@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -15,11 +15,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { GridView } from '@/components/werbeflaechen';
 import { getAllCategories, getBeginnerCategories } from '@/data/category-metadata';
-import { Globe, LayoutGrid, Table2, FlowerIcon, Upload, Loader2, Sparkles, CheckCircle } from 'lucide-react';
+import { Globe, LayoutGrid, Table2, FlowerIcon, Upload, Loader2, Sparkles, CheckCircle, FileText, X } from 'lucide-react';
 import { toast } from 'sonner';
 import type { WerbeflaechenEntry } from '@/types/werbeflaechen.types';
 
 type ViewMode = 'grid' | 'table' | 'flower';
+
+interface UploadedCV {
+  id: string;
+  filename: string;
+  file_type: string;
+  created_at: string;
+}
 
 export default function WerbeflaechenPage() {
   const [language, setLanguage] = useState<'en' | 'de'>('en');
@@ -34,6 +41,12 @@ export default function WerbeflaechenPage() {
   const [autofilling, setAutofilling] = useState(false);
   const [overwriteExisting, setOverwriteExisting] = useState(false);
 
+  // File upload state
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [previousUploads, setPreviousUploads] = useState<UploadedCV[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const allCategories = getAllCategories();
   const beginnerCategories = getBeginnerCategories();
   const completedCount = entries.filter(e => e.is_complete && e.language === language).length;
@@ -43,6 +56,25 @@ export default function WerbeflaechenPage() {
   useEffect(() => {
     loadEntries();
   }, [language]);
+
+  // Load previous uploads when dialog opens
+  useEffect(() => {
+    if (autofillOpen) {
+      loadPreviousUploads();
+    }
+  }, [autofillOpen]);
+
+  const loadPreviousUploads = async () => {
+    try {
+      const response = await fetch('/api/cv-upload');
+      if (response.ok) {
+        const data = await response.json();
+        setPreviousUploads(data.uploads || []);
+      }
+    } catch (error) {
+      console.error('Failed to load previous uploads:', error);
+    }
+  };
 
   const loadEntries = async () => {
     try {
@@ -58,9 +90,59 @@ export default function WerbeflaechenPage() {
     }
   };
 
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/cv-upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to upload file');
+      }
+
+      // Set the extracted text from the uploaded file
+      setCvText(result.extractedText);
+      setUploadedFile(file);
+      toast.success(`Extracted ${result.charCount} characters from ${file.name}`);
+
+      // Refresh previous uploads list
+      await loadPreviousUploads();
+    } catch (error) {
+      console.error('File upload error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload file');
+      setUploadedFile(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
+  const clearUploadedFile = () => {
+    setUploadedFile(null);
+    setCvText('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleAutofill = async () => {
     if (!cvText.trim() || cvText.trim().length < 50) {
-      toast.error('Please paste your CV text (minimum 50 characters)');
+      toast.error(language === 'de'
+        ? 'Bitte fügen Sie Ihren Lebenslauf ein (mindestens 50 Zeichen)'
+        : 'Please paste your CV text (minimum 50 characters)');
       return;
     }
 
@@ -82,9 +164,12 @@ export default function WerbeflaechenPage() {
         throw new Error(result.error || 'Failed to process CV');
       }
 
-      toast.success(`Populated ${result.savedCategories.length} categories from your CV!`);
+      toast.success(language === 'de'
+        ? `${result.savedCategories.length} Kategorien aus Ihrem Lebenslauf befüllt!`
+        : `Populated ${result.savedCategories.length} categories from your CV!`);
       setAutofillOpen(false);
       setCvText('');
+      setUploadedFile(null);
 
       // Reload entries
       await loadEntries();
@@ -135,6 +220,115 @@ export default function WerbeflaechenPage() {
               </DialogHeader>
 
               <div className="space-y-4 pt-4">
+                {/* File Upload Section */}
+                <div className="space-y-2">
+                  <Label>
+                    {language === 'de' ? 'Lebenslauf hochladen' : 'Upload CV'}
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      id="cv-file-upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="gap-2"
+                    >
+                      {uploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          {language === 'de' ? 'Lädt hoch...' : 'Uploading...'}
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4" />
+                          {language === 'de' ? 'Datei auswählen' : 'Choose file'}
+                        </>
+                      )}
+                    </Button>
+                    <span className="text-xs text-muted-foreground">
+                      PDF, DOCX, {language === 'de' ? 'oder' : 'or'} TXT (max 5MB)
+                    </span>
+                  </div>
+
+                  {uploadedFile && (
+                    <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span className="text-sm flex-1 truncate">{uploadedFile.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearUploadedFile}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Previous Uploads */}
+                  {previousUploads.length > 0 && !uploadedFile && (
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">
+                        {language === 'de' ? 'Frühere Uploads' : 'Previous uploads'}
+                      </Label>
+                      <div className="flex flex-wrap gap-2">
+                        {previousUploads.slice(0, 3).map((upload) => (
+                          <Button
+                            key={upload.id}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              // Fetch the extracted text from a previous upload
+                              try {
+                                const response = await fetch(`/api/cv-upload/${upload.id}`);
+                                if (response.ok) {
+                                  const data = await response.json();
+                                  setCvText(data.extractedText || '');
+                                  toast.success(language === 'de'
+                                    ? `Text aus ${upload.filename} geladen`
+                                    : `Loaded text from ${upload.filename}`);
+                                }
+                              } catch {
+                                toast.error(language === 'de'
+                                  ? 'Fehler beim Laden'
+                                  : 'Failed to load');
+                              }
+                            }}
+                            className="gap-1 text-xs"
+                          >
+                            <FileText className="h-3 w-3" />
+                            {upload.filename.length > 20
+                              ? upload.filename.slice(0, 17) + '...'
+                              : upload.filename}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      {language === 'de' ? 'oder Text einfügen' : 'or paste text'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Text Input Section */}
                 <div className="space-y-2">
                   <Label htmlFor="cv-text">
                     {language === 'de' ? 'Lebenslauf-Text' : 'CV/Resume Text'}
@@ -145,8 +339,14 @@ export default function WerbeflaechenPage() {
                       ? 'Fügen Sie hier Ihren Lebenslauf ein...'
                       : 'Paste your CV/resume text here...'}
                     value={cvText}
-                    onChange={(e) => setCvText(e.target.value)}
-                    rows={12}
+                    onChange={(e) => {
+                      setCvText(e.target.value);
+                      // Clear uploaded file if user starts typing
+                      if (uploadedFile && e.target.value !== cvText) {
+                        setUploadedFile(null);
+                      }
+                    }}
+                    rows={10}
                     className="font-mono text-sm"
                   />
                   <p className="text-xs text-muted-foreground">
@@ -177,14 +377,18 @@ export default function WerbeflaechenPage() {
                 <div className="flex justify-end gap-2 pt-2">
                   <Button
                     variant="outline"
-                    onClick={() => setAutofillOpen(false)}
-                    disabled={autofilling}
+                    onClick={() => {
+                      setAutofillOpen(false);
+                      setCvText('');
+                      setUploadedFile(null);
+                    }}
+                    disabled={autofilling || uploading}
                   >
                     {language === 'de' ? 'Abbrechen' : 'Cancel'}
                   </Button>
                   <Button
                     onClick={handleAutofill}
-                    disabled={autofilling || cvText.trim().length < 50}
+                    disabled={autofilling || uploading || cvText.trim().length < 50}
                     className="gap-2"
                   >
                     {autofilling ? (
