@@ -237,3 +237,32 @@ export interface ShareLinkVisit {
   referrer?: string;
   visited_at: string;
 }
+
+// Cover Letter types
+export interface CoverLetter {
+  id: string;
+  user_id: string;
+  cv_id?: string;
+  name: string;
+  language: 'en' | 'de';
+  content: CoverLetterContent;
+  job_context?: JobContext;
+  ai_metadata?: AIMetadata;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CoverLetterContent {
+  recipientName?: string;
+  recipientTitle?: string;
+  companyName?: string;
+  companyAddress?: string;
+  date?: string;
+  subject?: string;
+  greeting?: string;
+  opening?: string;
+  body?: string;
+  closing?: string;
+  signature?: string;
+}

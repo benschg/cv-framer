@@ -292,3 +292,88 @@ Return a JSON array of strings:
 
   return generateJSON<string[]>(prompt);
 }
+
+// Types for cover letter generation
+export interface GeneratedCoverLetterContent {
+  subject?: string;
+  greeting?: string;
+  opening?: string;
+  body?: string;
+  closing?: string;
+}
+
+// Generate cover letter content
+export async function generateCoverLetter(
+  werbeflaechenData: Record<string, unknown>,
+  cvContent?: Record<string, unknown>,
+  jobContext?: {
+    company?: string;
+    position?: string;
+    companyResearch?: CompanyResearchResult;
+  },
+  userProfile?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+  },
+  language: 'en' | 'de' = 'en'
+): Promise<GeneratedCoverLetterContent> {
+  const languageInstructions = language === 'de'
+    ? 'Generate the cover letter in German (Deutsch). Use formal German business letter conventions.'
+    : 'Generate the cover letter in English. Use professional business letter conventions.';
+
+  const prompt = `You are an expert cover letter writer. Generate a compelling, personalized cover letter.
+
+${languageInstructions}
+
+${userProfile ? `
+Applicant Information:
+- Name: ${userProfile.firstName || ''} ${userProfile.lastName || ''}
+- Email: ${userProfile.email || ''}
+- Phone: ${userProfile.phone || ''}
+` : ''}
+
+${jobContext?.company ? `
+Target Company: ${jobContext.company}
+Target Position: ${jobContext.position || 'Not specified'}
+` : ''}
+
+${jobContext?.companyResearch ? `
+Company Research:
+${JSON.stringify(jobContext.companyResearch, null, 2)}
+` : ''}
+
+${cvContent ? `
+CV/Resume Content:
+${JSON.stringify(cvContent, null, 2)}
+` : ''}
+
+Self-Marketing Data (Werbeflaechen):
+${JSON.stringify(werbeflaechenData, null, 2)}
+
+Generate a cover letter with these sections:
+1. subject: A compelling subject line for the application
+2. greeting: Professional greeting (use hiring manager name if known, otherwise generic)
+3. opening: Strong opening paragraph that hooks the reader and mentions the position
+4. body: 2-3 paragraphs highlighting relevant experience, skills, and why you're a good fit
+5. closing: Call to action and professional closing
+
+Guidelines:
+- Be specific and avoid generic phrases
+- Connect your experience to the company's needs
+- Show enthusiasm without being over the top
+- Keep total length to about 300-400 words
+- Make it personal and authentic
+
+Return as JSON:
+{
+  "subject": "...",
+  "greeting": "...",
+  "opening": "...",
+  "body": "...",
+  "closing": "..."
+}`;
+
+  return generateJSON<GeneratedCoverLetterContent>(prompt);
+}
