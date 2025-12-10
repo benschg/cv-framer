@@ -212,3 +212,28 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
 }
+
+// Share link types
+export interface ShareLink {
+  id: string;
+  cv_id: string;
+  user_id: string;
+  share_token: string;
+  privacy_level: 'none' | 'personal' | 'full';
+  is_active: boolean;
+  expires_at?: string;
+  password_hash?: string;
+  view_count: number;
+  last_viewed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShareLinkVisit {
+  id: string;
+  share_link_id: string;
+  visitor_ip?: string;
+  user_agent?: string;
+  referrer?: string;
+  visited_at: string;
+}

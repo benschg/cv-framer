@@ -24,6 +24,7 @@ import {
   GripVertical,
 } from 'lucide-react';
 import { fetchCV, updateCV, generateId } from '@/services/cv.service';
+import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import type { CVDocument, CVContent, WorkExperience, Education, SkillCategory, KeyCompetence } from '@/types/cv.types';
 
 export default function CVEditorPage() {
@@ -34,6 +35,9 @@ export default function CVEditorPage() {
   const [cv, setCv] = useState<CVDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [regeneratingSection, setRegeneratingSection] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Editable content
@@ -67,6 +71,86 @@ export default function CVEditorPage() {
 
   const updateField = (field: keyof CVContent, value: unknown) => {
     setContent(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Export PDF
+  const handleExport = async () => {
+    if (!cv) return;
+    setExporting(true);
+
+    try {
+      const response = await fetch(`/api/cv/${cvId}/export`);
+
+      if (!response.ok) {
+        const json = await response.json();
+        setError(json.error || 'Failed to export PDF');
+        return;
+      }
+
+      // Download the PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${cv.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError('Failed to export PDF');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // AI Generation
+  const handleGenerateAll = async () => {
+    if (!cv) return;
+    setGenerating(true);
+    setError(null);
+
+    const result = await generateCVWithAI({
+      cvId,
+      language: cv.language,
+      sections: ['tagline', 'profile', 'keyCompetences'],
+      jobContext: cv.job_context,
+      analyzeJobPosting: true,
+    });
+
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data?.content) {
+      const newContent = result.data.content;
+      setContent(prev => ({
+        ...prev,
+        ...newContent,
+      }));
+    }
+
+    setGenerating(false);
+  };
+
+  const handleRegenerateSection = async (section: string) => {
+    if (!cv) return;
+    setRegeneratingSection(section);
+
+    const currentValue = content[section as keyof CVContent] as string || '';
+
+    const result = await regenerateItem({
+      cvId,
+      section,
+      currentContent: currentValue,
+      language: cv.language,
+    });
+
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data && typeof result.data.content === 'string') {
+      updateField(section as keyof CVContent, result.data.content);
+    }
+
+    setRegeneratingSection(null);
   };
 
   // Work Experience helpers
@@ -138,6 +222,56 @@ export default function CVEditorPage() {
     updateField('skills', skills);
   };
 
+  // Key Competences helpers
+  const addKeyCompetence = () => {
+    const newComp: KeyCompetence = {
+      id: generateId(),
+      title: '',
+      description: '',
+    };
+    updateField('keyCompetences', [...(content.keyCompetences || []), newComp]);
+  };
+
+  const updateKeyCompetence = (index: number, updates: Partial<KeyCompetence>) => {
+    const comps = [...(content.keyCompetences || [])];
+    comps[index] = { ...comps[index], ...updates };
+    updateField('keyCompetences', comps);
+  };
+
+  const removeKeyCompetence = (index: number) => {
+    const comps = [...(content.keyCompetences || [])];
+    comps.splice(index, 1);
+    updateField('keyCompetences', comps);
+  };
+
+  // Generate experience bullets handler
+  const handleGenerateExperienceBullets = async (index: number) => {
+    if (!cv) return;
+    const exp = content.workExperience?.[index];
+    if (!exp) return;
+
+    setRegeneratingSection(`experience_bullets_${index}`);
+
+    const result = await regenerateItem({
+      cvId,
+      section: 'experience_bullets',
+      language: cv.language,
+      experienceContext: {
+        company: exp.company,
+        title: exp.title,
+        description: exp.description,
+      },
+    });
+
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data && Array.isArray(result.data.content)) {
+      updateWorkExperience(index, { bullets: result.data.content });
+    }
+
+    setRegeneratingSection(null);
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
@@ -193,8 +327,18 @@ export default function CVEditorPage() {
             <Eye className="h-4 w-4" />
             Preview
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" disabled>
-            <Download className="h-4 w-4" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleExport}
+            disabled={exporting}
+          >
+            {exporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
             Export
           </Button>
           <Button variant="outline" size="sm" className="gap-2" disabled>
@@ -213,7 +357,7 @@ export default function CVEditorPage() {
       </div>
 
       {/* AI Generate Button */}
-      <Card className="border-dashed">
+      <Card className="border-dashed border-primary/50 bg-primary/5">
         <CardContent className="py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -222,12 +366,26 @@ export default function CVEditorPage() {
                 <p className="font-medium">AI-Powered Generation</p>
                 <p className="text-sm text-muted-foreground">
                   Generate content from your Werbeflaechen data
+                  {cv.job_context?.company && ` tailored for ${cv.job_context.company}`}
                 </p>
               </div>
             </div>
-            <Button variant="outline" disabled>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Generate Content
+            <Button
+              onClick={handleGenerateAll}
+              disabled={generating}
+              className="gap-2"
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Generate Content
+                </>
+              )}
             </Button>
           </div>
         </CardContent>
@@ -241,7 +399,23 @@ export default function CVEditorPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="tagline">Tagline</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="tagline">Tagline</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => handleRegenerateSection('tagline')}
+                disabled={regeneratingSection === 'tagline'}
+              >
+                {regeneratingSection === 'tagline' ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+                Regenerate
+              </Button>
+            </div>
             <Input
               id="tagline"
               placeholder="e.g., Senior Software Engineer | React & Node.js"
@@ -250,7 +424,23 @@ export default function CVEditorPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="profile">Professional Summary</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="profile">Professional Summary</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => handleRegenerateSection('profile')}
+                disabled={regeneratingSection === 'profile'}
+              >
+                {regeneratingSection === 'profile' ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+                Regenerate
+              </Button>
+            </div>
             <Textarea
               id="profile"
               placeholder="Write a brief summary of your professional background..."
@@ -259,6 +449,67 @@ export default function CVEditorPage() {
               onChange={(e) => updateField('profile', e.target.value)}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Key Competences Section */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              Key Competences
+              <Badge variant="outline" className="font-normal text-xs">AI Generated</Badge>
+            </CardTitle>
+            <CardDescription>Your core professional strengths (best generated by AI)</CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={addKeyCompetence}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Competence
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(content.keyCompetences || []).length === 0 ? (
+            <div className="text-center py-4 space-y-2">
+              <p className="text-sm text-muted-foreground">
+                No key competences added yet.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Use &quot;Generate Content&quot; above to auto-generate from your Werbeflaechen data
+              </p>
+            </div>
+          ) : (
+            (content.keyCompetences || []).map((comp, index) => (
+              <div key={comp.id} className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2 flex-1 mr-4">
+                    <Label>Competence Title</Label>
+                    <Input
+                      placeholder="e.g., Technical Leadership"
+                      value={comp.title}
+                      onChange={(e) => updateKeyCompetence(index, { title: e.target.value })}
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive"
+                    onClick={() => removeKeyCompetence(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    placeholder="Brief description of this competence..."
+                    rows={2}
+                    value={comp.description}
+                    onChange={(e) => updateKeyCompetence(index, { description: e.target.value })}
+                  />
+                </div>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -333,7 +584,24 @@ export default function CVEditorPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Key Achievements (one per line)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Key Achievements (one per line)</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => handleGenerateExperienceBullets(index)}
+                      disabled={regeneratingSection === `experience_bullets_${index}` || !exp.company || !exp.title}
+                      title={!exp.company || !exp.title ? 'Fill in company and job title first' : 'Generate achievement bullets'}
+                    >
+                      {regeneratingSection === `experience_bullets_${index}` ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3" />
+                      )}
+                      Generate Bullets
+                    </Button>
+                  </div>
                   <Textarea
                     placeholder="- Led a team of 5 engineers&#10;- Reduced load time by 50%&#10;- Implemented CI/CD pipeline"
                     rows={4}
