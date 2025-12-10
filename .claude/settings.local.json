@@ -6,7 +6,9 @@
       "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Implement Phase 1 Auth & start Phase 2 Werbeflaechen\n\nPhase 1 - Authentication & User Profile:\n- Auth context with Google OAuth and email/password login\n- Login, signup, and forgot password pages\n- OAuth callback handler with redirect preservation\n- Protected route middleware for dashboard pages\n- Dashboard layout with ShadCN sidebar navigation\n- User profile page with form for personal info\n- Settings page with theme and language preferences\n- Placeholder pages for CV, cover letters, applications\n\nPhase 2 - Werbeflaechen (started):\n- TypeScript types for all 18 Werbeflaechen categories\n- Category metadata configuration with colors, icons, translations\n- Row metadata with questions for each category group\n- Beginner mode category list (11 categories for new users)\n\nShadCN components added:\n- avatar, badge, dropdown-menu, input, label, scroll-area\n- separator, sheet, sidebar, skeleton, tooltip\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(npm run build:*)",
       "Bash(bun run build:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(dir:*)",
+      "Bash(mkdir:*)"
     ]
   }
 }
