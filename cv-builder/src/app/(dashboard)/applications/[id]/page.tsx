@@ -282,7 +282,7 @@ export default function ApplicationDetailPage() {
                 </div>
               )}
             </div>
-            <Select value={status} onValueChange={(v) => handleStatusChange(v as ApplicationStatus)}>
+            <Select value={status} onValueChange={(v: string) => handleStatusChange(v as ApplicationStatus)}>
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>

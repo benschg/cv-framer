@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import { UpdateShareLinkSchema } from '@/types/api.schemas';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -32,7 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ shareLink });
   } catch (error) {
     console.error('Share GET by ID error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -48,8 +50,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { is_active, privacy_level, expires_at } = body;
+    // Validate request body
+    const data = await validateBody(request, UpdateShareLinkSchema);
+    const { is_active, privacy_level, expires_at } = data;
 
     // Build update object
     const updateData: Record<string, unknown> = {
@@ -80,7 +83,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ shareLink });
   } catch (error) {
     console.error('Share PATCH error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -111,6 +114,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Share DELETE error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

@@ -1,4 +1,9 @@
-import type { CoverLetter, CoverLetterContent, JobContext } from '@/types/cv.types';
+import type {
+  CoverLetter,
+  CreateCoverLetterInput,
+  UpdateCoverLetterInput,
+  GenerateCoverLetterInput,
+} from '@/types/api.schemas';
 
 const API_BASE = '/api';
 
@@ -48,13 +53,7 @@ export async function fetchCoverLetter(id: string): Promise<CoverLetterServiceRe
 /**
  * Create a new cover letter
  */
-export async function createCoverLetter(data: {
-  name: string;
-  language?: 'en' | 'de';
-  cv_id?: string;
-  content?: CoverLetterContent;
-  job_context?: JobContext;
-}): Promise<CoverLetterServiceResponse<CoverLetter>> {
+export async function createCoverLetter(data: CreateCoverLetterInput): Promise<CoverLetterServiceResponse<CoverLetter>> {
   try {
     const response = await fetch(`${API_BASE}/cover-letter`, {
       method: 'POST',
@@ -80,13 +79,7 @@ export async function createCoverLetter(data: {
  */
 export async function updateCoverLetter(
   id: string,
-  data: Partial<{
-    name: string;
-    content: CoverLetterContent;
-    job_context: JobContext;
-    cv_id: string;
-    is_archived: boolean;
-  }>
+  data: UpdateCoverLetterInput
 ): Promise<CoverLetterServiceResponse<CoverLetter>> {
   try {
     const response = await fetch(`${API_BASE}/cover-letter/${id}`, {
@@ -134,22 +127,12 @@ export async function deleteCoverLetter(
 /**
  * Generate cover letter content using AI
  */
-export async function generateCoverLetterWithAI(options: {
-  coverLetterId?: string;
-  cvId?: string;
-  language?: 'en' | 'de';
-  jobContext?: JobContext;
-}): Promise<CoverLetterServiceResponse<{ content: CoverLetterContent }>> {
+export async function generateCoverLetterWithAI(data: GenerateCoverLetterInput): Promise<CoverLetterServiceResponse<{ content: Record<string, unknown> }>> {
   try {
     const response = await fetch(`${API_BASE}/generate-cover-letter`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cover_letter_id: options.coverLetterId,
-        cv_id: options.cvId,
-        language: options.language || 'en',
-        job_context: options.jobContext,
-      }),
+      body: JSON.stringify(data),
     });
 
     const json = await response.json();
@@ -168,7 +151,7 @@ export async function generateCoverLetterWithAI(options: {
 /**
  * Get default cover letter content structure
  */
-export function getDefaultCoverLetterContent(): CoverLetterContent {
+export function getDefaultCoverLetterContent(): Record<string, unknown> {
   return {
     recipientName: '',
     recipientTitle: '',

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import { GenerateCVSchema, type GenerateCVInput } from '@/types/api.schemas';
 import {
   generateCVContent,
   analyzeJobPosting,
@@ -17,14 +19,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Validate request body
+    const data = await validateBody(request, GenerateCVSchema);
     const {
       cv_id,
       language = 'en',
       sections,
       job_context,
       analyze_job_posting = true,
-    } = body;
+    } = data;
 
     // Fetch werbeflaechen data for the user
     const { data: werbeflaechenEntries, error: wfError } = await supabase
@@ -140,9 +143,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Generate CV error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate CV content' },
-      { status: 500 }
-    );
+    return errorResponse(error);
   }
 }

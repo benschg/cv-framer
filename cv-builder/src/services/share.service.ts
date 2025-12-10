@@ -1,17 +1,14 @@
-import type { ShareLink } from '@/types/cv.types';
+import type {
+  ShareLink,
+  CreateShareLinkInput,
+  UpdateShareLinkInput,
+} from '@/types/api.schemas';
 
 const API_BASE = '/api';
 
 export interface ShareServiceResponse<T> {
   data: T | null;
   error: string | null;
-}
-
-export interface CreateShareLinkOptions {
-  cvId: string;
-  privacyLevel?: 'none' | 'personal' | 'full';
-  expiresAt?: string;
-  password?: string;
 }
 
 /**
@@ -30,18 +27,13 @@ function generateShareToken(): string {
  * Create a new share link for a CV
  */
 export async function createShareLink(
-  options: CreateShareLinkOptions
+  data: CreateShareLinkInput
 ): Promise<ShareServiceResponse<ShareLink>> {
   try {
     const response = await fetch(`${API_BASE}/share`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cv_id: options.cvId,
-        privacy_level: options.privacyLevel || 'personal',
-        expires_at: options.expiresAt,
-        password: options.password,
-      }),
+      body: JSON.stringify(data),
     });
 
     const json = await response.json();
@@ -102,17 +94,17 @@ export async function deleteShareLink(
 }
 
 /**
- * Toggle share link active status
+ * Toggle share link active status or update other properties
  */
-export async function toggleShareLink(
+export async function updateShareLink(
   linkId: string,
-  isActive: boolean
+  data: UpdateShareLinkInput
 ): Promise<ShareServiceResponse<ShareLink>> {
   try {
     const response = await fetch(`${API_BASE}/share/${linkId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_active: isActive }),
+      body: JSON.stringify(data),
     });
 
     const json = await response.json();
@@ -123,9 +115,19 @@ export async function toggleShareLink(
 
     return { data: json.shareLink, error: null };
   } catch (error) {
-    console.error('toggleShareLink error:', error);
+    console.error('updateShareLink error:', error);
     return { data: null, error: 'Network error' };
   }
+}
+
+/**
+ * Toggle share link active status (convenience wrapper)
+ */
+export async function toggleShareLink(
+  linkId: string,
+  isActive: boolean
+): Promise<ShareServiceResponse<ShareLink>> {
+  return updateShareLink(linkId, { is_active: isActive });
 }
 
 /**

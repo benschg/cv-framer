@@ -11,7 +11,14 @@ export interface CVTemplateData {
 export function generateCVHTML(data: CVTemplateData): string {
   const { cv, userProfile } = data;
   const content = cv.content;
-  const settings = cv.display_settings;
+  const defaultSettings: DisplaySettings = {
+    theme: 'light',
+    showPhoto: true,
+    showExperience: true,
+    showAttachments: false,
+    privacyLevel: 'personal',
+  };
+  const settings: DisplaySettings = { ...defaultSettings, ...cv.display_settings };
 
   const styles = generateStyles(settings);
   const headerHTML = generateHeader(content, userProfile, settings);

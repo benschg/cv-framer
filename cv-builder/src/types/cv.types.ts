@@ -1,4 +1,22 @@
-export interface CVDocument {
+// Import and re-export main entity types from api.schemas (these match DB schema with nullable fields)
+import type {
+  CVDocument as CVDocumentType,
+  CoverLetter as CoverLetterType,
+  JobApplication as JobApplicationType,
+  ShareLink as ShareLinkType,
+  ApplicationStatus as ApplicationStatusType,
+  Language as LanguageType,
+} from './api.schemas';
+
+export type CVDocument = CVDocumentType;
+export type CoverLetter = CoverLetterType;
+export type JobApplication = JobApplicationType;
+export type ShareLink = ShareLinkType;
+export type ApplicationStatus = ApplicationStatusType;
+export type Language = LanguageType;
+
+// Local interface for CV content structure (used in CV editor)
+export interface CVDocumentLocal {
   id: string;
   user_id: string;
   template_id?: string;
@@ -26,7 +44,7 @@ export interface CVContent {
   keyCompetences?: KeyCompetence[];
   projects?: Project[];
   references?: Reference[];
-  languages?: Language[];
+  languages?: LanguageSkill[];
   certifications?: Certification[];
 }
 
@@ -87,7 +105,7 @@ export interface Reference {
   quote?: string;
 }
 
-export interface Language {
+export interface LanguageSkill {
   id: string;
   name: string;
   level: 'native' | 'fluent' | 'advanced' | 'intermediate' | 'basic';
@@ -213,21 +231,7 @@ export interface UserProfile {
   updated_at: string;
 }
 
-// Share link types
-export interface ShareLink {
-  id: string;
-  cv_id: string;
-  user_id: string;
-  share_token: string;
-  privacy_level: 'none' | 'personal' | 'full';
-  is_active: boolean;
-  expires_at?: string;
-  password_hash?: string;
-  view_count: number;
-  last_viewed_at?: string;
-  created_at: string;
-  updated_at: string;
-}
+// Share link types (ShareLink entity type re-exported from api.schemas)
 
 export interface ShareLinkVisit {
   id: string;
@@ -238,20 +242,7 @@ export interface ShareLinkVisit {
   visited_at: string;
 }
 
-// Cover Letter types
-export interface CoverLetter {
-  id: string;
-  user_id: string;
-  cv_id?: string;
-  name: string;
-  language: 'en' | 'de';
-  content: CoverLetterContent;
-  job_context?: JobContext;
-  ai_metadata?: AIMetadata;
-  is_archived: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// Cover Letter content types (CoverLetter entity type re-exported from api.schemas)
 
 export interface CoverLetterContent {
   recipientName?: string;
@@ -267,39 +258,7 @@ export interface CoverLetterContent {
   signature?: string;
 }
 
-// Application Tracker types
-export type ApplicationStatus =
-  | 'draft'
-  | 'applied'
-  | 'screening'
-  | 'interview'
-  | 'offer'
-  | 'rejected'
-  | 'accepted'
-  | 'withdrawn';
-
-export interface JobApplication {
-  id: string;
-  user_id: string;
-  cv_id?: string;
-  cover_letter_id?: string;
-  company_name: string;
-  job_title: string;
-  job_url?: string;
-  job_description?: string;
-  location?: string;
-  salary_range?: string;
-  status: ApplicationStatus;
-  applied_at?: string;
-  deadline?: string;
-  notes?: string;
-  contact_name?: string;
-  contact_email?: string;
-  fit_analysis?: FitAnalysis;
-  is_archived: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// Application Tracker types (ApplicationStatus and JobApplication re-exported from api.schemas)
 
 export interface FitAnalysis {
   overall_score: number;

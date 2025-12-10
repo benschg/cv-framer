@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { errorResponse } from '@/lib/api-utils';
 
 // GET /api/cv-upload/[id] - Get a specific uploaded CV
 export async function GET(
@@ -36,7 +37,7 @@ export async function GET(
     });
   } catch (error) {
     console.error('CV upload GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -68,6 +69,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('CV upload DELETE error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

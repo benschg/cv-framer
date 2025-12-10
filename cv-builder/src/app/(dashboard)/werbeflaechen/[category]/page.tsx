@@ -151,17 +151,7 @@ export default function CategoryPage() {
 
       {/* Form Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">
-            {language === 'de' ? 'Inhalt bearbeiten' : 'Edit Content'}
-          </CardTitle>
-          <CardDescription>
-            {language === 'de'
-              ? 'Füllen Sie die Felder aus, um diese Kategorie zu vervollständigen'
-              : 'Fill in the fields to complete this category'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {renderCategoryForm(categoryKey, language, content, setContent)}
         </CardContent>
       </Card>

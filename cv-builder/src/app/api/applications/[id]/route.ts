@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import { UpdateApplicationSchema, type UpdateApplicationInput } from '@/types/api.schemas';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -36,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ application });
   } catch (error) {
     console.error('Application GET by ID error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -52,47 +54,30 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const {
-      company_name,
-      job_title,
-      job_url,
-      job_description,
-      location,
-      salary_range,
-      status,
-      applied_at,
-      deadline,
-      notes,
-      contact_name,
-      contact_email,
-      cv_id,
-      cover_letter_id,
-      fit_analysis,
-      is_archived,
-    } = body;
+    // Validate request body
+    const validated: UpdateApplicationInput = await validateBody(request, UpdateApplicationSchema);
 
-    // Build update object
+    // Build update object from validated data
     const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
 
-    if (company_name !== undefined) updateData.company_name = company_name;
-    if (job_title !== undefined) updateData.job_title = job_title;
-    if (job_url !== undefined) updateData.job_url = job_url;
-    if (job_description !== undefined) updateData.job_description = job_description;
-    if (location !== undefined) updateData.location = location;
-    if (salary_range !== undefined) updateData.salary_range = salary_range;
-    if (status !== undefined) updateData.status = status;
-    if (applied_at !== undefined) updateData.applied_at = applied_at;
-    if (deadline !== undefined) updateData.deadline = deadline;
-    if (notes !== undefined) updateData.notes = notes;
-    if (contact_name !== undefined) updateData.contact_name = contact_name;
-    if (contact_email !== undefined) updateData.contact_email = contact_email;
-    if (cv_id !== undefined) updateData.cv_id = cv_id;
-    if (cover_letter_id !== undefined) updateData.cover_letter_id = cover_letter_id;
-    if (fit_analysis !== undefined) updateData.fit_analysis = fit_analysis;
-    if (is_archived !== undefined) updateData.is_archived = is_archived;
+    if (validated.company_name !== undefined) updateData.company_name = validated.company_name;
+    if (validated.job_title !== undefined) updateData.job_title = validated.job_title;
+    if (validated.job_url !== undefined) updateData.job_url = validated.job_url || null;
+    if (validated.job_description !== undefined) updateData.job_description = validated.job_description;
+    if (validated.location !== undefined) updateData.location = validated.location;
+    if (validated.salary_range !== undefined) updateData.salary_range = validated.salary_range;
+    if (validated.status !== undefined) updateData.status = validated.status;
+    if (validated.applied_at !== undefined) updateData.applied_at = validated.applied_at;
+    if (validated.deadline !== undefined) updateData.deadline = validated.deadline;
+    if (validated.notes !== undefined) updateData.notes = validated.notes;
+    if (validated.contact_name !== undefined) updateData.contact_name = validated.contact_name;
+    if (validated.contact_email !== undefined) updateData.contact_email = validated.contact_email || null;
+    if (validated.cv_id !== undefined) updateData.cv_id = validated.cv_id;
+    if (validated.cover_letter_id !== undefined) updateData.cover_letter_id = validated.cover_letter_id;
+    if (validated.fit_analysis !== undefined) updateData.fit_analysis = validated.fit_analysis;
+    if (validated.is_archived !== undefined) updateData.is_archived = validated.is_archived;
 
     // Update the application
     const { data: application, error } = await supabase
@@ -114,7 +99,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ application });
   } catch (error) {
     console.error('Application PUT error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -163,6 +148,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Application DELETE error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

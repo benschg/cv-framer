@@ -1,4 +1,10 @@
-import type { JobApplication, ApplicationStatus, FitAnalysis } from '@/types/cv.types';
+import type {
+  JobApplication,
+  ApplicationStatus,
+  CreateApplicationInput,
+  UpdateApplicationInput,
+  ApplicationStatsResponse,
+} from '@/types/api.schemas';
 
 const API_BASE = '/api';
 
@@ -59,21 +65,9 @@ export async function fetchApplication(id: string): Promise<ApplicationServiceRe
 /**
  * Create a new application
  */
-export async function createApplication(data: {
-  company_name: string;
-  job_title: string;
-  job_url?: string;
-  job_description?: string;
-  location?: string;
-  salary_range?: string;
-  status?: ApplicationStatus;
-  deadline?: string;
-  notes?: string;
-  contact_name?: string;
-  contact_email?: string;
-  cv_id?: string;
-  cover_letter_id?: string;
-}): Promise<ApplicationServiceResponse<JobApplication>> {
+export async function createApplication(
+  data: CreateApplicationInput
+): Promise<ApplicationServiceResponse<JobApplication>> {
   try {
     const response = await fetch(`${API_BASE}/applications`, {
       method: 'POST',
@@ -99,24 +93,7 @@ export async function createApplication(data: {
  */
 export async function updateApplication(
   id: string,
-  data: Partial<{
-    company_name: string;
-    job_title: string;
-    job_url: string;
-    job_description: string;
-    location: string;
-    salary_range: string;
-    status: ApplicationStatus;
-    applied_at: string;
-    deadline: string;
-    notes: string;
-    contact_name: string;
-    contact_email: string;
-    cv_id: string;
-    cover_letter_id: string;
-    fit_analysis: FitAnalysis;
-    is_archived: boolean;
-  }>
+  data: UpdateApplicationInput
 ): Promise<ApplicationServiceResponse<JobApplication>> {
   try {
     const response = await fetch(`${API_BASE}/applications/${id}`, {
@@ -145,10 +122,7 @@ export async function updateApplicationStatus(
   id: string,
   status: ApplicationStatus
 ): Promise<ApplicationServiceResponse<JobApplication>> {
-  const updates: Partial<{
-    status: ApplicationStatus;
-    applied_at: string;
-  }> = { status };
+  const updates: UpdateApplicationInput = { status };
 
   // Auto-set applied_at when status changes to 'applied'
   if (status === 'applied') {
@@ -188,7 +162,7 @@ export async function deleteApplication(
  */
 export async function analyzeJobFit(
   applicationId: string
-): Promise<ApplicationServiceResponse<FitAnalysis>> {
+): Promise<ApplicationServiceResponse<Record<string, unknown>>> {
   try {
     const response = await fetch(`${API_BASE}/applications/${applicationId}/analyze`, {
       method: 'POST',
@@ -210,12 +184,7 @@ export async function analyzeJobFit(
 /**
  * Get application statistics
  */
-export async function getApplicationStats(): Promise<ApplicationServiceResponse<{
-  total: number;
-  byStatus: Record<ApplicationStatus, number>;
-  thisWeek: number;
-  thisMonth: number;
-}>> {
+export async function getApplicationStats(): Promise<ApplicationServiceResponse<ApplicationStatsResponse['stats']>> {
   try {
     const response = await fetch(`${API_BASE}/applications/stats`);
     const json = await response.json();

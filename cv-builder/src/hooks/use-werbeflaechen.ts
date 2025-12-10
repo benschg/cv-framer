@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { WerbeflaechenEntry, CategoryKey, WerbeflaechenContent } from '@/types/werbeflaechen.types';
+import type { WerbeflaechenCategory } from '@/types/api.schemas';
 import {
   fetchAllEntries,
   fetchCategoryEntry,
@@ -76,9 +77,10 @@ export function useWerbeflaechen(
       content: WerbeflaechenContent,
       isComplete?: boolean
     ) => {
-      const result = await saveCategoryEntry(categoryKey, content, {
+      const result = await saveCategoryEntry(categoryKey as WerbeflaechenCategory, {
+        content: content as Record<string, unknown>,
         language,
-        isComplete,
+        is_complete: isComplete,
       });
 
       if (result.error) {
@@ -91,10 +93,10 @@ export function useWerbeflaechen(
           const existing = prev.findIndex((e) => e.category_key === categoryKey);
           if (existing >= 0) {
             const updated = [...prev];
-            updated[existing] = result.data!;
+            updated[existing] = result.data as WerbeflaechenEntry;
             return updated;
           }
-          return [...prev, result.data!];
+          return [...prev, result.data as WerbeflaechenEntry];
         });
       }
 
@@ -163,9 +165,10 @@ export function useCategoryEntry(
 
   const save = useCallback(
     async (content: WerbeflaechenContent, isComplete?: boolean) => {
-      const result = await saveCategoryEntry(categoryKey, content, {
+      const result = await saveCategoryEntry(categoryKey as WerbeflaechenCategory, {
+        content: content as Record<string, unknown>,
         language,
-        isComplete,
+        is_complete: isComplete,
       });
 
       if (result.error) {
@@ -173,7 +176,7 @@ export function useCategoryEntry(
       }
 
       if (result.data) {
-        setEntry(result.data);
+        setEntry(result.data as WerbeflaechenEntry | null);
       }
 
       return { success: true };

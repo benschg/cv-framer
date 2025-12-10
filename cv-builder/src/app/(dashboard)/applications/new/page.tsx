@@ -198,7 +198,7 @@ export default function NewApplicationPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={status} onValueChange={(v) => setStatus(v as ApplicationStatus)}>
+                <Select value={status} onValueChange={(v: string) => setStatus(v as ApplicationStatus)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

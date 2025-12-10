@@ -73,7 +73,7 @@ export default function PublicCVPage() {
   if (!data) return null;
 
   const { cv, userProfile, shareLink } = data;
-  const content = cv.content;
+  const content = cv.content as CVContent;
   const privacyLevel = shareLink.privacy_level;
 
   return (

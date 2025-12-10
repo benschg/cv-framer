@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import { RegenerateItemSchema, type RegenerateItemInput } from '@/types/api.schemas';
 import { regenerateSection, generateExperienceBullets, CompanyResearchResult } from '@/lib/ai/gemini';
 
 // POST /api/regenerate-item - Regenerate a single CV section or item
@@ -13,7 +15,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Validate request body
+    const data = await validateBody(request, RegenerateItemSchema);
     const {
       cv_id,
       section,
@@ -22,11 +25,7 @@ export async function POST(request: NextRequest) {
       language = 'en',
       // For experience bullets
       experience_context,
-    } = body;
-
-    if (!section) {
-      return NextResponse.json({ error: 'Section is required' }, { status: 400 });
-    }
+    } = data;
 
     // Fetch werbeflaechen data for the user
     const { data: werbeflaechenEntries, error: wfError } = await supabase
@@ -107,9 +106,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Regenerate item error:', error);
-    return NextResponse.json(
-      { error: 'Failed to regenerate content' },
-      { status: 500 }
-    );
+    return errorResponse(error);
   }
 }

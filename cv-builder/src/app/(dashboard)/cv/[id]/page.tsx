@@ -60,7 +60,7 @@ export default function CVEditorPage() {
   const handleSave = async () => {
     if (!cv) return;
     setSaving(true);
-    const result = await updateCV(cvId, { content });
+    const result = await updateCV(cvId, { content: content as Record<string, unknown> });
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
@@ -114,7 +114,7 @@ export default function CVEditorPage() {
       cvId,
       language: cv.language,
       sections: ['tagline', 'profile', 'keyCompetences'],
-      jobContext: cv.job_context,
+      jobContext: cv.job_context ?? undefined,
       analyzeJobPosting: true,
     });
 

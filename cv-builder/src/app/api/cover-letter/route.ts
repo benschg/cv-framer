@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { CreateCoverLetterSchema } from '@/types/api.schemas';
+import { validateBody, errorResponse } from '@/lib/api-utils';
 
 // GET /api/cover-letter - Get all cover letters for the current user
 export async function GET() {
@@ -28,7 +30,7 @@ export async function GET() {
     return NextResponse.json({ coverLetters: coverLetters || [] });
   } catch (error) {
     console.error('Cover letter GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -43,18 +45,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Validate request body
+    const validatedData = await validateBody(request, CreateCoverLetterSchema);
+
     const {
       name,
       language = 'en',
       cv_id,
       content = {},
       job_context,
-    } = body;
-
-    if (!name) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-    }
+    } = validatedData;
 
     // Create the cover letter
     const { data: coverLetter, error } = await supabase
@@ -79,6 +79,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ coverLetter }, { status: 201 });
   } catch (error) {
     console.error('Cover letter POST error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

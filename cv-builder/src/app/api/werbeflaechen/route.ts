@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import { CreateWerbeflaechenSchema } from '@/types/api.schemas';
 
 // GET /api/werbeflaechen - Get all entries for the current user
 export async function GET(request: NextRequest) {
@@ -32,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ entries: entries || [] });
   } catch (error) {
     console.error('Werbeflaechen GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -47,12 +49,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { category_key, language = 'en', content, is_complete = false, row_number } = body;
-
-    if (!category_key) {
-      return NextResponse.json({ error: 'category_key is required' }, { status: 400 });
-    }
+    // Validate request body
+    const data = await validateBody(request, CreateWerbeflaechenSchema);
+    const { category_key, language = 'en', content, is_complete = false, row_number } = data;
 
     // Check if entry already exists
     const { data: existing } = await supabase
@@ -101,6 +100,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ entry: result.data });
   } catch (error) {
     console.error('Werbeflaechen POST error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { UpdateCVSchema } from '@/types/api.schemas';
+import { validateBody, errorResponse } from '@/lib/api-utils';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -36,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ cv });
   } catch (error) {
     console.error('CV GET by ID error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -52,7 +54,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Validate request body
+    const validatedData = await validateBody(request, UpdateCVSchema);
+
     const {
       name,
       description,
@@ -61,7 +65,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       display_settings,
       is_default,
       is_archived,
-    } = body;
+    } = validatedData;
 
     // Build update object
     const updateData: Record<string, unknown> = {
@@ -105,7 +109,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ cv });
   } catch (error) {
     console.error('CV PUT error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -154,6 +158,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('CV DELETE error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

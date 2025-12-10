@@ -95,7 +95,7 @@ export default function ApplicationsPage() {
     }
   };
 
-  const formatDate = (dateStr: string | undefined) => {
+  const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('en-US', {
       month: 'short',

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import { UpdateWerbeflaechenSchema } from '@/types/api.schemas';
 import type { CategoryKey } from '@/types/werbeflaechen.types';
 
 interface RouteParams {
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ entry: entry || null });
   } catch (error) {
     console.error('Werbeflaechen category GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -57,8 +59,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { language = 'en', content, is_complete, row_number } = body;
+    // Validate request body
+    const data = await validateBody(request, UpdateWerbeflaechenSchema);
+    const { language = 'en', content, is_complete, row_number } = data;
 
     // Check if entry exists
     const { data: existing } = await supabase
@@ -111,7 +114,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ entry: result.data });
   } catch (error) {
     console.error('Werbeflaechen category PUT error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -146,6 +149,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Werbeflaechen category DELETE error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

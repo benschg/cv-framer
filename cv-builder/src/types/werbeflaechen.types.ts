@@ -25,7 +25,7 @@ export interface WerbeflaechenEntry {
   user_id: string;
   language: 'en' | 'de';
   category_key: CategoryKey;
-  row_number: RowNumber;
+  row_number?: number;
   content: Record<string, unknown>;
   is_complete: boolean;
   cv_coverage?: number;

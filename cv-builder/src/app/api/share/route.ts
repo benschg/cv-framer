@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import { CreateShareLinkSchema } from '@/types/api.schemas';
 import crypto from 'crypto';
 
 // Generate a unique share token
@@ -58,7 +60,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ shareLinks: shareLinks || [] });
   } catch (error) {
     console.error('Share GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -73,17 +75,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Validate request body
+    const data = await validateBody(request, CreateShareLinkSchema);
     const {
       cv_id,
       privacy_level = 'personal',
       expires_at,
       password,
-    } = body;
-
-    if (!cv_id) {
-      return NextResponse.json({ error: 'cv_id is required' }, { status: 400 });
-    }
+    } = data;
 
     // Verify CV belongs to user
     const { data: cv } = await supabase
@@ -124,6 +123,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ shareLink }, { status: 201 });
   } catch (error) {
     console.error('Share POST error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

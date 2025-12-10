@@ -1,4 +1,10 @@
-import type { WerbeflaechenEntry, CategoryKey, WerbeflaechenContent } from '@/types/werbeflaechen.types';
+import type {
+  WerbeflaechenEntry,
+  WerbeflaechenCategory,
+  CreateWerbeflaechenInput,
+  UpdateWerbeflaechenInput,
+  Language,
+} from '@/types/api.schemas';
 
 const API_BASE = '/api/werbeflaechen';
 
@@ -11,10 +17,14 @@ export interface WerbeflaechenServiceResponse<T> {
  * Fetch all werbeflaechen entries for the current user
  */
 export async function fetchAllEntries(
-  language: 'en' | 'de' = 'en'
+  language?: Language
 ): Promise<WerbeflaechenServiceResponse<WerbeflaechenEntry[]>> {
   try {
-    const response = await fetch(`${API_BASE}?language=${language}`);
+    const params = new URLSearchParams();
+    if (language) params.set('language', language);
+
+    const url = `${API_BASE}${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await fetch(url);
     const json = await response.json();
 
     if (!response.ok) {
@@ -32,11 +42,15 @@ export async function fetchAllEntries(
  * Fetch a specific category entry
  */
 export async function fetchCategoryEntry(
-  categoryKey: CategoryKey,
-  language: 'en' | 'de' = 'en'
+  categoryKey: WerbeflaechenCategory,
+  language?: Language
 ): Promise<WerbeflaechenServiceResponse<WerbeflaechenEntry | null>> {
   try {
-    const response = await fetch(`${API_BASE}/${categoryKey}?language=${language}`);
+    const params = new URLSearchParams();
+    if (language) params.set('language', language);
+
+    const url = `${API_BASE}/${categoryKey}${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await fetch(url);
     const json = await response.json();
 
     if (!response.ok) {
@@ -54,26 +68,14 @@ export async function fetchCategoryEntry(
  * Save a category entry (creates or updates)
  */
 export async function saveCategoryEntry(
-  categoryKey: CategoryKey,
-  content: WerbeflaechenContent,
-  options: {
-    language?: 'en' | 'de';
-    isComplete?: boolean;
-    rowNumber?: 1 | 2 | 3;
-  } = {}
+  categoryKey: WerbeflaechenCategory,
+  data: UpdateWerbeflaechenInput
 ): Promise<WerbeflaechenServiceResponse<WerbeflaechenEntry>> {
-  const { language = 'en', isComplete, rowNumber } = options;
-
   try {
     const response = await fetch(`${API_BASE}/${categoryKey}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        language,
-        content,
-        is_complete: isComplete,
-        row_number: rowNumber,
-      }),
+      body: JSON.stringify(data),
     });
 
     const json = await response.json();
@@ -90,14 +92,44 @@ export async function saveCategoryEntry(
 }
 
 /**
+ * Create a new werbeflaechen entry
+ */
+export async function createEntry(
+  data: CreateWerbeflaechenInput
+): Promise<WerbeflaechenServiceResponse<WerbeflaechenEntry>> {
+  try {
+    const response = await fetch(API_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      return { data: null, error: json.error || 'Failed to create entry' };
+    }
+
+    return { data: json.entry, error: null };
+  } catch (error) {
+    console.error('createEntry error:', error);
+    return { data: null, error: 'Network error' };
+  }
+}
+
+/**
  * Delete a category entry
  */
 export async function deleteCategoryEntry(
-  categoryKey: CategoryKey,
-  language: 'en' | 'de' = 'en'
+  categoryKey: WerbeflaechenCategory,
+  language?: Language
 ): Promise<WerbeflaechenServiceResponse<boolean>> {
   try {
-    const response = await fetch(`${API_BASE}/${categoryKey}?language=${language}`, {
+    const params = new URLSearchParams();
+    if (language) params.set('language', language);
+
+    const url = `${API_BASE}/${categoryKey}${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await fetch(url, {
       method: 'DELETE',
     });
 
@@ -135,7 +167,7 @@ export function calculateCompletionStats(entries: WerbeflaechenEntry[], totalCat
  */
 export function getEntryByCategory(
   entries: WerbeflaechenEntry[],
-  categoryKey: CategoryKey
+  categoryKey: WerbeflaechenCategory
 ): WerbeflaechenEntry | undefined {
   return entries.find((e) => e.category_key === categoryKey);
 }

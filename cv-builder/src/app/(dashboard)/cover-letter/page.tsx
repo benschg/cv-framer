@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { fetchCoverLetters, deleteCoverLetter } from '@/services/cover-letter.service';
-import type { CoverLetter } from '@/types/cv.types';
+import type { CoverLetter, CoverLetterContent } from '@/types/cv.types';
 
 export default function CoverLetterListPage() {
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
@@ -171,9 +171,9 @@ export default function CoverLetterListPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {coverLetter.content?.subject && (
+                  {(coverLetter.content as CoverLetterContent)?.subject && (
                     <p className="text-sm text-muted-foreground line-clamp-2">
-                      {coverLetter.content.subject}
+                      {(coverLetter.content as CoverLetterContent).subject}
                     </p>
                   )}
 

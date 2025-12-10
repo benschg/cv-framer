@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { generateJSON, GeminiModel } from '@/lib/ai/gemini';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import { AutofillWerbeflaechenSchema } from '@/types/api.schemas';
 import type { CategoryKey } from '@/types/werbeflaechen.types';
 
 interface ExtractedWerbeflaechen {
@@ -130,20 +132,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Validate request body
+    const data = await validateBody(request, AutofillWerbeflaechenSchema);
     const {
       cvText,
       language = 'en',
       model = 'gemini-2.0-flash',
       overwrite = false,
-    } = body;
-
-    if (!cvText || cvText.trim().length < 50) {
-      return NextResponse.json(
-        { error: 'CV text is required (minimum 50 characters)' },
-        { status: 400 }
-      );
-    }
+    } = data;
 
     // Extract werbeflaechen data from CV using AI
     const extractedData = await extractWerbeflaechenFromCV(
@@ -207,10 +203,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Werbeflaechen autofill error:', error);
-    return NextResponse.json(
-      { error: 'Failed to process CV data' },
-      { status: 500 }
-    );
+    return errorResponse(error);
   }
 }
 

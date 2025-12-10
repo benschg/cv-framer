@@ -1,4 +1,10 @@
-import type { CVDocument, CVContent, JobContext, DisplaySettings } from '@/types/cv.types';
+import type {
+  CVDocument,
+  CreateCVInput,
+  UpdateCVInput,
+  GenerateCVInput,
+  RegenerateItemInput,
+} from '@/types/api.schemas';
 
 const API_BASE = '/api/cv';
 
@@ -48,15 +54,7 @@ export async function fetchCV(id: string): Promise<CVServiceResponse<CVDocument>
 /**
  * Create a new CV
  */
-export async function createCV(data: {
-  name: string;
-  description?: string;
-  language?: 'en' | 'de';
-  template_id?: string;
-  content?: CVContent;
-  job_context?: JobContext;
-  display_settings?: Partial<DisplaySettings>;
-}): Promise<CVServiceResponse<CVDocument>> {
+export async function createCV(data: CreateCVInput): Promise<CVServiceResponse<CVDocument>> {
   try {
     const response = await fetch(API_BASE, {
       method: 'POST',
@@ -82,15 +80,7 @@ export async function createCV(data: {
  */
 export async function updateCV(
   id: string,
-  data: Partial<{
-    name: string;
-    description: string;
-    content: CVContent;
-    job_context: JobContext;
-    display_settings: DisplaySettings;
-    is_default: boolean;
-    is_archived: boolean;
-  }>
+  data: UpdateCVInput
 ): Promise<CVServiceResponse<CVDocument>> {
   try {
     const response = await fetch(`${API_BASE}/${id}`, {
@@ -161,16 +151,12 @@ export async function duplicateCV(id: string, newName?: string): Promise<CVServi
 /**
  * Generate CV content using AI
  */
-export async function generateCVContent(
-  id: string,
-  jobContext?: JobContext,
-  sections?: string[]
-): Promise<CVServiceResponse<CVContent>> {
+export async function generateCVContent(data: GenerateCVInput): Promise<CVServiceResponse<Record<string, unknown>>> {
   try {
-    const response = await fetch(`${API_BASE}/${id}/generate`, {
+    const response = await fetch('/api/generate-cv', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ job_context: jobContext, sections }),
+      body: JSON.stringify(data),
     });
 
     const json = await response.json();
@@ -187,6 +173,33 @@ export async function generateCVContent(
 }
 
 /**
+ * Regenerate a specific CV item/section using AI
+ */
+export async function regenerateItem(data: RegenerateItemInput): Promise<CVServiceResponse<{
+  section: string;
+  content: string | string[];
+}>> {
+  try {
+    const response = await fetch('/api/regenerate-item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      return { data: null, error: json.error || 'Failed to regenerate item' };
+    }
+
+    return { data: { section: json.section, content: json.content }, error: null };
+  } catch (error) {
+    console.error('regenerateItem error:', error);
+    return { data: null, error: 'Network error' };
+  }
+}
+
+/**
  * Export CV to PDF
  */
 export async function exportCVToPDF(
@@ -194,7 +207,7 @@ export async function exportCVToPDF(
   options?: {
     theme?: 'light' | 'dark';
     showPhoto?: boolean;
-    privacyLevel?: 'none' | 'personal' | 'full';
+    privacyLevel?: 'personal' | 'professional' | 'public';
   }
 ): Promise<CVServiceResponse<Blob>> {
   try {
@@ -220,9 +233,30 @@ export async function exportCVToPDF(
 }
 
 /**
- * Create default display settings
+ * Generate a unique ID for new items
  */
-export function getDefaultDisplaySettings(): DisplaySettings {
+export function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Get default CV content structure
+ */
+export function getDefaultCVContent(): Record<string, unknown> {
+  return {
+    summary: '',
+    experience: [],
+    education: [],
+    skills: [],
+    languages: [],
+    certifications: [],
+  };
+}
+
+/**
+ * Get default display settings
+ */
+export function getDefaultDisplaySettings(): Record<string, unknown> {
   return {
     theme: 'light',
     showPhoto: true,
@@ -230,29 +264,4 @@ export function getDefaultDisplaySettings(): DisplaySettings {
     showAttachments: false,
     privacyLevel: 'personal',
   };
-}
-
-/**
- * Create default CV content
- */
-export function getDefaultCVContent(): CVContent {
-  return {
-    tagline: '',
-    profile: '',
-    workExperience: [],
-    education: [],
-    skills: [],
-    keyCompetences: [],
-    projects: [],
-    references: [],
-    languages: [],
-    certifications: [],
-  };
-}
-
-/**
- * Generate a unique ID for new items
- */
-export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }

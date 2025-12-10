@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { UpdateCoverLetterSchema } from '@/types/api.schemas';
+import { validateBody, errorResponse } from '@/lib/api-utils';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -36,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ coverLetter });
   } catch (error) {
     console.error('Cover letter GET by ID error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -52,14 +54,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Validate request body
+    const validatedData = await validateBody(request, UpdateCoverLetterSchema);
+
     const {
       name,
       content,
       job_context,
       cv_id,
       is_archived,
-    } = body;
+    } = validatedData;
 
     // Build update object
     const updateData: Record<string, unknown> = {
@@ -92,7 +96,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ coverLetter });
   } catch (error) {
     console.error('Cover letter PUT error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -141,6 +145,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Cover letter DELETE error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }

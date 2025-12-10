@@ -58,7 +58,7 @@ export default function CoverLetterEditorPage() {
   const handleSave = async () => {
     if (!coverLetter) return;
     setSaving(true);
-    const result = await updateCoverLetter(coverLetterId, { content });
+    const result = await updateCoverLetter(coverLetterId, { content: content as Record<string, unknown> });
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
@@ -78,10 +78,10 @@ export default function CoverLetterEditorPage() {
     setError(null);
 
     const result = await generateCoverLetterWithAI({
-      coverLetterId,
-      cvId: coverLetter.cv_id,
-      language: coverLetter.language,
-      jobContext: coverLetter.job_context,
+      cover_letter_id: coverLetterId,
+      cv_id: coverLetter.cv_id ?? undefined,
+      language: coverLetter.language ?? undefined,
+      job_context: coverLetter.job_context ?? undefined,
     });
 
     if (result.error) {

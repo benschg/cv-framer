@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { validateBody, errorResponse } from '@/lib/api-utils';
+import {
+  CreateApplicationSchema,
+  GetApplicationsQuerySchema,
+  type CreateApplicationInput,
+} from '@/types/api.schemas';
 
 // GET /api/applications - Get all applications for the current user
 export async function GET(request: NextRequest) {
@@ -13,8 +19,13 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const includeArchived = searchParams.get('includeArchived') === 'true';
+    const queryResult = GetApplicationsQuerySchema.safeParse({
+      status: searchParams.get('status') || undefined,
+      includeArchived: searchParams.get('includeArchived') || undefined,
+    });
+
+    const status = queryResult.success ? queryResult.data.status : undefined;
+    const includeArchived = queryResult.success ? queryResult.data.includeArchived === 'true' : false;
 
     // Build query
     let query = supabase
@@ -42,7 +53,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ applications: applications || [] });
   } catch (error) {
     console.error('Applications GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -57,48 +68,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const {
-      company_name,
-      job_title,
-      job_url,
-      job_description,
-      location,
-      salary_range,
-      status = 'draft',
-      deadline,
-      notes,
-      contact_name,
-      contact_email,
-      cv_id,
-      cover_letter_id,
-    } = body;
-
-    if (!company_name || !job_title) {
-      return NextResponse.json(
-        { error: 'Company name and job title are required' },
-        { status: 400 }
-      );
-    }
+    // Validate request body
+    const validated: CreateApplicationInput = await validateBody(request, CreateApplicationSchema);
 
     // Create the application
     const { data: application, error } = await supabase
       .from('job_applications')
       .insert({
         user_id: user.id,
-        company_name,
-        job_title,
-        job_url,
-        job_description,
-        location,
-        salary_range,
-        status,
-        deadline,
-        notes,
-        contact_name,
-        contact_email,
-        cv_id,
-        cover_letter_id,
+        company_name: validated.company_name,
+        job_title: validated.job_title,
+        job_url: validated.job_url || null,
+        job_description: validated.job_description || null,
+        location: validated.location || null,
+        salary_range: validated.salary_range || null,
+        status: validated.status,
+        deadline: validated.deadline || null,
+        notes: validated.notes || null,
+        contact_name: validated.contact_name || null,
+        contact_email: validated.contact_email || null,
+        cv_id: validated.cv_id || null,
+        cover_letter_id: validated.cover_letter_id || null,
         is_archived: false,
       })
       .select()
@@ -112,6 +102,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ application }, { status: 201 });
   } catch (error) {
     console.error('Applications POST error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return errorResponse(error);
   }
 }
