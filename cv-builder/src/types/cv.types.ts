@@ -266,3 +266,141 @@ export interface CoverLetterContent {
   closing?: string;
   signature?: string;
 }
+
+// Application Tracker types
+export type ApplicationStatus =
+  | 'draft'
+  | 'applied'
+  | 'screening'
+  | 'interview'
+  | 'offer'
+  | 'rejected'
+  | 'accepted'
+  | 'withdrawn';
+
+export interface JobApplication {
+  id: string;
+  user_id: string;
+  cv_id?: string;
+  cover_letter_id?: string;
+  company_name: string;
+  job_title: string;
+  job_url?: string;
+  job_description?: string;
+  location?: string;
+  salary_range?: string;
+  status: ApplicationStatus;
+  applied_at?: string;
+  deadline?: string;
+  notes?: string;
+  contact_name?: string;
+  contact_email?: string;
+  fit_analysis?: FitAnalysis;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FitAnalysis {
+  overall_score: number;
+  strengths: string[];
+  gaps: string[];
+  recommendations: string[];
+  analyzed_at: string;
+}
+
+export interface ApplicationEvent {
+  id: string;
+  application_id: string;
+  event_type: ApplicationEventType;
+  title: string;
+  description?: string;
+  scheduled_at?: string;
+  completed_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+}
+
+export type ApplicationEventType =
+  | 'status_change'
+  | 'note_added'
+  | 'interview_scheduled'
+  | 'interview_completed'
+  | 'offer_received'
+  | 'follow_up'
+  | 'document_sent'
+  | 'custom';
+
+export interface ApplicationNote {
+  id: string;
+  application_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Application status metadata for UI
+export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
+  label: string;
+  labelDe: string;
+  color: string;
+  bgColor: string;
+  order: number;
+}> = {
+  draft: {
+    label: 'Draft',
+    labelDe: 'Entwurf',
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-100',
+    order: 0,
+  },
+  applied: {
+    label: 'Applied',
+    labelDe: 'Beworben',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
+    order: 1,
+  },
+  screening: {
+    label: 'Screening',
+    labelDe: 'Vorauswahl',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
+    order: 2,
+  },
+  interview: {
+    label: 'Interview',
+    labelDe: 'Interview',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-100',
+    order: 3,
+  },
+  offer: {
+    label: 'Offer',
+    labelDe: 'Angebot',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+    order: 4,
+  },
+  accepted: {
+    label: 'Accepted',
+    labelDe: 'Angenommen',
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-100',
+    order: 5,
+  },
+  rejected: {
+    label: 'Rejected',
+    labelDe: 'Abgelehnt',
+    color: 'text-red-600',
+    bgColor: 'bg-red-100',
+    order: 6,
+  },
+  withdrawn: {
+    label: 'Withdrawn',
+    labelDe: 'Zurückgezogen',
+    color: 'text-slate-600',
+    bgColor: 'bg-slate-100',
+    order: 7,
+  },
+};
