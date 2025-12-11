@@ -5,101 +5,28 @@ import { validateBody, errorResponse } from '@/lib/api-utils';
 import { AutofillWerbeflaechenSchema } from '@/types/api.schemas';
 import type { CategoryKey } from '@/types/werbeflaechen.types';
 
-interface ExtractedWerbeflaechen {
-  kurzprofil?: {
-    summary?: string;
-    professionalTitle?: string;
-    yearsExperience?: number;
-  };
-  berufliche_erfahrungen?: {
-    experiences?: Array<{
-      company: string;
-      title: string;
-      location?: string;
-      startDate: string;
-      endDate?: string;
-      current?: boolean;
-      description?: string;
-      bullets?: string[];
-    }>;
-  };
-  aus_weiterbildungen?: {
-    education?: Array<{
-      institution: string;
-      degree: string;
-      field?: string;
-      startDate: string;
-      endDate?: string;
-      description?: string;
-    }>;
-    certifications?: Array<{
-      name: string;
-      issuer?: string;
-      date?: string;
-    }>;
-  };
-  kernkompetenzen?: {
-    skills?: Array<{
-      category: string;
-      items: string[];
-    }>;
-  };
-  schluesselkompetenzen?: {
-    softSkills?: string[];
-    competencies?: Array<{
-      name: string;
-      level?: string;
-    }>;
-  };
-  erfolge?: {
-    achievements?: Array<{
-      title: string;
-      description: string;
-      metric?: string;
-    }>;
-  };
-  projekte?: {
-    projects?: Array<{
-      name: string;
-      description: string;
-      role?: string;
-      technologies?: string[];
-      outcome?: string;
-    }>;
-  };
-  highlights?: {
-    highlights?: Array<{
-      title: string;
-      description: string;
-    }>;
-  };
-  slogan?: {
-    slogan?: string;
-    tagline?: string;
-  };
-  motivation?: {
-    whatDrivesYou?: string;
-    whyThisField?: string;
-    careerGoals?: string;
-  };
-  usp?: {
-    uniqueSellingPoints?: Array<{
-      title: string;
-      description: string;
-    }>;
-  };
-  referenzen?: {
-    references?: Array<{
-      name: string;
-      title: string;
-      company: string;
-      relationship?: string;
-      quote?: string;
-    }>;
-  };
+interface CategoryExtraction {
+  content: Record<string, unknown>;
+  ai_reasoning: Record<string, string>;
+  cv_coverage: number;
+  fit_reasoning: string;
 }
 
-// Row mapping for categories
+interface ExtractedWerbeflaechen {
+  kurzprofil?: CategoryExtraction;
+  berufliche_erfahrungen?: CategoryExtraction;
+  aus_weiterbildungen?: CategoryExtraction;
+  kernkompetenzen?: CategoryExtraction;
+  schluesselkompetenzen?: CategoryExtraction;
+  erfolge?: CategoryExtraction;
+  projekte?: CategoryExtraction;
+  highlights?: CategoryExtraction;
+  slogan?: CategoryExtraction;
+  motivation?: CategoryExtraction;
+  usp?: CategoryExtraction;
+  referenzen?: CategoryExtraction;
+}
+
 const CATEGORY_ROWS: Record<CategoryKey, number> = {
   vision_mission: 1,
   motivation: 1,
@@ -121,18 +48,15 @@ const CATEGORY_ROWS: Record<CategoryKey, number> = {
   aus_weiterbildungen: 3,
 };
 
-// POST /api/werbeflaechen/autofill - Extract CV data and autofill werbeflaechen
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
 
-    // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Validate request body
     const data = await validateBody(request, AutofillWerbeflaechenSchema);
     const {
       cvText,
@@ -141,14 +65,12 @@ export async function POST(request: NextRequest) {
       overwrite = false,
     } = data;
 
-    // Extract werbeflaechen data from CV using AI
     const extractedData = await extractWerbeflaechenFromCV(
       cvText,
       language,
       model as GeminiModel
     );
 
-    // Get existing entries if not overwriting
     let existingCategories: Set<string> = new Set();
     if (!overwrite) {
       const { data: existing } = await supabase
@@ -162,13 +84,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Upsert the extracted data
     const savedCategories: string[] = [];
 
-    for (const [categoryKey, content] of Object.entries(extractedData)) {
-      if (!content || Object.keys(content).length === 0) continue;
+    for (const [categoryKey, extraction] of Object.entries(extractedData)) {
+      if (!extraction || !extraction.content || Object.keys(extraction.content).length === 0) continue;
 
-      // Skip if not overwriting and entry exists
       if (!overwrite && existingCategories.has(categoryKey)) {
         continue;
       }
@@ -181,8 +101,11 @@ export async function POST(request: NextRequest) {
         language,
         category_key: categoryKey,
         row_number,
-        content,
-        is_complete: hasSubstantialContent(content),
+        content: extraction.content,
+        ai_reasoning: extraction.ai_reasoning,
+        cv_coverage: extraction.cv_coverage,
+        fit_reasoning: extraction.fit_reasoning,
+        is_complete: hasSubstantialContent(extraction.content),
         updated_at: new Date().toISOString(),
       };
 
@@ -223,53 +146,62 @@ ${languageNote}
 CV/Resume Text:
 ${cvText}
 
-Extract information into these categories (only include categories where you find relevant data):
+For EACH category, provide:
+1. "content": The extracted data for that category
+2. "ai_reasoning": For each field in content, explain WHY you extracted/inferred that value (key = field name, value = reasoning)
+3. "cv_coverage": Score 1-10 how well the CV covers this category (10 = excellent coverage, 1 = almost no relevant data)
+4. "fit_reasoning": Brief explanation of the coverage score
+
+Categories to extract:
 
 1. kurzprofil (Short Profile):
-   - summary: Professional summary/objective
-   - professionalTitle: Current or target job title
-   - yearsExperience: Years of professional experience (number)
+   content: { summary, professionalTitle, yearsExperience }
 
 2. berufliche_erfahrungen (Professional Experience):
-   - experiences: Array of work experiences with company, title, location, startDate, endDate, current (boolean), description, bullets[]
+   content: { experiences: [{company, title, location, startDate, endDate, current, description, bullets[]}] }
 
 3. aus_weiterbildungen (Education & Training):
-   - education: Array with institution, degree, field, startDate, endDate, description
-   - certifications: Array with name, issuer, date
+   content: { education: [{institution, degree, field, startDate, endDate, description}], certifications: [{name, issuer, date}] }
 
 4. kernkompetenzen (Core/Technical Skills):
-   - skills: Array of {category: "Category Name", items: ["skill1", "skill2"]}
+   content: { skills: [{category, items[]}] }
 
 5. schluesselkompetenzen (Key/Soft Competencies):
-   - softSkills: Array of soft skill names
-   - competencies: Array of {name, level} where level is beginner/intermediate/advanced/expert
+   content: { softSkills[], competencies: [{name, level}] }
 
 6. erfolge (Achievements):
-   - achievements: Array of {title, description, metric} - focus on quantifiable accomplishments
+   content: { achievements: [{title, description, metric}] }
 
 7. projekte (Projects):
-   - projects: Array of {name, description, role, technologies[], outcome}
+   content: { projects: [{name, description, role, technologies[], outcome}] }
 
 8. highlights (Career Highlights):
-   - highlights: Array of {title, description} - standout moments/awards
+   content: { highlights: [{title, description}] }
 
 9. slogan (Tagline):
-   - slogan: A professional slogan derived from the CV
-   - tagline: A one-line professional tagline
+   content: { slogan, tagline }
 
-10. motivation (Motivation):
-    - whatDrivesYou: What motivates this person (inferred from CV)
-    - whyThisField: Why they chose this career field
-    - careerGoals: Career aspirations if mentioned
+10. motivation (Motivation - infer from CV tone/content):
+    content: { whatDrivesYou, whyThisField, careerGoals }
 
 11. usp (Unique Selling Points):
-    - uniqueSellingPoints: Array of {title, description} - what makes this person unique
+    content: { uniqueSellingPoints: [{title, description}] }
 
 12. referenzen (References):
-    - references: Array of {name, title, company, relationship, quote} if mentioned
+    content: { references: [{name, title, company, relationship, quote}] }
 
-Return ONLY valid JSON with the extracted data. Use null or empty arrays for categories with no relevant data found.
-Format dates as YYYY-MM or YYYY-MM-DD where possible.`;
+Return JSON with this structure:
+{
+  "kurzprofil": {
+    "content": { ... },
+    "ai_reasoning": { "summary": "Extracted from objective section...", "professionalTitle": "..." },
+    "cv_coverage": 8,
+    "fit_reasoning": "CV has clear summary and title, years calculated from experience dates"
+  },
+  ...
+}
+
+Only include categories where relevant data exists. Use null for categories with no data.`;
 
   return generateJSON<ExtractedWerbeflaechen>(prompt, model);
 }

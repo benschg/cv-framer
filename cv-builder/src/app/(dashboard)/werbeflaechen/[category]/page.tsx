@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +9,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { getCategoryByKey, ROW_METADATA } from '@/data/category-metadata';
-import type { CategoryKey, CategoryDefinition } from '@/types/werbeflaechen.types';
+import { getCategoryByKey } from '@/data/category-metadata';
+import { useCategoryEntry } from '@/hooks/use-werbeflaechen';
+import { useTranslations } from '@/hooks/use-translations';
+import { Progress } from '@/components/ui/progress';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import type { CategoryKey } from '@/types/werbeflaechen.types';
 import {
   ArrowLeft,
   Save,
@@ -33,9 +42,8 @@ import {
   User,
   Briefcase,
   GraduationCap,
-  Plus,
-  Trash2,
   Globe,
+  Info,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -45,25 +53,31 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function CategoryPage() {
   const params = useParams();
-  const router = useRouter();
   const categoryKey = params.category as CategoryKey;
 
   const [language, setLanguage] = useState<'en' | 'de'>('en');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [content, setContent] = useState<Record<string, unknown>>({});
+  const [isSaved, setIsSaved] = useState(false);
 
-  // Get category metadata
+  const { t, translations } = useTranslations(language);
+  const { entry, loading, error, save } = useCategoryEntry(categoryKey, { language });
+
+  useEffect(() => {
+    if (entry?.content) {
+      setContent(entry.content as Record<string, unknown>);
+    }
+  }, [entry]);
+
   const category = getCategoryByKey(categoryKey);
 
   if (!category) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <h1 className="text-2xl font-bold">Category not found</h1>
+        <h1 className="text-2xl font-bold">{t('werbeflaechen.categoryNotFound')}</h1>
         <Link href="/werbeflaechen">
           <Button variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Werbeflaechen
+            {t('common.back')}
           </Button>
         </Link>
       </div>
@@ -71,19 +85,30 @@ export default function CategoryPage() {
   }
 
   const Icon = iconMap[category.icon] || Target;
-  const title = language === 'de' ? category.de : category.en;
-  const description = language === 'de' ? category.description_de : category.description_en;
-  const rowMeta = ROW_METADATA[category.row];
-  const rowQuestion = language === 'de' ? rowMeta.de : rowMeta.en;
+  const categoryTranslations = translations.werbeflaechen.categories[categoryKey];
+  const title = categoryTranslations?.title || category.en;
+  const description = categoryTranslations?.description || category.description_en;
+  const rowQuestion = t(`werbeflaechen.rows.${category.row}`);
+
+  const aiReasoning = (entry?.ai_reasoning as Record<string, string>) || {};
+  const cvCoverage = entry?.cv_coverage;
+  const fitReasoning = entry?.fit_reasoning;
 
   const handleSave = async () => {
-    setIsLoading(true);
-    // TODO: Save to Supabase
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+    const result = await save(content, true);
+    if (result.success) {
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -92,7 +117,7 @@ export default function CategoryPage() {
         <Link href="/werbeflaechen">
           <Button variant="ghost" size="sm" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            {language === 'de' ? 'Zurück' : 'Back'}
+            {t('common.back')}
           </Button>
         </Link>
         <div className="flex items-center gap-2">
@@ -137,7 +162,7 @@ export default function CategoryPage() {
                   variant="outline"
                   style={{ borderColor: category.color, color: category.color }}
                 >
-                  {language === 'de' ? `Reihe ${category.row}` : `Row ${category.row}`}
+                  {t('werbeflaechen.row')} {category.row}
                 </Badge>
               </div>
               <CardDescription>{description}</CardDescription>
@@ -149,10 +174,61 @@ export default function CategoryPage() {
         </CardHeader>
       </Card>
 
+      {/* CV Coverage Card */}
+      {cvCoverage !== undefined && cvCoverage !== null && (
+        <TooltipProvider>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                {t('werbeflaechen.cvCoverage')}
+                {fitReasoning && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="text-xs">{fitReasoning}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <Progress value={cvCoverage * 10} className="flex-1" />
+                <span className="text-sm font-medium w-12 text-right">{cvCoverage}/10</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {cvCoverage >= 8
+                  ? t('werbeflaechen.excellentCoverage')
+                  : cvCoverage >= 5
+                  ? t('werbeflaechen.goodCoverage')
+                  : t('werbeflaechen.moreDetailsRecommended')}
+              </p>
+            </CardContent>
+          </Card>
+        </TooltipProvider>
+      )}
+
+      {error && (
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md">
+          {error}
+        </div>
+      )}
+
       {/* Form Card */}
       <Card>
         <CardContent className="pt-6">
-          {renderCategoryForm(categoryKey, language, content, setContent)}
+          <TooltipProvider>
+            <CategoryForm
+              categoryKey={categoryKey}
+              content={content}
+              setContent={setContent}
+              aiReasoning={aiReasoning}
+              t={t}
+              translations={translations}
+            />
+          </TooltipProvider>
         </CardContent>
       </Card>
 
@@ -161,20 +237,20 @@ export default function CategoryPage() {
         <div>
           {isSaved && (
             <span className="text-sm text-green-600">
-              {language === 'de' ? 'Änderungen gespeichert!' : 'Changes saved!'}
+              {t('common.changesSaved')}
             </span>
           )}
         </div>
-        <Button onClick={handleSave} disabled={isLoading} className="gap-2">
-          {isLoading ? (
+        <Button onClick={handleSave} disabled={loading} className="gap-2">
+          {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              {language === 'de' ? 'Speichern...' : 'Saving...'}
+              {t('common.saving')}
             </>
           ) : (
             <>
               <Save className="h-4 w-4" />
-              {language === 'de' ? 'Speichern' : 'Save'}
+              {t('common.save')}
             </>
           )}
         </Button>
@@ -183,217 +259,238 @@ export default function CategoryPage() {
   );
 }
 
-// Render form based on category type
-function renderCategoryForm(
-  categoryKey: CategoryKey,
-  language: 'en' | 'de',
-  content: Record<string, unknown>,
-  setContent: (content: Record<string, unknown>) => void
-) {
+function FieldWithReasoning({
+  fieldId,
+  label,
+  reasoning,
+  children,
+}: {
+  fieldId: string;
+  label: string;
+  reasoning?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Label htmlFor={fieldId}>{label}</Label>
+        {reasoning && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-4 w-4 text-blue-500 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs">
+              <p className="text-xs">{reasoning}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+interface CategoryFormProps {
+  categoryKey: CategoryKey;
+  content: Record<string, unknown>;
+  setContent: (content: Record<string, unknown>) => void;
+  aiReasoning: Record<string, string>;
+  t: (path: string) => string;
+  translations: ReturnType<typeof useTranslations>['translations'];
+}
+
+function CategoryForm({ categoryKey, content, setContent, aiReasoning, t, translations }: CategoryFormProps) {
   const updateField = (field: string, value: unknown) => {
     setContent({ ...content, [field]: value });
   };
+
+  const fields = translations.werbeflaechen.fields;
+  const placeholders = translations.werbeflaechen.placeholders;
+  const hints = translations.werbeflaechen.hints;
 
   switch (categoryKey) {
     case 'kurzprofil':
       return (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="professionalTitle">
-              {language === 'de' ? 'Berufsbezeichnung' : 'Professional Title'}
-            </Label>
+          <FieldWithReasoning
+            fieldId="professionalTitle"
+            label={fields.professionalTitle}
+            reasoning={aiReasoning.professionalTitle}
+          >
             <Input
               id="professionalTitle"
-              placeholder={language === 'de' ? 'z.B. Senior Software Engineer' : 'e.g., Senior Software Engineer'}
+              placeholder={placeholders.professionalTitle}
               value={(content.professionalTitle as string) || ''}
               onChange={(e) => updateField('professionalTitle', e.target.value)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="yearsExperience">
-              {language === 'de' ? 'Jahre Berufserfahrung' : 'Years of Experience'}
-            </Label>
+          </FieldWithReasoning>
+          <FieldWithReasoning
+            fieldId="yearsExperience"
+            label={fields.yearsExperience}
+            reasoning={aiReasoning.yearsExperience}
+          >
             <Input
               id="yearsExperience"
               type="number"
-              placeholder="10"
+              placeholder={placeholders.yearsExperience}
               value={(content.yearsExperience as number) || ''}
               onChange={(e) => updateField('yearsExperience', parseInt(e.target.value) || 0)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="summary">
-              {language === 'de' ? 'Zusammenfassung' : 'Summary'}
-            </Label>
+          </FieldWithReasoning>
+          <FieldWithReasoning
+            fieldId="summary"
+            label={fields.summary}
+            reasoning={aiReasoning.summary}
+          >
             <Textarea
               id="summary"
-              placeholder={language === 'de'
-                ? 'Schreiben Sie eine kurze Zusammenfassung Ihres beruflichen Profils...'
-                : 'Write a brief summary of your professional profile...'}
+              placeholder={placeholders.summary}
               rows={5}
               value={(content.summary as string) || ''}
               onChange={(e) => updateField('summary', e.target.value)}
             />
-          </div>
+          </FieldWithReasoning>
         </div>
       );
 
     case 'vision_mission':
       return (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="vision">
-              {language === 'de' ? 'Ihre Vision' : 'Your Vision'}
-            </Label>
+          <FieldWithReasoning
+            fieldId="vision"
+            label={fields.vision}
+            reasoning={aiReasoning.vision}
+          >
             <Textarea
               id="vision"
-              placeholder={language === 'de'
-                ? 'Wo sehen Sie sich in 5-10 Jahren?'
-                : 'Where do you see yourself in 5-10 years?'}
+              placeholder={placeholders.vision}
               rows={4}
               value={(content.vision as string) || ''}
               onChange={(e) => updateField('vision', e.target.value)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="mission">
-              {language === 'de' ? 'Ihre Mission' : 'Your Mission'}
-            </Label>
+          </FieldWithReasoning>
+          <FieldWithReasoning
+            fieldId="mission"
+            label={fields.mission}
+            reasoning={aiReasoning.mission}
+          >
             <Textarea
               id="mission"
-              placeholder={language === 'de'
-                ? 'Was ist Ihr beruflicher Auftrag?'
-                : 'What is your professional mission?'}
+              placeholder={placeholders.mission}
               rows={4}
               value={(content.mission as string) || ''}
               onChange={(e) => updateField('mission', e.target.value)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="purpose">
-              {language === 'de' ? 'Ihr Zweck' : 'Your Purpose'}
-            </Label>
+          </FieldWithReasoning>
+          <FieldWithReasoning
+            fieldId="purpose"
+            label={fields.purpose}
+            reasoning={aiReasoning.purpose}
+          >
             <Textarea
               id="purpose"
-              placeholder={language === 'de'
-                ? 'Warum tun Sie, was Sie tun?'
-                : 'Why do you do what you do?'}
+              placeholder={placeholders.purpose}
               rows={3}
               value={(content.purpose as string) || ''}
               onChange={(e) => updateField('purpose', e.target.value)}
             />
-          </div>
+          </FieldWithReasoning>
         </div>
       );
 
     case 'motivation':
       return (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="whatDrivesYou">
-              {language === 'de' ? 'Was treibt Sie an?' : 'What drives you?'}
-            </Label>
+          <FieldWithReasoning
+            fieldId="whatDrivesYou"
+            label={fields.whatDrivesYou}
+            reasoning={aiReasoning.whatDrivesYou}
+          >
             <Textarea
               id="whatDrivesYou"
-              placeholder={language === 'de'
-                ? 'Beschreiben Sie, was Sie jeden Tag motiviert...'
-                : 'Describe what motivates you every day...'}
+              placeholder={placeholders.whatDrivesYou}
               rows={4}
               value={(content.whatDrivesYou as string) || ''}
               onChange={(e) => updateField('whatDrivesYou', e.target.value)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="whyThisField">
-              {language === 'de' ? 'Warum dieses Berufsfeld?' : 'Why this field?'}
-            </Label>
+          </FieldWithReasoning>
+          <FieldWithReasoning
+            fieldId="whyThisField"
+            label={fields.whyThisField}
+            reasoning={aiReasoning.whyThisField}
+          >
             <Textarea
               id="whyThisField"
-              placeholder={language === 'de'
-                ? 'Warum haben Sie sich für dieses Berufsfeld entschieden?'
-                : 'Why did you choose this professional field?'}
+              placeholder={placeholders.whyThisField}
               rows={4}
               value={(content.whyThisField as string) || ''}
               onChange={(e) => updateField('whyThisField', e.target.value)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="careerGoals">
-              {language === 'de' ? 'Karriereziele' : 'Career Goals'}
-            </Label>
+          </FieldWithReasoning>
+          <FieldWithReasoning
+            fieldId="careerGoals"
+            label={fields.careerGoals}
+            reasoning={aiReasoning.careerGoals}
+          >
             <Textarea
               id="careerGoals"
-              placeholder={language === 'de'
-                ? 'Was sind Ihre kurzfristigen und langfristigen Karriereziele?'
-                : 'What are your short-term and long-term career goals?'}
+              placeholder={placeholders.careerGoals}
               rows={4}
               value={(content.careerGoals as string) || ''}
               onChange={(e) => updateField('careerGoals', e.target.value)}
             />
-          </div>
+          </FieldWithReasoning>
         </div>
       );
 
     case 'slogan':
       return (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="slogan">
-              {language === 'de' ? 'Ihr Slogan' : 'Your Slogan'}
-            </Label>
+          <FieldWithReasoning
+            fieldId="slogan"
+            label={fields.slogan}
+            reasoning={aiReasoning.slogan}
+          >
             <Input
               id="slogan"
-              placeholder={language === 'de'
-                ? 'Ein prägnanter Satz, der Sie beschreibt'
-                : 'A concise sentence that describes you'}
+              placeholder={placeholders.slogan}
               value={(content.slogan as string) || ''}
               onChange={(e) => updateField('slogan', e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              {language === 'de'
-                ? 'Kurz und einprägsam - wird als Tagline in Ihrem CV verwendet'
-                : 'Short and memorable - used as a tagline in your CV'}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tagline">
-              {language === 'de' ? 'Alternative Tagline' : 'Alternative Tagline'}
-            </Label>
+            <p className="text-xs text-muted-foreground">{hints.slogan}</p>
+          </FieldWithReasoning>
+          <FieldWithReasoning
+            fieldId="tagline"
+            label={fields.tagline}
+            reasoning={aiReasoning.tagline}
+          >
             <Input
               id="tagline"
-              placeholder={language === 'de'
-                ? 'Eine alternative Version Ihres Slogans'
-                : 'An alternative version of your slogan'}
+              placeholder={placeholders.tagline}
               value={(content.tagline as string) || ''}
               onChange={(e) => updateField('tagline', e.target.value)}
             />
-          </div>
+          </FieldWithReasoning>
         </div>
       );
 
-    // Default form for categories without specific forms yet
     default:
       return (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="notes">
-              {language === 'de' ? 'Notizen' : 'Notes'}
-            </Label>
+          <FieldWithReasoning
+            fieldId="notes"
+            label={fields.notes}
+            reasoning={aiReasoning.notes}
+          >
             <Textarea
               id="notes"
-              placeholder={language === 'de'
-                ? 'Fügen Sie hier Ihre Notizen und Inhalte hinzu...'
-                : 'Add your notes and content here...'}
+              placeholder={placeholders.notes}
               rows={6}
               value={(content.notes as string) || ''}
               onChange={(e) => updateField('notes', e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              {language === 'de'
-                ? 'Spezifische Formularfelder für diese Kategorie werden bald verfügbar sein'
-                : 'Specific form fields for this category will be available soon'}
-            </p>
-          </div>
+            <p className="text-xs text-muted-foreground">{hints.defaultForm}</p>
+          </FieldWithReasoning>
         </div>
       );
   }

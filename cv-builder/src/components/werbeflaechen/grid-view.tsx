@@ -47,13 +47,13 @@ export function GridView({ language, entries = [], beginnerMode = false }: GridV
 
         const rowMeta = ROW_METADATA[row];
         const rowTitle = language === 'de' ? rowMeta.de : rowMeta.en;
-        const rowQuestion = language === 'de' ? rowMeta.question_de : rowMeta.question_en;
+        
 
         return (
           <section key={row} className="space-y-4">
             <div className="border-b pb-2">
               <h2 className="text-xl font-semibold">{rowTitle}</h2>
-              <p className="text-sm text-muted-foreground">{rowQuestion}</p>
+              
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {categories.map((category) => (

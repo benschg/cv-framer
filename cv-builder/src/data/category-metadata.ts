@@ -246,24 +246,18 @@ export const getCategoryByKey = (key: CategoryKey): CategoryDefinition => {
 };
 
 // Row titles and descriptions
-export const ROW_METADATA: Record<RowNumber, { en: string; de: string; question_en: string; question_de: string }> = {
+export const ROW_METADATA: Record<RowNumber, { en: string; de: string }> = {
   1: {
     en: 'Will you love the job?',
     de: 'Werden Sie den Job lieben?',
-    question_en: 'Questions about your motivation, passion, and vision',
-    question_de: 'Fragen zu Ihrer Motivation, Leidenschaft und Vision',
   },
   2: {
     en: 'Can you do the job?',
     de: 'Können Sie den Job machen?',
-    question_en: 'Questions about your skills, achievements, and unique value',
-    question_de: 'Fragen zu Ihren Fähigkeiten, Erfolgen und einzigartigen Werten',
   },
   3: {
     en: 'Can we work together?',
     de: 'Können wir zusammenarbeiten?',
-    question_en: 'Questions about your experience, competencies, and background',
-    question_de: 'Fragen zu Ihrer Erfahrung, Kompetenzen und Hintergrund',
   },
 };
 

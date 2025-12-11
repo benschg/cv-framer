@@ -31,6 +31,7 @@ export interface WerbeflaechenEntry {
   cv_coverage?: number;
   job_match?: number;
   fit_reasoning?: string;
+  ai_reasoning?: Record<string, string>;
   created_at: string;
   updated_at: string;
 }
