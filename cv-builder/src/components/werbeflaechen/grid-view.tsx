@@ -1,7 +1,7 @@
 'use client';
 
 import { CategoryCard } from './category-card';
-import { getCategoriesByRow, ROW_METADATA, getBeginnerCategories } from '@/data/category-metadata';
+import { getCategoriesByRow, getBeginnerCategories } from '@/data/category-metadata';
 import { useTranslations } from '@/hooks/use-translations';
 import type { CategoryDefinition, RowNumber, WerbeflaechenEntry } from '@/types/werbeflaechen.types';
 
@@ -91,16 +91,13 @@ export function GridView({ language, entries = [], beginnerMode = false }: GridV
         const categories = getVisibleCategories(row);
         if (categories.length === 0) return null;
 
-        const rowMeta = ROW_METADATA[row];
-        const rowTitle = language === 'de' ? rowMeta.de : rowMeta.en;
         const rowKey = row.toString() as '1' | '2' | '3';
         const rowQuestion = translations.werbeflaechen.rows[rowKey];
 
         return (
           <section key={row} className="space-y-4">
             <div className="border-b pb-2">
-              <h2 className="text-xl font-semibold">{rowTitle}</h2>
-              <p className="text-sm text-muted-foreground italic">{rowQuestion}</p>
+              <h2 className="text-xl font-semibold">{rowQuestion}</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {categories.map((category) => (
