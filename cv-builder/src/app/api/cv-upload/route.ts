@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PDF text extraction using unpdf with position-aware text extraction
+// PDF text extraction using unpdf with column-aware extraction
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
     const { getDocumentProxy } = await import('unpdf');
@@ -123,6 +123,8 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
+      const viewport = page.getViewport({ scale: 1 });
+      const pageWidth = viewport.width;
 
       // Extract text items with position information
       const items = textContent.items as Array<{
@@ -134,48 +136,37 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
 
       if (items.length === 0) continue;
 
-      // Group text by Y position (lines) with tolerance for slight variations
-      const lines: Map<number, Array<{ x: number; text: string }>> = new Map();
-      const yTolerance = 3; // pixels tolerance for same line
-
-      for (const item of items) {
-        if (!item.str.trim()) continue;
-
-        const x = item.transform[4];
-        const y = Math.round(item.transform[5] / yTolerance) * yTolerance;
-
-        if (!lines.has(y)) {
-          lines.set(y, []);
-        }
-        lines.get(y)!.push({ x, text: item.str });
-      }
-
-      // Sort lines by Y (descending - PDF coordinates start from bottom)
-      const sortedYs = Array.from(lines.keys()).sort((a, b) => b - a);
+      // Detect if this is a multi-column layout
+      // Check X distribution of text items
+      const xPositions = items.filter(item => item.str.trim()).map(item => item.transform[4]);
+      const midPoint = pageWidth / 2;
+      const leftItems = xPositions.filter(x => x < midPoint * 0.7).length;
+      const rightItems = xPositions.filter(x => x > midPoint * 0.5).length;
+      const isMultiColumn = leftItems > 10 && rightItems > 10 &&
+        Math.min(leftItems, rightItems) / Math.max(leftItems, rightItems) > 0.2;
 
       let pageText = '';
-      let lastY: number | null = null;
 
-      for (const y of sortedYs) {
-        const lineItems = lines.get(y)!;
-        // Sort items in line by X position
-        lineItems.sort((a, b) => a.x - b.x);
-        const lineText = lineItems.map(item => item.text).join(' ').trim();
+      if (isMultiColumn) {
+        // Process columns separately - left sidebar first, then main content
+        const columnDivider = midPoint * 0.45; // Assume sidebar is on the left ~40%
 
-        if (!lineText) continue;
+        const leftColumn = items.filter(item => item.transform[4] < columnDivider);
+        const rightColumn = items.filter(item => item.transform[4] >= columnDivider);
 
-        // Detect paragraph breaks (larger Y gaps)
-        if (lastY !== null) {
-          const gap = lastY - y;
-          if (gap > 20) {
-            pageText += '\n\n';
-          } else {
-            pageText += '\n';
-          }
+        const leftText = extractColumnText(leftColumn);
+        const rightText = extractColumnText(rightColumn);
+
+        // Combine with clear separation - main content first (usually more important)
+        if (rightText.trim()) {
+          pageText += rightText;
         }
-
-        pageText += lineText;
-        lastY = y;
+        if (leftText.trim()) {
+          pageText += '\n\n--- Sidebar ---\n\n' + leftText;
+        }
+      } else {
+        // Single column - process normally
+        pageText = extractColumnText(items);
       }
 
       if (pageText.trim()) {
@@ -188,6 +179,55 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
     console.error('PDF parsing error:', error);
     return '';
   }
+}
+
+// Extract text from a set of items (single column)
+function extractColumnText(items: Array<{ str: string; transform: number[]; width: number; height: number }>): string {
+  if (items.length === 0) return '';
+
+  // Group text by Y position (lines) with tolerance
+  const lines: Map<number, Array<{ x: number; text: string }>> = new Map();
+  const yTolerance = 3;
+
+  for (const item of items) {
+    if (!item.str.trim()) continue;
+
+    const x = item.transform[4];
+    const y = Math.round(item.transform[5] / yTolerance) * yTolerance;
+
+    if (!lines.has(y)) {
+      lines.set(y, []);
+    }
+    lines.get(y)!.push({ x, text: item.str });
+  }
+
+  // Sort lines by Y (descending - PDF coordinates start from bottom)
+  const sortedYs = Array.from(lines.keys()).sort((a, b) => b - a);
+
+  let text = '';
+  let lastY: number | null = null;
+
+  for (const y of sortedYs) {
+    const lineItems = lines.get(y)!;
+    lineItems.sort((a, b) => a.x - b.x);
+    const lineText = lineItems.map(item => item.text).join(' ').trim();
+
+    if (!lineText) continue;
+
+    if (lastY !== null) {
+      const gap = lastY - y;
+      if (gap > 20) {
+        text += '\n\n';
+      } else {
+        text += '\n';
+      }
+    }
+
+    text += lineText;
+    lastY = y;
+  }
+
+  return text;
 }
 
 // Format extracted text to preserve structure (sections, bullets, numbers)
