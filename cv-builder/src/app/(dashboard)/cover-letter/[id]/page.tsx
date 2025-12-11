@@ -24,6 +24,7 @@ import {
   updateCoverLetter,
   generateCoverLetterWithAI,
 } from '@/services/cover-letter.service';
+import { useTranslations } from '@/hooks/use-translations';
 import type { CoverLetter, CoverLetterContent } from '@/types/cv.types';
 
 export default function CoverLetterEditorPage() {
@@ -37,9 +38,19 @@ export default function CoverLetterEditorPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'de'>('en');
+  const { translations } = useTranslations(language);
 
   // Editable content
   const [content, setContent] = useState<CoverLetterContent>({});
+
+  // Load language preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('app-language');
+    if (saved === 'en' || saved === 'de') {
+      setLanguage(saved);
+    }
+  }, []);
 
   useEffect(() => {
     const loadCoverLetter = async () => {
@@ -137,12 +148,12 @@ export default function CoverLetterEditorPage() {
         <Link href="/cover-letter">
           <Button variant="ghost" size="sm" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to Cover Letters
+            {translations.coverLetter.backToCoverLetters}
           </Button>
         </Link>
         <Card className="border-destructive/50">
           <CardContent className="pt-6">
-            <p className="text-destructive">{error || 'Cover letter not found'}</p>
+            <p className="text-destructive">{error || translations.coverLetter.editor.coverLetterNotFound}</p>
           </CardContent>
         </Card>
       </div>
@@ -157,14 +168,14 @@ export default function CoverLetterEditorPage() {
           <Link href="/cover-letter">
             <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Back
+              {translations.common.back}
             </Button>
           </Link>
           <div>
             <h1 className="text-2xl font-bold">{coverLetter.name}</h1>
             {coverLetter.job_context?.company && (
               <p className="text-sm text-muted-foreground">
-                {coverLetter.job_context.position} at {coverLetter.job_context.company}
+                {coverLetter.job_context.position} {language === 'de' ? 'bei' : 'at'} {coverLetter.job_context.company}
               </p>
             )}
           </div>
@@ -172,11 +183,11 @@ export default function CoverLetterEditorPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-2" disabled>
             <Eye className="h-4 w-4" />
-            Preview
+            {translations.coverLetter.editor.preview}
           </Button>
           <Button variant="outline" size="sm" className="gap-2" disabled>
             <Download className="h-4 w-4" />
-            Export
+            {translations.coverLetter.editor.export}
           </Button>
           <Button
             variant="outline"
@@ -185,7 +196,7 @@ export default function CoverLetterEditorPage() {
             onClick={handleCopy}
           >
             <Copy className="h-4 w-4" />
-            {copied ? 'Copied!' : 'Copy'}
+            {copied ? translations.coverLetter.editor.copied : translations.coverLetter.editor.copy}
           </Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             {saving ? (
@@ -193,7 +204,7 @@ export default function CoverLetterEditorPage() {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            Save
+            {translations.common.save}
           </Button>
         </div>
       </div>
@@ -205,10 +216,10 @@ export default function CoverLetterEditorPage() {
             <div className="flex items-center gap-3">
               <Sparkles className="h-5 w-5 text-primary" />
               <div>
-                <p className="font-medium">AI-Powered Generation</p>
+                <p className="font-medium">{translations.coverLetter.editor.aiPoweredGeneration}</p>
                 <p className="text-sm text-muted-foreground">
-                  Generate content from your profile
-                  {coverLetter.job_context?.company && ` tailored for ${coverLetter.job_context.company}`}
+                  {translations.coverLetter.editor.generateFromProfile}
+                  {coverLetter.job_context?.company && ` ${language === 'de' ? 'zugeschnitten für' : 'tailored for'} ${coverLetter.job_context.company}`}
                 </p>
               </div>
             </div>
@@ -220,12 +231,12 @@ export default function CoverLetterEditorPage() {
               {generating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating...
+                  {translations.coverLetter.generating}
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" />
-                  Generate Content
+                  {translations.coverLetter.editor.generateContent}
                 </>
               )}
             </Button>
@@ -236,18 +247,18 @@ export default function CoverLetterEditorPage() {
       {/* Editor */}
       <Card>
         <CardHeader>
-          <CardTitle>Cover Letter Content</CardTitle>
+          <CardTitle>{translations.coverLetter.editor.coverLetterContent}</CardTitle>
           <CardDescription>
-            Edit your cover letter sections below
+            {translations.coverLetter.editor.editSectionsBelow}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Subject Line */}
           <div className="space-y-2">
-            <Label htmlFor="subject">Subject Line</Label>
+            <Label htmlFor="subject">{translations.coverLetter.editor.subjectLine}</Label>
             <Input
               id="subject"
-              placeholder="e.g., Application for Senior Software Engineer Position"
+              placeholder={translations.coverLetter.editor.subjectPlaceholder}
               value={content.subject || ''}
               onChange={(e) => updateField('subject', e.target.value)}
             />
@@ -255,10 +266,10 @@ export default function CoverLetterEditorPage() {
 
           {/* Greeting */}
           <div className="space-y-2">
-            <Label htmlFor="greeting">Greeting</Label>
+            <Label htmlFor="greeting">{translations.coverLetter.editor.greeting}</Label>
             <Input
               id="greeting"
-              placeholder="e.g., Dear Hiring Manager,"
+              placeholder={translations.coverLetter.editor.greetingPlaceholder}
               value={content.greeting || ''}
               onChange={(e) => updateField('greeting', e.target.value)}
             />
@@ -266,40 +277,40 @@ export default function CoverLetterEditorPage() {
 
           {/* Opening Paragraph */}
           <div className="space-y-2">
-            <Label htmlFor="opening">Opening Paragraph</Label>
+            <Label htmlFor="opening">{translations.coverLetter.editor.openingParagraph}</Label>
             <Textarea
               id="opening"
-              placeholder="Your hook and introduction..."
+              placeholder={translations.coverLetter.editor.openingPlaceholder}
               rows={3}
               value={content.opening || ''}
               onChange={(e) => updateField('opening', e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Start strong - mention the position and why you&apos;re excited about it
+              {translations.coverLetter.editor.openingHint}
             </p>
           </div>
 
           {/* Body */}
           <div className="space-y-2">
-            <Label htmlFor="body">Main Body</Label>
+            <Label htmlFor="body">{translations.coverLetter.editor.mainBody}</Label>
             <Textarea
               id="body"
-              placeholder="Your qualifications, experience, and why you're a great fit..."
+              placeholder={translations.coverLetter.editor.bodyPlaceholder}
               rows={8}
               value={content.body || ''}
               onChange={(e) => updateField('body', e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Highlight your relevant experience and connect your skills to the job requirements
+              {translations.coverLetter.editor.bodyHint}
             </p>
           </div>
 
           {/* Closing */}
           <div className="space-y-2">
-            <Label htmlFor="closing">Closing Paragraph</Label>
+            <Label htmlFor="closing">{translations.coverLetter.editor.closingParagraph}</Label>
             <Textarea
               id="closing"
-              placeholder="Your call to action and professional sign-off..."
+              placeholder={translations.coverLetter.editor.closingPlaceholder}
               rows={3}
               value={content.closing || ''}
               onChange={(e) => updateField('closing', e.target.value)}
@@ -308,10 +319,10 @@ export default function CoverLetterEditorPage() {
 
           {/* Signature */}
           <div className="space-y-2">
-            <Label htmlFor="signature">Signature</Label>
+            <Label htmlFor="signature">{translations.coverLetter.editor.signature}</Label>
             <Input
               id="signature"
-              placeholder="e.g., Best regards, John Doe"
+              placeholder={translations.coverLetter.editor.signaturePlaceholder}
               value={content.signature || ''}
               onChange={(e) => updateField('signature', e.target.value)}
             />
@@ -323,15 +334,15 @@ export default function CoverLetterEditorPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Preview
-            <Badge variant="outline" className="font-normal">Live</Badge>
+            {translations.coverLetter.editor.preview}
+            <Badge variant="outline" className="font-normal">{translations.coverLetter.editor.previewLive}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="prose prose-sm max-w-none">
             {content.subject && (
               <p className="font-medium text-primary">
-                Subject: {content.subject}
+                {translations.coverLetter.editor.subject}: {content.subject}
               </p>
             )}
             {content.greeting && <p>{content.greeting}</p>}
@@ -348,7 +359,7 @@ export default function CoverLetterEditorPage() {
       {/* Bottom Save Button */}
       <div className="flex justify-end gap-2 pb-8">
         <Button variant="outline" onClick={() => router.push('/cover-letter')}>
-          Cancel
+          {translations.common.cancel}
         </Button>
         <Button onClick={handleSave} disabled={saving} className="gap-2">
           {saving ? (
@@ -356,7 +367,7 @@ export default function CoverLetterEditorPage() {
           ) : (
             <Save className="h-4 w-4" />
           )}
-          Save Changes
+          {translations.coverLetter.editor.saveChanges}
         </Button>
       </div>
     </div>

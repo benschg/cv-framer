@@ -26,12 +26,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { fetchAllCVs, deleteCV, duplicateCV, updateCV } from '@/services/cv.service';
+import { useTranslations } from '@/hooks/use-translations';
 import type { CVDocument } from '@/types/cv.types';
 
 export default function CVDashboardPage() {
   const [cvs, setCvs] = useState<CVDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [language, setLanguage] = useState<'en' | 'de'>('en');
+  const { translations } = useTranslations(language);
+
+  // Load language preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('app-language');
+    if (saved === 'en' || saved === 'de') {
+      setLanguage(saved);
+    }
+  }, []);
 
   useEffect(() => {
     const loadCVs = async () => {
@@ -47,7 +58,7 @@ export default function CVDashboardPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this CV?')) return;
+    if (!confirm(translations.cv.confirmDelete)) return;
     const result = await deleteCV(id);
     if (result.data) {
       setCvs(cvs.filter(cv => cv.id !== id));
@@ -72,7 +83,7 @@ export default function CVDashboardPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -84,15 +95,15 @@ export default function CVDashboardPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My CVs</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{translations.cv.myCVs}</h1>
           <p className="text-muted-foreground">
-            Create and manage your professional CVs
+            {translations.cv.subtitle}
           </p>
         </div>
         <Link href="/cv/new">
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
-            New CV
+            {translations.cv.newCV}
           </Button>
         </Link>
       </div>
@@ -101,52 +112,52 @@ export default function CVDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">CVs Created</CardTitle>
+            <CardTitle className="text-sm font-medium">{translations.cv.cvsCreated}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{cvs.length}</div>
             <p className="text-xs text-muted-foreground">
-              {cvs.length === 0 ? 'Start building your first CV' : 'Total CVs in your account'}
+              {cvs.length === 0 ? translations.cv.startBuilding : translations.cv.totalCVs}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Werbeflaechen</CardTitle>
+            <CardTitle className="text-sm font-medium">{translations.nav.werbeflaechen}</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0%</div>
             <p className="text-xs text-muted-foreground">
-              Profile completion
+              {translations.cv.profileCompletion}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cover Letters</CardTitle>
+            <CardTitle className="text-sm font-medium">{translations.nav.coverLetter}</CardTitle>
             <Mail className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">
-              Generated letters
+              {translations.cv.generatedLetters}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Applications</CardTitle>
+            <CardTitle className="text-sm font-medium">{translations.nav.applications}</CardTitle>
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">
-              Active applications
+              {translations.cv.activeApplications}
             </p>
           </CardContent>
         </Card>
@@ -180,16 +191,16 @@ export default function CVDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Fill Out Werbeflaechen
+                {translations.cv.fillOutWerbeflaechen}
               </CardTitle>
               <CardDescription>
-                Complete your self-marketing profile to generate better CVs
+                {translations.cv.completeProfile}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/werbeflaechen">
                 <Button variant="outline" className="w-full">
-                  Get Started
+                  {translations.cv.getStarted}
                 </Button>
               </Link>
             </CardContent>
@@ -199,16 +210,16 @@ export default function CVDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Create Your First CV
+                {translations.cv.createFirstCV}
               </CardTitle>
               <CardDescription>
-                Build a professional CV with AI-powered customization
+                {translations.cv.buildProfessional}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/cv/new">
                 <Button variant="outline" className="w-full">
-                  Create CV
+                  {translations.cv.createCV}
                 </Button>
               </Link>
             </CardContent>
@@ -218,16 +229,16 @@ export default function CVDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
-                Generate Cover Letter
+                {translations.cv.generateCoverLetter}
               </CardTitle>
               <CardDescription>
-                Create tailored cover letters for your job applications
+                {translations.cv.createTailored}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/cover-letter">
                 <Button variant="outline" className="w-full">
-                  Write Letter
+                  {translations.cv.writeLetter}
                 </Button>
               </Link>
             </CardContent>
@@ -246,7 +257,7 @@ export default function CVDashboardPage() {
                       {cv.is_default && (
                         <Badge variant="secondary" className="shrink-0">
                           <Star className="h-3 w-3 mr-1 fill-current" />
-                          Default
+                          {translations.cv.default}
                         </Badge>
                       )}
                     </div>
@@ -270,17 +281,17 @@ export default function CVDashboardPage() {
                       <DropdownMenuItem asChild>
                         <Link href={`/cv/${cv.id}`} className="flex items-center">
                           <Edit className="h-4 w-4 mr-2" />
-                          Edit
+                          {translations.common.edit}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDuplicate(cv.id, cv.name)}>
                         <Copy className="h-4 w-4 mr-2" />
-                        Duplicate
+                        {translations.cv.duplicate}
                       </DropdownMenuItem>
                       {!cv.is_default && (
                         <DropdownMenuItem onClick={() => handleSetDefault(cv.id)}>
                           <Star className="h-4 w-4 mr-2" />
-                          Set as Default
+                          {translations.cv.setAsDefault}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -289,7 +300,7 @@ export default function CVDashboardPage() {
                         onClick={() => handleDelete(cv.id)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
+                        {translations.common.delete}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -298,14 +309,14 @@ export default function CVDashboardPage() {
               <CardContent>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>
-                    {cv.job_context?.company || cv.job_context?.position || 'General CV'}
+                    {cv.job_context?.company || cv.job_context?.position || translations.cv.generalCV}
                   </span>
                   <span>{formatDate(cv.updated_at)}</span>
                 </div>
                 <div className="mt-4">
                   <Link href={`/cv/${cv.id}`}>
                     <Button variant="outline" size="sm" className="w-full">
-                      Open Editor
+                      {translations.cv.openEditor}
                     </Button>
                   </Link>
                 </div>

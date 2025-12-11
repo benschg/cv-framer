@@ -18,6 +18,7 @@ import {
 import { ArrowLeft, ArrowRight, Loader2, Mail, Sparkles, Link as LinkIcon } from 'lucide-react';
 import { createCoverLetter, getDefaultCoverLetterContent } from '@/services/cover-letter.service';
 import { fetchAllCVs } from '@/services/cv.service';
+import { useTranslations } from '@/hooks/use-translations';
 import type { CVDocument } from '@/types/cv.types';
 
 type Step = 'basic' | 'job';
@@ -28,6 +29,8 @@ export default function NewCoverLetterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cvList, setCvList] = useState<CVDocument[]>([]);
+  const [appLanguage, setAppLanguage] = useState<'en' | 'de'>('en');
+  const { translations } = useTranslations(appLanguage);
 
   // Form state
   const [name, setName] = useState('');
@@ -37,6 +40,14 @@ export default function NewCoverLetterPage() {
   const [jobPostingUrl, setJobPostingUrl] = useState('');
   const [company, setCompany] = useState('');
   const [position, setPosition] = useState('');
+
+  // Load language preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('app-language');
+    if (saved === 'en' || saved === 'de') {
+      setAppLanguage(saved);
+    }
+  }, []);
 
   useEffect(() => {
     const loadCVs = async () => {
@@ -50,7 +61,7 @@ export default function NewCoverLetterPage() {
 
   const handleCreate = async (skipJobContext: boolean = false) => {
     if (!name.trim()) {
-      setError('Please enter a name for your cover letter');
+      setError(translations.coverLetter.new.pleaseEnterName);
       return;
     }
 
@@ -89,27 +100,27 @@ export default function NewCoverLetterPage() {
         <Link href="/cover-letter">
           <Button variant="ghost" size="sm" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to Cover Letters
+            {translations.coverLetter.backToCoverLetters}
           </Button>
         </Link>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span className={step === 'basic' ? 'font-medium text-foreground' : ''}>
-            1. Basic Info
+            1. {translations.coverLetter.list.stepBasicInfo}
           </span>
           <ArrowRight className="h-3 w-3" />
           <span className={step === 'job' ? 'font-medium text-foreground' : ''}>
-            2. Job Context
+            2. {translations.coverLetter.list.stepJobContext}
           </span>
         </div>
       </div>
 
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Create Cover Letter</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{translations.coverLetter.new.title}</h1>
         <p className="text-muted-foreground mt-2">
           {step === 'basic'
-            ? 'Name your cover letter and optionally link it to a CV'
-            : 'Add job details for AI-powered customization'}
+            ? translations.coverLetter.new.basicInfoSubtitle
+            : translations.coverLetter.new.jobContextSubtitle}
         </p>
       </div>
 
@@ -119,54 +130,54 @@ export default function NewCoverLetterPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Basic Information
+              {translations.coverLetter.new.basicInformation}
             </CardTitle>
             <CardDescription>
-              Give your cover letter a name and choose the language
+              {translations.coverLetter.new.basicInfoDescription}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Cover Letter Name *</Label>
+              <Label htmlFor="name">{translations.coverLetter.new.coverLetterName} *</Label>
               <Input
                 id="name"
-                placeholder="e.g., Google - Senior Engineer Application"
+                placeholder={translations.coverLetter.new.coverLetterNamePlaceholder}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Use a descriptive name to easily identify this cover letter later
+                {translations.coverLetter.new.coverLetterNameHint}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label>Language</Label>
+              <Label>{translations.common.language}</Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
                   variant={language === 'en' ? 'default' : 'outline'}
                   onClick={() => setLanguage('en')}
                 >
-                  English
+                  {translations.coverLetter.english}
                 </Button>
                 <Button
                   type="button"
                   variant={language === 'de' ? 'default' : 'outline'}
                   onClick={() => setLanguage('de')}
                 >
-                  Deutsch
+                  {translations.coverLetter.german}
                 </Button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="linkedCv">Link to CV (optional)</Label>
+              <Label htmlFor="linkedCv">{translations.coverLetter.new.linkToCV}</Label>
               <Select value={linkedCvId} onValueChange={setLinkedCvId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a CV to link" />
+                  <SelectValue placeholder={translations.coverLetter.new.selectCV} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No linked CV</SelectItem>
+                  <SelectItem value="">{translations.coverLetter.new.noLinkedCV}</SelectItem>
                   {cvList.map((cv) => (
                     <SelectItem key={cv.id} value={cv.id}>
                       {cv.name}
@@ -175,7 +186,7 @@ export default function NewCoverLetterPage() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Link to a CV to use its content for AI generation
+                {translations.coverLetter.new.linkToCVHint}
               </p>
             </div>
 
@@ -190,10 +201,10 @@ export default function NewCoverLetterPage() {
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                Skip & Create
+                {translations.coverLetter.new.skipAndCreate}
               </Button>
               <Button onClick={() => setStep('job')} disabled={!name.trim()}>
-                Continue
+                {translations.coverLetter.new.continue}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
@@ -207,16 +218,16 @@ export default function NewCoverLetterPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
-              Job Context (Optional)
+              {translations.coverLetter.new.jobContextOptional}
             </CardTitle>
             <CardDescription>
-              Add job posting details for AI-powered customization
+              {translations.coverLetter.new.jobContextDescription}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="company">Company</Label>
+                <Label htmlFor="company">{translations.coverLetter.company}</Label>
                 <Input
                   id="company"
                   placeholder="e.g., Google"
@@ -225,7 +236,7 @@ export default function NewCoverLetterPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="position">Position</Label>
+                <Label htmlFor="position">{translations.coverLetter.position}</Label>
                 <Input
                   id="position"
                   placeholder="e.g., Senior Software Engineer"
@@ -238,7 +249,7 @@ export default function NewCoverLetterPage() {
             <div className="space-y-2">
               <Label htmlFor="jobPostingUrl" className="flex items-center gap-2">
                 <LinkIcon className="h-4 w-4" />
-                Job Posting URL
+                {translations.coverLetter.new.jobPostingUrl}
               </Label>
               <Input
                 id="jobPostingUrl"
@@ -250,16 +261,16 @@ export default function NewCoverLetterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="jobPosting">Job Description</Label>
+              <Label htmlFor="jobPosting">{translations.coverLetter.new.jobDescription}</Label>
               <Textarea
                 id="jobPosting"
-                placeholder="Paste the full job description here..."
+                placeholder={translations.coverLetter.new.jobDescriptionPlaceholder}
                 value={jobPosting}
                 onChange={(e) => setJobPosting(e.target.value)}
                 rows={6}
               />
               <p className="text-xs text-muted-foreground">
-                The AI will analyze this to tailor your cover letter
+                {translations.coverLetter.new.jobDescriptionHint}
               </p>
             </div>
 
@@ -272,18 +283,18 @@ export default function NewCoverLetterPage() {
             <div className="flex justify-between pt-4">
               <Button variant="outline" onClick={() => setStep('basic')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                {translations.common.back}
               </Button>
               <Button onClick={() => handleCreate(false)} disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Creating...
+                    {translations.coverLetter.creating}
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Create Cover Letter
+                    {translations.coverLetter.createCoverLetter}
                   </>
                 )}
               </Button>

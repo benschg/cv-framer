@@ -53,6 +53,7 @@ interface CategoryCardProps {
   language: 'en' | 'de';
   isComplete?: boolean;
   completionPercentage?: number;
+  matchScore?: number; // 1-10 score
 }
 
 export function CategoryCard({
@@ -60,6 +61,7 @@ export function CategoryCard({
   language,
   isComplete = false,
   completionPercentage = 0,
+  matchScore,
 }: CategoryCardProps) {
   const { t, translations } = useTranslations(language);
   const Icon = iconMap[category.icon] || Target;
@@ -89,11 +91,25 @@ export function CategoryCard({
                 <Icon className="h-5 w-5" />
               </span>
             </div>
-            {isComplete && (
-              <Badge variant="secondary" className="bg-green-100 text-green-700">
-                {t('werbeflaechen.complete')}
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {matchScore !== undefined && matchScore > 0 && (
+                <div
+                  className="flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold"
+                  style={{
+                    backgroundColor: matchScore >= 8 ? '#dcfce7' : matchScore >= 5 ? '#fef9c3' : '#fee2e2',
+                    color: matchScore >= 8 ? '#166534' : matchScore >= 5 ? '#854d0e' : '#991b1b',
+                  }}
+                  title={`Match score: ${matchScore}/10`}
+                >
+                  {matchScore}/10
+                </div>
+              )}
+              {isComplete && (
+                <Badge variant="secondary" className="bg-green-100 text-green-700">
+                  {t('werbeflaechen.complete')}
+                </Badge>
+              )}
+            </div>
           </div>
           <CardTitle className="text-base group-hover:text-primary transition-colors">
             {title}

@@ -32,13 +32,51 @@ export function GridView({ language, entries = [], beginnerMode = false }: GridV
     return entry?.is_complete ?? false;
   };
 
-  // Calculate completion percentage (placeholder - would need actual logic based on content)
+  // Calculate completion percentage based on content fields
   const getCompletionPercentage = (categoryKey: string): number => {
     const entry = entries.find((e) => e.category_key === categoryKey);
     if (!entry) return 0;
     if (entry.is_complete) return 100;
-    // TODO: Calculate based on content fields
-    return Object.keys(entry.content || {}).length > 0 ? 50 : 0;
+
+    const content = entry.content || {};
+    const contentValues = Object.values(content).filter(
+      (val) => val !== null && val !== undefined && val !== ''
+    );
+
+    // Estimate based on number of filled fields (assume ~5 fields per category)
+    const estimatedFields = 5;
+    return Math.min(Math.round((contentValues.length / estimatedFields) * 100), 99);
+  };
+
+  // Calculate match score (1-10) based on content completeness
+  const getMatchScore = (categoryKey: string): number => {
+    const entry = entries.find((e) => e.category_key === categoryKey);
+    if (!entry) return 0;
+    if (entry.is_complete) return 10;
+
+    const content = entry.content || {};
+    const contentValues = Object.values(content).filter(
+      (val) => val !== null && val !== undefined && val !== ''
+    );
+
+    if (contentValues.length === 0) return 0;
+
+    // Calculate score based on filled content
+    // More fields filled = higher score, text length also matters
+    const totalTextLength = contentValues.reduce((sum: number, val) => {
+      if (typeof val === 'string') return sum + val.length;
+      if (Array.isArray(val)) return sum + val.join('').length;
+      return sum;
+    }, 0);
+
+    // Base score from number of fields (max 5 points)
+    const fieldScore = Math.min(contentValues.length, 5);
+
+    // Bonus points for content depth (max 5 points)
+    // 50 chars = 1 point, up to 250+ chars for 5 points
+    const depthScore = Math.min(Math.floor(totalTextLength / 50), 5);
+
+    return Math.min(fieldScore + depthScore, 10);
   };
 
   return (
@@ -66,6 +104,7 @@ export function GridView({ language, entries = [], beginnerMode = false }: GridV
                   language={language}
                   isComplete={isCategoryComplete(category.key)}
                   completionPercentage={getCompletionPercentage(category.key)}
+                  matchScore={getMatchScore(category.key)}
                 />
               ))}
             </div>
