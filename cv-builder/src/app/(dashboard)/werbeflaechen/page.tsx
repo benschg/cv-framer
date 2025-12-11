@@ -339,8 +339,9 @@ export default function WerbeflaechenPage() {
                         setUploadedFile(null);
                       }
                     }}
+                    onKeyDown={(e) => e.stopPropagation()}
                     rows={10}
-                    className="font-mono text-sm"
+                    className="font-mono text-sm resize-y"
                   />
                   <p className="text-xs text-muted-foreground">
                     {cvText.length} {translations.werbeflaechen.autofill.characters}

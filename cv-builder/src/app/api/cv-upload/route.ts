@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { errorResponse } from '@/lib/api-utils';
 import mammoth from 'mammoth';
+import PDFParser from 'pdf2json';
 
 // POST /api/cv-upload - Upload and extract text from a CV file
 export async function POST(request: NextRequest) {
@@ -111,120 +112,190 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PDF text extraction using unpdf with column-aware extraction
+// PDF text extraction using pdf2json with column-aware extraction
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
-  try {
-    const { getDocumentProxy } = await import('unpdf');
-    const uint8Array = new Uint8Array(buffer);
-    const pdf = await getDocumentProxy(uint8Array);
+  return new Promise((resolve) => {
+    try {
+      const pdfParser = new PDFParser();
 
-    const pages: string[] = [];
+      pdfParser.on('pdfParser_dataError', (errData: Error | { parserError: Error }) => {
+        const error = 'parserError' in errData ? errData.parserError : errData;
+        console.error('PDF parsing error:', error);
+        resolve('');
+      });
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const viewport = page.getViewport({ scale: 1 });
-      const pageWidth = viewport.width;
+      pdfParser.on('pdfParser_dataReady', (pdfData: PDFData) => {
+        try {
+          const pages: string[] = [];
 
-      // Extract text items with position information
-      const items = textContent.items as Array<{
-        str: string;
-        transform: number[];
-        width: number;
-        height: number;
-      }>;
+          for (const page of pdfData.Pages) {
+            const pageWidth = page.Width || 50; // Default width in pdf2json units
+            const pageText = extractPageText(page.Texts, pageWidth);
+            if (pageText.trim()) {
+              pages.push(formatExtractedText(pageText));
+            }
+          }
 
-      if (items.length === 0) continue;
-
-      // Detect if this is a multi-column layout
-      // Check X distribution of text items
-      const xPositions = items.filter(item => item.str.trim()).map(item => item.transform[4]);
-      const midPoint = pageWidth / 2;
-      const leftItems = xPositions.filter(x => x < midPoint * 0.7).length;
-      const rightItems = xPositions.filter(x => x > midPoint * 0.5).length;
-      const isMultiColumn = leftItems > 10 && rightItems > 10 &&
-        Math.min(leftItems, rightItems) / Math.max(leftItems, rightItems) > 0.2;
-
-      let pageText = '';
-
-      if (isMultiColumn) {
-        // Process columns separately - left sidebar first, then main content
-        const columnDivider = midPoint * 0.45; // Assume sidebar is on the left ~40%
-
-        const leftColumn = items.filter(item => item.transform[4] < columnDivider);
-        const rightColumn = items.filter(item => item.transform[4] >= columnDivider);
-
-        const leftText = extractColumnText(leftColumn);
-        const rightText = extractColumnText(rightColumn);
-
-        // Combine with clear separation - main content first (usually more important)
-        if (rightText.trim()) {
-          pageText += rightText;
+          resolve(pages.join('\n\n---\n\n'));
+        } catch (error) {
+          console.error('PDF processing error:', error);
+          resolve('');
         }
-        if (leftText.trim()) {
-          pageText += '\n\n--- Sidebar ---\n\n' + leftText;
-        }
-      } else {
-        // Single column - process normally
-        pageText = extractColumnText(items);
-      }
+      });
 
-      if (pageText.trim()) {
-        pages.push(formatExtractedText(pageText));
+      pdfParser.parseBuffer(buffer);
+    } catch (error) {
+      console.error('PDF parsing error:', error);
+      resolve('');
+    }
+  });
+}
+
+// Type definitions for pdf2json output
+interface PDFText {
+  x: number;
+  y: number;
+  w: number;
+  R: Array<{ T: string; S?: number; TS?: number[] }>;
+}
+
+interface PDFPage {
+  Width?: number;
+  Height?: number;
+  Texts: PDFText[];
+}
+
+interface PDFData {
+  Pages: PDFPage[];
+}
+
+// Extract text from a page with column detection
+function extractPageText(texts: PDFText[], pageWidth: number): string {
+  if (texts.length === 0) return '';
+
+  // Decode and collect all text items with positions
+  const items: Array<{ x: number; y: number; text: string; fontSize: number }> = [];
+
+  for (const textItem of texts) {
+    const text = textItem.R.map(r => decodeURIComponent(r.T)).join('');
+    if (!text.trim()) continue;
+
+    // Get font size from TS array (index 1 is font size)
+    const fontSize = textItem.R[0]?.TS?.[1] || 12;
+
+    items.push({
+      x: textItem.x,
+      y: textItem.y,
+      text,
+      fontSize,
+    });
+  }
+
+  if (items.length === 0) return '';
+
+  // Detect if this is a multi-column layout
+  const xPositions = items.map(item => item.x);
+  const midPoint = pageWidth / 2;
+  const leftItems = xPositions.filter(x => x < midPoint * 0.7).length;
+  const rightItems = xPositions.filter(x => x > midPoint * 0.5).length;
+  const isMultiColumn = leftItems > 5 && rightItems > 5 &&
+    Math.min(leftItems, rightItems) / Math.max(leftItems, rightItems) > 0.15;
+
+  if (isMultiColumn) {
+    // Find the column divider (gap between columns)
+    const sortedX = [...xPositions].sort((a, b) => a - b);
+    let maxGap = 0;
+    let columnDivider = midPoint * 0.4;
+
+    for (let i = 1; i < sortedX.length; i++) {
+      const gap = sortedX[i] - sortedX[i - 1];
+      if (gap > maxGap && sortedX[i - 1] < midPoint && sortedX[i] > midPoint * 0.3) {
+        maxGap = gap;
+        columnDivider = (sortedX[i - 1] + sortedX[i]) / 2;
       }
     }
 
-    return pages.join('\n\n---\n\n');
-  } catch (error) {
-    console.error('PDF parsing error:', error);
-    return '';
+    const leftColumn = items.filter(item => item.x < columnDivider);
+    const rightColumn = items.filter(item => item.x >= columnDivider);
+
+    const leftText = extractColumnText(leftColumn);
+    const rightText = extractColumnText(rightColumn);
+
+    // Main content first (right column), then sidebar
+    let pageText = '';
+    if (rightText.trim()) {
+      pageText += rightText;
+    }
+    if (leftText.trim()) {
+      pageText += '\n\n--- Sidebar ---\n\n' + leftText;
+    }
+    return pageText;
   }
+
+  return extractColumnText(items);
 }
 
 // Extract text from a set of items (single column)
-function extractColumnText(items: Array<{ str: string; transform: number[]; width: number; height: number }>): string {
+function extractColumnText(items: Array<{ x: number; y: number; text: string; fontSize: number }>): string {
   if (items.length === 0) return '';
 
   // Group text by Y position (lines) with tolerance
-  const lines: Map<number, Array<{ x: number; text: string }>> = new Map();
-  const yTolerance = 3;
+  const lines: Map<number, Array<{ x: number; text: string; fontSize: number }>> = new Map();
+  const yTolerance = 0.3; // pdf2json uses smaller units
 
   for (const item of items) {
-    if (!item.str.trim()) continue;
-
-    const x = item.transform[4];
-    const y = Math.round(item.transform[5] / yTolerance) * yTolerance;
+    const y = Math.round(item.y / yTolerance) * yTolerance;
 
     if (!lines.has(y)) {
       lines.set(y, []);
     }
-    lines.get(y)!.push({ x, text: item.str });
+    lines.get(y)!.push({ x: item.x, text: item.text, fontSize: item.fontSize });
   }
 
-  // Sort lines by Y (descending - PDF coordinates start from bottom)
-  const sortedYs = Array.from(lines.keys()).sort((a, b) => b - a);
+  // Sort lines by Y (ascending - pdf2json Y starts from top)
+  const sortedYs = Array.from(lines.keys()).sort((a, b) => a - b);
 
   let text = '';
   let lastY: number | null = null;
+  let lastFontSize: number | null = null;
 
   for (const y of sortedYs) {
     const lineItems = lines.get(y)!;
     lineItems.sort((a, b) => a.x - b.x);
-    const lineText = lineItems.map(item => item.text).join(' ').trim();
+
+    // Join items with appropriate spacing
+    let lineText = '';
+    let lastX = -1;
+    for (const item of lineItems) {
+      // Add space if there's a gap between items
+      if (lastX >= 0 && item.x - lastX > 0.5) {
+        lineText += ' ';
+      }
+      lineText += item.text;
+      lastX = item.x + (item.text.length * 0.1); // Approximate end position
+    }
+    lineText = lineText.trim();
 
     if (!lineText) continue;
 
+    // Get average font size for this line
+    const avgFontSize = lineItems.reduce((sum, item) => sum + item.fontSize, 0) / lineItems.length;
+
     if (lastY !== null) {
-      const gap = lastY - y;
-      if (gap > 20) {
+      const gap = y - lastY;
+      // Larger gap or font size change indicates new section
+      if (gap > 1.5 || (lastFontSize && avgFontSize > lastFontSize * 1.2)) {
         text += '\n\n';
-      } else {
+      } else if (gap > 0.8) {
         text += '\n';
+      } else {
+        text += ' ';
       }
     }
 
     text += lineText;
     lastY = y;
+    lastFontSize = avgFontSize;
   }
 
   return text;
