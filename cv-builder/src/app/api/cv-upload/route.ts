@@ -111,23 +111,79 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PDF text extraction using unpdf (serverless-compatible)
+// PDF text extraction using unpdf with position-aware text extraction
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   try {
-    const { extractText } = await import('unpdf');
-    // unpdf requires Uint8Array, not Buffer
+    const { getDocumentProxy } = await import('unpdf');
     const uint8Array = new Uint8Array(buffer);
-    const result = await extractText(uint8Array);
+    const pdf = await getDocumentProxy(uint8Array);
 
-    // extractText returns { text: string[], totalPages } where each element is a page
-    const textArray = result.text || [];
+    const pages: string[] = [];
 
-    // Process each page to preserve structure
-    const processedPages = (Array.isArray(textArray) ? textArray : [String(textArray)])
-      .map(pageText => formatExtractedText(pageText));
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
 
-    // Join pages with clear separator
-    return processedPages.join('\n\n---\n\n');
+      // Extract text items with position information
+      const items = textContent.items as Array<{
+        str: string;
+        transform: number[];
+        width: number;
+        height: number;
+      }>;
+
+      if (items.length === 0) continue;
+
+      // Group text by Y position (lines) with tolerance for slight variations
+      const lines: Map<number, Array<{ x: number; text: string }>> = new Map();
+      const yTolerance = 3; // pixels tolerance for same line
+
+      for (const item of items) {
+        if (!item.str.trim()) continue;
+
+        const x = item.transform[4];
+        const y = Math.round(item.transform[5] / yTolerance) * yTolerance;
+
+        if (!lines.has(y)) {
+          lines.set(y, []);
+        }
+        lines.get(y)!.push({ x, text: item.str });
+      }
+
+      // Sort lines by Y (descending - PDF coordinates start from bottom)
+      const sortedYs = Array.from(lines.keys()).sort((a, b) => b - a);
+
+      let pageText = '';
+      let lastY: number | null = null;
+
+      for (const y of sortedYs) {
+        const lineItems = lines.get(y)!;
+        // Sort items in line by X position
+        lineItems.sort((a, b) => a.x - b.x);
+        const lineText = lineItems.map(item => item.text).join(' ').trim();
+
+        if (!lineText) continue;
+
+        // Detect paragraph breaks (larger Y gaps)
+        if (lastY !== null) {
+          const gap = lastY - y;
+          if (gap > 20) {
+            pageText += '\n\n';
+          } else {
+            pageText += '\n';
+          }
+        }
+
+        pageText += lineText;
+        lastY = y;
+      }
+
+      if (pageText.trim()) {
+        pages.push(formatExtractedText(pageText));
+      }
+    }
+
+    return pages.join('\n\n---\n\n');
   } catch (error) {
     console.error('PDF parsing error:', error);
     return '';
