@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { GridView } from '@/components/werbeflaechen';
 import { getAllCategories, getBeginnerCategories } from '@/data/category-metadata';
+import { useTranslations } from '@/hooks/use-translations';
 import { Globe, LayoutGrid, Table2, FlowerIcon, Upload, Loader2, Sparkles, CheckCircle, FileText, X } from 'lucide-react';
 import { toast } from 'sonner';
 import type { WerbeflaechenEntry } from '@/types/werbeflaechen.types';
@@ -46,6 +47,8 @@ export default function WerbeflaechenPage() {
   const [uploading, setUploading] = useState(false);
   const [previousUploads, setPreviousUploads] = useState<UploadedCV[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { t, translations } = useTranslations(language);
 
   const allCategories = getAllCategories();
   const beginnerCategories = getBeginnerCategories();
@@ -110,7 +113,9 @@ export default function WerbeflaechenPage() {
       // Set the extracted text from the uploaded file
       setCvText(result.extractedText);
       setUploadedFile(file);
-      toast.success(`Extracted ${result.charCount} characters from ${file.name}`);
+      toast.success(translations.werbeflaechen.autofill.extractedChars
+        .replace('{count}', result.charCount)
+        .replace('{filename}', file.name));
 
       // Refresh previous uploads list
       await loadPreviousUploads();
@@ -140,9 +145,7 @@ export default function WerbeflaechenPage() {
 
   const handleAutofill = async () => {
     if (!cvText.trim() || cvText.trim().length < 50) {
-      toast.error(language === 'de'
-        ? 'Bitte fügen Sie Ihren Lebenslauf ein (mindestens 50 Zeichen)'
-        : 'Please paste your CV text (minimum 50 characters)');
+      toast.error(translations.werbeflaechen.autofill.minCharsError);
       return;
     }
 
@@ -164,9 +167,8 @@ export default function WerbeflaechenPage() {
         throw new Error(result.error || 'Failed to process CV');
       }
 
-      toast.success(language === 'de'
-        ? `${result.savedCategories.length} Kategorien aus Ihrem Lebenslauf befüllt!`
-        : `Populated ${result.savedCategories.length} categories from your CV!`);
+      toast.success(translations.werbeflaechen.autofill.successMessage
+        .replace('{count}', result.savedCategories.length));
       setAutofillOpen(false);
       setCvText('');
       setUploadedFile(null);
@@ -186,16 +188,14 @@ export default function WerbeflaechenPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Werbeflaechen</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('werbeflaechen.title')}</h1>
           <p className="text-muted-foreground">
-            {language === 'de'
-              ? 'Ihr Selbstvermarktungs-Framework - die Grundlage für großartige Lebensläufe'
-              : 'Your self-marketing framework - the foundation for great CVs'}
+            {t('werbeflaechen.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="px-3 py-1">
-            {completedCount}/{totalCount} {language === 'de' ? 'abgeschlossen' : 'completed'}
+            {completedCount}/{totalCount} {t('werbeflaechen.completed')}
           </Badge>
 
           {/* Autofill from CV Button */}
@@ -203,19 +203,17 @@ export default function WerbeflaechenPage() {
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Sparkles className="h-4 w-4" />
-                {language === 'de' ? 'Aus Lebenslauf befüllen' : 'Fill from CV'}
+                {t('werbeflaechen.autofillFromCV')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Upload className="h-5 w-5" />
-                  {language === 'de' ? 'Werbeflaechen aus Lebenslauf befüllen' : 'Auto-fill from CV'}
+                  {translations.werbeflaechen.autofill.title}
                 </DialogTitle>
                 <DialogDescription>
-                  {language === 'de'
-                    ? 'Fügen Sie Ihren bestehenden Lebenslauf ein, und wir extrahieren die relevanten Informationen in Ihre Werbeflaechen-Kategorien.'
-                    : 'Paste your existing CV/resume text and we\'ll extract relevant information into your Werbeflaechen categories.'}
+                  {translations.werbeflaechen.autofill.description}
                 </DialogDescription>
               </DialogHeader>
 
@@ -223,7 +221,7 @@ export default function WerbeflaechenPage() {
                 {/* File Upload Section */}
                 <div className="space-y-2">
                   <Label>
-                    {language === 'de' ? 'Lebenslauf hochladen' : 'Upload CV'}
+                    {translations.werbeflaechen.autofill.uploadLabel}
                   </Label>
                   <div className="flex items-center gap-2">
                     <input
@@ -244,17 +242,17 @@ export default function WerbeflaechenPage() {
                       {uploading ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          {language === 'de' ? 'Lädt hoch...' : 'Uploading...'}
+                          {translations.werbeflaechen.autofill.uploading}
                         </>
                       ) : (
                         <>
                           <Upload className="h-4 w-4" />
-                          {language === 'de' ? 'Datei auswählen' : 'Choose file'}
+                          {translations.werbeflaechen.autofill.chooseFile}
                         </>
                       )}
                     </Button>
                     <span className="text-xs text-muted-foreground">
-                      PDF, DOCX, {language === 'de' ? 'oder' : 'or'} TXT (max 5MB)
+                      {translations.werbeflaechen.autofill.fileTypes}
                     </span>
                   </div>
 
@@ -278,7 +276,7 @@ export default function WerbeflaechenPage() {
                   {previousUploads.length > 0 && !uploadedFile && (
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">
-                        {language === 'de' ? 'Frühere Uploads' : 'Previous uploads'}
+                        {translations.werbeflaechen.autofill.previousUploads}
                       </Label>
                       <div className="flex flex-wrap gap-2">
                         {previousUploads.slice(0, 3).map((upload) => (
@@ -294,14 +292,11 @@ export default function WerbeflaechenPage() {
                                 if (response.ok) {
                                   const data = await response.json();
                                   setCvText(data.extractedText || '');
-                                  toast.success(language === 'de'
-                                    ? `Text aus ${upload.filename} geladen`
-                                    : `Loaded text from ${upload.filename}`);
+                                  toast.success(translations.werbeflaechen.autofill.loadedFromFile
+                                    .replace('{filename}', upload.filename));
                                 }
                               } catch {
-                                toast.error(language === 'de'
-                                  ? 'Fehler beim Laden'
-                                  : 'Failed to load');
+                                toast.error(translations.werbeflaechen.autofill.loadError);
                               }
                             }}
                             className="gap-1 text-xs"
@@ -323,7 +318,7 @@ export default function WerbeflaechenPage() {
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-background px-2 text-muted-foreground">
-                      {language === 'de' ? 'oder Text einfügen' : 'or paste text'}
+                      {translations.werbeflaechen.autofill.orPasteText}
                     </span>
                   </div>
                 </div>
@@ -331,13 +326,11 @@ export default function WerbeflaechenPage() {
                 {/* Text Input Section */}
                 <div className="space-y-2">
                   <Label htmlFor="cv-text">
-                    {language === 'de' ? 'Lebenslauf-Text' : 'CV/Resume Text'}
+                    {translations.werbeflaechen.autofill.textLabel}
                   </Label>
                   <Textarea
                     id="cv-text"
-                    placeholder={language === 'de'
-                      ? 'Fügen Sie hier Ihren Lebenslauf ein...'
-                      : 'Paste your CV/resume text here...'}
+                    placeholder={translations.werbeflaechen.autofill.textPlaceholder}
                     value={cvText}
                     onChange={(e) => {
                       setCvText(e.target.value);
@@ -350,10 +343,10 @@ export default function WerbeflaechenPage() {
                     className="font-mono text-sm"
                   />
                   <p className="text-xs text-muted-foreground">
-                    {cvText.length} {language === 'de' ? 'Zeichen' : 'characters'}
+                    {cvText.length} {translations.werbeflaechen.autofill.characters}
                     {cvText.length > 0 && cvText.length < 50 && (
                       <span className="text-destructive ml-2">
-                        ({language === 'de' ? 'Mindestens 50 erforderlich' : 'Minimum 50 required'})
+                        ({translations.werbeflaechen.autofill.minRequired})
                       </span>
                     )}
                   </p>
@@ -368,9 +361,7 @@ export default function WerbeflaechenPage() {
                     className="rounded border-gray-300"
                   />
                   <Label htmlFor="overwrite" className="text-sm font-normal cursor-pointer">
-                    {language === 'de'
-                      ? 'Bestehende Einträge überschreiben'
-                      : 'Overwrite existing entries'}
+                    {translations.werbeflaechen.autofill.overwriteExisting}
                   </Label>
                 </div>
 
@@ -384,7 +375,7 @@ export default function WerbeflaechenPage() {
                     }}
                     disabled={autofilling || uploading}
                   >
-                    {language === 'de' ? 'Abbrechen' : 'Cancel'}
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     onClick={handleAutofill}
@@ -394,12 +385,12 @@ export default function WerbeflaechenPage() {
                     {autofilling ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        {language === 'de' ? 'Analysiere...' : 'Analyzing...'}
+                        {translations.werbeflaechen.autofill.analyzing}
                       </>
                     ) : (
                       <>
                         <CheckCircle className="h-4 w-4" />
-                        {language === 'de' ? 'Extrahieren & Speichern' : 'Extract & Save'}
+                        {translations.werbeflaechen.autofill.extractAndSave}
                       </>
                     )}
                   </Button>
@@ -415,7 +406,7 @@ export default function WerbeflaechenPage() {
         {/* View mode toggle */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {language === 'de' ? 'Ansicht:' : 'View:'}
+            {t('werbeflaechen.view')}:
           </span>
           <div className="flex rounded-lg border p-1">
             <Button
@@ -458,14 +449,14 @@ export default function WerbeflaechenPage() {
               size="sm"
               onClick={() => setBeginnerMode(true)}
             >
-              {language === 'de' ? 'Anfänger' : 'Beginner'}
+              {t('werbeflaechen.beginnerMode')}
             </Button>
             <Button
               variant={!beginnerMode ? 'default' : 'outline'}
               size="sm"
               onClick={() => setBeginnerMode(false)}
             >
-              {language === 'de' ? 'Alle' : 'All'} (18)
+              {t('werbeflaechen.allCategories')} (18)
             </Button>
           </div>
 

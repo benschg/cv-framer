@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/auth-context';
+import { useTranslations } from '@/hooks/use-translations';
 import { AlertCircle, Globe, Moon, Sun } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -12,26 +13,28 @@ export default function SettingsPage() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
   const [language, setLanguage] = useState<'en' | 'de'>('en');
 
+  const { t } = useTranslations(language);
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('settings.title')}</h1>
         <p className="text-muted-foreground">
-          Manage your account and application preferences
+          {t('settings.subtitle')}
         </p>
       </div>
 
       {/* Appearance */}
       <Card>
         <CardHeader>
-          <CardTitle>Appearance</CardTitle>
+          <CardTitle>{t('settings.appearance')}</CardTitle>
           <CardDescription>
-            Customize how the application looks
+            {t('settings.appearanceDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Theme</Label>
+            <Label>{t('settings.theme')}</Label>
             <div className="flex gap-2">
               <Button
                 variant={theme === 'light' ? 'default' : 'outline'}
@@ -40,7 +43,7 @@ export default function SettingsPage() {
                 className="gap-2"
               >
                 <Sun className="h-4 w-4" />
-                Light
+                {t('settings.light')}
               </Button>
               <Button
                 variant={theme === 'dark' ? 'default' : 'outline'}
@@ -49,14 +52,14 @@ export default function SettingsPage() {
                 className="gap-2"
               >
                 <Moon className="h-4 w-4" />
-                Dark
+                {t('settings.dark')}
               </Button>
               <Button
                 variant={theme === 'system' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setTheme('system')}
               >
-                System
+                {t('settings.system')}
               </Button>
             </div>
           </div>
@@ -66,14 +69,14 @@ export default function SettingsPage() {
       {/* Language */}
       <Card>
         <CardHeader>
-          <CardTitle>Language</CardTitle>
+          <CardTitle>{t('settings.language')}</CardTitle>
           <CardDescription>
-            Choose your preferred language for the application
+            {t('settings.languageDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Application Language</Label>
+            <Label>{t('settings.applicationLanguage')}</Label>
             <div className="flex gap-2">
               <Button
                 variant={language === 'en' ? 'default' : 'outline'}
@@ -82,7 +85,7 @@ export default function SettingsPage() {
                 className="gap-2"
               >
                 <Globe className="h-4 w-4" />
-                English
+                {t('settings.english')}
               </Button>
               <Button
                 variant={language === 'de' ? 'default' : 'outline'}
@@ -91,11 +94,11 @@ export default function SettingsPage() {
                 className="gap-2"
               >
                 <Globe className="h-4 w-4" />
-                Deutsch
+                {t('settings.german')}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              This affects the UI language. CV content language is set per document.
+              {t('settings.languageHint')}
             </p>
           </div>
         </CardContent>
@@ -104,27 +107,27 @@ export default function SettingsPage() {
       {/* Account */}
       <Card>
         <CardHeader>
-          <CardTitle>Account</CardTitle>
+          <CardTitle>{t('settings.account')}</CardTitle>
           <CardDescription>
-            Manage your account settings
+            {t('settings.accountDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Email</Label>
+            <Label>{t('settings.email')}</Label>
             <p className="text-sm">{user?.email}</p>
           </div>
           <div className="space-y-2">
-            <Label>Account Created</Label>
+            <Label>{t('settings.accountCreated')}</Label>
             <p className="text-sm text-muted-foreground">
               {user?.created_at
-                ? new Date(user.created_at).toLocaleDateString()
-                : 'Unknown'}
+                ? new Date(user.created_at).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')
+                : t('settings.unknown')}
             </p>
           </div>
           <div className="pt-4">
             <Button variant="outline" onClick={() => signOut()}>
-              Sign Out
+              {t('settings.signOut')}
             </Button>
           </div>
         </CardContent>
@@ -135,24 +138,24 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertCircle className="h-5 w-5" />
-            Danger Zone
+            {t('settings.dangerZone')}
           </CardTitle>
           <CardDescription>
-            Irreversible actions that affect your account
+            {t('settings.dangerZoneDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Delete Account</Label>
+            <Label>{t('settings.deleteAccount')}</Label>
             <p className="text-sm text-muted-foreground">
-              Permanently delete your account and all associated data. This action cannot be undone.
+              {t('settings.deleteAccountDescription')}
             </p>
           </div>
           <Button variant="destructive" disabled>
-            Delete Account
+            {t('settings.deleteAccount')}
           </Button>
           <p className="text-xs text-muted-foreground">
-            Account deletion is not yet available. Please contact support if needed.
+            {t('settings.deleteAccountDisabled')}
           </p>
         </CardContent>
       </Card>

@@ -140,6 +140,40 @@ npx supabase gen types  # Generate TypeScript types
    - Response schemas: `{Resource}ResponseSchema` (e.g., `CVResponseSchema`)
    - Inferred types: `{Action}{Resource}Input` / `{Resource}Response`
 
+## Internationalization (i18n)
+
+**All user-facing strings MUST use the i18n system:**
+
+1. **Translation Files**: `src/i18n/en.json` and `src/i18n/de.json`
+2. **Hook Usage**:
+   ```typescript
+   import { useTranslations } from '@/hooks/use-translations';
+
+   const { t, translations } = useTranslations(language);
+
+   // Dot notation for simple strings
+   {t('common.back')}
+   {t('werbeflaechen.title')}
+
+   // Direct access for nested objects
+   {translations.werbeflaechen.categories.kurzprofil.title}
+   ```
+
+3. **Adding New Strings**:
+   - Add to BOTH `en.json` and `de.json`
+   - Use consistent key structure: `section.subsection.key`
+   - Never use inline ternaries like `language === 'de' ? 'German' : 'English'`
+
+4. **Key Structure**:
+   - `common.*` - Shared UI strings (back, save, cancel, etc.)
+   - `nav.*` - Navigation labels
+   - `werbeflaechen.*` - Werbeflaechen feature
+   - `cv.*` - CV builder feature
+   - `coverLetter.*` - Cover letter feature
+   - `applications.*` - Application tracker
+   - `settings.*` - Settings page
+   - `auth.*` - Authentication pages
+
 ## Notes
 
 - PDF extraction uses `unpdf` (serverless-compatible)

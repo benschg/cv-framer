@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { CategoryDefinition } from '@/types/werbeflaechen.types';
+import { useTranslations } from '@/hooks/use-translations';
+import type { CategoryDefinition, CategoryKey } from '@/types/werbeflaechen.types';
 import {
   Target,
   Flame,
@@ -60,9 +61,14 @@ export function CategoryCard({
   isComplete = false,
   completionPercentage = 0,
 }: CategoryCardProps) {
+  const { t, translations } = useTranslations(language);
   const Icon = iconMap[category.icon] || Target;
-  const title = language === 'de' ? category.de : category.en;
-  const description = language === 'de' ? category.description_de : category.description_en;
+
+  // Get translated title and description from i18n, fallback to category definition
+  const categoryKey = category.key as CategoryKey;
+  const categoryTranslations = translations.werbeflaechen.categories[categoryKey];
+  const title = categoryTranslations?.title || (language === 'de' ? category.de : category.en);
+  const description = categoryTranslations?.description || (language === 'de' ? category.description_de : category.description_en);
 
   return (
     <Link href={`/werbeflaechen/${category.key}`}>
@@ -85,7 +91,7 @@ export function CategoryCard({
             </div>
             {isComplete && (
               <Badge variant="secondary" className="bg-green-100 text-green-700">
-                Complete
+                {t('werbeflaechen.complete')}
               </Badge>
             )}
           </div>
@@ -100,7 +106,7 @@ export function CategoryCard({
           {completionPercentage > 0 && !isComplete && (
             <div className="mt-3">
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                <span>Progress</span>
+                <span>{t('werbeflaechen.progress')}</span>
                 <span>{completionPercentage}%</span>
               </div>
               <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
