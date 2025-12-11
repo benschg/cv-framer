@@ -119,20 +119,54 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
     const uint8Array = new Uint8Array(buffer);
     const result = await extractText(uint8Array);
 
-    // extractText returns { text: string[], totalPages }
+    // extractText returns { text: string[], totalPages } where each element is a page
     const textArray = result.text || [];
-    let text = Array.isArray(textArray) ? textArray.join('\n') : String(textArray);
 
-    // Clean up whitespace
-    text = text
-      .replace(/\s+/g, ' ')
-      .trim();
+    // Process each page to preserve structure
+    const processedPages = (Array.isArray(textArray) ? textArray : [String(textArray)])
+      .map(pageText => formatExtractedText(pageText));
 
-    return text;
+    // Join pages with clear separator
+    return processedPages.join('\n\n---\n\n');
   } catch (error) {
     console.error('PDF parsing error:', error);
     return '';
   }
+}
+
+// Format extracted text to preserve structure (sections, bullets, numbers)
+function formatExtractedText(text: string): string {
+  let formatted = text
+    // Normalize line endings
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+
+    // Preserve bullet points - normalize various bullet characters to •
+    .replace(/^[\s]*[●○◦▪▸►‣⁃∙·]\s*/gm, '• ')
+    .replace(/^[\s]*[-–—]\s+/gm, '• ')
+
+    // Preserve numbered lists - normalize to "1. " format
+    .replace(/^[\s]*(\d+)[.)]\s*/gm, '$1. ')
+    .replace(/^[\s]*([a-z])[.)]\s*/gim, '   $1. ')
+
+    // Detect section headers (lines in ALL CAPS or Title Case followed by newline)
+    .replace(/^([A-Z][A-Z\s&]+)$/gm, '\n## $1\n')
+
+    // Collapse multiple spaces (but preserve newlines)
+    .replace(/[ \t]+/g, ' ')
+
+    // Collapse more than 2 consecutive newlines to 2
+    .replace(/\n{3,}/g, '\n\n')
+
+    // Trim each line
+    .split('\n')
+    .map(line => line.trim())
+    .join('\n')
+
+    // Remove empty lines at start/end
+    .trim();
+
+  return formatted;
 }
 
 // DOCX text extraction using mammoth library
@@ -140,15 +174,11 @@ async function extractTextFromDOCX(buffer: Buffer): Promise<string> {
   try {
     const result = await mammoth.extractRawText({ buffer });
 
-    // mammoth returns the text content
-    let text = result.value || '';
+    // mammoth returns the text content with some structure preserved
+    const text = result.value || '';
 
-    // Clean up whitespace
-    text = text
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    return text;
+    // Apply the same formatting to preserve structure
+    return formatExtractedText(text);
   } catch (error) {
     console.error('DOCX parsing error:', error);
     return '';
