@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { errorResponse } from '@/lib/api-utils';
 import mammoth from 'mammoth';
-import PDFParser from 'pdf2json';
 
 // POST /api/cv-upload - Upload and extract text from a CV file
 export async function POST(request: NextRequest) {
@@ -112,85 +111,59 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PDF text extraction using pdf2json with column-aware extraction
+// PDF text extraction using unpdf with column-aware extraction
+// unpdf uses pdf.js which handles embedded fonts better than pdf2json
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
-  return new Promise((resolve) => {
-    try {
-      const pdfParser = new PDFParser();
+  try {
+    const { getDocumentProxy } = await import('unpdf');
+    const uint8Array = new Uint8Array(buffer);
+    const pdf = await getDocumentProxy(uint8Array);
 
-      pdfParser.on('pdfParser_dataError', (errData: Error | { parserError: Error }) => {
-        const error = 'parserError' in errData ? errData.parserError : errData;
-        console.error('PDF parsing error:', error);
-        resolve('');
-      });
+    const pages: string[] = [];
 
-      pdfParser.on('pdfParser_dataReady', (pdfData: PDFData) => {
-        try {
-          const pages: string[] = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const viewport = page.getViewport({ scale: 1 });
+      const pageWidth = viewport.width;
 
-          for (const page of pdfData.Pages) {
-            const pageWidth = page.Width || 50; // Default width in pdf2json units
-            const pageText = extractPageText(page.Texts, pageWidth);
-            if (pageText.trim()) {
-              pages.push(formatExtractedText(pageText));
-            }
-          }
+      // Extract text items with position information
+      const items = textContent.items as Array<{
+        str: string;
+        transform: number[];
+        width: number;
+        height: number;
+      }>;
 
-          resolve(pages.join('\n\n---\n\n'));
-        } catch (error) {
-          console.error('PDF processing error:', error);
-          resolve('');
-        }
-      });
+      if (items.length === 0) continue;
 
-      pdfParser.parseBuffer(buffer);
-    } catch (error) {
-      console.error('PDF parsing error:', error);
-      resolve('');
+      // Convert to our format with fontSize estimation from height
+      const textItems = items
+        .filter(item => item.str.trim())
+        .map(item => ({
+          x: item.transform[4],
+          y: item.transform[5],
+          text: item.str,
+          fontSize: item.height || 12,
+        }));
+
+      if (textItems.length === 0) continue;
+
+      const pageText = extractPageText(textItems, pageWidth);
+      if (pageText.trim()) {
+        pages.push(formatExtractedText(pageText));
+      }
     }
-  });
-}
 
-// Type definitions for pdf2json output
-interface PDFText {
-  x: number;
-  y: number;
-  w: number;
-  R: Array<{ T: string; S?: number; TS?: number[] }>;
-}
-
-interface PDFPage {
-  Width?: number;
-  Height?: number;
-  Texts: PDFText[];
-}
-
-interface PDFData {
-  Pages: PDFPage[];
+    return pages.join('\n\n---\n\n');
+  } catch (error) {
+    console.error('PDF parsing error:', error);
+    return '';
+  }
 }
 
 // Extract text from a page with column detection
-function extractPageText(texts: PDFText[], pageWidth: number): string {
-  if (texts.length === 0) return '';
-
-  // Decode and collect all text items with positions
-  const items: Array<{ x: number; y: number; text: string; fontSize: number }> = [];
-
-  for (const textItem of texts) {
-    const text = textItem.R.map(r => decodeURIComponent(r.T)).join('');
-    if (!text.trim()) continue;
-
-    // Get font size from TS array (index 1 is font size)
-    const fontSize = textItem.R[0]?.TS?.[1] || 12;
-
-    items.push({
-      x: textItem.x,
-      y: textItem.y,
-      text,
-      fontSize,
-    });
-  }
-
+function extractPageText(items: Array<{ x: number; y: number; text: string; fontSize: number }>, pageWidth: number): string {
   if (items.length === 0) return '';
 
   // Detect if this is a multi-column layout
@@ -241,7 +214,7 @@ function extractColumnText(items: Array<{ x: number; y: number; text: string; fo
 
   // Group text by Y position (lines) with tolerance
   const lines: Map<number, Array<{ x: number; text: string; fontSize: number }>> = new Map();
-  const yTolerance = 0.3; // pdf2json uses smaller units
+  const yTolerance = 3; // unpdf uses larger units than pdf2json
 
   for (const item of items) {
     const y = Math.round(item.y / yTolerance) * yTolerance;
@@ -252,8 +225,8 @@ function extractColumnText(items: Array<{ x: number; y: number; text: string; fo
     lines.get(y)!.push({ x: item.x, text: item.text, fontSize: item.fontSize });
   }
 
-  // Sort lines by Y (ascending - pdf2json Y starts from top)
-  const sortedYs = Array.from(lines.keys()).sort((a, b) => a - b);
+  // Sort lines by Y (descending - PDF coordinates start from bottom)
+  const sortedYs = Array.from(lines.keys()).sort((a, b) => b - a);
 
   let text = '';
   let lastY: number | null = null;
@@ -264,17 +237,7 @@ function extractColumnText(items: Array<{ x: number; y: number; text: string; fo
     lineItems.sort((a, b) => a.x - b.x);
 
     // Join items with appropriate spacing
-    let lineText = '';
-    let lastX = -1;
-    for (const item of lineItems) {
-      // Add space if there's a gap between items
-      if (lastX >= 0 && item.x - lastX > 0.5) {
-        lineText += ' ';
-      }
-      lineText += item.text;
-      lastX = item.x + (item.text.length * 0.1); // Approximate end position
-    }
-    lineText = lineText.trim();
+    const lineText = lineItems.map(item => item.text).join(' ').trim();
 
     if (!lineText) continue;
 
@@ -282,11 +245,11 @@ function extractColumnText(items: Array<{ x: number; y: number; text: string; fo
     const avgFontSize = lineItems.reduce((sum, item) => sum + item.fontSize, 0) / lineItems.length;
 
     if (lastY !== null) {
-      const gap = y - lastY;
+      const gap = lastY - y;
       // Larger gap or font size change indicates new section
-      if (gap > 1.5 || (lastFontSize && avgFontSize > lastFontSize * 1.2)) {
+      if (gap > 25 || (lastFontSize && avgFontSize > lastFontSize * 1.3)) {
         text += '\n\n';
-      } else if (gap > 0.8) {
+      } else if (gap > 15) {
         text += '\n';
       } else {
         text += ' ';
