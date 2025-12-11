@@ -48,10 +48,16 @@ export function GridView({ language, entries = [], beginnerMode = false }: GridV
     return Math.min(Math.round((contentValues.length / estimatedFields) * 100), 99);
   };
 
-  // Calculate match score (1-10) based on content completeness
+  // Get match score from entry's cv_coverage (AI-calculated) or fallback to estimate
   const getMatchScore = (categoryKey: string): number => {
     const entry = entries.find((e) => e.category_key === categoryKey);
     if (!entry) return 0;
+
+    // Use AI-calculated cv_coverage if available
+    if (entry.cv_coverage !== undefined && entry.cv_coverage !== null) {
+      return entry.cv_coverage;
+    }
+
     if (entry.is_complete) return 10;
 
     const content = entry.content || {};
@@ -61,7 +67,7 @@ export function GridView({ language, entries = [], beginnerMode = false }: GridV
 
     if (contentValues.length === 0) return 0;
 
-    // Calculate score based on filled content
+    // Fallback: Calculate score based on filled content
     // More fields filled = higher score, text length also matters
     const totalTextLength = contentValues.reduce((sum: number, val) => {
       if (typeof val === 'string') return sum + val.length;

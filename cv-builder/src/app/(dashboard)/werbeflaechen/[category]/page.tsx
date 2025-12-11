@@ -272,20 +272,14 @@ function FieldWithReasoning({
 }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Label htmlFor={fieldId}>{label}</Label>
-        {reasoning && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Info className="h-4 w-4 text-blue-500 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
-              <p className="text-xs">{reasoning}</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
+      <Label htmlFor={fieldId}>{label}</Label>
       {children}
+      {reasoning && (
+        <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+          <Sparkles className="h-3 w-3 mt-0.5 text-amber-500 shrink-0" />
+          <span>{reasoning}</span>
+        </div>
+      )}
     </div>
   );
 }

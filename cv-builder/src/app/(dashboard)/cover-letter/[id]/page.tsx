@@ -41,6 +41,11 @@ export default function CoverLetterEditorPage() {
   const [language, setLanguage] = useState<'en' | 'de'>('en');
   const { translations } = useTranslations(language);
 
+  // Scroll to preview
+  const handlePreview = () => {
+    document.getElementById('preview-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   // Editable content
   const [content, setContent] = useState<CoverLetterContent>({});
 
@@ -181,7 +186,7 @@ export default function CoverLetterEditorPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2" disabled>
+          <Button variant="outline" size="sm" className="gap-2" onClick={handlePreview}>
             <Eye className="h-4 w-4" />
             {translations.coverLetter.editor.preview}
           </Button>
@@ -331,7 +336,7 @@ export default function CoverLetterEditorPage() {
       </Card>
 
       {/* Preview Card */}
-      <Card>
+      <Card id="preview-section">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {translations.coverLetter.editor.preview}
