@@ -474,12 +474,12 @@ export default function ApplicationDetailPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>CV</Label>
-                <Select value={linkedCvId} onValueChange={setLinkedCvId}>
+                <Select value={linkedCvId || '__none__'} onValueChange={(v) => setLinkedCvId(v === '__none__' ? '' : v)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a CV" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No linked CV</SelectItem>
+                    <SelectItem value="__none__">No linked CV</SelectItem>
                     {cvList.map((cv) => (
                       <SelectItem key={cv.id} value={cv.id}>
                         {cv.name}
@@ -497,12 +497,12 @@ export default function ApplicationDetailPage() {
               </div>
               <div className="space-y-2">
                 <Label>Cover Letter</Label>
-                <Select value={linkedCoverLetterId} onValueChange={setLinkedCoverLetterId}>
+                <Select value={linkedCoverLetterId || '__none__'} onValueChange={(v) => setLinkedCoverLetterId(v === '__none__' ? '' : v)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a cover letter" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No linked cover letter</SelectItem>
+                    <SelectItem value="__none__">No linked cover letter</SelectItem>
                     {coverLetterList.map((cl) => (
                       <SelectItem key={cl.id} value={cl.id}>
                         {cl.name}
