@@ -15,16 +15,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Loader2, Briefcase, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, Loader2, Briefcase, Link as LinkIcon, Wand2 } from 'lucide-react';
 import { createApplication } from '@/services/application.service';
 import { fetchAllCVs } from '@/services/cv.service';
 import { fetchCoverLetters } from '@/services/cover-letter.service';
+import { parseJobPostingUrl, type ParsedJobPosting } from '@/services/job-parser.service';
+import { AutoFillDialog } from '@/components/auto-fill-dialog';
 import type { CVDocument, CoverLetter, ApplicationStatus } from '@/types/cv.types';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
 
 export default function NewApplicationPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isParsingUrl, setIsParsingUrl] = useState(false);
+  const [showAutoFillDialog, setShowAutoFillDialog] = useState(false);
+  const [parsedData, setParsedData] = useState<ParsedJobPosting | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cvList, setCvList] = useState<CVDocument[]>([]);
   const [coverLetterList, setCoverLetterList] = useState<CoverLetter[]>([]);
@@ -55,6 +60,38 @@ export default function NewApplicationPage() {
     };
     loadData();
   }, []);
+
+  // Parse job posting URL
+  const handleParseUrl = async () => {
+    if (!jobUrl.trim()) return;
+
+    setIsParsingUrl(true);
+    setShowAutoFillDialog(true);
+    setParsedData(null);
+    setError(null);
+
+    const result = await parseJobPostingUrl(jobUrl.trim());
+
+    if (result.error) {
+      setError(result.error);
+      setShowAutoFillDialog(false);
+    } else if (result.data) {
+      setParsedData(result.data);
+    }
+
+    setIsParsingUrl(false);
+  };
+
+  // Handle applying auto-fill data from dialog
+  const handleApplyAutoFill = (fields: Record<string, string>) => {
+    if (fields.company) setCompanyName(fields.company);
+    if (fields.position) setJobTitle(fields.position);
+    if (fields.jobDescription) setJobDescription(fields.jobDescription);
+    if (fields.location) setLocation(fields.location);
+    if (fields.salary) setSalaryRange(fields.salary);
+    if (fields.contactName) setContactName(fields.contactName);
+    if (fields.contactEmail) setContactEmail(fields.contactEmail);
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +163,39 @@ export default function NewApplicationPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="jobUrl" className="flex items-center gap-2">
+                <LinkIcon className="h-4 w-4" />
+                Job Posting URL
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="jobUrl"
+                  type="url"
+                  placeholder="https://..."
+                  value={jobUrl}
+                  onChange={(e) => setJobUrl(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleParseUrl}
+                  disabled={isParsingUrl || !jobUrl.trim()}
+                >
+                  {isParsingUrl ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Wand2 className="h-4 w-4" />
+                  )}
+                  <span className="ml-2">Auto-fill</span>
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Paste a job posting URL and click Auto-fill to extract details automatically
+              </p>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="companyName">Company Name *</Label>
@@ -168,20 +238,6 @@ export default function NewApplicationPage() {
                   onChange={(e) => setSalaryRange(e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="jobUrl" className="flex items-center gap-2">
-                <LinkIcon className="h-4 w-4" />
-                Job Posting URL
-              </Label>
-              <Input
-                id="jobUrl"
-                type="url"
-                placeholder="https://..."
-                value={jobUrl}
-                onChange={(e) => setJobUrl(e.target.value)}
-              />
             </div>
 
             <div className="space-y-2">
@@ -318,6 +374,19 @@ export default function NewApplicationPage() {
           </CardContent>
         </Card>
       </form>
+
+      <AutoFillDialog
+        open={showAutoFillDialog}
+        onOpenChange={setShowAutoFillDialog}
+        data={parsedData}
+        isLoading={isParsingUrl}
+        onApply={handleApplyAutoFill}
+        fieldLabels={{
+          company: 'Company Name',
+          position: 'Job Title',
+          salary: 'Salary Range',
+        }}
+      />
     </div>
   );
 }

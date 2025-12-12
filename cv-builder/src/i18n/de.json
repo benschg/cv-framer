@@ -249,7 +249,9 @@
       "jobDescription": "Stellenbeschreibung",
       "jobDescriptionPlaceholder": "Fügen Sie hier die vollständige Stellenbeschreibung ein...",
       "jobDescriptionHint": "Die KI analysiert dies, um Ihr Anschreiben anzupassen",
-      "pleaseEnterName": "Bitte geben Sie einen Namen für Ihr Anschreiben ein"
+      "pleaseEnterName": "Bitte geben Sie einen Namen für Ihr Anschreiben ein",
+      "autoFill": "Auto-Ausfüllen",
+      "autoFillHint": "Fügen Sie eine URL der Stellenanzeige ein und klicken Sie auf Auto-Ausfüllen, um Details automatisch zu extrahieren"
     },
     "editor": {
       "positionAt": "{position} bei {company}",

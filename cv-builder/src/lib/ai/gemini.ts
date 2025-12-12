@@ -293,6 +293,58 @@ Return a JSON array of strings:
   return generateJSON<string[]>(prompt);
 }
 
+// Types for job posting URL parsing
+export interface ParsedJobPosting {
+  company: string;
+  position: string;
+  jobDescription: string;
+  location?: string;
+  employmentType?: string;
+  salary?: string;
+  contactName?: string;
+  contactEmail?: string;
+}
+
+// Parse a job posting URL's HTML content to extract key information
+export async function parseJobPostingUrl(
+  htmlContent: string,
+  sourceUrl: string
+): Promise<ParsedJobPosting> {
+  // Truncate HTML to avoid token limits (keep first 50k chars)
+  const truncatedHtml = htmlContent.slice(0, 50000);
+
+  const prompt = `You are an expert at extracting job posting information from HTML content.
+
+Analyze this HTML content from a job posting page and extract the key information.
+
+Source URL: ${sourceUrl}
+
+HTML Content:
+${truncatedHtml}
+
+Extract and return a JSON object with this structure:
+{
+  "company": "The company name posting the job",
+  "position": "The job title/position",
+  "jobDescription": "The full job description including responsibilities, requirements, qualifications - extract all relevant text, formatted cleanly without HTML",
+  "location": "Job location if specified (optional)",
+  "employmentType": "Full-time, Part-time, Contract, etc. if specified (optional)",
+  "salary": "Salary range if specified (optional)",
+  "contactName": "Name of the hiring manager or recruiter if mentioned (optional)",
+  "contactEmail": "Contact email for applications if mentioned (optional)"
+}
+
+Guidelines:
+- Extract the company name from the page content, URL, or meta tags
+- Get the exact job title as listed
+- For jobDescription, include: role overview, responsibilities, requirements, qualifications, nice-to-haves, benefits - clean text only
+- Look for contact information like "Contact:", "Hiring Manager:", "Recruiter:", or email addresses
+- If a field is not found or unclear, use an empty string
+- Keep the jobDescription comprehensive but clean (no HTML tags, no excessive whitespace)`;
+
+  return generateJSON<ParsedJobPosting>(prompt);
+}
+
 // Types for cover letter generation
 export interface GeneratedCoverLetterContent {
   subject?: string;

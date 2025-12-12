@@ -8,8 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, ArrowRight, Loader2, FileText, Sparkles, Upload, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, FileText, Sparkles, Upload, Link as LinkIcon, Wand2 } from 'lucide-react';
 import { createCV, getDefaultDisplaySettings, getDefaultCVContent } from '@/services/cv.service';
+import { parseJobPostingUrl, type ParsedJobPosting } from '@/services/job-parser.service';
+import { AutoFillDialog } from '@/components/auto-fill-dialog';
 
 type Step = 'basic' | 'job' | 'create';
 
@@ -17,6 +19,9 @@ export default function NewCVPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('basic');
   const [isLoading, setIsLoading] = useState(false);
+  const [isParsingUrl, setIsParsingUrl] = useState(false);
+  const [showAutoFillDialog, setShowAutoFillDialog] = useState(false);
+  const [parsedData, setParsedData] = useState<ParsedJobPosting | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Form state
@@ -27,6 +32,38 @@ export default function NewCVPage() {
   const [jobPostingUrl, setJobPostingUrl] = useState('');
   const [company, setCompany] = useState('');
   const [position, setPosition] = useState('');
+
+  // Parse job posting URL
+  const handleParseUrl = async () => {
+    if (!jobPostingUrl.trim()) return;
+
+    setIsParsingUrl(true);
+    setShowAutoFillDialog(true);
+    setParsedData(null);
+    setError(null);
+
+    const result = await parseJobPostingUrl(jobPostingUrl.trim());
+
+    if (result.error) {
+      setError(result.error);
+      setShowAutoFillDialog(false);
+    } else if (result.data) {
+      setParsedData(result.data);
+    }
+
+    setIsParsingUrl(false);
+  };
+
+  // Handle applying auto-fill data from dialog
+  const handleApplyAutoFill = (fields: Record<string, string>) => {
+    if (fields.company) setCompany(fields.company);
+    if (fields.position) setPosition(fields.position);
+    if (fields.jobDescription) setJobPosting(fields.jobDescription);
+    // Also update name if empty
+    if (!name && fields.position && fields.company) {
+      setName(`${fields.position} - ${fields.company}`);
+    }
+  };
 
   const handleCreate = async (skipJobContext: boolean = false) => {
     if (!name.trim()) {
@@ -212,13 +249,38 @@ export default function NewCVPage() {
                 <LinkIcon className="h-4 w-4" />
                 Job Posting URL
               </Label>
-              <Input
-                id="jobPostingUrl"
-                type="url"
-                placeholder="https://..."
-                value={jobPostingUrl}
-                onChange={(e) => setJobPostingUrl(e.target.value)}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="jobPostingUrl"
+                  type="url"
+                  placeholder="https://..."
+                  value={jobPostingUrl}
+                  onChange={(e) => setJobPostingUrl(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleParseUrl}
+                  disabled={!jobPostingUrl.trim() || isParsingUrl}
+                  className="gap-2"
+                >
+                  {isParsingUrl ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Parsing...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4" />
+                      Auto-fill
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Paste a job posting URL and click Auto-fill to extract company, position, and description
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -266,6 +328,15 @@ export default function NewCVPage() {
           </CardContent>
         </Card>
       )}
+
+      <AutoFillDialog
+        open={showAutoFillDialog}
+        onOpenChange={setShowAutoFillDialog}
+        data={parsedData}
+        isLoading={isParsingUrl}
+        onApply={handleApplyAutoFill}
+        visibleFields={['company', 'position', 'jobDescription']}
+      />
     </div>
   );
 }

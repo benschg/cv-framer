@@ -15,9 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, ArrowRight, Loader2, Mail, Sparkles, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, Mail, Sparkles, Link as LinkIcon, Wand2 } from 'lucide-react';
 import { createCoverLetter, getDefaultCoverLetterContent } from '@/services/cover-letter.service';
 import { fetchAllCVs } from '@/services/cv.service';
+import { parseJobPostingUrl, type ParsedJobPosting } from '@/services/job-parser.service';
+import { AutoFillDialog } from '@/components/auto-fill-dialog';
 import { useTranslations } from '@/hooks/use-translations';
 import type { CVDocument } from '@/types/cv.types';
 
@@ -27,6 +29,9 @@ export default function NewCoverLetterPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('basic');
   const [isLoading, setIsLoading] = useState(false);
+  const [isParsingUrl, setIsParsingUrl] = useState(false);
+  const [showAutoFillDialog, setShowAutoFillDialog] = useState(false);
+  const [parsedData, setParsedData] = useState<ParsedJobPosting | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cvList, setCvList] = useState<CVDocument[]>([]);
   const [appLanguage, setAppLanguage] = useState<'en' | 'de'>('en');
@@ -58,6 +63,38 @@ export default function NewCoverLetterPage() {
     };
     loadCVs();
   }, []);
+
+  // Parse job posting URL
+  const handleParseUrl = async () => {
+    if (!jobPostingUrl.trim()) return;
+
+    setIsParsingUrl(true);
+    setShowAutoFillDialog(true);
+    setParsedData(null);
+    setError(null);
+
+    const result = await parseJobPostingUrl(jobPostingUrl.trim());
+
+    if (result.error) {
+      setError(result.error);
+      setShowAutoFillDialog(false);
+    } else if (result.data) {
+      setParsedData(result.data);
+    }
+
+    setIsParsingUrl(false);
+  };
+
+  // Handle applying auto-fill data from dialog
+  const handleApplyAutoFill = (fields: Record<string, string>) => {
+    if (fields.company) setCompany(fields.company);
+    if (fields.position) setPosition(fields.position);
+    if (fields.jobDescription) setJobPosting(fields.jobDescription);
+    // Also update name if empty
+    if (!name && fields.position && fields.company) {
+      setName(`${fields.position} - ${fields.company}`);
+    }
+  };
 
   const handleCreate = async (skipJobContext: boolean = false) => {
     if (!name.trim()) {
@@ -251,13 +288,32 @@ export default function NewCoverLetterPage() {
                 <LinkIcon className="h-4 w-4" />
                 {translations.coverLetter.new.jobPostingUrl}
               </Label>
-              <Input
-                id="jobPostingUrl"
-                type="url"
-                placeholder="https://..."
-                value={jobPostingUrl}
-                onChange={(e) => setJobPostingUrl(e.target.value)}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="jobPostingUrl"
+                  type="url"
+                  placeholder="https://..."
+                  value={jobPostingUrl}
+                  onChange={(e) => setJobPostingUrl(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleParseUrl}
+                  disabled={isParsingUrl || !jobPostingUrl.trim()}
+                >
+                  {isParsingUrl ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Wand2 className="h-4 w-4" />
+                  )}
+                  <span className="ml-2">{translations.coverLetter.new.autoFill}</span>
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {translations.coverLetter.new.autoFillHint}
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -302,6 +358,15 @@ export default function NewCoverLetterPage() {
           </CardContent>
         </Card>
       )}
+
+      <AutoFillDialog
+        open={showAutoFillDialog}
+        onOpenChange={setShowAutoFillDialog}
+        data={parsedData}
+        isLoading={isParsingUrl}
+        onApply={handleApplyAutoFill}
+        visibleFields={['company', 'position', 'jobDescription']}
+      />
     </div>
   );
 }

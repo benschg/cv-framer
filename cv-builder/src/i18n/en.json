@@ -249,7 +249,9 @@
       "jobDescription": "Job Description",
       "jobDescriptionPlaceholder": "Paste the full job description here...",
       "jobDescriptionHint": "The AI will analyze this to tailor your cover letter",
-      "pleaseEnterName": "Please enter a name for your cover letter"
+      "pleaseEnterName": "Please enter a name for your cover letter",
+      "autoFill": "Auto-fill",
+      "autoFillHint": "Paste a job posting URL and click Auto-fill to extract details automatically"
     },
     "editor": {
       "positionAt": "{position} at {company}",
