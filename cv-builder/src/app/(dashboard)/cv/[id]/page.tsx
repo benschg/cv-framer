@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { fetchCV, updateCV, generateId } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
+import { CVPreview } from '@/components/cv/cv-preview';
 import type { CVDocument, CVContent, WorkExperience, Education, SkillCategory, KeyCompetence } from '@/types/cv.types';
 
 export default function CVEditorPage() {
@@ -244,6 +245,11 @@ export default function CVEditorPage() {
     updateField('keyCompetences', comps);
   };
 
+  // Scroll to preview
+  const handlePreview = () => {
+    document.getElementById('preview-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   // Generate experience bullets handler
   const handleGenerateExperienceBullets = async (index: number) => {
     if (!cv) return;
@@ -323,7 +329,7 @@ export default function CVEditorPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2" disabled>
+          <Button variant="outline" size="sm" className="gap-2" onClick={handlePreview}>
             <Eye className="h-4 w-4" />
             Preview
           </Button>
@@ -743,6 +749,26 @@ export default function CVEditorPage() {
               </div>
             ))
           )}
+        </CardContent>
+      </Card>
+
+      {/* Preview Section */}
+      <Card id="preview-section">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Preview
+            <Badge variant="outline" className="font-normal">Live</Badge>
+          </CardTitle>
+          <CardDescription>
+            This is how your CV will look when exported
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CVPreview
+            content={content}
+            language={cv.language}
+            settings={cv.display_settings}
+          />
         </CardContent>
       </Card>
 
