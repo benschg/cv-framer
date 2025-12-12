@@ -53,7 +53,6 @@ import {
   pointerWithin,
 } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import { fetchApplications, deleteApplication, updateApplicationStatus } from '@/services/application.service';
 import type { JobApplication, ApplicationStatus } from '@/types/cv.types';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
@@ -583,8 +582,8 @@ function DroppableColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`${stacked ? 'flex-1' : ''} transition-colors ${
-        isOver ? 'ring-2 ring-primary ring-offset-2 rounded-lg' : ''
+      className={`${stacked ? 'flex-1' : ''} transition-all duration-200 ${
+        isOver ? 'bg-primary/10 rounded-lg' : ''
       }`}
     >
       {children}
@@ -604,26 +603,19 @@ function DraggableApplicationCard({
   onStatusChange: (id: string, status: ApplicationStatus) => void;
   isDragging: boolean;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging: isCurrentlyDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef } = useDraggable({
     id: application.id,
   });
-
-  const style = transform
-    ? {
-        transform: CSS.Transform.toString(transform),
-      }
-    : undefined;
 
   const isOverdue = application.deadline && new Date(application.deadline) < new Date();
 
   return (
     <Card
       ref={setNodeRef}
-      style={style}
       {...attributes}
       {...listeners}
-      className={`group relative hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing touch-none ${
-        isDragging ? 'opacity-50' : ''
+      className={`group relative hover:shadow-md transition-all cursor-grab active:cursor-grabbing touch-none ${
+        isDragging ? 'opacity-30 scale-95' : ''
       }`}
     >
       <CardContent className="p-3">
