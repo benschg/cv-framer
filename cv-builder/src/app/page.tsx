@@ -15,6 +15,7 @@ import {
   Briefcase,
   Download,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
@@ -23,7 +24,13 @@ export default function LandingPage() {
       <header className="border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <FileText className="h-6 w-6" />
+            <Image
+              src="/icon.svg"
+              alt="CV Builder"
+              width={24}
+              height={24}
+              className="h-6 w-6"
+            />
             <span className="text-xl font-bold">CV Builder</span>
           </div>
           <nav className="flex items-center gap-4">
@@ -39,6 +46,17 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-24 text-center">
+        <div className="mb-8 flex justify-center">
+          <div className="rounded-full bg-blue-500 p-6 sm:p-8">
+            <Image
+              src="/icon.svg"
+              alt="CV Builder"
+              width={160}
+              height={160}
+              className="h-32 w-32 sm:h-40 sm:w-40"
+            />
+          </div>
+        </div>
         <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl">
           Create CVs That
           <span className="text-primary"> Win Jobs</span>
