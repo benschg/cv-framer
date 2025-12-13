@@ -195,8 +195,8 @@ export default function LandingPage() {
             Ready to Build Your Perfect CV?
           </h2>
           <p className="mx-auto mb-8 max-w-xl text-lg opacity-90">
-            Join thousands of job seekers who have landed their dream jobs with
-            CVs built using our platform.
+            Start building your professional CV today with AI-powered tools
+            designed to help you stand out.
           </p>
           <Link href="/signup">
             <Button size="lg" variant="secondary" className="gap-2">

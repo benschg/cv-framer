@@ -13,18 +13,27 @@ interface CategoryExtraction {
 }
 
 interface ExtractedWerbeflaechen {
+  // Row 1: Will you love the job?
+  vision_mission?: CategoryExtraction;
+  motivation?: CategoryExtraction;
+  passion?: CategoryExtraction;
+  slogan?: CategoryExtraction;
+  zitat_motto?: CategoryExtraction;
+  highlights?: CategoryExtraction;
+  // Row 2: Can you do the job?
+  erfolge?: CategoryExtraction;
+  mehrwert?: CategoryExtraction;
+  projekte?: CategoryExtraction;
+  referenzen?: CategoryExtraction;
+  usp?: CategoryExtraction;
+  corporate_design?: CategoryExtraction;
+  // Row 3: Can we work together?
+  erfahrungswissen?: CategoryExtraction;
+  kernkompetenzen?: CategoryExtraction;
+  schluesselkompetenzen?: CategoryExtraction;
   kurzprofil?: CategoryExtraction;
   berufliche_erfahrungen?: CategoryExtraction;
   aus_weiterbildungen?: CategoryExtraction;
-  kernkompetenzen?: CategoryExtraction;
-  schluesselkompetenzen?: CategoryExtraction;
-  erfolge?: CategoryExtraction;
-  projekte?: CategoryExtraction;
-  highlights?: CategoryExtraction;
-  slogan?: CategoryExtraction;
-  motivation?: CategoryExtraction;
-  usp?: CategoryExtraction;
-  referenzen?: CategoryExtraction;
 }
 
 const CATEGORY_ROWS: Record<CategoryKey, number> = {
@@ -152,56 +161,108 @@ For EACH category, provide:
 3. "cv_coverage": Score 1-10 how well the CV covers this category (10 = excellent coverage, 1 = almost no relevant data)
 4. "fit_reasoning": Brief explanation of the coverage score
 
-Categories to extract:
+Categories to extract (organized by row):
 
-1. kurzprofil (Short Profile):
-   content: { summary, professionalTitle, yearsExperience }
+=== ROW 1: "Will you love the job?" ===
 
-2. berufliche_erfahrungen (Professional Experience):
-   content: { experiences: [{company, title, location, startDate, endDate, current, description, bullets[]}] }
+1. vision_mission (Vision & Mission):
+   content: { vision, mission, longTermGoals }
+   - Infer from career trajectory, stated objectives, or professional summary
 
-3. aus_weiterbildungen (Education & Training):
-   content: { education: [{institution, degree, field, startDate, endDate, description}], certifications: [{name, issuer, date}] }
+2. motivation (Motivation):
+   content: { whatDrivesYou, whyThisField, careerGoals }
+   - Infer from CV tone, career choices, and any stated objectives
 
-4. kernkompetenzen (Core/Technical Skills):
-   content: { skills: [{category, items[]}] }
+3. passion (Passion):
+   content: { professionalPassions, excitingAspects, sideProjects }
+   - Infer from side projects, volunteering, interests, or enthusiastic language
 
-5. schluesselkompetenzen (Key/Soft Competencies):
-   content: { softSkills[], competencies: [{name, level}] }
-
-6. erfolge (Achievements):
-   content: { achievements: [{title, description, metric}] }
-
-7. projekte (Projects):
-   content: { projects: [{name, description, role, technologies[], outcome}] }
-
-8. highlights (Career Highlights):
-   content: { highlights: [{title, description}] }
-
-9. slogan (Tagline):
+4. slogan (Tagline/Slogan):
    content: { slogan, tagline }
+   - Create a compelling professional tagline based on their profile
 
-10. motivation (Motivation - infer from CV tone/content):
-    content: { whatDrivesYou, whyThisField, careerGoals }
+5. zitat_motto (Quote/Motto):
+   content: { quote, source, personalMotto }
+   - Extract any quotes mentioned, or infer a fitting motto from their approach
+
+6. highlights (Career Highlights):
+   content: { highlights: [{title, description}] }
+   - Top 3-5 most impressive achievements or career moments
+
+=== ROW 2: "Can you do the job?" ===
+
+7. erfolge (Achievements):
+   content: { achievements: [{title, description, metric}] }
+   - Quantifiable accomplishments with metrics where possible
+
+8. mehrwert (Added Value):
+   content: { valueProposition, uniqueContributions, impactAreas }
+   - What unique value they bring to employers
+
+9. projekte (Projects):
+   content: { projects: [{name, description, role, technologies[], outcome}] }
+   - Notable projects with outcomes
+
+10. referenzen (References):
+    content: { references: [{name, title, company, relationship, quote}] }
+    - Any mentioned references or testimonials
 
 11. usp (Unique Selling Points):
     content: { uniqueSellingPoints: [{title, description}] }
+    - What makes them stand out from other candidates
 
-12. referenzen (References):
-    content: { references: [{name, title, company, relationship, quote}] }
+12. corporate_design (Personal Branding):
+    content: { brandKeywords, professionalImage, communicationStyle }
+    - Infer their professional brand from CV tone and presentation
 
-Return JSON with this structure:
+=== ROW 3: "Can we work together?" ===
+
+13. erfahrungswissen (Experiential Knowledge):
+    content: { industryInsights, lessonsLearned, expertiseAreas }
+    - Deep knowledge gained through experience
+
+14. kernkompetenzen (Core/Technical Skills):
+    content: { skills: [{category, items[]}] }
+    - Technical and hard skills grouped by category
+
+15. schluesselkompetenzen (Key/Soft Competencies):
+    content: { softSkills[], competencies: [{name, level}] }
+    - Interpersonal and soft skills
+
+16. kurzprofil (Short Profile):
+    content: { summary, professionalTitle, yearsExperience }
+    - Concise professional summary
+
+17. berufliche_erfahrungen (Professional Experience):
+    content: { experiences: [{company, title, location, startDate, endDate, current, description, bullets[]}] }
+    - Full work history
+
+18. aus_weiterbildungen (Education & Training):
+    content: { education: [{institution, degree, field, startDate, endDate, description}], certifications: [{name, issuer, date}] }
+    - Education and certifications
+
+Return JSON with all 18 categories. Example structure:
 {
+  "vision_mission": {
+    "content": { "vision": "...", "mission": "...", "longTermGoals": "..." },
+    "ai_reasoning": { "vision": "Inferred from career progression showing...", "mission": "..." },
+    "cv_coverage": 5,
+    "fit_reasoning": "CV hints at direction but no explicit vision statement"
+  },
   "kurzprofil": {
-    "content": { ... },
+    "content": { "summary": "...", "professionalTitle": "...", "yearsExperience": 10 },
     "ai_reasoning": { "summary": "Extracted from objective section...", "professionalTitle": "..." },
     "cv_coverage": 8,
     "fit_reasoning": "CV has clear summary and title, years calculated from experience dates"
   },
-  ...
+  ... (include all 18 categories)
 }
 
-Only include categories where relevant data exists. Use null for categories with no data.`;
+IMPORTANT:
+- Include ALL 18 categories in the response
+- For categories where CV has no data, still include them with cv_coverage: 1-3 and infer what you can
+- Be creative in inferring motivation, passion, vision from career choices and CV tone
+- Generate a compelling slogan and motto even if not explicitly stated`;
 
   return generateJSON<ExtractedWerbeflaechen>(prompt, model);
 }
