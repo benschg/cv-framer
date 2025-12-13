@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/select';
 import {
   ArrowLeft,
-  Save,
   Loader2,
   ExternalLink,
   Building2,
@@ -31,6 +30,8 @@ import {
   FileText,
   Clock,
   Trash2,
+  Star,
+  Check,
 } from 'lucide-react';
 import {
   fetchApplication,
@@ -50,9 +51,13 @@ export default function ApplicationDetailPage() {
   const [application, setApplication] = useState<JobApplication | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [cvList, setCvList] = useState<CVDocument[]>([]);
   const [coverLetterList, setCoverLetterList] = useState<CoverLetter[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Form state
   const [companyName, setCompanyName] = useState('');
@@ -69,6 +74,7 @@ export default function ApplicationDetailPage() {
   const [contactEmail, setContactEmail] = useState('');
   const [linkedCvId, setLinkedCvId] = useState('');
   const [linkedCoverLetterId, setLinkedCoverLetterId] = useState('');
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -97,6 +103,9 @@ export default function ApplicationDetailPage() {
         setContactEmail(app.contact_email || '');
         setLinkedCvId(app.cv_id || '');
         setLinkedCoverLetterId(app.cover_letter_id || '');
+        setIsFavorite(app.is_favorite || false);
+        // Mark as initialized after loading data
+        setTimeout(() => setIsInitialized(true), 100);
       }
 
       if (cvResult.data) setCvList(cvResult.data);
@@ -106,13 +115,14 @@ export default function ApplicationDetailPage() {
     loadData();
   }, [applicationId]);
 
-  const handleSave = async () => {
+  // Auto-save function
+  const performSave = useCallback(async () => {
     if (!companyName.trim() || !jobTitle.trim()) {
-      setError('Company name and job title are required');
       return;
     }
 
     setSaving(true);
+    setSaveStatus('saving');
     setError(null);
 
     const result = await updateApplication(applicationId, {
@@ -130,16 +140,59 @@ export default function ApplicationDetailPage() {
       contact_email: contactEmail.trim() || undefined,
       cv_id: linkedCvId || undefined,
       cover_letter_id: linkedCoverLetterId || undefined,
+      is_favorite: isFavorite,
     });
 
     if (result.error) {
       setError(result.error);
+      setSaveStatus('error');
     } else if (result.data) {
       setApplication(result.data);
+      setSaveStatus('saved');
+      // Clear "saved" status after 2 seconds
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+      savedTimeoutRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
     }
 
     setSaving(false);
-  };
+  }, [
+    applicationId, companyName, jobTitle, jobUrl, jobDescription, location,
+    salaryRange, status, appliedAt, deadline, notes, contactName, contactEmail,
+    linkedCvId, linkedCoverLetterId, isFavorite
+  ]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Set new timeout for auto-save (500ms debounce)
+    saveTimeoutRef.current = setTimeout(() => {
+      performSave();
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [
+    isInitialized, companyName, jobTitle, jobUrl, jobDescription, location,
+    salaryRange, status, appliedAt, deadline, notes, contactName, contactEmail,
+    linkedCvId, linkedCoverLetterId, isFavorite, performSave
+  ]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    };
+  }, []);
 
   const handleStatusChange = async (newStatus: ApplicationStatus) => {
     setStatus(newStatus);
@@ -219,6 +272,18 @@ export default function ApplicationDetailPage() {
               <Badge className={`${statusConfig.bgColor} ${statusConfig.color}`}>
                 {statusConfig.label}
               </Badge>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setIsFavorite(!isFavorite)}
+              >
+                <Star
+                  className={`h-5 w-5 ${
+                    isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
+                  }`}
+                />
+              </Button>
             </div>
             <p className="text-muted-foreground">{jobTitle}</p>
           </div>
@@ -241,14 +306,23 @@ export default function ApplicationDetailPage() {
             <Trash2 className="h-4 w-4" />
             Delete
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-[80px] justify-end">
+            {saveStatus === 'saving' && (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Saving...</span>
+              </>
             )}
-            Save
-          </Button>
+            {saveStatus === 'saved' && (
+              <>
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-green-500">Saved</span>
+              </>
+            )}
+            {saveStatus === 'error' && (
+              <span className="text-destructive">Error</span>
+            )}
+          </div>
         </div>
       </div>
 
