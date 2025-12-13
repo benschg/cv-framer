@@ -1,5 +1,6 @@
 import type {
   JobApplication,
+  JobFitAnalysis,
   ApplicationStatus,
   CreateApplicationInput,
   UpdateApplicationInput,
@@ -172,7 +173,7 @@ export async function deleteApplication(
  */
 export async function analyzeJobFit(
   applicationId: string
-): Promise<ApplicationServiceResponse<Record<string, unknown>>> {
+): Promise<ApplicationServiceResponse<JobFitAnalysis>> {
   try {
     const response = await fetch(`${API_BASE}/applications/${applicationId}/analyze`, {
       method: 'POST',
@@ -187,6 +188,27 @@ export async function analyzeJobFit(
     return { data: json.fitAnalysis, error: null };
   } catch (error) {
     console.error('analyzeJobFit error:', error);
+    return { data: null, error: 'Network error' };
+  }
+}
+
+/**
+ * Get existing fit analysis for an application
+ */
+export async function getFitAnalysis(
+  applicationId: string
+): Promise<ApplicationServiceResponse<JobFitAnalysis | null>> {
+  try {
+    const response = await fetch(`${API_BASE}/applications/${applicationId}/analyze`);
+    const json = await response.json();
+
+    if (!response.ok) {
+      return { data: null, error: json.error || 'Failed to fetch fit analysis' };
+    }
+
+    return { data: json.fitAnalysis, error: null };
+  } catch (error) {
+    console.error('getFitAnalysis error:', error);
     return { data: null, error: 'Network error' };
   }
 }

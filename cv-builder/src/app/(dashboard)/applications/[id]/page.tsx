@@ -32,16 +32,24 @@ import {
   Trash2,
   Star,
   Check,
+  Sparkles,
+  TrendingUp,
+  AlertCircle,
+  Lightbulb,
 } from 'lucide-react';
 import {
   fetchApplication,
   updateApplication,
   deleteApplication,
+  analyzeJobFit,
+  getFitAnalysis,
 } from '@/services/application.service';
 import { fetchAllCVs } from '@/services/cv.service';
 import { fetchCoverLetters } from '@/services/cover-letter.service';
 import type { JobApplication, CVDocument, CoverLetter, ApplicationStatus } from '@/types/cv.types';
+import type { JobFitAnalysis } from '@/types/api.schemas';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
+import { Progress } from '@/components/ui/progress';
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -75,13 +83,16 @@ export default function ApplicationDetailPage() {
   const [linkedCvId, setLinkedCvId] = useState('');
   const [linkedCoverLetterId, setLinkedCoverLetterId] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [fitAnalysis, setFitAnalysis] = useState<JobFitAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
-      const [appResult, cvResult, clResult] = await Promise.all([
+      const [appResult, cvResult, clResult, fitResult] = await Promise.all([
         fetchApplication(applicationId),
         fetchAllCVs(),
         fetchCoverLetters(),
+        getFitAnalysis(applicationId),
       ]);
 
       if (appResult.error) {
@@ -110,10 +121,30 @@ export default function ApplicationDetailPage() {
 
       if (cvResult.data) setCvList(cvResult.data);
       if (clResult.data) setCoverLetterList(clResult.data);
+      if (fitResult.data) setFitAnalysis(fitResult.data);
       setLoading(false);
     };
     loadData();
   }, [applicationId]);
+
+  const handleAnalyze = async () => {
+    if (!jobDescription.trim()) {
+      setError('Job description is required to analyze fit');
+      return;
+    }
+
+    setAnalyzing(true);
+    setError(null);
+
+    const result = await analyzeJobFit(applicationId);
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data) {
+      setFitAnalysis(result.data);
+    }
+
+    setAnalyzing(false);
+  };
 
   // Auto-save function
   const performSave = useCallback(async () => {
@@ -461,6 +492,127 @@ export default function ApplicationDetailPage() {
                 placeholder="Interview notes, follow-up reminders, thoughts..."
                 rows={6}
               />
+            </CardContent>
+          </Card>
+
+          {/* Fit Analysis */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  Job Fit Analysis
+                </CardTitle>
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={analyzing || !jobDescription.trim()}
+                  size="sm"
+                  variant={fitAnalysis ? 'outline' : 'default'}
+                >
+                  {analyzing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : fitAnalysis ? (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Re-analyze
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Analyze Fit
+                    </>
+                  )}
+                </Button>
+              </div>
+              <CardDescription>
+                AI-powered analysis of how well you match this role
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!jobDescription.trim() ? (
+                <p className="text-sm text-muted-foreground">
+                  Add a job description to enable fit analysis.
+                </p>
+              ) : !fitAnalysis ? (
+                <p className="text-sm text-muted-foreground">
+                  Click &quot;Analyze Fit&quot; to see how well you match this role.
+                </p>
+              ) : (
+                <div className="space-y-6">
+                  {/* Overall Score */}
+                  {fitAnalysis.overall_score !== null && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Overall Fit Score</span>
+                        <span className="text-2xl font-bold">{fitAnalysis.overall_score}%</span>
+                      </div>
+                      <Progress value={fitAnalysis.overall_score} className="h-2" />
+                    </div>
+                  )}
+
+                  {/* Summary */}
+                  {fitAnalysis.summary && (
+                    <p className="text-sm text-muted-foreground">{fitAnalysis.summary}</p>
+                  )}
+
+                  {/* Strengths */}
+                  {fitAnalysis.strengths && fitAnalysis.strengths.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-green-600">
+                        <TrendingUp className="h-4 w-4" />
+                        Strengths
+                      </div>
+                      <ul className="space-y-1">
+                        {fitAnalysis.strengths.map((strength, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="text-green-500 mt-1">•</span>
+                            {strength}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Gaps */}
+                  {fitAnalysis.gaps && fitAnalysis.gaps.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-amber-600">
+                        <AlertCircle className="h-4 w-4" />
+                        Areas to Address
+                      </div>
+                      <ul className="space-y-1">
+                        {fitAnalysis.gaps.map((gap, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="text-amber-500 mt-1">•</span>
+                            {gap}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Recommendations */}
+                  {fitAnalysis.recommendations && fitAnalysis.recommendations.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
+                        <Lightbulb className="h-4 w-4" />
+                        Recommendations
+                      </div>
+                      <ul className="space-y-1">
+                        {fitAnalysis.recommendations.map((rec, i) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <span className="text-blue-500 mt-1">•</span>
+                            {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

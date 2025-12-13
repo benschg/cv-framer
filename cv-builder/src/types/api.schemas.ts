@@ -438,6 +438,37 @@ export const ApplicationStatsResponseSchema = z.object({
 });
 
 // ============================================
+// JOB FIT ANALYSIS SCHEMAS
+// ============================================
+
+export const JobFitAnalysisSchema = z.object({
+  id: z.string().uuid(),
+  application_id: z.string().uuid(),
+  overall_score: z.number().min(0).max(100).nullable(),
+  strengths: z.array(z.string()).nullable(),
+  gaps: z.array(z.string()).nullable(),
+  recommendations: z.array(z.string()).nullable(),
+  summary: z.string().nullable(),
+  raw_analysis: z.record(z.string(), z.unknown()).nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+// POST /api/applications/[id]/analyze
+export const CreateFitAnalysisSchema = z.object({
+  overall_score: z.number().min(0).max(100).optional(),
+  strengths: z.array(z.string()).optional(),
+  gaps: z.array(z.string()).optional(),
+  recommendations: z.array(z.string()).optional(),
+  summary: z.string().optional(),
+  raw_analysis: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const FitAnalysisResponseSchema = z.object({
+  fitAnalysis: JobFitAnalysisSchema,
+});
+
+// ============================================
 // CV UPLOAD SCHEMAS
 // ============================================
 
@@ -529,6 +560,11 @@ export type CreateApplicationInput = z.infer<typeof CreateApplicationSchema>;
 export type UpdateApplicationInput = z.infer<typeof UpdateApplicationSchema>;
 export type ApplicationResponse = z.infer<typeof ApplicationResponseSchema>;
 export type ApplicationStatsResponse = z.infer<typeof ApplicationStatsResponseSchema>;
+
+// Job Fit Analysis
+export type JobFitAnalysis = z.infer<typeof JobFitAnalysisSchema>;
+export type CreateFitAnalysisInput = z.infer<typeof CreateFitAnalysisSchema>;
+export type FitAnalysisResponse = z.infer<typeof FitAnalysisResponseSchema>;
 
 // CV Upload
 export type UploadedCV = z.infer<typeof UploadedCVSchema>;
