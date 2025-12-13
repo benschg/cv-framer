@@ -12,6 +12,7 @@ import {
   LogOut,
   Home,
 } from 'lucide-react';
+import { CVBuilderLogo } from './cv-builder-logo';
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +34,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
+import { ThemeToggle } from './theme-toggle';
 
 const navigation = [
   {
@@ -69,7 +71,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b p-4">
         <Link href="/cv" className="flex items-center gap-2">
-          <FileText className="h-6 w-6" />
+          <CVBuilderLogo className="h-8 w-8" />
           <span className="text-lg font-bold">CV Builder</span>
         </Link>
       </SidebarHeader>
@@ -100,6 +102,10 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Theme</span>
+          <ThemeToggle />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent">
             <Avatar className="h-8 w-8">

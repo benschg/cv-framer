@@ -9,14 +9,14 @@ export default {
   ],
   safelist: [
     // Application status colors
-    'text-gray-600', 'bg-gray-100',
-    'text-blue-600', 'bg-blue-100',
-    'text-purple-600', 'bg-purple-100',
-    'text-amber-600', 'bg-amber-100',
-    'text-green-600', 'bg-green-100',
-    'text-emerald-600', 'bg-emerald-100',
-    'text-red-600', 'bg-red-100',
-    'text-slate-600', 'bg-slate-100',
+    'text-status-draft', 'bg-status-draft',
+    'text-status-applied', 'bg-status-applied',
+    'text-status-screening', 'bg-status-screening',
+    'text-status-interview', 'bg-status-interview',
+    'text-status-offer', 'bg-status-offer',
+    'text-status-accepted', 'bg-status-accepted',
+    'text-status-rejected', 'bg-status-rejected',
+    'text-status-withdrawn', 'bg-status-withdrawn',
   ],
   theme: {
   	container: {
@@ -70,12 +70,34 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+  			status: {
+  				draft: 'hsl(var(--status-draft))',
+  				applied: 'hsl(var(--status-applied))',
+  				screening: 'hsl(var(--status-screening))',
+  				interview: 'hsl(var(--status-interview))',
+  				offer: 'hsl(var(--status-offer))',
+  				accepted: 'hsl(var(--status-accepted))',
+  				rejected: 'hsl(var(--status-rejected))',
+  				withdrawn: 'hsl(var(--status-withdrawn))'
+  			},
+  			success: {
+  				DEFAULT: 'hsl(var(--success))',
+  				foreground: 'hsl(var(--success-foreground))'
+  			},
+  			favorite: 'hsl(var(--favorite))'
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		boxShadow: {
+  			'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+  			'DEFAULT': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+  			'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  			'lg': '0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.15)',
+  			'xl': '0 20px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.15)',
   		},
   		keyframes: {
   			'accordion-down': {
