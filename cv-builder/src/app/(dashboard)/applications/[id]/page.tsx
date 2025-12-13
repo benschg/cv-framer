@@ -288,25 +288,8 @@ export default function ApplicationDetailPage() {
             <p className="text-muted-foreground">{jobTitle}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {jobUrl && (
-            <Button variant="outline" size="sm" asChild>
-              <a href={jobUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
-                <ExternalLink className="h-4 w-4" />
-                View Posting
-              </a>
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 text-destructive hover:text-destructive"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-[80px] justify-end">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-[80px]">
             {saveStatus === 'saving' && (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -323,6 +306,22 @@ export default function ApplicationDetailPage() {
               <span className="text-destructive">Error</span>
             )}
           </div>
+          {jobUrl && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={jobUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
+                <ExternalLink className="h-4 w-4" />
+                View Posting
+              </a>
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:text-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
