@@ -370,6 +370,7 @@ export const JobApplicationSchema = z.object({
   contact_email: z.string().nullable(),
   fit_analysis: z.record(z.string(), z.unknown()).nullable(),
   is_archived: z.boolean(),
+  is_favorite: z.boolean(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -423,6 +424,7 @@ export const UpdateApplicationSchema = z.object({
   cover_letter_id: z.string().uuid().nullable().optional(),
   fit_analysis: z.record(z.string(), z.unknown()).optional(),
   is_archived: z.boolean().optional(),
+  is_favorite: z.boolean().optional(),
 });
 
 // GET /api/applications/stats

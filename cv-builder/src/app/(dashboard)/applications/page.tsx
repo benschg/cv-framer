@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,8 @@ import {
   CheckCircle,
   XCircle,
   Undo2,
+  Wand2,
+  Star,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -53,7 +56,7 @@ import {
   pointerWithin,
 } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { fetchApplications, deleteApplication, updateApplicationStatus } from '@/services/application.service';
+import { fetchApplications, deleteApplication, updateApplicationStatus, createApplication, toggleApplicationFavorite } from '@/services/application.service';
 import type { JobApplication, ApplicationStatus } from '@/types/cv.types';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
 import { StatusChangeAnimation } from '@/components/animations/status-change-animation';
@@ -96,12 +99,45 @@ const STATUS_ICONS = {
   Undo2,
 } as const;
 
+// Fake data for auto-generating applications (dev only)
+const FAKE_COMPANIES = [
+  'Acme Corp', 'TechStart Inc', 'DataFlow Systems', 'CloudNine Solutions',
+  'InnovateTech', 'PixelPerfect', 'CodeCraft Labs', 'DigitalDreams',
+  'FutureWorks', 'ByteSize Co', 'Quantum Dynamics', 'NexGen Software',
+  'BlueSky Analytics', 'GreenLeaf Tech', 'RedRocket Media', 'SilverStream',
+];
+const FAKE_TITLES = [
+  'Senior Frontend Developer', 'Full Stack Engineer', 'React Developer',
+  'Software Engineer', 'Lead Developer', 'UI/UX Developer', 'Tech Lead',
+  'Junior Developer', 'Backend Engineer', 'DevOps Engineer', 'Platform Engineer',
+];
+const FAKE_LOCATIONS = [
+  'Berlin, Germany', 'Munich, Germany', 'Hamburg, Germany', 'Remote',
+  'Frankfurt, Germany', 'Cologne, Germany', 'Vienna, Austria', 'Zurich, Switzerland',
+];
+
+function generateFakeApplication() {
+  const company = FAKE_COMPANIES[Math.floor(Math.random() * FAKE_COMPANIES.length)];
+  const title = FAKE_TITLES[Math.floor(Math.random() * FAKE_TITLES.length)];
+  const location = FAKE_LOCATIONS[Math.floor(Math.random() * FAKE_LOCATIONS.length)];
+  const status = ALL_STATUSES[Math.floor(Math.random() * ALL_STATUSES.length)];
+
+  return {
+    company_name: company,
+    job_title: title,
+    location,
+    status,
+    job_description: `We are looking for a ${title} to join our team at ${company}.`,
+  };
+}
+
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [animatingStatus, setAnimatingStatus] = useState<ApplicationStatus | null>(null);
 
@@ -153,6 +189,38 @@ export default function ApplicationsPage() {
     }
   };
 
+  const handleAutoGenerate = async () => {
+    const fakeData = generateFakeApplication();
+    const result = await createApplication(fakeData);
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data) {
+      setApplications((prev) => [result.data!, ...prev]);
+      // Trigger animation for the new status
+      setAnimatingStatus(result.data.status);
+    }
+  };
+
+  const handleToggleFavorite = async (id: string, currentFavorite: boolean) => {
+    // Optimistically update the UI
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.id === id ? { ...app, is_favorite: !currentFavorite } : app
+      )
+    );
+
+    const result = await toggleApplicationFavorite(id, !currentFavorite);
+    if (result.error) {
+      // Revert on error
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === id ? { ...app, is_favorite: currentFavorite } : app
+        )
+      );
+      setError(result.error);
+    }
+  };
+
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -163,6 +231,10 @@ export default function ApplicationsPage() {
   };
 
   const filteredApplications = applications.filter((app) => {
+    // Filter by favorites if enabled
+    if (showFavoritesOnly && !app.is_favorite) return false;
+
+    // Filter by search query
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -243,24 +315,41 @@ export default function ApplicationsPage() {
             Track and manage your job applications
           </p>
         </div>
-        <Link href="/applications/new">
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Application
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleAutoGenerate}>
+            <Wand2 className="h-4 w-4" />
+            Auto-generate
           </Button>
-        </Link>
+          <Link href="/applications/new">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Application
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search applications..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search applications..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button
+            variant={showFavoritesOnly ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+            className="gap-2"
+          >
+            <Star className={`h-4 w-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+            Favorites
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -359,6 +448,7 @@ export default function ApplicationsPage() {
                               application={app}
                               onDelete={handleDelete}
                               onStatusChange={handleStatusChange}
+                              onToggleFavorite={handleToggleFavorite}
                               isDragging={activeId === app.id}
                             />
                           ))}
@@ -512,14 +602,19 @@ function ApplicationCard({
                   Open
                 </Link>
               </DropdownMenuItem>
-              {ALL_STATUSES.filter((s) => s !== application.status).map((status) => (
-                <DropdownMenuItem
-                  key={status}
-                  onClick={() => onStatusChange(application.id, status)}
-                >
-                  Move to {APPLICATION_STATUS_CONFIG[status].label}
-                </DropdownMenuItem>
-              ))}
+              {ALL_STATUSES.filter((s) => s !== application.status).map((status) => {
+                const config = APPLICATION_STATUS_CONFIG[status];
+                const StatusIcon = STATUS_ICONS[config.icon];
+                return (
+                  <DropdownMenuItem
+                    key={status}
+                    onClick={() => onStatusChange(application.id, status)}
+                  >
+                    <StatusIcon className="h-4 w-4 mr-2" />
+                    Move to {config.label}
+                  </DropdownMenuItem>
+                );
+              })}
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => onDelete(application.id)}
@@ -596,25 +691,54 @@ function DraggableApplicationCard({
   application,
   onDelete,
   onStatusChange,
+  onToggleFavorite,
   isDragging,
 }: {
   application: JobApplication;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: ApplicationStatus) => void;
+  onToggleFavorite: (id: string, currentFavorite: boolean) => void;
   isDragging: boolean;
 }) {
-  const { attributes, listeners, setNodeRef } = useDraggable({
+  const router = useRouter();
+  const { attributes, listeners, setNodeRef, isDragging: isDragActive } = useDraggable({
     id: application.id,
   });
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const isOverdue = application.deadline && new Date(application.deadline) < new Date();
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!pointerStartRef.current) return;
+
+    const dx = Math.abs(e.clientX - pointerStartRef.current.x);
+    const dy = Math.abs(e.clientY - pointerStartRef.current.y);
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Only navigate if pointer didn't move much (wasn't a drag)
+    // The drag activation threshold is 8px, so we use a similar value
+    if (distance < 8 && !isDragActive) {
+      router.push(`/applications/${application.id}`);
+    }
+
+    pointerStartRef.current = null;
+  };
 
   return (
     <Card
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`group relative hover:shadow-md transition-all cursor-grab active:cursor-grabbing touch-none ${
+      onPointerDown={(e) => {
+        handlePointerDown(e);
+        listeners?.onPointerDown?.(e as unknown as PointerEvent);
+      }}
+      onPointerUp={handlePointerUp}
+      className={`group relative hover:shadow-md transition-all cursor-pointer touch-none ${
         isDragging ? 'opacity-30 scale-95' : ''
       }`}
     >
@@ -629,7 +753,25 @@ function DraggableApplicationCard({
               {application.job_title}
             </p>
           </div>
-          <DropdownMenu>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-7 w-7 transition-opacity relative z-10 ${
+                application.is_favorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(application.id, application.is_favorite);
+              }}
+            >
+              <Star
+                className={`h-4 w-4 ${
+                  application.is_favorite ? 'fill-yellow-400 text-yellow-400' : ''
+                }`}
+              />
+            </Button>
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
@@ -646,14 +788,19 @@ function DraggableApplicationCard({
                   Open
                 </Link>
               </DropdownMenuItem>
-              {ALL_STATUSES.filter((s) => s !== application.status).map((status) => (
-                <DropdownMenuItem
-                  key={status}
-                  onClick={() => onStatusChange(application.id, status)}
-                >
-                  Move to {APPLICATION_STATUS_CONFIG[status].label}
-                </DropdownMenuItem>
-              ))}
+              {ALL_STATUSES.filter((s) => s !== application.status).map((status) => {
+                const config = APPLICATION_STATUS_CONFIG[status];
+                const StatusIcon = STATUS_ICONS[config.icon];
+                return (
+                  <DropdownMenuItem
+                    key={status}
+                    onClick={() => onStatusChange(application.id, status)}
+                  >
+                    <StatusIcon className="h-4 w-4 mr-2" />
+                    Move to {config.label}
+                  </DropdownMenuItem>
+                );
+              })}
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => onDelete(application.id)}
@@ -662,7 +809,8 @@ function DraggableApplicationCard({
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-muted-foreground">

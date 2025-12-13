@@ -133,6 +133,16 @@ export async function updateApplicationStatus(
 }
 
 /**
+ * Toggle application favorite status
+ */
+export async function toggleApplicationFavorite(
+  id: string,
+  isFavorite: boolean
+): Promise<ApplicationServiceResponse<JobApplication>> {
+  return updateApplication(id, { is_favorite: isFavorite });
+}
+
+/**
  * Delete an application
  */
 export async function deleteApplication(

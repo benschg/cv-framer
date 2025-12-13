@@ -78,6 +78,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (validated.cover_letter_id !== undefined) updateData.cover_letter_id = validated.cover_letter_id;
     if (validated.fit_analysis !== undefined) updateData.fit_analysis = validated.fit_analysis;
     if (validated.is_archived !== undefined) updateData.is_archived = validated.is_archived;
+    if (validated.is_favorite !== undefined) updateData.is_favorite = validated.is_favorite;
 
     // Update the application
     const { data: application, error } = await supabase
