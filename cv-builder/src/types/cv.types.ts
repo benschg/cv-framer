@@ -260,14 +260,6 @@ export interface CoverLetterContent {
 
 // Application Tracker types (ApplicationStatus and JobApplication re-exported from api.schemas)
 
-export interface FitAnalysis {
-  overall_score: number;
-  strengths: string[];
-  gaps: string[];
-  recommendations: string[];
-  analyzed_at: string;
-}
-
 export interface ApplicationEvent {
   id: string;
   application_id: string;
@@ -305,6 +297,7 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
   color: string;
   bgColor: string;
   order: number;
+  icon: 'FileEdit' | 'Send' | 'Search' | 'Users' | 'Gift' | 'CheckCircle' | 'XCircle' | 'Undo2';
 }> = {
   draft: {
     label: 'Draft',
@@ -312,6 +305,7 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
     color: 'text-gray-600',
     bgColor: 'bg-gray-100',
     order: 0,
+    icon: 'FileEdit',
   },
   applied: {
     label: 'Applied',
@@ -319,6 +313,7 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
     color: 'text-blue-600',
     bgColor: 'bg-blue-100',
     order: 1,
+    icon: 'Send',
   },
   screening: {
     label: 'Screening',
@@ -326,6 +321,7 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
     color: 'text-purple-600',
     bgColor: 'bg-purple-100',
     order: 2,
+    icon: 'Search',
   },
   interview: {
     label: 'Interview',
@@ -333,6 +329,7 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
     color: 'text-amber-600',
     bgColor: 'bg-amber-100',
     order: 3,
+    icon: 'Users',
   },
   offer: {
     label: 'Offer',
@@ -340,6 +337,7 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
     color: 'text-green-600',
     bgColor: 'bg-green-100',
     order: 4,
+    icon: 'Gift',
   },
   accepted: {
     label: 'Accepted',
@@ -347,6 +345,7 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-100',
     order: 5,
+    icon: 'CheckCircle',
   },
   rejected: {
     label: 'Rejected',
@@ -354,6 +353,7 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
     color: 'text-red-600',
     bgColor: 'bg-red-100',
     order: 6,
+    icon: 'XCircle',
   },
   withdrawn: {
     label: 'Withdrawn',
@@ -361,5 +361,6 @@ export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
     color: 'text-slate-600',
     bgColor: 'bg-slate-100',
     order: 7,
+    icon: 'Undo2',
   },
 };

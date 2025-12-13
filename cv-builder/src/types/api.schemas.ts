@@ -368,7 +368,6 @@ export const JobApplicationSchema = z.object({
   notes: z.string().nullable(),
   contact_name: z.string().nullable(),
   contact_email: z.string().nullable(),
-  fit_analysis: z.record(z.string(), z.unknown()).nullable(),
   is_archived: z.boolean(),
   is_favorite: z.boolean(),
   created_at: z.string(),
@@ -422,7 +421,6 @@ export const UpdateApplicationSchema = z.object({
   contact_email: z.string().email().optional().or(z.literal('')),
   cv_id: z.string().uuid().nullable().optional(),
   cover_letter_id: z.string().uuid().nullable().optional(),
-  fit_analysis: z.record(z.string(), z.unknown()).optional(),
   is_archived: z.boolean().optional(),
   is_favorite: z.boolean().optional(),
 });
