@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -35,6 +36,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
 import { ThemeToggle } from './theme-toggle';
+import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
+import type { ProfilePhoto } from '@/types/api.schemas';
 
 const navigation = [
   {
@@ -63,10 +66,28 @@ const navigation = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
 
   const userInitials = user?.email
     ? user.email.charAt(0).toUpperCase()
     : 'U';
+
+  useEffect(() => {
+    const loadPrimaryPhoto = async () => {
+      const result = await fetchProfilePhotos();
+      if (result.data?.primaryPhoto) {
+        setPrimaryPhoto(result.data.primaryPhoto);
+      }
+    };
+
+    if (user) {
+      loadPrimaryPhoto();
+    }
+  }, [user]);
+
+  const avatarUrl = primaryPhoto
+    ? getPhotoPublicUrl(primaryPhoto.storage_path)
+    : user?.user_metadata?.avatar_url;
 
   return (
     <Sidebar>
@@ -110,7 +131,7 @@ export function AppSidebar() {
         <DropdownMenu>
           <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <AvatarImage src={avatarUrl} />
               <AvatarFallback>{userInitials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 text-left text-sm">
