@@ -25,6 +25,7 @@ export default function DashboardLayout({
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb />
+            <div className="ml-auto" id="breadcrumb-header-right"></div>
           </header>
         )}
         <main className={isCVEditor ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto p-4 min-h-0"}>

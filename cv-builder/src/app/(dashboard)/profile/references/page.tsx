@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { ReferencesManager } from '@/components/profile/references-manager';
+import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
 
 export const metadata: Metadata = {
   title: 'References - Profile',
@@ -8,15 +9,11 @@ export const metadata: Metadata = {
 
 export default function ReferencesPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">References</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your professional references. Add contact information, upload reference letters, and link them to specific positions.
-        </p>
-      </div>
-
+    <ProfilePageLayout
+      title="References"
+      description="Manage your professional references. Add contact information, upload reference letters, and link them to specific positions."
+    >
       <ReferencesManager />
-    </div>
+    </ProfilePageLayout>
   );
 }
