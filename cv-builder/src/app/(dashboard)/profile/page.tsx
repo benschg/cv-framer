@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
 import { Loader2, Save } from 'lucide-react';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import { getUserInitials, getUserName } from '@/lib/user-utils';
+import { getUserInitials, getUserName, getUserPhone, getUserLocation } from '@/lib/user-utils';
 import type { ProfilePhoto } from '@/types/api.schemas';
+import { toast } from 'sonner';
 import { BasicInfoForm } from '@/components/profile/basic-info-form';
 import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
 import { DefaultCvSettingsForm } from '@/components/profile/default-cv-settings-form';
@@ -14,7 +15,7 @@ import { ProfessionalLinksForm } from '@/components/profile/professional-links-f
 import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -23,19 +24,35 @@ export default function ProfilePage() {
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
 
-  // Form state - pre-filled with user data
+  // Form state - pre-filled with user data from auth.user_metadata
   const { firstName: userFirstName, lastName: userLastName } = getUserName(user);
+  const userPhone = getUserPhone(user);
+  const userLocation = getUserLocation(user);
+
   const [formData, setFormData] = useState({
     firstName: userFirstName,
     lastName: userLastName,
     email: user?.email || '',
-    phone: '',
-    location: '',
+    phone: userPhone,
+    location: userLocation,
     linkedinUrl: '',
     githubUrl: '',
     websiteUrl: '',
     defaultTagline: '',
   });
+
+  // Update form when user data changes (e.g., after login)
+  useEffect(() => {
+    const { firstName, lastName } = getUserName(user);
+    setFormData(prev => ({
+      ...prev,
+      firstName: firstName || prev.firstName,
+      lastName: lastName || prev.lastName,
+      email: user?.email || prev.email,
+      phone: getUserPhone(user) || prev.phone,
+      location: getUserLocation(user) || prev.location,
+    }));
+  }, [user]);
 
   // Load photos
   const loadPhotos = async () => {
@@ -64,11 +81,25 @@ export default function ProfilePage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // TODO: Save to Supabase user_profiles table
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Save basic info to auth.user_metadata
+    const { error } = await updateUserProfile({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      location: formData.location,
+    });
+
+    if (error) {
+      toast.error(`Failed to save: ${error}`);
+      setIsLoading(false);
+      return;
+    }
+
+    // TODO: Save professional links and default tagline to a separate table if needed
 
     setIsLoading(false);
     setIsSaved(true);
+    toast.success('Profile saved successfully!');
   };
 
   const userInitials = getUserInitials(user);
