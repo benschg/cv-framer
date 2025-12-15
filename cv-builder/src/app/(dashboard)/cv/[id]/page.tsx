@@ -29,13 +29,19 @@ import { PhotoSelector } from '@/components/cv/photo-selector';
 import { FormatSettings } from '@/components/cv/format-settings';
 import { CVPreviewSection } from '@/components/cv/cv-preview-section';
 import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-section';
+import { CVEducationSection } from '@/components/cv/cv-education-section';
+import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
+import { CVKeyCompetencesSection } from '@/components/cv/cv-key-competences-section';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { fetchCVWorkExperiences, bulkUpsertCVWorkExperienceSelections } from '@/services/cv-work-experience.service';
+import { fetchCVEducations, bulkUpsertCVEducationSelections } from '@/services/cv-education.service';
+import { fetchCVSkillCategories, bulkUpsertCVSkillCategorySelections } from '@/services/cv-skill-categories.service';
+import { fetchCVKeyCompetences, bulkUpsertCVKeyCompetenceSelections } from '@/services/cv-key-competences.service';
 import type { CVDocument, CVContent, DisplaySettings } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
-import type { CVWorkExperienceWithSelection } from '@/types/profile-career.types';
+import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 
 export default function CVEditorPage() {
   const params = useParams();
@@ -61,6 +67,15 @@ export default function CVEditorPage() {
 
   // Work experience state
   const [workExperiences, setWorkExperiences] = useState<CVWorkExperienceWithSelection[]>([]);
+
+  // Education state
+  const [educations, setEducations] = useState<CVEducationWithSelection[]>([]);
+
+  // Skill categories state
+  const [skillCategories, setSkillCategories] = useState<CVSkillCategoryWithSelection[]>([]);
+
+  // Key competences state
+  const [keyCompetences, setKeyCompetences] = useState<CVKeyCompetenceWithSelection[]>([]);
 
   useEffect(() => {
     const loadCV = async () => {
@@ -99,6 +114,39 @@ export default function CVEditorPage() {
       }
     };
     loadWorkExperiences();
+  }, [cvId]);
+
+  // Load educations
+  useEffect(() => {
+    const loadEducations = async () => {
+      const result = await fetchCVEducations(cvId);
+      if (result.data) {
+        setEducations(result.data);
+      }
+    };
+    loadEducations();
+  }, [cvId]);
+
+  // Load skill categories
+  useEffect(() => {
+    const loadSkillCategories = async () => {
+      const result = await fetchCVSkillCategories(cvId);
+      if (result.data) {
+        setSkillCategories(result.data);
+      }
+    };
+    loadSkillCategories();
+  }, [cvId]);
+
+  // Load key competences
+  useEffect(() => {
+    const loadKeyCompetences = async () => {
+      const result = await fetchCVKeyCompetences(cvId);
+      if (result.data) {
+        setKeyCompetences(result.data);
+      }
+    };
+    loadKeyCompetences();
   }, [cvId]);
 
   // Update photo URL when selected photo or primary photo changes
@@ -155,6 +203,42 @@ export default function CVEditorPage() {
         selected_bullet_indices: exp.selection.selected_bullet_indices,
       }));
       await bulkUpsertCVWorkExperienceSelections(cvId, selectionsToSave);
+    }
+
+    // Save education selections
+    if (educations.length > 0) {
+      const selectionsToSave = educations.map((edu, index) => ({
+        education_id: edu.id,
+        is_selected: edu.selection.is_selected,
+        is_favorite: edu.selection.is_favorite,
+        display_order: index,
+        description_override: edu.selection.description_override,
+      }));
+      await bulkUpsertCVEducationSelections(cvId, selectionsToSave);
+    }
+
+    // Save skill category selections
+    if (skillCategories.length > 0) {
+      const selectionsToSave = skillCategories.map((cat, index) => ({
+        skill_category_id: cat.id,
+        is_selected: cat.selection.is_selected,
+        is_favorite: cat.selection.is_favorite,
+        display_order: index,
+        selected_skill_indices: cat.selection.selected_skill_indices,
+      }));
+      await bulkUpsertCVSkillCategorySelections(cvId, selectionsToSave);
+    }
+
+    // Save key competence selections
+    if (keyCompetences.length > 0) {
+      const selectionsToSave = keyCompetences.map((comp, index) => ({
+        key_competence_id: comp.id,
+        is_selected: comp.selection.is_selected,
+        is_favorite: comp.selection.is_favorite,
+        display_order: index,
+        description_override: comp.selection.description_override,
+      }));
+      await bulkUpsertCVKeyCompetenceSelections(cvId, selectionsToSave);
     }
 
     if (result.error) {
@@ -578,6 +662,36 @@ export default function CVEditorPage() {
         onShowWorkExperienceChange={(show) => updateDisplaySettings('showWorkExperience', show)}
       />
 
+      {/* Education Section */}
+      <CVEducationSection
+        cvId={cvId}
+        educations={educations}
+        onChange={setEducations}
+        language={cv.language}
+        showEducation={cv.display_settings?.showEducation !== false}
+        onShowEducationChange={(show) => updateDisplaySettings('showEducation', show)}
+      />
+
+      {/* Skills Section */}
+      <CVSkillCategoriesSection
+        cvId={cvId}
+        skillCategories={skillCategories}
+        onChange={setSkillCategories}
+        language={cv.language}
+        showSkills={cv.display_settings?.showSkills !== false}
+        onShowSkillsChange={(show) => updateDisplaySettings('showSkills', show)}
+      />
+
+      {/* Key Competences Section */}
+      <CVKeyCompetencesSection
+        cvId={cvId}
+        keyCompetences={keyCompetences}
+        onChange={setKeyCompetences}
+        language={cv.language}
+        showKeyCompetences={cv.display_settings?.showKeyCompetences !== false}
+        onShowKeyCompetencesChange={(show) => updateDisplaySettings('showKeyCompetences', show)}
+      />
+
       {/* Format Settings */}
       <FormatSettings
         displaySettings={cv.display_settings}
@@ -596,6 +710,9 @@ export default function CVEditorPage() {
         onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
         onFormatChange={(format) => updateDisplaySettings('format', format)}
         workExperiences={workExperiences}
+        educations={educations}
+        skillCategories={skillCategories}
+        keyCompetences={keyCompetences}
       />
 
         </div>

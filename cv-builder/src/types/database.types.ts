@@ -183,6 +183,159 @@ export type Database = {
           },
         ]
       }
+      cv_education_selections: {
+        Row: {
+          created_at: string | null
+          cv_id: string
+          description_override: string | null
+          display_order: number | null
+          education_id: string
+          id: string
+          is_favorite: boolean | null
+          is_selected: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cv_id: string
+          description_override?: string | null
+          display_order?: number | null
+          education_id: string
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cv_id?: string
+          description_override?: string | null
+          display_order?: number | null
+          education_id?: string
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_education_selections_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cv_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_education_selections_education_id_fkey"
+            columns: ["education_id"]
+            isOneToOne: false
+            referencedRelation: "profile_educations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cv_key_competence_selections: {
+        Row: {
+          created_at: string | null
+          cv_id: string
+          description_override: string | null
+          display_order: number | null
+          id: string
+          is_favorite: boolean | null
+          is_selected: boolean | null
+          key_competence_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cv_id: string
+          description_override?: string | null
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          key_competence_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cv_id?: string
+          description_override?: string | null
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          key_competence_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_key_competence_selections_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cv_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_key_competence_selections_key_competence_id_fkey"
+            columns: ["key_competence_id"]
+            isOneToOne: false
+            referencedRelation: "profile_key_competences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cv_skill_category_selections: {
+        Row: {
+          created_at: string | null
+          cv_id: string
+          display_order: number | null
+          id: string
+          is_favorite: boolean | null
+          is_selected: boolean | null
+          selected_skill_indices: number[] | null
+          skill_category_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cv_id: string
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          selected_skill_indices?: number[] | null
+          skill_category_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cv_id?: string
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          selected_skill_indices?: number[] | null
+          skill_category_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_skill_category_selections_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cv_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_skill_category_selections_skill_category_id_fkey"
+            columns: ["skill_category_id"]
+            isOneToOne: false
+            referencedRelation: "profile_skill_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cv_templates: {
         Row: {
           created_at: string | null

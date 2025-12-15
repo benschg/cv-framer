@@ -136,6 +136,9 @@ export interface DisplaySettings {
   showPhoto: boolean;
   showAttachments: boolean;
   showWorkExperience?: boolean;
+  showEducation?: boolean;
+  showSkills?: boolean;
+  showKeyCompetences?: boolean;
   privacyLevel: 'none' | 'personal' | 'full';
   accentColor?: string;
   fontFamily?: string;
