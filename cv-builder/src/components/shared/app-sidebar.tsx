@@ -37,6 +37,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
 import { ThemeToggle } from './theme-toggle';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
+import { getUserInitials, getDisplayName } from '@/lib/user-utils';
 import type { ProfilePhoto } from '@/types/api.schemas';
 
 const navigation = [
@@ -68,10 +69,6 @@ export function AppSidebar() {
   const { user, signOut } = useAuth();
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
 
-  const userInitials = user?.email
-    ? user.email.charAt(0).toUpperCase()
-    : 'U';
-
   useEffect(() => {
     const loadPrimaryPhoto = async () => {
       const result = await fetchProfilePhotos();
@@ -88,6 +85,8 @@ export function AppSidebar() {
   const avatarUrl = primaryPhoto
     ? getPhotoPublicUrl(primaryPhoto.storage_path)
     : user?.user_metadata?.avatar_url;
+  const userInitials = getUserInitials(user);
+  const displayName = getDisplayName(user);
 
   return (
     <Sidebar>
@@ -136,7 +135,7 @@ export function AppSidebar() {
             </Avatar>
             <div className="flex-1 text-left text-sm">
               <p className="font-medium truncate">
-                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                {displayName}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {user?.email}

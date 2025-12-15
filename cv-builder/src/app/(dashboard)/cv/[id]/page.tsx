@@ -26,12 +26,16 @@ import {
 import { fetchCV, updateCV, generateId } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { CVPreview } from '@/components/cv/cv-preview';
+import { PhotoSelector } from '@/components/cv/photo-selector';
+import { useAuth } from '@/contexts/auth-context';
+import { getUserInitials } from '@/lib/user-utils';
 import type { CVDocument, CVContent, WorkExperience, Education, SkillCategory, KeyCompetence } from '@/types/cv.types';
 
 export default function CVEditorPage() {
   const params = useParams();
   const router = useRouter();
   const cvId = params.id as string;
+  const { user } = useAuth();
 
   const [cv, setCv] = useState<CVDocument | null>(null);
   const [loading, setLoading] = useState(true);
@@ -361,6 +365,23 @@ export default function CVEditorPage() {
           </Button>
         </div>
       </div>
+
+      {/* Photo Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Photo Settings</CardTitle>
+          <CardDescription>
+            Choose which photo to use for this CV (defaults to your primary photo)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PhotoSelector
+            selectedPhotoId={content.selected_photo_id || null}
+            onChange={(photoId) => updateField('selected_photo_id', photoId)}
+            userInitials={getUserInitials(user)}
+          />
+        </CardContent>
+      </Card>
 
       {/* AI Generate Button */}
       <Card className="border-dashed border-primary/50 bg-primary/5">

@@ -11,6 +11,7 @@ import { Loader2, Save, Plus } from 'lucide-react';
 import { PhotoUpload } from '@/components/profile/photo-upload';
 import { PhotoGallery } from '@/components/profile/photo-gallery';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
+import { getUserInitials, getUserName } from '@/lib/user-utils';
 import type { ProfilePhoto } from '@/types/api.schemas';
 
 export default function ProfilePage() {
@@ -25,9 +26,10 @@ export default function ProfilePage() {
   const [loadingPhotos, setLoadingPhotos] = useState(true);
 
   // Form state - pre-filled with user data
+  const { firstName: userFirstName, lastName: userLastName } = getUserName(user);
   const [formData, setFormData] = useState({
-    firstName: user?.user_metadata?.full_name?.split(' ')[0] || '',
-    lastName: user?.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
+    firstName: userFirstName,
+    lastName: userLastName,
     email: user?.email || '',
     phone: '',
     location: '',
@@ -71,10 +73,7 @@ export default function ProfilePage() {
     setIsSaved(true);
   };
 
-  const userInitials = formData.firstName
-    ? `${formData.firstName.charAt(0)}${formData.lastName?.charAt(0) || ''}`
-    : user?.email?.charAt(0).toUpperCase() || 'U';
-
+  const userInitials = getUserInitials(user);
   const primaryPhotoUrl = primaryPhoto
     ? getPhotoPublicUrl(primaryPhoto.storage_path)
     : user?.user_metadata?.avatar_url;

@@ -38,6 +38,7 @@ export interface CVContent {
   tagline?: string;
   profile?: string;
   slogan?: string;
+  selected_photo_id?: string | null; // UUID of selected photo from profile_photos
   workExperience?: WorkExperience[];
   education?: Education[];
   skills?: SkillCategory[];
