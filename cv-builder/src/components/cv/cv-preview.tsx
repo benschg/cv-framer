@@ -17,6 +17,8 @@ interface CVPreviewProps {
 
 export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U', photoElement }: CVPreviewProps) {
   const accentColor = settings?.accentColor || '#2563eb';
+  const textColor = settings?.textColor || '#111827';
+  const fontFamily = settings?.fontFamily || 'sans-serif';
   const showPhoto = settings?.showPhoto !== false && photoUrl;
   const format = settings?.format || 'A4';
 
@@ -58,11 +60,13 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
   return (
     <div
-      className="bg-white text-gray-900 p-8 rounded-lg shadow-sm border mx-auto font-sans text-[10pt] leading-relaxed"
+      className="bg-white p-8 rounded-lg shadow-sm border mx-auto text-[10pt] leading-relaxed"
       style={{
         width: `${pageWidth}mm`,
         minHeight: `${pageHeight}mm`,
-        aspectRatio: `${pageWidth} / ${pageHeight}`
+        aspectRatio: `${pageWidth} / ${pageHeight}`,
+        fontFamily: fontFamily,
+        color: textColor
       }}
     >
       {/* Header */}

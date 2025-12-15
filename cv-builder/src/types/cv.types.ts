@@ -173,6 +173,7 @@ export interface DisplaySettings {
   privacyLevel: 'none' | 'personal' | 'full';
   accentColor?: string;
   fontFamily?: string;
+  textColor?: string;
 }
 
 export interface WerbeflaechenSnapshot {
