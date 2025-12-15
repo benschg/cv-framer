@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, Trash2, Loader2, ExternalLink, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
+import { AlertTriangle, Trash2, Loader2, ExternalLink, FileText, Image as ImageIcon } from 'lucide-react';
+import { CertificationDocumentsManager } from './certification-documents-manager';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
 import { formatMonthYear } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -160,81 +161,11 @@ function CertificationEditForm({
   onMultiFieldChange,
   onDone,
 }: CertificationEditFormProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingFile, setUploadingFile] = useState(false);
-
   // Check if expiry date is before issue date
   const isExpiryBeforeIssue = (() => {
     if (!formData.date || !formData.expiry_date) return false;
     return formData.expiry_date < formData.date;
   })();
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type (images and PDFs only)
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
-    if (!validTypes.includes(file.type)) {
-      toast.error('Invalid file type', {
-        description: 'Please upload an image (JPG, PNG, WebP) or PDF file.',
-      });
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-      toast.error('File too large', {
-        description: `File size is ${sizeMB}MB. Maximum allowed size is 10MB.`,
-      });
-      return;
-    }
-
-    setUploadingFile(true);
-
-    try {
-      // Upload to storage
-      const formDataToSend = new FormData();
-      formDataToSend.append('file', file);
-      if (formData.id) {
-        formDataToSend.append('certificationId', formData.id);
-      }
-
-      // For now, just create a preview URL
-      // TODO: Implement actual storage upload in future
-      const objectUrl = URL.createObjectURL(file);
-
-      onMultiFieldChange({
-        document_url: objectUrl,
-        document_name: file.name,
-      });
-
-      toast.success('Document attached', {
-        description: file.name,
-      });
-
-    } catch (error) {
-      console.error('File upload error:', error);
-      toast.error('Failed to upload file', {
-        description: 'Please try again or contact support if the problem persists.',
-      });
-    } finally {
-      setUploadingFile(false);
-
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleRemoveDocument = () => {
-    onMultiFieldChange({
-      document_url: '',
-      document_name: '',
-    });
-  };
 
   return (
     <>
@@ -319,68 +250,16 @@ function CertificationEditForm({
           />
         </div>
 
-        {/* Certificate Document Upload */}
-        <div className="space-y-2">
-          <Label>Certificate Document</Label>
-          {formData.document_url ? (
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
-              <div className="flex-shrink-0">
-                {formData.document_name?.toLowerCase().endsWith('.pdf') ? (
-                  <FileText className="h-8 w-8 text-red-500" />
-                ) : (
-                  <ImageIcon className="h-8 w-8 text-blue-500" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{formData.document_name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {formData.document_name?.toLowerCase().endsWith('.pdf') ? 'PDF Document' : 'Image'}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.open(formData.document_url || '', '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveDocument}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingFile}
-                className="w-full"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                {uploadingFile ? 'Uploading...' : 'Upload Certificate (Image or PDF)'}
-              </Button>
-              <p className="text-xs text-muted-foreground mt-1">
-                Accepted formats: JPG, PNG, WebP, PDF (Max 10MB)
-              </p>
-            </div>
-          )}
-        </div>
+        {/* Certificate Documents */}
+        {item.id && (
+          <div className="space-y-2">
+            <Label>Certificate Documents</Label>
+            <CertificationDocumentsManager
+              certificationId={item.id}
+              disabled={isSaving}
+            />
+          </div>
+        )}
       </CardContent>
     </>
   );
@@ -400,6 +279,8 @@ function CertificationViewCard({
   onDelete,
   disabled,
 }: CertificationViewCardProps) {
+  const [showDocuments, setShowDocuments] = useState(false);
+
   return (
     <>
       <CardHeader>
@@ -424,21 +305,16 @@ function CertificationViewCard({
                   <ExternalLink className="h-3 w-3" />
                 </a>
               )}
-              {certification.document_url && (
-                <a
-                  href={certification.document_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  {certification.document_name?.toLowerCase().endsWith('.pdf') ? (
-                    <FileText className="h-3 w-3" />
-                  ) : (
-                    <ImageIcon className="h-3 w-3" />
-                  )}
-                  View certificate
-                </a>
-              )}
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={() => setShowDocuments(!showDocuments)}
+                className="h-auto p-0 text-sm"
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                {showDocuments ? 'Hide documents' : 'View documents'}
+              </Button>
             </div>
           </div>
           <div className="flex gap-2">
@@ -461,6 +337,14 @@ function CertificationViewCard({
           </div>
         </div>
       </CardHeader>
+      {showDocuments && (
+        <CardContent>
+          <CertificationDocumentsManager
+            certificationId={certification.id}
+            disabled={disabled}
+          />
+        </CardContent>
+      )}
     </>
   );
 }

@@ -20,7 +20,8 @@
       "Bash(npm run dev:*)",
       "Bash(bun run type-check:*)",
       "Bash(npm run type-check:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git rebase:*)"
     ]
   }
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { extractCertificationData } from '@/lib/ai/gemini';
-import { uploadCertificationDocument } from '@/services/profile-career.service';
+import { createCertificationDocument } from '@/services/profile-career.service';
 
 // POST /api/certifications/analyze - Analyze certification document and extract data
 export async function POST(request: NextRequest) {
@@ -52,22 +52,16 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Upload to storage first (prevents data loss if AI fails)
-    let documentUrl: string | undefined;
-    let storagePath: string | undefined;
+    let documentData: any = null;
 
     if (certificationId) {
-      const uploadResult = await uploadCertificationDocument(
-        user.id,
-        certificationId,
-        file
-      );
+      const uploadResult = await createCertificationDocument(certificationId, file);
 
       if (uploadResult.error) {
         console.error('Storage upload error:', uploadResult.error);
         // Continue with analysis even if upload fails
       } else {
-        documentUrl = uploadResult.data?.url;
-        storagePath = uploadResult.data?.path;
+        documentData = uploadResult.data;
       }
     }
 
@@ -111,10 +105,8 @@ export async function POST(request: NextRequest) {
             credential_id: 0,
             url: 0,
           },
-          documentUploaded: !!documentUrl,
-          documentUrl,
-          storagePath,
-          documentName: file.name,
+          documentUploaded: !!documentData,
+          document: documentData,
         },
         { status: 200 } // Not an error - return empty data for manual entry
       );
@@ -123,10 +115,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       extractedData: extractionResult.extractedData,
       confidence: extractionResult.confidence,
-      documentUploaded: !!documentUrl,
-      documentUrl,
-      storagePath,
-      documentName: file.name,
+      documentUploaded: !!documentData,
+      document: documentData,
     });
 
   } catch (error) {

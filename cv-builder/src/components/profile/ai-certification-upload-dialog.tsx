@@ -125,9 +125,9 @@ export function AICertificationUploadDialog({
         expiry_date: data.extractedData.expiry_date || '',
         credential_id: data.extractedData.credential_id || '',
         url: data.extractedData.url || '',
-        document_url: data.documentUrl || '',
-        document_name: data.documentName,
-        storage_path: data.storagePath || '',
+        document_url: data.document?.document_url || '',
+        document_name: data.document?.document_name || file.name,
+        storage_path: data.document?.storage_path || '',
       });
 
       // Success feedback

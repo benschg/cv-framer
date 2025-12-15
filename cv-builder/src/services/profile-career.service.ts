@@ -388,6 +388,91 @@ export async function deleteCertificationDocument(storagePath: string): Promise<
 }
 
 // ============================================
+// CERTIFICATION DOCUMENTS (Multiple per certification)
+// ============================================
+
+// Fetch all documents for a certification
+export async function fetchCertificationDocuments(
+  certificationId: string
+): Promise<{ data: any[] | null; error: any }> {
+  const { data, error } = await supabase
+    .from('certification_documents')
+    .select('*')
+    .eq('certification_id', certificationId)
+    .order('display_order', { ascending: true });
+
+  return { data, error };
+}
+
+// Create certification document
+export async function createCertificationDocument(
+  certificationId: string,
+  file: File
+): Promise<{ data: any | null; error: any }> {
+  const { userId, error: userError } = await getCurrentUserId();
+  if (userError || !userId) {
+    return { data: null, error: userError || { message: 'User not authenticated' } };
+  }
+
+  // Upload file to storage
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${certificationId}_${Date.now()}.${fileExt}`;
+  const filePath = `${userId}/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('certification-documents')
+    .upload(filePath, file, { upsert: false });
+
+  if (uploadError) {
+    return { data: null, error: uploadError };
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('certification-documents')
+    .getPublicUrl(filePath);
+
+  // Create document record
+  const { data, error } = await supabase
+    .from('certification_documents')
+    .insert({
+      certification_id: certificationId,
+      user_id: userId,
+      document_url: publicUrl,
+      document_name: file.name,
+      storage_path: filePath,
+      file_type: file.type,
+      file_size: file.size,
+    })
+    .select()
+    .single();
+
+  return { data, error };
+}
+
+// Delete certification document
+export async function deleteCertificationDocumentRecord(
+  documentId: string,
+  storagePath: string
+): Promise<{ error: any }> {
+  // Delete from storage
+  const { error: storageError } = await supabase.storage
+    .from('certification-documents')
+    .remove([storagePath]);
+
+  if (storageError) {
+    return { error: storageError };
+  }
+
+  // Delete database record
+  const { error } = await supabase
+    .from('certification_documents')
+    .delete()
+    .eq('id', documentId);
+
+  return { error };
+}
+
+// ============================================
 // REFERENCES
 // ============================================
 
