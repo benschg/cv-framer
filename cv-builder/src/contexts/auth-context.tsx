@@ -12,11 +12,19 @@ interface AuthState {
   error: string | null;
 }
 
+interface UserProfileData {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  location?: string;
+}
+
 interface AuthContextType extends AuthState {
   signInWithGoogle: () => Promise<void>;
   signInWithOTP: (email: string) => Promise<{ error: string | null }>;
   verifyOTP: (email: string, token: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  updateUserProfile: (data: UserProfileData) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -132,6 +140,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase]);
 
+  const updateUserProfile = useCallback(async (data: UserProfileData) => {
+    const fullName = [data.firstName, data.lastName].filter(Boolean).join(' ');
+
+    const { data: updatedUser, error } = await supabase.auth.updateUser({
+      data: {
+        full_name: fullName || undefined,
+        first_name: data.firstName || undefined,
+        last_name: data.lastName || undefined,
+        phone: data.phone || undefined,
+        location: data.location || undefined,
+      },
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    // Update local state with the new user data
+    if (updatedUser.user) {
+      setState(prev => ({ ...prev, user: updatedUser.user }));
+    }
+
+    return { error: null };
+  }, [supabase]);
+
   return (
     <AuthContext.Provider value={{
       ...state,
@@ -139,6 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithOTP,
       verifyOTP,
       signOut,
+      updateUserProfile,
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,44 +1,58 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
-import { Loader2, Save, Plus, Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck } from 'lucide-react';
-import { PhotoUpload } from '@/components/profile/photo-upload';
-import { PhotoGallery } from '@/components/profile/photo-gallery';
+import { Loader2, Save } from 'lucide-react';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import { getUserInitials, getUserName } from '@/lib/user-utils';
+import { getUserInitials, getUserName, getUserPhone, getUserLocation } from '@/lib/user-utils';
 import type { ProfilePhoto } from '@/types/api.schemas';
+import { toast } from 'sonner';
+import { BasicInfoForm } from '@/components/profile/basic-info-form';
+import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
+import { DefaultCvSettingsForm } from '@/components/profile/default-cv-settings-form';
+import { ProfessionalLinksForm } from '@/components/profile/professional-links-form';
+import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [showUpload, setShowUpload] = useState(false);
 
   // Photo state
   const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
 
-  // Form state - pre-filled with user data
+  // Form state - pre-filled with user data from auth.user_metadata
   const { firstName: userFirstName, lastName: userLastName } = getUserName(user);
+  const userPhone = getUserPhone(user);
+  const userLocation = getUserLocation(user);
+
   const [formData, setFormData] = useState({
     firstName: userFirstName,
     lastName: userLastName,
     email: user?.email || '',
-    phone: '',
-    location: '',
+    phone: userPhone,
+    location: userLocation,
     linkedinUrl: '',
     githubUrl: '',
     websiteUrl: '',
     defaultTagline: '',
   });
+
+  // Update form when user data changes (e.g., after login)
+  useEffect(() => {
+    const { firstName, lastName } = getUserName(user);
+    setFormData(prev => ({
+      ...prev,
+      firstName: firstName || prev.firstName,
+      lastName: lastName || prev.lastName,
+      email: user?.email || prev.email,
+      phone: getUserPhone(user) || prev.phone,
+      location: getUserLocation(user) || prev.location,
+    }));
+  }, [user]);
 
   // Load photos
   const loadPhotos = async () => {
@@ -67,50 +81,31 @@ export default function ProfilePage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // TODO: Save to Supabase user_profiles table
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Save basic info to auth.user_metadata
+    const { error } = await updateUserProfile({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      location: formData.location,
+    });
+
+    if (error) {
+      toast.error(`Failed to save: ${error}`);
+      setIsLoading(false);
+      return;
+    }
+
+    // TODO: Save professional links and default tagline to a separate table if needed
 
     setIsLoading(false);
     setIsSaved(true);
+    toast.success('Profile saved successfully!');
   };
 
   const userInitials = getUserInitials(user);
   const primaryPhotoUrl = primaryPhoto
     ? getPhotoPublicUrl(primaryPhoto.storage_path)
     : user?.user_metadata?.avatar_url;
-
-  const profileSections = [
-    {
-      title: 'Work Experience',
-      description: 'Manage your work history',
-      href: '/profile/experience',
-      icon: Briefcase,
-    },
-    {
-      title: 'Education',
-      description: 'Add your degrees and qualifications',
-      href: '/profile/education',
-      icon: GraduationCap,
-    },
-    {
-      title: 'Skills',
-      description: 'Organize your skills by category',
-      href: '/profile/skills',
-      icon: Code,
-    },
-    {
-      title: 'Certifications',
-      description: 'Add professional certifications',
-      href: '/profile/certifications',
-      icon: Award,
-    },
-    {
-      title: 'References',
-      description: 'Upload reference letters',
-      href: '/profile/references',
-      icon: UserCheck,
-    },
-  ];
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -121,239 +116,26 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      {/* Quick Navigation to Profile Sections */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Career Information</CardTitle>
-          <CardDescription>
-            Manage your professional background that will be used across all your CVs
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {profileSections.map((section) => (
-              <Link
-                key={section.href}
-                href={section.href}
-                className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors group"
-              >
-                <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <section.icon className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{section.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {section.description}
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
-              </Link>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Profile Photos */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Photos</CardTitle>
-            <CardDescription>
-              Upload multiple photos and choose which one to use for each CV
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Current Primary Photo */}
-            <div className="flex items-center gap-6">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={primaryPhotoUrl} />
-                <AvatarFallback className="text-xl">{userInitials}</AvatarFallback>
-              </Avatar>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">
-                  {primaryPhoto ? 'Primary Photo' : 'No photos uploaded'}
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowUpload(!showUpload)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {showUpload ? 'Hide Upload' : 'Add Photo'}
-                </Button>
-              </div>
-            </div>
+        <BasicInfoForm formData={formData} onChange={handleChange} />
 
-            {/* Upload Section */}
-            {showUpload && (
-              <div>
-                <PhotoUpload
-                  onUploadComplete={() => {
-                    loadPhotos();
-                    setShowUpload(false);
-                  }}
-                  isPrimary={photos.length === 0}
-                />
-              </div>
-            )}
+        <ProfilePhotosCard
+          photos={photos}
+          primaryPhoto={primaryPhoto}
+          loadingPhotos={loadingPhotos}
+          primaryPhotoUrl={primaryPhotoUrl}
+          userInitials={userInitials}
+          onPhotosUpdate={loadPhotos}
+        />
 
-            {/* Photo Gallery */}
-            {loadingPhotos ? (
-              <div className="text-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-              </div>
-            ) : (
-              <PhotoGallery
-                photos={photos}
-                primaryPhoto={primaryPhoto}
-                onUpdate={loadPhotos}
-                userInitials={userInitials}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <DefaultCvSettingsForm
+          defaultTagline={formData.defaultTagline}
+          onChange={handleChange}
+        />
 
-        {/* Basic Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>
-              Your name and contact details
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  placeholder="John"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  placeholder="Doe"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="john@example.com"
-                disabled
-              />
-              <p className="text-xs text-muted-foreground">
-                Email is managed through your account settings
-              </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  placeholder="San Francisco, CA"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <CareerInfoNavigation />
 
-        {/* Professional Links */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Professional Links</CardTitle>
-            <CardDescription>
-              Add links to your professional profiles
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
-              <Input
-                id="linkedinUrl"
-                name="linkedinUrl"
-                type="url"
-                value={formData.linkedinUrl}
-                onChange={handleChange}
-                placeholder="https://linkedin.com/in/yourprofile"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="githubUrl">GitHub URL</Label>
-              <Input
-                id="githubUrl"
-                name="githubUrl"
-                type="url"
-                value={formData.githubUrl}
-                onChange={handleChange}
-                placeholder="https://github.com/yourusername"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="websiteUrl">Personal Website</Label>
-              <Input
-                id="websiteUrl"
-                name="websiteUrl"
-                type="url"
-                value={formData.websiteUrl}
-                onChange={handleChange}
-                placeholder="https://yourwebsite.com"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Default CV Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Default CV Settings</CardTitle>
-            <CardDescription>
-              Set default values for new CVs
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="defaultTagline">Default Tagline</Label>
-              <Input
-                id="defaultTagline"
-                name="defaultTagline"
-                value={formData.defaultTagline}
-                onChange={handleChange}
-                placeholder="e.g., Senior Software Engineer | React & Node.js"
-              />
-              <p className="text-xs text-muted-foreground">
-                This will be used as the default tagline for new CVs
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <ProfessionalLinksForm formData={formData} onChange={handleChange} />
 
         {/* Save Button */}
         <div className="flex justify-end gap-4">

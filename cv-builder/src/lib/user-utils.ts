@@ -30,15 +30,42 @@ export function getUserInitials(user: User | null | undefined, fallback: string 
  * Get first and last name from user
  */
 export function getUserName(user: User | null | undefined): { firstName: string; lastName: string } {
-  if (!user?.user_metadata?.full_name) {
+  if (!user?.user_metadata) {
     return { firstName: '', lastName: '' };
   }
 
-  const names = user.user_metadata.full_name.trim().split(/\s+/);
-  return {
-    firstName: names[0] || '',
-    lastName: names.slice(1).join(' ') || '',
-  };
+  // Prefer explicit first_name/last_name fields
+  if (user.user_metadata.first_name || user.user_metadata.last_name) {
+    return {
+      firstName: user.user_metadata.first_name || '',
+      lastName: user.user_metadata.last_name || '',
+    };
+  }
+
+  // Fall back to parsing full_name
+  if (user.user_metadata.full_name) {
+    const names = user.user_metadata.full_name.trim().split(/\s+/);
+    return {
+      firstName: names[0] || '',
+      lastName: names.slice(1).join(' ') || '',
+    };
+  }
+
+  return { firstName: '', lastName: '' };
+}
+
+/**
+ * Get phone number from user metadata
+ */
+export function getUserPhone(user: User | null | undefined): string {
+  return user?.user_metadata?.phone || '';
+}
+
+/**
+ * Get location from user metadata
+ */
+export function getUserLocation(user: User | null | undefined): string {
+  return user?.user_metadata?.location || '';
 }
 
 /**
