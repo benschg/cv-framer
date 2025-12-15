@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Trash2, X, Loader2 } from 'lucide-react';
+import { MonthYearPicker } from '@/components/ui/month-year-picker';
 import {
   fetchWorkExperiences,
   createWorkExperience,
@@ -199,22 +200,20 @@ function ExperienceEditForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="start_date">Start Date *</Label>
-            <Input
-              id="start_date"
-              type="month"
+            <Label>Start Date *</Label>
+            <MonthYearPicker
               value={formData.start_date || ''}
-              onChange={(e) => onFieldChange('start_date', e.target.value)}
+              onChange={(value) => onFieldChange('start_date', value)}
+              placeholder="Select start date"
             />
           </div>
           {!formData.current && (
             <div className="space-y-2">
-              <Label htmlFor="end_date">End Date</Label>
-              <Input
-                id="end_date"
-                type="month"
+              <Label>End Date</Label>
+              <MonthYearPicker
                 value={formData.end_date || ''}
-                onChange={(e) => onFieldChange('end_date', e.target.value)}
+                onChange={(value) => onFieldChange('end_date', value)}
+                placeholder="Select end date"
               />
             </div>
           )}
