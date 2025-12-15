@@ -1,97 +1,168 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Trash2, GripVertical, Save, X } from 'lucide-react';
-import { generateId } from '@/services/cv.service';
-import type { WorkExperience } from '@/types/cv.types';
+import { Plus, Trash2, GripVertical, Save, X, Loader2 } from 'lucide-react';
+import {
+  fetchWorkExperiences,
+  createWorkExperience,
+  updateWorkExperience,
+  deleteWorkExperience,
+  autoSaveWorkExperience,
+  type ProfileWorkExperience,
+} from '@/services/profile-career.service';
 
 export function WorkExperienceManager() {
-  const [experiences, setExperiences] = useState<WorkExperience[]>([]);
+  const [experiences, setExperiences] = useState<ProfileWorkExperience[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<WorkExperience>>({});
+  const [formData, setFormData] = useState<Partial<ProfileWorkExperience>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const handleAdd = () => {
-    const newExperience: WorkExperience = {
-      id: generateId(),
+  // Load experiences on mount
+  useEffect(() => {
+    loadExperiences();
+  }, []);
+
+  const loadExperiences = async () => {
+    setLoading(true);
+    const { data, error } = await fetchWorkExperiences();
+    if (error) {
+      console.error('Failed to load work experiences:', error);
+    } else if (data) {
+      setExperiences(data);
+    }
+    setLoading(false);
+  };
+
+  const handleAdd = async () => {
+    setSaving(true);
+    const newExperience = {
       company: '',
       title: '',
       location: '',
-      startDate: '',
-      endDate: '',
+      start_date: '',
+      end_date: '',
       current: false,
       description: '',
       bullets: [],
+      display_order: experiences.length,
     };
-    setExperiences([newExperience, ...experiences]);
-    setEditingId(newExperience.id);
-    setFormData(newExperience);
+
+    const { data, error } = await createWorkExperience(newExperience);
+    if (error) {
+      console.error('Failed to create work experience:', error);
+      alert('Failed to create work experience');
+    } else if (data) {
+      setExperiences([data, ...experiences]);
+      setEditingId(data.id);
+      setFormData(data);
+    }
+    setSaving(false);
   };
 
-  const handleEdit = (experience: WorkExperience) => {
+  const handleEdit = (experience: ProfileWorkExperience) => {
     setEditingId(experience.id);
     setFormData(experience);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingId) return;
 
-    setExperiences(experiences.map(exp =>
-      exp.id === editingId
-        ? { ...exp, ...formData }
-        : exp
-    ));
+    setSaving(true);
+    const { data, error } = await updateWorkExperience(editingId, formData);
+    if (error) {
+      console.error('Failed to save work experience:', error);
+      alert('Failed to save work experience');
+    } else if (data) {
+      setExperiences(experiences.map(exp =>
+        exp.id === editingId ? data : exp
+      ));
+    }
     setEditingId(null);
     setFormData({});
+    setSaving(false);
   };
 
   const handleCancel = () => {
-    // If it's a new unsaved experience, remove it
+    // If it's a new unsaved experience, delete it
     if (editingId && !experiences.find(e => e.id === editingId)?.company) {
-      setExperiences(experiences.filter(e => e.id !== editingId));
+      handleDelete(editingId);
     }
     setEditingId(null);
     setFormData({});
   };
 
-  const handleDelete = (id: string) => {
-    setExperiences(experiences.filter(e => e.id !== id));
-    if (editingId === id) {
-      setEditingId(null);
-      setFormData({});
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this work experience?')) {
+      return;
     }
+
+    setSaving(true);
+    const { error } = await deleteWorkExperience(id);
+    if (error) {
+      console.error('Failed to delete work experience:', error);
+      alert('Failed to delete work experience');
+    } else {
+      setExperiences(experiences.filter(e => e.id !== id));
+      if (editingId === id) {
+        setEditingId(null);
+        setFormData({});
+      }
+    }
+    setSaving(false);
   };
+
+  // Auto-save handler
+  const handleFieldChange = useCallback((field: keyof ProfileWorkExperience, value: any) => {
+    const updatedData = { ...formData, [field]: value };
+    setFormData(updatedData);
+
+    // Only auto-save if we're editing an existing entry with required fields
+    if (editingId && updatedData.company && updatedData.title && updatedData.start_date) {
+      autoSaveWorkExperience(editingId, updatedData);
+    }
+  }, [editingId, formData]);
 
   const handleBulletChange = (index: number, value: string) => {
     const newBullets = [...(formData.bullets || [])];
     newBullets[index] = value;
-    setFormData({ ...formData, bullets: newBullets });
+    handleFieldChange('bullets', newBullets);
   };
 
   const handleAddBullet = () => {
-    setFormData({
-      ...formData,
-      bullets: [...(formData.bullets || []), '']
-    });
+    handleFieldChange('bullets', [...(formData.bullets || []), '']);
   };
 
   const handleRemoveBullet = (index: number) => {
     const newBullets = [...(formData.bullets || [])];
     newBullets.splice(index, 1);
-    setFormData({ ...formData, bullets: newBullets });
+    handleFieldChange('bullets', newBullets);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       {/* Add Button */}
       <div className="flex justify-end">
-        <Button onClick={handleAdd} disabled={editingId !== null}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button onClick={handleAdd} disabled={editingId !== null || saving}>
+          {saving ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Plus className="h-4 w-4 mr-2" />
+          )}
           Add Experience
         </Button>
       </div>
@@ -117,7 +188,7 @@ export function WorkExperienceManager() {
                       <Input
                         id="title"
                         value={formData.title || ''}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) => handleFieldChange('title', e.target.value)}
                         placeholder="Senior Software Engineer"
                       />
                     </div>
@@ -126,50 +197,53 @@ export function WorkExperienceManager() {
                       <Input
                         id="company"
                         value={formData.company || ''}
-                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                        onChange={(e) => handleFieldChange('company', e.target.value)}
                         placeholder="Tech Corp Inc."
                       />
                     </div>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
+                      <Label htmlFor="start_date">Start Date *</Label>
                       <Input
-                        id="location"
-                        value={formData.location || ''}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="San Francisco, CA"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="startDate">Start Date *</Label>
-                      <Input
-                        id="startDate"
+                        id="start_date"
                         type="month"
-                        value={formData.startDate || ''}
-                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        value={formData.start_date || ''}
+                        onChange={(e) => handleFieldChange('start_date', e.target.value)}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="endDate">End Date</Label>
-                      <Input
-                        id="endDate"
-                        type="month"
-                        value={formData.endDate || ''}
-                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                        disabled={formData.current}
-                      />
-                    </div>
+                    {!formData.current && (
+                      <div className="space-y-2">
+                        <Label htmlFor="end_date">End Date</Label>
+                        <Input
+                          id="end_date"
+                          type="month"
+                          value={formData.end_date || ''}
+                          onChange={(e) => handleFieldChange('end_date', e.target.value)}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="current"
-                      checked={formData.current || false}
-                      onCheckedChange={(checked) =>
-                        setFormData({ ...formData, current: checked as boolean, endDate: checked ? undefined : formData.endDate })
-                      }
+                      checked={!!formData.current}
+                      onCheckedChange={(checked) => {
+                        const isChecked = checked === true;
+                        const updatedData = {
+                          ...formData,
+                          current: isChecked,
+                          end_date: isChecked ? '' : formData.end_date,
+                        };
+                        setFormData(updatedData);
+
+                        // Auto-save if editing an existing entry with required fields
+                        if (editingId && updatedData.company && updatedData.title && updatedData.start_date) {
+                          autoSaveWorkExperience(editingId, updatedData);
+                        }
+                      }}
                     />
                     <Label htmlFor="current" className="text-sm font-normal cursor-pointer">
                       I currently work here
@@ -177,11 +251,21 @@ export function WorkExperienceManager() {
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      value={formData.location || ''}
+                      onChange={(e) => handleFieldChange('location', e.target.value)}
+                      placeholder="San Francisco, CA"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="description">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description || ''}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(e) => handleFieldChange('description', e.target.value)}
                       placeholder="Brief description of your role..."
                       rows={3}
                     />
@@ -215,15 +299,19 @@ export function WorkExperienceManager() {
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={handleCancel}>
+                    <Button type="button" variant="outline" onClick={handleCancel} disabled={saving}>
                       Cancel
                     </Button>
                     <Button
                       onClick={handleSave}
-                      disabled={!formData.title || !formData.company || !formData.startDate}
+                      disabled={!formData.title || !formData.company || !formData.start_date || saving}
                     >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save
+                      {saving ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
+                      {saving ? 'Saving...' : 'Save'}
                     </Button>
                   </div>
                 </CardContent>
@@ -239,7 +327,7 @@ export function WorkExperienceManager() {
                           {experience.location && ` • ${experience.location}`}
                         </CardDescription>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {experience.startDate} - {experience.current ? 'Present' : experience.endDate}
+                          {experience.start_date} - {experience.current ? 'Present' : experience.end_date}
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -247,7 +335,7 @@ export function WorkExperienceManager() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(experience)}
-                          disabled={editingId !== null}
+                          disabled={editingId !== null || saving}
                         >
                           Edit
                         </Button>
@@ -255,7 +343,7 @@ export function WorkExperienceManager() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(experience.id)}
-                          disabled={editingId !== null}
+                          disabled={editingId !== null || saving}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

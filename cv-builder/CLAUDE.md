@@ -73,14 +73,29 @@ All content supports both English (en) and German (de).
 
 ## Database Schema
 
-Key tables (all with RLS policies):
+### Core Tables (all with RLS policies)
+
+**User & Content:**
 - `user_profiles` - User settings and preferences
 - `werbeflaechen_entries` - Content for each category
+- `uploaded_cvs` - Uploaded CV files for autofill
+
+**Profile Career Data (Master Data):**
+- `profile_work_experiences` - Work history with auto-save
+- `profile_educations` - Educational background
+- `profile_skill_categories` - Organized skills
+- `profile_certifications` - Certifications with document upload
+- `profile_references` - Professional references with letters
+
+**Documents:**
 - `cv_documents` - Generated CV documents
 - `cover_letters` - Generated cover letters
 - `job_applications` - Application tracker entries
-- `uploaded_cvs` - Uploaded CV files for autofill
 - `share_links` - Public sharing tokens
+
+**Storage Buckets:**
+- `certification-documents` - Certification files
+- `reference-letters` - Reference letter PDFs
 
 ## Environment Variables
 
@@ -98,12 +113,78 @@ GEMINI_API_KEY=
 - **CV Autofill**: Extract Werbeflaechen from uploaded PDF/DOCX/TXT CVs
 - **Content Regeneration**: AI-powered item regeneration
 
+## Type System & Database Types
+
+### Auto-Generated Types from Supabase
+
+**ALWAYS use auto-generated types from Supabase schema for database operations.**
+
+1. **Type Generation Command**:
+   ```bash
+   npx supabase gen types typescript --project-id zmfgbwluvrgeojovntkd > src/types/database.types.ts
+   ```
+   Run this after any database migration to keep types in sync.
+
+2. **Type Location**:
+   - `src/types/database.types.ts` - Auto-generated from Supabase (DO NOT edit manually)
+   - `src/types/profile-career.types.ts` - Helper types for profile career data
+
+3. **Usage Pattern**:
+   ```typescript
+   import type {
+     ProfileWorkExperience,
+     ProfileEducation
+   } from '@/types/profile-career.types';
+
+   // Types are automatically in sync with database schema
+   const experience: ProfileWorkExperience = {
+     id: '...',
+     user_id: '...',
+     company: 'Acme Inc',
+     title: 'Senior Developer',
+     // ... TypeScript will enforce all required fields
+   };
+   ```
+
+4. **Benefits**:
+   - ✅ Compile-time type safety
+   - ✅ Auto-complete in IDE
+   - ✅ Catches schema mismatches before runtime
+   - ✅ No manual type maintenance
+
+### Data Access Layer
+
+All database operations use generic helper functions in `src/services/profile-career.service.ts`:
+
+**Helper Functions:**
+- `getCurrentUserId()` - Get authenticated user ID
+- `fetchProfileData<T>()` - Generic fetch with ordering
+- `createProfileData<T>()` - Generic create with auto user_id injection
+- `updateProfileData<T>()` - Generic update
+- `deleteProfileData()` - Generic delete
+- `createAutoSave<T>()` - Auto-save factory with 1-second debouncing
+
+**Example Service Function:**
+```typescript
+export async function fetchWorkExperiences() {
+  return fetchProfileData<ProfileWorkExperience>('profile_work_experiences', [
+    { column: 'display_order', ascending: true },
+    { column: 'start_date', ascending: false },
+  ]);
+}
+```
+
 ## Supabase Commands
 
 ```bash
-npx supabase db push    # Push migrations to remote
-npx supabase db reset   # Reset local database
-npx supabase gen types  # Generate TypeScript types
+# Push migrations to remote
+npx supabase db push
+
+# Reset local database (if running locally)
+npx supabase db reset
+
+# Generate TypeScript types from schema
+npx supabase gen types typescript --project-id zmfgbwluvrgeojovntkd > src/types/database.types.ts
 ```
 
 ## Implementation Phases (Completed)
