@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertTriangle, CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -9,26 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-
-const MONTHS = [
-  { value: '01', label: 'Jan' },
-  { value: '02', label: 'Feb' },
-  { value: '03', label: 'Mar' },
-  { value: '04', label: 'Apr' },
-  { value: '05', label: 'May' },
-  { value: '06', label: 'Jun' },
-  { value: '07', label: 'Jul' },
-  { value: '08', label: 'Aug' },
-  { value: '09', label: 'Sep' },
-  { value: '10', label: 'Oct' },
-  { value: '11', label: 'Nov' },
-  { value: '12', label: 'Dec' },
-];
-
-const MONTHS_FULL = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+import { MONTHS_SHORT, MONTHS_FULL } from '@/lib/date-constants';
 
 interface MonthYearPickerProps {
   value?: string; // Format: "YYYY-MM" or ""
@@ -38,6 +19,8 @@ interface MonthYearPickerProps {
   minYear?: number;
   maxYear?: number;
   className?: string;
+  showFutureWarning?: boolean;
+  futureWarningMessage?: string;
 }
 
 export function MonthYearPicker({
@@ -48,6 +31,8 @@ export function MonthYearPicker({
   minYear = 1950,
   maxYear = new Date().getFullYear() + 10,
   className,
+  showFutureWarning = false,
+  futureWarningMessage = 'Date is in the future',
 }: MonthYearPickerProps) {
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState<'month' | 'year'>('month');
@@ -110,6 +95,17 @@ export function MonthYearPicker({
     return `${MONTHS_FULL[monthIndex]} ${selectedYear}`;
   }, [selectedMonth, selectedYear]);
 
+  // Check if date is in the future
+  const isFutureDate = React.useMemo(() => {
+    if (!showFutureWarning || !selectedMonth || !selectedYear) return false;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // 1-indexed
+    const selYear = parseInt(selectedYear);
+    const selMonth = parseInt(selectedMonth);
+    return selYear > currentYear || (selYear === currentYear && selMonth > currentMonth);
+  }, [showFutureWarning, selectedMonth, selectedYear]);
+
   // Reset view when opening
   React.useEffect(() => {
     if (open) {
@@ -121,23 +117,25 @@ export function MonthYearPicker({
   }, [open, selectedYear]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          disabled={disabled}
-          className={cn(
-            'w-full justify-start text-left font-normal',
-            !displayValue && 'text-muted-foreground',
-            className
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {displayValue || placeholder}
-        </Button>
-      </PopoverTrigger>
+    <div className="space-y-1">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            disabled={disabled}
+            className={cn(
+              'w-full justify-start text-left font-normal',
+              !displayValue && 'text-muted-foreground',
+              isFutureDate && 'border-amber-500',
+              className
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {displayValue || placeholder}
+          </Button>
+        </PopoverTrigger>
       <PopoverContent className="w-[280px] p-3" align="start">
         {view === 'month' ? (
           <div className="space-y-3">
@@ -152,7 +150,7 @@ export function MonthYearPicker({
 
             {/* Month grid - 4 columns x 3 rows */}
             <div className="grid grid-cols-4 gap-2">
-              {MONTHS.map((month) => (
+              {MONTHS_SHORT.map((month) => (
                 <Button
                   key={month.value}
                   variant={selectedMonth === month.value ? 'default' : 'ghost'}
@@ -209,6 +207,13 @@ export function MonthYearPicker({
           </div>
         )}
       </PopoverContent>
-    </Popover>
+      </Popover>
+      {isFutureDate && (
+        <p className="flex items-center gap-1 text-xs text-amber-600">
+          <AlertTriangle className="h-3 w-3" />
+          {futureWarningMessage}
+        </p>
+      )}
+    </div>
   );
 }

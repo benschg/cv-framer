@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Trash2, X, Loader2 } from 'lucide-react';
+import { AlertTriangle, Trash2, Loader2 } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
+import { BulletListEditor } from '@/components/ui/bullet-list-editor';
+import { formatDateRange } from '@/lib/utils';
 import {
   fetchWorkExperiences,
   createWorkExperience,
@@ -63,25 +65,6 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
     onSaveSuccessChange,
   });
 
-  const handleBulletChange = (id: string, index: number, value: string) => {
-    const formData = getFormData(id) as Partial<ProfileWorkExperience>;
-    const newBullets = [...(formData.bullets || [])];
-    newBullets[index] = value;
-    handleFieldChange(id, 'bullets', newBullets);
-  };
-
-  const handleAddBullet = (id: string) => {
-    const formData = getFormData(id) as Partial<ProfileWorkExperience>;
-    handleFieldChange(id, 'bullets', [...(formData.bullets || []), '']);
-  };
-
-  const handleRemoveBullet = (id: string, index: number) => {
-    const formData = getFormData(id) as Partial<ProfileWorkExperience>;
-    const newBullets = [...(formData.bullets || [])];
-    newBullets.splice(index, 1);
-    handleFieldChange(id, 'bullets', newBullets);
-  };
-
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     handleAdd,
@@ -113,9 +96,6 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
                 formData={formData}
                 onFieldChange={(field, value) => handleFieldChange(experience.id, field, value)}
                 onMultiFieldChange={(updates) => handleMultiFieldChange(experience.id, updates)}
-                onBulletChange={(index, value) => handleBulletChange(experience.id, index, value)}
-                onAddBullet={() => handleAddBullet(experience.id)}
-                onRemoveBullet={(index) => handleRemoveBullet(experience.id, index)}
                 onDone={() => handleDone(experience.id)}
               />
             ) : (
@@ -151,9 +131,6 @@ interface ExperienceEditFormProps {
   formData: Partial<ProfileWorkExperience>;
   onFieldChange: (field: keyof ProfileWorkExperience, value: any) => void;
   onMultiFieldChange: (updates: Partial<ProfileWorkExperience>) => void;
-  onBulletChange: (index: number, value: string) => void;
-  onAddBullet: () => void;
-  onRemoveBullet: (index: number) => void;
   onDone: () => void;
 }
 
@@ -161,11 +138,14 @@ function ExperienceEditForm({
   formData,
   onFieldChange,
   onMultiFieldChange,
-  onBulletChange,
-  onAddBullet,
-  onRemoveBullet,
   onDone,
 }: ExperienceEditFormProps) {
+  // Check if end date is before start date
+  const isEndDateBeforeStart = (() => {
+    if (!formData.start_date || !formData.end_date || formData.current) return false;
+    return formData.end_date < formData.start_date;
+  })();
+
   return (
     <>
       <CardHeader className="pb-3">
@@ -205,6 +185,7 @@ function ExperienceEditForm({
               value={formData.start_date || ''}
               onChange={(value) => onFieldChange('start_date', value)}
               placeholder="Select start date"
+              showFutureWarning
             />
           </div>
           {!formData.current && (
@@ -214,10 +195,18 @@ function ExperienceEditForm({
                 value={formData.end_date || ''}
                 onChange={(value) => onFieldChange('end_date', value)}
                 placeholder="Select end date"
+                showFutureWarning
               />
             </div>
           )}
         </div>
+
+        {isEndDateBeforeStart && (
+          <p className="flex items-center gap-1 text-sm text-amber-600">
+            <AlertTriangle className="h-4 w-4" />
+            End date cannot be before start date
+          </p>
+        )}
 
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -257,32 +246,13 @@ function ExperienceEditForm({
           />
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>Key Achievements & Responsibilities</Label>
-            <Button type="button" variant="outline" size="sm" onClick={onAddBullet}>
-              <Plus className="h-3 w-3 mr-1" />
-              Add Bullet
-            </Button>
-          </div>
-          {(formData.bullets || []).map((bullet, index) => (
-            <div key={index} className="flex gap-2">
-              <Input
-                value={bullet}
-                onChange={(e) => onBulletChange(index, e.target.value)}
-                placeholder="• Achieved X% increase in..."
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => onRemoveBullet(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
+        <BulletListEditor
+          label="Key Achievements & Responsibilities"
+          bullets={formData.bullets || []}
+          onChange={(bullets) => onFieldChange('bullets', bullets)}
+          placeholder="Achieved X% increase in..."
+          addButtonLabel="Add Bullet"
+        />
       </CardContent>
     </>
   );
@@ -313,7 +283,7 @@ function ExperienceViewCard({
               {experience.location && ` • ${experience.location}`}
             </CardDescription>
             <p className="text-sm text-muted-foreground mt-1">
-              {experience.start_date} - {experience.current ? 'Present' : experience.end_date}
+              {formatDateRange(experience.start_date, experience.end_date, experience.current)}
             </p>
           </div>
           <div className="flex gap-2">
@@ -368,7 +338,7 @@ function ExperienceCardOverlay({ experience }: { experience: ProfileWorkExperien
             {experience.location && ` • ${experience.location}`}
           </CardDescription>
           <p className="text-sm text-muted-foreground mt-1">
-            {experience.start_date} - {experience.current ? 'Present' : experience.end_date}
+            {formatDateRange(experience.start_date, experience.end_date, experience.current)}
           </p>
         </div>
       </CardHeader>
