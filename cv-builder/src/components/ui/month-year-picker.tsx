@@ -1,35 +1,33 @@
 'use client';
 
 import * as React from 'react';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
 const MONTHS = [
-  { value: '01', label: 'January' },
-  { value: '02', label: 'February' },
-  { value: '03', label: 'March' },
-  { value: '04', label: 'April' },
+  { value: '01', label: 'Jan' },
+  { value: '02', label: 'Feb' },
+  { value: '03', label: 'Mar' },
+  { value: '04', label: 'Apr' },
   { value: '05', label: 'May' },
-  { value: '06', label: 'June' },
-  { value: '07', label: 'July' },
-  { value: '08', label: 'August' },
-  { value: '09', label: 'September' },
-  { value: '10', label: 'October' },
-  { value: '11', label: 'November' },
-  { value: '12', label: 'December' },
+  { value: '06', label: 'Jun' },
+  { value: '07', label: 'Jul' },
+  { value: '08', label: 'Aug' },
+  { value: '09', label: 'Sep' },
+  { value: '10', label: 'Oct' },
+  { value: '11', label: 'Nov' },
+  { value: '12', label: 'Dec' },
+];
+
+const MONTHS_FULL = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
 interface MonthYearPickerProps {
@@ -52,6 +50,7 @@ export function MonthYearPicker({
   className,
 }: MonthYearPickerProps) {
   const [open, setOpen] = React.useState(false);
+  const [view, setView] = React.useState<'month' | 'year'>('month');
 
   // Parse the value (format: "YYYY-MM")
   const [selectedYear, selectedMonth] = React.useMemo(() => {
@@ -63,31 +62,63 @@ export function MonthYearPicker({
     return [null, null];
   }, [value]);
 
-  // Generate years array
-  const years = React.useMemo(() => {
-    const result = [];
-    for (let year = maxYear; year >= minYear; year--) {
-      result.push(year.toString());
-    }
-    return result;
-  }, [minYear, maxYear]);
+  // Current decade for year grid navigation
+  const [decadeStart, setDecadeStart] = React.useState(() => {
+    const year = selectedYear ? parseInt(selectedYear) : new Date().getFullYear();
+    return Math.floor(year / 10) * 10;
+  });
 
-  const handleMonthChange = (month: string) => {
+  // Generate years for current decade view (10 years)
+  const decadeYears = React.useMemo(() => {
+    const years = [];
+    for (let i = 0; i < 10; i++) {
+      const year = decadeStart + i;
+      if (year >= minYear && year <= maxYear) {
+        years.push(year.toString());
+      }
+    }
+    return years;
+  }, [decadeStart, minYear, maxYear]);
+
+  const handleMonthSelect = (month: string) => {
     const year = selectedYear || new Date().getFullYear().toString();
     onChange?.(`${year}-${month}`);
   };
 
-  const handleYearChange = (year: string) => {
+  const handleYearSelect = (year: string) => {
     const month = selectedMonth || '01';
     onChange?.(`${year}-${month}`);
+    setView('month');
+  };
+
+  const goToPrevDecade = () => {
+    if (decadeStart - 10 >= minYear) {
+      setDecadeStart(decadeStart - 10);
+    }
+  };
+
+  const goToNextDecade = () => {
+    if (decadeStart + 10 <= maxYear) {
+      setDecadeStart(decadeStart + 10);
+    }
   };
 
   // Format display value
   const displayValue = React.useMemo(() => {
     if (!selectedMonth || !selectedYear) return null;
-    const monthObj = MONTHS.find((m) => m.value === selectedMonth);
-    return monthObj ? `${monthObj.label} ${selectedYear}` : null;
+    const monthIndex = parseInt(selectedMonth) - 1;
+    return `${MONTHS_FULL[monthIndex]} ${selectedYear}`;
   }, [selectedMonth, selectedYear]);
+
+  // Reset view when opening
+  React.useEffect(() => {
+    if (open) {
+      setView('month');
+      if (selectedYear) {
+        setDecadeStart(Math.floor(parseInt(selectedYear) / 10) * 10);
+      }
+    }
+  }, [open, selectedYear]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -107,39 +138,76 @@ export function MonthYearPicker({
           {displayValue || placeholder}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-4" align="start">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Month</label>
-            <Select value={selectedMonth || ''} onValueChange={handleMonthChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Month" />
-              </SelectTrigger>
-              <SelectContent>
-                {MONTHS.map((month) => (
-                  <SelectItem key={month.value} value={month.value}>
-                    {month.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <PopoverContent className="w-[280px] p-3" align="start">
+        {view === 'month' ? (
+          <div className="space-y-3">
+            {/* Year selector header */}
+            <Button
+              variant="ghost"
+              className="w-full justify-center font-semibold"
+              onClick={() => setView('year')}
+            >
+              {selectedYear || new Date().getFullYear()}
+            </Button>
+
+            {/* Month grid - 4 columns x 3 rows */}
+            <div className="grid grid-cols-4 gap-2">
+              {MONTHS.map((month) => (
+                <Button
+                  key={month.value}
+                  variant={selectedMonth === month.value ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-9"
+                  onClick={() => handleMonthSelect(month.value)}
+                >
+                  {month.label}
+                </Button>
+              ))}
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Year</label>
-            <Select value={selectedYear || ''} onValueChange={handleYearChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        ) : (
+          <div className="space-y-3">
+            {/* Decade navigation header */}
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={goToPrevDecade}
+                disabled={decadeStart - 10 < minYear}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="font-semibold">
+                {decadeStart} - {decadeStart + 9}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={goToNextDecade}
+                disabled={decadeStart + 10 > maxYear}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Year grid - 5 columns x 2 rows */}
+            <div className="grid grid-cols-5 gap-2">
+              {decadeYears.map((year) => (
+                <Button
+                  key={year}
+                  variant={selectedYear === year ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-9"
+                  onClick={() => handleYearSelect(year)}
+                >
+                  {year}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </PopoverContent>
     </Popover>
   );
