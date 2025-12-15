@@ -20,7 +20,7 @@ import type { ProfileCertification } from '@/services/profile-career.service';
 interface AICertificationUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (certification: Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>) => Promise<void>;
+  onAdd: (certification: Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>, file?: File) => Promise<void>;
 }
 
 export function AICertificationUploadDialog({
@@ -117,7 +117,7 @@ export function AICertificationUploadDialog({
       setExtractedData(data.extractedData);
       setConfidence(data.confidence);
 
-      // Populate form with extracted data
+      // Populate form with extracted data (document will be uploaded after certification creation)
       setFormData({
         name: data.extractedData.name || '',
         issuer: data.extractedData.issuer || '',
@@ -125,9 +125,9 @@ export function AICertificationUploadDialog({
         expiry_date: data.extractedData.expiry_date || '',
         credential_id: data.extractedData.credential_id || '',
         url: data.extractedData.url || '',
-        document_url: data.document?.document_url || '',
-        document_name: data.document?.document_name || file.name,
-        storage_path: data.document?.storage_path || '',
+        document_url: '',
+        document_name: '',
+        storage_path: '',
       });
 
       // Success feedback
@@ -207,7 +207,8 @@ export function AICertificationUploadDialog({
 
     setAdding(true);
     try {
-      await onAdd(formData);
+      // Pass the selected file to the parent so it can be uploaded after certification creation
+      await onAdd(formData, selectedFile || undefined);
 
       toast.success('Certification added!', {
         description: `${formData.name} has been added to your profile.`,

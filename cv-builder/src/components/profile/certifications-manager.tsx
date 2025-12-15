@@ -15,6 +15,7 @@ import {
   createCertification,
   deleteCertification,
   updateCertification,
+  createCertificationDocument,
   type ProfileCertification,
 } from '@/services/profile-career.service';
 import { useProfileManager } from '@/hooks/use-profile-manager';
@@ -28,7 +29,7 @@ interface CertificationsManagerProps {
 
 export interface CertificationsManagerRef {
   handleAdd: () => void;
-  handleAddWithData: (data: Partial<ProfileCertification>) => Promise<void>;
+  handleAddWithData: (data: Partial<ProfileCertification>, file?: File) => Promise<void>;
 }
 
 export const CertificationsManager = forwardRef<CertificationsManagerRef, CertificationsManagerProps>(
@@ -66,12 +67,28 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
     onSaveSuccessChange,
   });
 
-  const handleAddWithData = async (data: Partial<ProfileCertification>) => {
+  const handleAddWithData = async (data: Partial<ProfileCertification>, file?: File) => {
     try {
       const result = await createCertification(data as any);
       if (result.error) {
         throw new Error(result.error);
       }
+
+      const certificationId = result.data?.id;
+
+      // If a file was provided, upload it to the newly created certification
+      if (file && certificationId) {
+        const uploadResult = await createCertificationDocument(certificationId, file);
+        if (uploadResult.error) {
+          console.error('Error uploading document:', uploadResult.error);
+          toast.error('Document upload failed', {
+            description: 'The certification was created but the document could not be uploaded.',
+          });
+        } else {
+          toast.success('Document uploaded successfully');
+        }
+      }
+
       // Manually refresh the list
       const { data: refreshedData } = await fetchCertifications();
       if (refreshedData) {

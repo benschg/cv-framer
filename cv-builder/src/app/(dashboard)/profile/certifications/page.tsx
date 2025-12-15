@@ -43,9 +43,9 @@ export default function CertificationsPage() {
       <AICertificationUploadDialog
         open={aiDialogOpen}
         onOpenChange={setAiDialogOpen}
-        onAdd={async (certification) => {
+        onAdd={async (certification, file) => {
           if (managerRef.current) {
-            await managerRef.current.handleAddWithData(certification);
+            await managerRef.current.handleAddWithData(certification, file);
           }
         }}
       />
