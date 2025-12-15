@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   ArrowLeft,
   Save,
@@ -27,6 +28,7 @@ import { fetchCV, updateCV, generateId } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { CVPreview } from '@/components/cv/cv-preview';
 import { PhotoSelector } from '@/components/cv/photo-selector';
+import { CVEditorHeader } from '@/components/cv/cv-editor-header';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
@@ -382,58 +384,21 @@ export default function CVEditorPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/cv">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold">{cv.name}</h1>
-            {cv.job_context?.company && (
-              <p className="text-sm text-muted-foreground">
-                {cv.job_context.position} at {cv.job_context.company}
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2" onClick={handlePreview}>
-            <Eye className="h-4 w-4" />
-            Preview
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={handleExport}
-            disabled={exporting}
-          >
-            {exporting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4" />
-            )}
-            Export
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2" disabled>
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Save
-          </Button>
-        </div>
-      </div>
+    <div className="pb-6">
+      <CVEditorHeader
+        cvName={cv.name}
+        jobContext={cv.job_context}
+        photoUrl={photoUrl}
+        userInitials={getUserInitials(user)}
+        onPreview={handlePreview}
+        onExport={handleExport}
+        onSave={handleSave}
+        saving={saving}
+        exporting={exporting}
+      />
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-6 pt-6 space-y-6">
 
       {/* Photo Selection */}
       <Card>
@@ -925,6 +890,7 @@ export default function CVEditorPage() {
           )}
           Save Changes
         </Button>
+      </div>
       </div>
     </div>
   );
