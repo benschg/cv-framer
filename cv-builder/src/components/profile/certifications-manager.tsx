@@ -118,6 +118,7 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
                 onFieldChange={(field, value) => handleFieldChange(certification.id, field, value)}
                 onMultiFieldChange={(updates) => handleMultiFieldChange(certification.id, updates)}
                 onDone={() => handleDone(certification.id)}
+                isSaving={saving}
               />
             ) : (
               <CertificationViewCard
@@ -153,6 +154,7 @@ interface CertificationEditFormProps {
   onFieldChange: (field: keyof ProfileCertification, value: any) => void;
   onMultiFieldChange: (updates: Partial<ProfileCertification>) => void;
   onDone: () => void;
+  isSaving?: boolean;
 }
 
 function CertificationEditForm({
@@ -160,6 +162,7 @@ function CertificationEditForm({
   onFieldChange,
   onMultiFieldChange,
   onDone,
+  isSaving = false,
 }: CertificationEditFormProps) {
   // Check if expiry date is before issue date
   const isExpiryBeforeIssue = (() => {
@@ -251,11 +254,11 @@ function CertificationEditForm({
         </div>
 
         {/* Certificate Documents */}
-        {item.id && (
+        {formData.id && (
           <div className="space-y-2">
             <Label>Certificate Documents</Label>
             <CertificationDocumentsManager
-              certificationId={item.id}
+              certificationId={formData.id}
               disabled={isSaving}
             />
           </div>
