@@ -17,7 +17,6 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [showUpload, setShowUpload] = useState(false);
 
   // Photo state
   const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
@@ -93,10 +92,8 @@ export default function ProfilePage() {
           photos={photos}
           primaryPhoto={primaryPhoto}
           loadingPhotos={loadingPhotos}
-          showUpload={showUpload}
           primaryPhotoUrl={primaryPhotoUrl}
           userInitials={userInitials}
-          onToggleUpload={() => setShowUpload(!showUpload)}
           onPhotosUpdate={loadPhotos}
         />
 

@@ -11,9 +11,10 @@ import { toast } from 'sonner';
 interface PhotoUploadProps {
   onUploadComplete: () => void;
   isPrimary?: boolean;
+  compact?: boolean;
 }
 
-export function PhotoUpload({ onUploadComplete, isPrimary = false }: PhotoUploadProps) {
+export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = false }: PhotoUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedFilename, setSelectedFilename] = useState<string>('');
@@ -96,6 +97,49 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false }: PhotoUpload
       setUploading(false);
     }
   };
+
+  if (compact) {
+    return (
+      <>
+        <div
+          className={`flex-1 border-2 border-dashed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 px-4 py-2 ${
+            isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
+          }`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={handleClick}
+        >
+          {uploading ? (
+            <Upload className="h-4 w-4 text-muted-foreground animate-pulse" />
+          ) : (
+            <>
+              <Upload className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Drop photo or click</span>
+            </>
+          )}
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          className="hidden"
+          onChange={handleFileInputChange}
+        />
+
+        {selectedImage && (
+          <ImageCropper
+            image={selectedImage}
+            filename={selectedFilename}
+            onComplete={handleCropComplete}
+            onCancel={() => setSelectedImage(null)}
+            open={!!selectedImage}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <>

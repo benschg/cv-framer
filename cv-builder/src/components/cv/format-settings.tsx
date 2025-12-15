@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import type { DisplaySettings } from '@/types/cv.types';
 
 interface FormatSettingsProps {
@@ -15,32 +15,26 @@ interface FormatSettingsProps {
 }
 
 export function FormatSettings({ displaySettings, onUpdateSettings }: FormatSettingsProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Card>
-      <CardHeader
-        className="cursor-pointer hover:bg-accent/50 transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Format Settings</CardTitle>
-            <CardDescription>
-              Customize the appearance and layout of your CV
-            </CardDescription>
-          </div>
-          <div className="h-8 w-8 flex items-center justify-center">
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      {isExpanded && (
-        <CardContent className="space-y-4">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Format Settings</CardTitle>
+                <CardDescription>
+                  Customize the appearance and layout of your CV
+                </CardDescription>
+              </div>
+              <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="space-y-4 pt-0">
         <div className="flex flex-wrap gap-3">
           {/* Font Family */}
           <div className="space-y-2 flex-1 min-w-[180px]">
@@ -182,8 +176,9 @@ export function FormatSettings({ displaySettings, onUpdateSettings }: FormatSett
             </p>
           </div>
         </div>
-        </CardContent>
-      )}
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
