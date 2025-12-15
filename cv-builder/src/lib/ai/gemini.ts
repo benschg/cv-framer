@@ -4,7 +4,7 @@ import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 // Available models
-export type GeminiModel = 'gemini-2.0-flash' | 'gemini-1.5-flash' | 'gemini-1.5-pro';
+export type GeminiModel = 'gemini-2.0-flash' | 'gemini-2.0-flash-thinking-exp' | 'gemini-1.5-flash' | 'gemini-1.5-pro';
 
 // Get a model instance
 export function getModel(modelName: GeminiModel = 'gemini-2.0-flash'): GenerativeModel {
@@ -284,6 +284,132 @@ Guidelines:
 - Keep the jobDescription comprehensive but clean (no HTML tags, no excessive whitespace)`;
 
   return generateJSON<ParsedJobPosting>(prompt);
+}
+
+// Types for certification document extraction
+export interface ExtractedCertificationData {
+  name: string | null;
+  issuer: string | null;
+  date: string | null;
+  expiry_date: string | null;
+  credential_id: string | null;
+  url: string | null;
+}
+
+export interface CertificationExtraction {
+  extractedData: ExtractedCertificationData;
+  confidence: {
+    name: number;
+    issuer: number;
+    date: number;
+    expiry_date: number;
+    credential_id: number;
+    url: number;
+  };
+  reasoning: string;
+}
+
+// Extract certification data from a document image or PDF
+export async function extractCertificationData(
+  fileBuffer: Buffer,
+  mimeType: string,
+  modelName: GeminiModel = 'gemini-2.0-flash'
+): Promise<CertificationExtraction> {
+  const model = getModel(modelName);
+
+  const prompt = `You are analyzing a certification document to extract structured information. Think carefully about what you see in the image.
+
+Your task is to extract the following fields:
+
+1. **Certification Name** - The official full name of the certification (e.g., "AWS Certified Solutions Architect - Associate")
+   - Look for prominent titles, headers, or the main certification text
+   - Include any level indicators (Associate, Professional, Expert, etc.)
+
+2. **Issuing Organization** - The company or institution that issued this certificate (e.g., "Amazon Web Services", "Microsoft", "Google Cloud")
+   - Look for logos, organization names, or issuer information
+   - Use the full official name when possible
+
+3. **Issue Date** - When the certification was issued (format: YYYY-MM)
+   - Look for "Issued:", "Date:", "Completion Date:", etc.
+   - If only year is visible, use YYYY-01
+   - If no date is found, return null
+
+4. **Expiry Date** - When the certification expires (format: YYYY-MM)
+   - Look for "Expires:", "Valid Until:", "Expiration Date:", etc.
+   - If it says "Does not expire" or "No expiration", return null
+   - If only year is visible, use YYYY-12
+   - If no expiry information is found, return null
+
+5. **Credential ID** - Any unique identifier, certificate number, or credential ID
+   - Look for "ID:", "Certificate #:", "Credential ID:", serial numbers, etc.
+   - May be alphanumeric codes, often near the bottom of the certificate
+
+6. **Verification URL** - Any URL for verifying the certification
+   - Look for "Verify at:", URLs, web addresses, or QR codes
+   - If there's a QR code, try to identify if there's an associated URL visible
+   - Return null if no verification method is visible
+
+For each field, assign a confidence score (0.0 to 1.0):
+- 1.0 = Absolutely certain, text is crystal clear
+- 0.9 = Very confident, clearly visible
+- 0.8 = Confident, minor ambiguity
+- 0.7 = Moderately confident, some uncertainty
+- 0.5 = Low confidence, text is unclear or partially obscured
+- 0.0 = No information found or completely unreadable
+
+Be conservative with high confidence scores. Only use 0.8+ when the text is very clear and unambiguous.
+
+IMPORTANT FORMATTING:
+- All dates MUST be in YYYY-MM format (e.g., "2024-03" not "March 2024")
+- Use null (not empty string) for fields you cannot extract
+- Think step by step about what you see before making extractions
+
+Return your response as ONLY valid JSON (no markdown, no explanations outside the JSON):
+{
+  "extractedData": {
+    "name": "string" | null,
+    "issuer": "string" | null,
+    "date": "YYYY-MM" | null,
+    "expiry_date": "YYYY-MM" | null,
+    "credential_id": "string" | null,
+    "url": "string" | null
+  },
+  "confidence": {
+    "name": 0.0-1.0,
+    "issuer": 0.0-1.0,
+    "date": 0.0-1.0,
+    "expiry_date": 0.0-1.0,
+    "credential_id": 0.0-1.0,
+    "url": 0.0-1.0
+  },
+  "reasoning": "Brief explanation of what you observed and any challenges in extraction"
+}`;
+
+  // Use Gemini Vision API
+  const base64Data = fileBuffer.toString('base64');
+  const imagePart = {
+    inlineData: {
+      data: base64Data,
+      mimeType: mimeType,
+    },
+  };
+
+  const result = await model.generateContent([prompt, imagePart]);
+  const text = result.response.text();
+
+  // Clean and parse JSON
+  let cleanedText = text.trim();
+  if (cleanedText.startsWith('```json')) {
+    cleanedText = cleanedText.slice(7);
+  } else if (cleanedText.startsWith('```')) {
+    cleanedText = cleanedText.slice(3);
+  }
+  if (cleanedText.endsWith('```')) {
+    cleanedText = cleanedText.slice(0, -3);
+  }
+  cleanedText = cleanedText.trim();
+
+  return JSON.parse(cleanedText) as CertificationExtraction;
 }
 
 // Types for cover letter generation

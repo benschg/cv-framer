@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { AlertTriangle, Trash2, Loader2, ExternalLink, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
 import { formatMonthYear } from '@/lib/utils';
+import { toast } from 'sonner';
 import {
   fetchCertifications,
   createCertification,
@@ -26,6 +27,7 @@ interface CertificationsManagerProps {
 
 export interface CertificationsManagerRef {
   handleAdd: () => void;
+  handleAddWithData: (data: Partial<ProfileCertification>) => Promise<void>;
 }
 
 export const CertificationsManager = forwardRef<CertificationsManagerRef, CertificationsManagerProps>(
@@ -63,9 +65,29 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
     onSaveSuccessChange,
   });
 
+  const handleAddWithData = async (data: Partial<ProfileCertification>) => {
+    try {
+      const result = await createCertification(data as any);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      // Manually refresh the list
+      const { data: refreshedData } = await fetchCertifications();
+      if (refreshedData) {
+        // The useProfileManager hook will handle this through its own state
+        // We just need to wait for it to complete
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error creating certification:', error);
+      throw error;
+    }
+  };
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     handleAdd,
+    handleAddWithData,
   }));
 
   if (loading) {
@@ -154,32 +176,52 @@ function CertificationEditForm({
     // Validate file type (images and PDFs only)
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
     if (!validTypes.includes(file.type)) {
-      alert('Please upload an image (JPG, PNG, WebP) or PDF file');
+      toast.error('Invalid file type', {
+        description: 'Please upload an image (JPG, PNG, WebP) or PDF file.',
+      });
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert('File size must be less than 10MB');
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      toast.error('File too large', {
+        description: `File size is ${sizeMB}MB. Maximum allowed size is 10MB.`,
+      });
       return;
     }
 
     setUploadingFile(true);
 
     try {
-      // TODO: Upload to storage when API is ready
-      // For now, create a local object URL for preview
+      // Upload to storage
+      const formDataToSend = new FormData();
+      formDataToSend.append('file', file);
+      if (formData.id) {
+        formDataToSend.append('certificationId', formData.id);
+      }
+
+      // For now, just create a preview URL
+      // TODO: Implement actual storage upload in future
       const objectUrl = URL.createObjectURL(file);
 
       onMultiFieldChange({
         document_url: objectUrl,
         document_name: file.name,
       });
+
+      toast.success('Document attached', {
+        description: file.name,
+      });
+
     } catch (error) {
       console.error('File upload error:', error);
-      alert('Failed to upload file');
+      toast.error('Failed to upload file', {
+        description: 'Please try again or contact support if the problem persists.',
+      });
     } finally {
       setUploadingFile(false);
+
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
