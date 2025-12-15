@@ -15,6 +15,15 @@ interface CVPreviewProps {
 export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U' }: CVPreviewProps) {
   const accentColor = settings?.accentColor || '#2563eb';
   const showPhoto = settings?.showPhoto !== false && photoUrl;
+  const format = settings?.format || 'A4';
+
+  // Page dimensions in mm
+  const pageDimensions = {
+    A4: { width: 210, height: 297 },
+    Letter: { width: 216, height: 279 }
+  };
+
+  const { width: pageWidth } = pageDimensions[format];
 
   const formatDate = (dateStr?: string): string => {
     if (!dateStr) return '';
@@ -44,7 +53,10 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
   };
 
   return (
-    <div className="bg-white text-gray-900 p-8 rounded-lg shadow-sm border max-w-[210mm] mx-auto font-sans text-[10pt] leading-relaxed">
+    <div
+      className="bg-white text-gray-900 p-8 rounded-lg shadow-sm border mx-auto font-sans text-[10pt] leading-relaxed"
+      style={{ maxWidth: `${pageWidth}mm` }}
+    >
       {/* Header */}
       <header
         className="mb-5 pb-4"

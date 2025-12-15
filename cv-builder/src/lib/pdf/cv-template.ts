@@ -14,6 +14,7 @@ export function generateCVHTML(data: CVTemplateData): string {
   const content = cv.content;
   const defaultSettings: DisplaySettings = {
     theme: 'light',
+    format: 'A4',
     showPhoto: true,
     showExperience: true,
     showAttachments: false,

@@ -31,7 +31,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { createClient } from '@/lib/supabase/client';
-import type { CVDocument, CVContent, WorkExperience, Education, SkillCategory, KeyCompetence } from '@/types/cv.types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { CVDocument, CVContent, WorkExperience, Education, SkillCategory, KeyCompetence, DisplaySettings } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
 
 export default function CVEditorPage() {
@@ -120,7 +121,10 @@ export default function CVEditorPage() {
   const handleSave = async () => {
     if (!cv) return;
     setSaving(true);
-    const result = await updateCV(cvId, { content: content as Record<string, unknown> });
+    const result = await updateCV(cvId, {
+      content: content as Record<string, unknown>,
+      display_settings: cv.display_settings as Record<string, unknown>,
+    });
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
@@ -133,13 +137,23 @@ export default function CVEditorPage() {
     setContent(prev => ({ ...prev, [field]: value }));
   };
 
+  const updateDisplaySettings = (field: keyof DisplaySettings, value: unknown) => {
+    if (!cv) return;
+    const updatedSettings = {
+      ...cv.display_settings,
+      [field]: value,
+    };
+    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+  };
+
   // Export PDF
   const handleExport = async () => {
     if (!cv) return;
     setExporting(true);
 
     try {
-      const response = await fetch(`/api/cv/${cvId}/export`);
+      const format = cv.display_settings?.format || 'A4';
+      const response = await fetch(`/api/cv/${cvId}/export?format=${format}`);
 
       if (!response.ok) {
         const json = await response.json();
@@ -435,6 +449,38 @@ export default function CVEditorPage() {
             onChange={(photoId) => updateField('selected_photo_id', photoId)}
             userInitials={getUserInitials(user)}
           />
+        </CardContent>
+      </Card>
+
+      {/* Format Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Format Settings</CardTitle>
+          <CardDescription>
+            Choose the page format for your CV
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="format">Page Format</Label>
+            <Select
+              value={cv.display_settings?.format || 'A4'}
+              onValueChange={(value) => updateDisplaySettings('format', value as 'A4' | 'Letter')}
+            >
+              <SelectTrigger id="format" className="w-full">
+                <SelectValue placeholder="Select format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
+                <SelectItem value="Letter">Letter (8.5 × 11 in / 216 × 279 mm)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {cv.display_settings?.format === 'Letter'
+                ? 'Letter format is commonly used in the US and Canada'
+                : 'A4 format is the international standard used in most countries'}
+            </p>
+          </div>
         </CardContent>
       </Card>
 

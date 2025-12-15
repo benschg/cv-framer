@@ -166,6 +166,7 @@ export interface AIMetadata {
 
 export interface DisplaySettings {
   theme: 'light' | 'dark';
+  format: 'A4' | 'Letter';
   showPhoto: boolean;
   showExperience: boolean;
   showAttachments: boolean;
