@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
-  ArrowLeft,
   Save,
   Download,
   Share2,
@@ -24,11 +22,13 @@ import {
   Trash2,
   GripVertical,
 } from 'lucide-react';
+import { Breadcrumb } from '@/components/shared/breadcrumb';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Separator } from '@/components/ui/separator';
 import { fetchCV, updateCV, generateId } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { CVPreview } from '@/components/cv/cv-preview';
 import { PhotoSelector } from '@/components/cv/photo-selector';
-import { CVEditorHeader } from '@/components/cv/cv-editor-header';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
@@ -368,12 +368,7 @@ export default function CVEditorPage() {
   if (error || !cv) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
-        <Link href="/cv">
-          <Button variant="ghost" size="sm" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to CVs
-          </Button>
-        </Link>
+        <Breadcrumb currentLabel="CV" />
         <Card className="border-destructive/50">
           <CardContent className="pt-6">
             <p className="text-destructive">{error || 'CV not found'}</p>
@@ -384,21 +379,55 @@ export default function CVEditorPage() {
   }
 
   return (
-    <div className="pb-6">
-      <CVEditorHeader
-        cvName={cv.name}
-        jobContext={cv.job_context}
-        photoUrl={photoUrl}
-        userInitials={getUserInitials(user)}
-        onPreview={handlePreview}
-        onExport={handleExport}
-        onSave={handleSave}
-        saving={saving}
-        exporting={exporting}
-      />
+    <>
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 bg-background">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Breadcrumb currentLabel={cv.name} data={cv} />
+        <Avatar className="h-8 w-8 flex-shrink-0 hidden sm:block ml-2">
+          <AvatarImage src={photoUrl || undefined} />
+          <AvatarFallback className="text-xs">{getUserInitials(user)}</AvatarFallback>
+        </Avatar>
+        {cv.job_context?.company && (
+          <div className="min-w-0 flex-1 hidden lg:block ml-2">
+            <p className="text-sm text-muted-foreground truncate">
+              {cv.job_context.position} at {cv.job_context.company}
+            </p>
+          </div>
+        )}
+        <div className="flex items-center gap-2 ml-auto">
+          <Button variant="outline" size="sm" className="gap-2" onClick={handlePreview}>
+            <Eye className="h-4 w-4" />
+            <span className="hidden sm:inline">Preview</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleExport}
+            disabled={exporting}
+          >
+            {exporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">Export</span>
+          </Button>
+          <Button onClick={handleSave} disabled={saving} size="sm" className="gap-2">
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">Save</span>
+          </Button>
+        </div>
+      </header>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 pt-6 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 min-h-0">
+        <div className="max-w-4xl mx-auto space-y-6">
 
       {/* Photo Selection */}
       <Card>
@@ -878,7 +907,7 @@ export default function CVEditorPage() {
       </Card>
 
       {/* Bottom Save Button */}
-      <div className="flex justify-end gap-2 pb-8">
+      <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => router.push('/cv')}>
           Cancel
         </Button>
@@ -891,7 +920,8 @@ export default function CVEditorPage() {
           Save Changes
         </Button>
       </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
