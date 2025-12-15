@@ -10,6 +10,7 @@ import { CVPreview } from './cv-preview';
 import { getPhotoPublicUrl } from '@/services/profile-photo.service';
 import type { CVContent, DisplaySettings } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
+import type { CVWorkExperienceWithSelection } from '@/types/profile-career.types';
 
 interface CVPreviewSectionProps {
   content: CVContent;
@@ -21,6 +22,7 @@ interface CVPreviewSectionProps {
   primaryPhoto: ProfilePhoto | null;
   onPhotoSelect: (photoId: string | null) => void;
   onFormatChange: (format: 'A4' | 'Letter') => void;
+  workExperiences?: CVWorkExperienceWithSelection[];
 }
 
 export function CVPreviewSection({
@@ -33,6 +35,7 @@ export function CVPreviewSection({
   primaryPhoto,
   onPhotoSelect,
   onFormatChange,
+  workExperiences,
 }: CVPreviewSectionProps) {
   const renderPhotoPopover = () => (
     <Popover>
@@ -171,6 +174,7 @@ export function CVPreviewSection({
           photoUrl={photoUrl}
           userInitials={userInitials}
           photoElement={renderPhotoPopover()}
+          workExperiences={workExperiences}
         />
       </CardContent>
     </Card>

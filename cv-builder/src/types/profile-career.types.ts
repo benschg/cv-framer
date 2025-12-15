@@ -18,6 +18,36 @@ export type ProfileCertification = Tables['profile_certifications']['Row'];
 export type ProfileReference = Tables['profile_references']['Row'];
 export type CertificationDocument = Tables['certification_documents']['Row'];
 
+// CV Work Experience Selection (junction table for per-CV customization)
+export type CVWorkExperienceSelection = Tables['cv_work_experience_selections']['Row'];
+export type CVWorkExperienceSelectionInsert = Tables['cv_work_experience_selections']['Insert'];
+export type CVWorkExperienceSelectionUpdate = Tables['cv_work_experience_selections']['Update'];
+
+// Composite type for CV editor: work experience merged with CV-specific selection
+export interface CVWorkExperienceWithSelection {
+  // From profile_work_experiences
+  id: string;
+  company: string;
+  title: string;
+  location: string | null;
+  start_date: string;
+  end_date: string | null;
+  current: boolean | null;
+  description: string | null;
+  bullets: string[] | null;
+  display_order: number | null;
+
+  // From cv_work_experience_selections (or defaults if no selection exists)
+  selection: {
+    id?: string; // undefined if no selection record exists yet
+    is_selected: boolean;
+    is_favorite: boolean;
+    display_order: number;
+    description_override: string | null;
+    selected_bullet_indices: number[] | null; // null means all bullets
+  };
+}
+
 // Manual type for profile_key_competences (pending database.types.ts regeneration)
 export interface ProfileKeyCompetence {
   id: string;

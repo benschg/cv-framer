@@ -28,11 +28,14 @@ import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { PhotoSelector } from '@/components/cv/photo-selector';
 import { FormatSettings } from '@/components/cv/format-settings';
 import { CVPreviewSection } from '@/components/cv/cv-preview-section';
+import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-section';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
+import { fetchCVWorkExperiences, bulkUpsertCVWorkExperienceSelections } from '@/services/cv-work-experience.service';
 import type { CVDocument, CVContent, DisplaySettings } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
+import type { CVWorkExperienceWithSelection } from '@/types/profile-career.types';
 
 export default function CVEditorPage() {
   const params = useParams();
@@ -55,6 +58,9 @@ export default function CVEditorPage() {
   const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+  // Work experience state
+  const [workExperiences, setWorkExperiences] = useState<CVWorkExperienceWithSelection[]>([]);
 
   useEffect(() => {
     const loadCV = async () => {
@@ -83,6 +89,17 @@ export default function CVEditorPage() {
       loadPhotos();
     }
   }, [user]);
+
+  // Load work experiences
+  useEffect(() => {
+    const loadWorkExperiences = async () => {
+      const result = await fetchCVWorkExperiences(cvId);
+      if (result.data) {
+        setWorkExperiences(result.data);
+      }
+    };
+    loadWorkExperiences();
+  }, [cvId]);
 
   // Update photo URL when selected photo or primary photo changes
   useEffect(() => {
@@ -120,10 +137,26 @@ export default function CVEditorPage() {
   const handleSave = async () => {
     if (!cv) return;
     setSaving(true);
+
+    // Save CV content
     const result = await updateCV(cvId, {
       content: content as Record<string, unknown>,
       display_settings: cv.display_settings as Record<string, unknown>,
     });
+
+    // Save work experience selections
+    if (workExperiences.length > 0) {
+      const selectionsToSave = workExperiences.map((exp, index) => ({
+        work_experience_id: exp.id,
+        is_selected: exp.selection.is_selected,
+        is_favorite: exp.selection.is_favorite,
+        display_order: index,
+        description_override: exp.selection.description_override,
+        selected_bullet_indices: exp.selection.selected_bullet_indices,
+      }));
+      await bulkUpsertCVWorkExperienceSelections(cvId, selectionsToSave);
+    }
+
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
@@ -535,6 +568,14 @@ export default function CVEditorPage() {
         </CardContent>
       </Card>
 
+      {/* Work Experience Section */}
+      <CVWorkExperienceSection
+        cvId={cvId}
+        workExperiences={workExperiences}
+        onChange={setWorkExperiences}
+        language={cv.language}
+      />
+
       {/* Format Settings */}
       <FormatSettings
         displaySettings={cv.display_settings}
@@ -552,6 +593,7 @@ export default function CVEditorPage() {
         primaryPhoto={primaryPhoto}
         onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
         onFormatChange={(format) => updateDisplaySettings('format', format)}
+        workExperiences={workExperiences}
       />
 
         </div>
