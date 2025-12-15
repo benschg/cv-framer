@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
-import { Loader2, Save, Plus } from 'lucide-react';
+import { Loader2, Save, Plus, Briefcase, GraduationCap, Code, Award, ChevronRight } from 'lucide-react';
 import { PhotoUpload } from '@/components/profile/photo-upload';
 import { PhotoGallery } from '@/components/profile/photo-gallery';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
@@ -78,6 +79,33 @@ export default function ProfilePage() {
     ? getPhotoPublicUrl(primaryPhoto.storage_path)
     : user?.user_metadata?.avatar_url;
 
+  const profileSections = [
+    {
+      title: 'Work Experience',
+      description: 'Manage your work history',
+      href: '/profile/experience',
+      icon: Briefcase,
+    },
+    {
+      title: 'Education',
+      description: 'Add your degrees and qualifications',
+      href: '/profile/education',
+      icon: GraduationCap,
+    },
+    {
+      title: 'Skills',
+      description: 'Organize your skills by category',
+      href: '/profile/skills',
+      icon: Code,
+    },
+    {
+      title: 'Certifications',
+      description: 'Add professional certifications',
+      href: '/profile/certifications',
+      icon: Award,
+    },
+  ];
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
@@ -86,6 +114,38 @@ export default function ProfilePage() {
           Manage your personal information and professional details
         </p>
       </div>
+
+      {/* Quick Navigation to Profile Sections */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Career Information</CardTitle>
+          <CardDescription>
+            Manage your professional background that will be used across all your CVs
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {profileSections.map((section) => (
+              <Link
+                key={section.href}
+                href={section.href}
+                className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors group"
+              >
+                <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <section.icon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{section.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {section.description}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Profile Photos */}

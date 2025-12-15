@@ -25,6 +25,22 @@ export const routeConfig: Record<string, RouteConfig> = {
   '/profile': {
     label: 'Profile',
   },
+  '/profile/experience': {
+    label: 'Work Experience',
+    parent: '/profile',
+  },
+  '/profile/education': {
+    label: 'Education',
+    parent: '/profile',
+  },
+  '/profile/skills': {
+    label: 'Skills',
+    parent: '/profile',
+  },
+  '/profile/certifications': {
+    label: 'Certifications',
+    parent: '/profile',
+  },
   '/settings': {
     label: 'Settings',
   },

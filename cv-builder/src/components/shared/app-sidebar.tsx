@@ -12,6 +12,10 @@ import {
   User,
   LogOut,
   Home,
+  GraduationCap,
+  Award,
+  Code,
+  Wrench,
 } from 'lucide-react';
 import { CVBuilderLogo } from './cv-builder-logo';
 import {
@@ -51,6 +55,10 @@ const navigation = [
     label: 'Build',
     items: [
       { title: 'Profile', href: '/profile', icon: User },
+      { title: 'Work Experience', href: '/profile/experience', icon: Briefcase, indent: true },
+      { title: 'Education', href: '/profile/education', icon: GraduationCap, indent: true },
+      { title: 'Skills', href: '/profile/skills', icon: Code, indent: true },
+      { title: 'Certifications', href: '/profile/certifications', icon: Award, indent: true },
       { title: 'Werbeflaechen', href: '/werbeflaechen', icon: Target },
       { title: 'My CVs', href: '/cv', icon: FileText },
       { title: 'Cover Letters', href: '/cover-letter', icon: Mail },
@@ -108,6 +116,7 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       asChild
                       isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
+                      className={'indent' in item && item.indent ? 'pl-8' : ''}
                     >
                       <Link href={item.href}>
                         <item.icon className="h-4 w-4" />
