@@ -31,6 +31,7 @@ import { fetchCV, updateCV, generateId } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { CVPreview } from '@/components/cv/cv-preview';
 import { PhotoSelector } from '@/components/cv/photo-selector';
+import { FormatSettings } from '@/components/cv/format-settings';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
@@ -563,154 +564,6 @@ export default function CVEditorPage() {
         </CardContent>
       </Card>
 
-      {/* Format Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Format Settings</CardTitle>
-          <CardDescription>
-            Customize the appearance and layout of your CV
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Page Format */}
-            <div className="space-y-2">
-              <Label htmlFor="format">Page Format</Label>
-              <Select
-                value={cv.display_settings?.format || 'A4'}
-                onValueChange={(value) => updateDisplaySettings('format', value as 'A4' | 'Letter')}
-              >
-                <SelectTrigger id="format">
-                  <SelectValue placeholder="Select format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A4">A4 (210×297mm)</SelectItem>
-                  <SelectItem value="Letter">Letter (216×279mm)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Font Family */}
-            <div className="space-y-2">
-              <Label htmlFor="fontFamily">Font</Label>
-              <Select
-                value={cv.display_settings?.fontFamily || 'sans-serif'}
-                onValueChange={(value) => updateDisplaySettings('fontFamily', value)}
-              >
-                <SelectTrigger id="fontFamily">
-                  <SelectValue placeholder="Select font" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  {/* Default System Fonts */}
-                  <SelectItem value="sans-serif" style={{ fontFamily: 'sans-serif' }}>Sans Serif (Default)</SelectItem>
-                  <SelectItem value="serif" style={{ fontFamily: 'serif' }}>Serif (Default)</SelectItem>
-
-                  {/* Classic Professional Fonts */}
-                  <SelectItem value="'Arial', sans-serif" style={{ fontFamily: 'Arial, sans-serif' }}>Arial</SelectItem>
-                  <SelectItem value="'Helvetica', sans-serif" style={{ fontFamily: 'Helvetica, sans-serif' }}>Helvetica</SelectItem>
-                  <SelectItem value="'Calibri', sans-serif" style={{ fontFamily: 'Calibri, sans-serif' }}>Calibri</SelectItem>
-                  <SelectItem value="'Verdana', sans-serif" style={{ fontFamily: 'Verdana, sans-serif' }}>Verdana</SelectItem>
-                  <SelectItem value="'Tahoma', sans-serif" style={{ fontFamily: 'Tahoma, sans-serif' }}>Tahoma</SelectItem>
-
-                  {/* Serif Fonts */}
-                  <SelectItem value="'Times New Roman', serif" style={{ fontFamily: 'Times New Roman, serif' }}>Times New Roman</SelectItem>
-                  <SelectItem value="'Georgia', serif" style={{ fontFamily: 'Georgia, serif' }}>Georgia</SelectItem>
-                  <SelectItem value="'Garamond', serif" style={{ fontFamily: 'Garamond, serif' }}>Garamond</SelectItem>
-                  <SelectItem value="'Palatino', serif" style={{ fontFamily: 'Palatino, serif' }}>Palatino</SelectItem>
-                  <SelectItem value="'Cambria', serif" style={{ fontFamily: 'Cambria, serif' }}>Cambria</SelectItem>
-
-                  {/* Modern Sans-Serif */}
-                  <SelectItem value="'Roboto', sans-serif" style={{ fontFamily: 'Roboto, sans-serif' }}>Roboto</SelectItem>
-                  <SelectItem value="'Open Sans', sans-serif" style={{ fontFamily: 'Open Sans, sans-serif' }}>Open Sans</SelectItem>
-                  <SelectItem value="'Lato', sans-serif" style={{ fontFamily: 'Lato, sans-serif' }}>Lato</SelectItem>
-                  <SelectItem value="'Montserrat', sans-serif" style={{ fontFamily: 'Montserrat, sans-serif' }}>Montserrat</SelectItem>
-                  <SelectItem value="'Source Sans Pro', sans-serif" style={{ fontFamily: 'Source Sans Pro, sans-serif' }}>Source Sans Pro</SelectItem>
-                  <SelectItem value="'Inter', sans-serif" style={{ fontFamily: 'Inter, sans-serif' }}>Inter</SelectItem>
-                  <SelectItem value="'Work Sans', sans-serif" style={{ fontFamily: 'Work Sans, sans-serif' }}>Work Sans</SelectItem>
-
-                  {/* Professional Serif */}
-                  <SelectItem value="'Merriweather', serif" style={{ fontFamily: 'Merriweather, serif' }}>Merriweather</SelectItem>
-                  <SelectItem value="'Playfair Display', serif" style={{ fontFamily: 'Playfair Display, serif' }}>Playfair Display</SelectItem>
-                  <SelectItem value="'PT Serif', serif" style={{ fontFamily: 'PT Serif, serif' }}>PT Serif</SelectItem>
-
-                  {/* Monospace (for technical CVs) */}
-                  <SelectItem value="'Courier New', monospace" style={{ fontFamily: 'Courier New, monospace' }}>Courier New</SelectItem>
-                  <SelectItem value="'Consolas', monospace" style={{ fontFamily: 'Consolas, monospace' }}>Consolas</SelectItem>
-                  <SelectItem value="'Monaco', monospace" style={{ fontFamily: 'Monaco, monospace' }}>Monaco</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Accent Color */}
-            <div className="space-y-2">
-              <Label htmlFor="accentColor">Accent Color</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="accentColor"
-                  type="color"
-                  value={cv.display_settings?.accentColor || '#2563eb'}
-                  onChange={(e) => updateDisplaySettings('accentColor', e.target.value)}
-                  className="w-14 h-9 p-1 cursor-pointer"
-                />
-                <Input
-                  type="text"
-                  value={cv.display_settings?.accentColor || '#2563eb'}
-                  onChange={(e) => updateDisplaySettings('accentColor', e.target.value)}
-                  placeholder="#2563eb"
-                  className="flex-1 font-mono text-sm"
-                />
-              </div>
-            </div>
-
-            {/* Text Color */}
-            <div className="space-y-2">
-              <Label htmlFor="textColor">Text Color</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="textColor"
-                  type="color"
-                  value={cv.display_settings?.textColor || '#111827'}
-                  onChange={(e) => updateDisplaySettings('textColor', e.target.value)}
-                  className="w-14 h-9 p-1 cursor-pointer"
-                />
-                <Input
-                  type="text"
-                  value={cv.display_settings?.textColor || '#111827'}
-                  onChange={(e) => updateDisplaySettings('textColor', e.target.value)}
-                  placeholder="#111827"
-                  className="flex-1 font-mono text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Preview Example */}
-          <div className="mt-4 p-4 rounded-lg border bg-white">
-            <div className="space-y-2">
-              <h3
-                className="text-sm font-bold uppercase tracking-wide"
-                style={{
-                  color: cv.display_settings?.accentColor || '#2563eb',
-                  fontFamily: cv.display_settings?.fontFamily || 'sans-serif'
-                }}
-              >
-                Preview Example
-              </h3>
-              <p
-                className="text-xs"
-                style={{
-                  color: cv.display_settings?.textColor || '#111827',
-                  fontFamily: cv.display_settings?.fontFamily || 'sans-serif'
-                }}
-              >
-                This is how your CV text will appear with the selected font and colors.
-                The heading above uses the accent color, while this paragraph uses the text color.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* AI Generate Button */}
       <Card className="border-dashed border-primary/50 bg-primary/5">
         <CardContent className="py-4">
@@ -1100,6 +953,12 @@ export default function CVEditorPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Format Settings */}
+      <FormatSettings
+        displaySettings={cv.display_settings}
+        onUpdateSettings={updateDisplaySettings}
+      />
 
       {/* Preview Section */}
       <Card id="preview-section">
