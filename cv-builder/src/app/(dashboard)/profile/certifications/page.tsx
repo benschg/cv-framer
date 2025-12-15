@@ -22,23 +22,24 @@ export default function CertificationsPage() {
         onAdd={() => managerRef.current?.handleAdd()}
         isSaving={isSaving}
         saveSuccess={saveSuccess}
+        headerActions={
+          <Button
+            variant="outline"
+            onClick={() => setAiDialogOpen(true)}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Add using AI
+          </Button>
+        }
       >
-        <Button
-          variant="outline"
-          onClick={() => setAiDialogOpen(true)}
-        >
-          <Sparkles className="h-4 w-4 mr-2" />
-          Add using AI
-        </Button>
+        <div className="max-w-4xl mx-auto">
+          <CertificationsManager
+            ref={managerRef}
+            onSavingChange={setIsSaving}
+            onSaveSuccessChange={setSaveSuccess}
+          />
+        </div>
       </ProfilePageLayout>
-
-      <div className="max-w-4xl mx-auto">
-        <CertificationsManager
-          ref={managerRef}
-          onSavingChange={setIsSaving}
-          onSaveSuccessChange={setSaveSuccess}
-        />
-      </div>
 
       <AICertificationUploadDialog
         open={aiDialogOpen}
