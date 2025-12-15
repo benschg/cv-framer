@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, Zap, LucideIcon } from 'lucide-react';
+import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, Zap, Upload, LucideIcon } from 'lucide-react';
 
 interface ProfileSection {
   title: string;
@@ -12,6 +12,12 @@ interface ProfileSection {
 }
 
 const profileSections: ProfileSection[] = [
+  {
+    title: 'Import from CV',
+    description: 'Upload your CV to auto-fill career data',
+    href: '/profile/import-cv',
+    icon: Upload,
+  },
   {
     title: 'Work Experience',
     description: 'Manage your work history',

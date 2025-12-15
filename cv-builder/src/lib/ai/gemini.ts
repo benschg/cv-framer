@@ -599,3 +599,225 @@ Return as JSON:
 
   return generateJSON<GeneratedCoverLetterContent>(prompt);
 }
+
+// Types for CV upload extraction
+export interface ExtractedCVData {
+  workExperiences: Array<{
+    company: string | null;
+    title: string | null;
+    location: string | null;
+    start_date: string | null;  // YYYY-MM
+    end_date: string | null;
+    current: boolean;
+    description: string | null;
+    bullets: string[];
+  }>;
+  educations: Array<{
+    institution: string | null;
+    degree: string | null;
+    field: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    grade: string | null;
+    description: string | null;
+  }>;
+  skillCategories: Array<{
+    category: string | null;
+    skills: string[];
+  }>;
+  keyCompetences: Array<{
+    title: string | null;
+    description: string | null;
+  }>;
+  certifications: Array<{
+    name: string | null;
+    issuer: string | null;
+    date: string | null;
+    expiry_date: string | null;
+    credential_id: string | null;
+    url: string | null;
+  }>;
+}
+
+export interface CVExtractionResult {
+  extractedData: ExtractedCVData;
+  confidence: {
+    workExperiences: number;
+    educations: number;
+    skillCategories: number;
+    keyCompetences: number;
+    certifications: number;
+  };
+  sectionCounts: {
+    workExperiences: number;
+    educations: number;
+    skillCategories: number;
+    keyCompetences: number;
+    certifications: number;
+  };
+  reasoning: string;
+}
+
+// Extract comprehensive career data from a CV document
+export async function extractCVData(
+  fileBuffer: Buffer,
+  mimeType: string,
+  modelName: GeminiModel = 'gemini-2.0-flash'
+): Promise<CVExtractionResult> {
+  const model = getModel(modelName);
+
+  const prompt = `You are analyzing a CV/Resume document to extract comprehensive career information. Think carefully about what you see in the document.
+
+Your task is to extract ALL instances from the following sections:
+
+1. **Work Experience** - Every job, position, or professional role
+   For each position extract:
+   - Company name (full organization name)
+   - Job title/position
+   - Location (city, state/country if visible)
+   - Start date (format: YYYY-MM, use YYYY-01 if only year visible)
+   - End date (format: YYYY-MM, use YYYY-01 if only year visible, null if "Present"/"Current")
+   - Is current position (boolean: true if "Present"/"Current", false otherwise)
+   - Description (brief role overview if present)
+   - Bullet points (ALL achievement/responsibility bullets listed for this job)
+
+2. **Education** - Every degree, certification program, or educational institution
+   For each entry extract:
+   - Institution name (full university/school name)
+   - Degree/qualification type (e.g., "Bachelor of Science", "Master of Arts")
+   - Field of study/major (e.g., "Computer Science", "Business Administration")
+   - Start date (YYYY-MM, use YYYY-01 if only year)
+   - End date (YYYY-MM, null if in progress)
+   - Grade/GPA/honors (if mentioned, e.g., "3.8 GPA", "Summa Cum Laude")
+   - Description (thesis, coursework, honors, etc.)
+
+3. **Skills** - Organize all skills by logical category
+   Group skills into categories (e.g., "Programming Languages", "Frameworks", "Tools", "Soft Skills")
+   For each category:
+   - Category name
+   - Array of skill names (extract every skill mentioned)
+
+4. **Key Competences** - Core professional competencies or strengths
+   Extract 3-7 main competences with descriptions:
+   - Competence title (e.g., "Leadership", "Technical Architecture")
+   - Brief description (1-2 sentences if available)
+
+5. **Certifications** - Professional certifications only (not academic degrees)
+   For each certification:
+   - Certification name
+   - Issuing organization
+   - Issue date (YYYY-MM if visible)
+   - Expiry date (YYYY-MM if visible, null if "Does not expire")
+   - Credential ID (if visible)
+   - Verification URL (if visible)
+
+CRITICAL RULES:
+- Extract EVERY item you find - do not summarize, combine, or skip entries
+- Use null for fields you cannot confidently extract
+- All dates MUST be in YYYY-MM format
+- For "Present"/"Current" positions: set end_date to null and current to true
+- For past positions: set end_date to the date and current to false
+- Preserve original text where possible
+- Extract ALL bullet points for each job (don't truncate)
+- Be conservative with confidence scores (only 0.8+ if very clear and unambiguous)
+
+Confidence scoring per section (0.0-1.0):
+- 1.0: Crystal clear, multiple well-structured entries extracted
+- 0.9: Very clear, most fields extracted successfully
+- 0.8: Good extraction, minor ambiguities
+- 0.7: Moderate confidence, some fields unclear
+- 0.5: Partial extraction, poor formatting or unclear structure
+- 0.0: No data found or completely unreadable section
+
+Return ONLY valid JSON (no markdown, no explanations, no code blocks):
+{
+  "extractedData": {
+    "workExperiences": [
+      {
+        "company": "string" | null,
+        "title": "string" | null,
+        "location": "string" | null,
+        "start_date": "YYYY-MM" | null,
+        "end_date": "YYYY-MM" | null,
+        "current": boolean,
+        "description": "string" | null,
+        "bullets": ["bullet1", "bullet2", ...]
+      }
+    ],
+    "educations": [
+      {
+        "institution": "string" | null,
+        "degree": "string" | null,
+        "field": "string" | null,
+        "start_date": "YYYY-MM" | null,
+        "end_date": "YYYY-MM" | null,
+        "grade": "string" | null,
+        "description": "string" | null
+      }
+    ],
+    "skillCategories": [
+      {
+        "category": "string" | null,
+        "skills": ["skill1", "skill2", ...]
+      }
+    ],
+    "keyCompetences": [
+      {
+        "title": "string" | null,
+        "description": "string" | null
+      }
+    ],
+    "certifications": [
+      {
+        "name": "string" | null,
+        "issuer": "string" | null,
+        "date": "YYYY-MM" | null,
+        "expiry_date": "YYYY-MM" | null,
+        "credential_id": "string" | null,
+        "url": "string" | null
+      }
+    ]
+  },
+  "confidence": {
+    "workExperiences": 0.0-1.0,
+    "educations": 0.0-1.0,
+    "skillCategories": 0.0-1.0,
+    "keyCompetences": 0.0-1.0,
+    "certifications": 0.0-1.0
+  },
+  "sectionCounts": {
+    "workExperiences": number,
+    "educations": number,
+    "skillCategories": number,
+    "keyCompetences": number,
+    "certifications": number
+  },
+  "reasoning": "Brief summary of extraction quality, challenges encountered, and overall document structure"
+}`;
+
+  // Use Gemini Vision API
+  const base64Data = fileBuffer.toString('base64');
+  const imagePart = {
+    inlineData: {
+      data: base64Data,
+      mimeType: mimeType,
+    },
+  };
+
+  const result = await model.generateContent([prompt, imagePart]);
+  const text = result.response.text();
+
+  // Clean and parse JSON
+  let cleanedText = text.trim();
+  if (cleanedText.startsWith('```json')) {
+    cleanedText = cleanedText.slice(7);
+  } else if (cleanedText.startsWith('```')) {
+    cleanedText = cleanedText.slice(3);
+  }
+  if (cleanedText.endsWith('```')) {
+    cleanedText = cleanedText.slice(0, -3);
+  }
+  cleanedText = cleanedText.trim();
+
+  return JSON.parse(cleanedText) as CVExtractionResult;
+}
