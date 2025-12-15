@@ -1,229 +1,315 @@
 'use client';
 
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Save, X } from 'lucide-react';
-import { generateId } from '@/services/cv.service';
-import type { Education } from '@/types/cv.types';
+import { AlertTriangle, Trash2, Loader2 } from 'lucide-react';
+import { MonthYearPicker } from '@/components/ui/month-year-picker';
+import { formatDateRange } from '@/lib/utils';
+import {
+  fetchEducations,
+  createEducation,
+  deleteEducation,
+  updateEducation,
+  type ProfileEducation,
+} from '@/services/profile-career.service';
+import { useProfileManager } from '@/hooks/use-profile-manager';
+import { ProfileCardManager } from './ProfileCardManager';
+import { SortableCard } from './SortableCard';
 
-export function EducationManager() {
-  const [educationList, setEducationList] = useState<Education[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Education>>({});
+interface EducationManagerProps {
+  onSavingChange?: (saving: boolean) => void;
+  onSaveSuccessChange?: (success: boolean) => void;
+}
 
-  const handleAdd = () => {
-    const newEducation: Education = {
-      id: generateId(),
+export interface EducationManagerRef {
+  handleAdd: () => void;
+}
+
+export const EducationManager = forwardRef<EducationManagerRef, EducationManagerProps>(
+  ({ onSavingChange, onSaveSuccessChange }, ref) => {
+  const {
+    items: educationList,
+    isExpanded,
+    getFormData,
+    loading,
+    saving,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    handleDone,
+    handleFieldChange,
+    handleDragEnd,
+  } = useProfileManager<ProfileEducation>({
+    fetchItems: fetchEducations,
+    createItem: createEducation,
+    updateItem: updateEducation,
+    deleteItem: deleteEducation,
+    defaultItem: {
       institution: '',
       degree: '',
       field: '',
-      startDate: '',
-      endDate: '',
+      start_date: '',
+      end_date: '',
       description: '',
       grade: '',
-    };
-    setEducationList([newEducation, ...educationList]);
-    setEditingId(newEducation.id);
-    setFormData(newEducation);
-  };
+    },
+    onSavingChange,
+    onSaveSuccessChange,
+  });
 
-  const handleEdit = (education: Education) => {
-    setEditingId(education.id);
-    setFormData(education);
-  };
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    handleAdd,
+  }));
 
-  const handleSave = () => {
-    if (!editingId) return;
-
-    setEducationList(educationList.map(edu =>
-      edu.id === editingId
-        ? { ...edu, ...formData }
-        : edu
-    ));
-    setEditingId(null);
-    setFormData({});
-  };
-
-  const handleCancel = () => {
-    // If it's a new unsaved education, remove it
-    if (editingId && !educationList.find(e => e.id === editingId)?.institution) {
-      setEducationList(educationList.filter(e => e.id !== editingId));
-    }
-    setEditingId(null);
-    setFormData({});
-  };
-
-  const handleDelete = (id: string) => {
-    setEducationList(educationList.filter(e => e.id !== id));
-    if (editingId === id) {
-      setEditingId(null);
-      setFormData({});
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Add Button */}
-      <div className="flex justify-end">
-        <Button onClick={handleAdd} disabled={editingId !== null}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Education
-        </Button>
-      </div>
-
-      {/* Education List */}
-      {educationList.length === 0 ? (
+    <ProfileCardManager
+      items={educationList}
+      onDragEnd={handleDragEnd}
+      renderCard={(education) => {
+        const expanded = isExpanded(education.id);
+        const formData = getFormData(education.id);
+        return (
+          <SortableCard
+            id={education.id}
+            disabled={false}
+            showDragHandle={!expanded}
+          >
+            {expanded ? (
+              <EducationEditForm
+                formData={formData}
+                onFieldChange={(field, value) => handleFieldChange(education.id, field, value)}
+                onDone={() => handleDone(education.id)}
+              />
+            ) : (
+              <EducationViewCard
+                education={education}
+                onEdit={() => handleEdit(education)}
+                onDelete={() => handleDelete(education.id)}
+                disabled={saving}
+              />
+            )}
+          </SortableCard>
+        );
+      }}
+      renderDragOverlay={(education) => (
+        <EducationCardOverlay education={education} />
+      )}
+      emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             <p>No education added yet.</p>
             <p className="text-sm mt-1">Click "Add Education" to get started.</p>
           </CardContent>
         </Card>
-      ) : (
-        <div className="space-y-4">
-          {educationList.map((education) => (
-            <Card key={education.id}>
-              {editingId === education.id ? (
-                // Edit Mode
-                <CardContent className="pt-6 space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="degree">Degree *</Label>
-                      <Input
-                        id="degree"
-                        value={formData.degree || ''}
-                        onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
-                        placeholder="Bachelor of Science"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="field">Field of Study</Label>
-                      <Input
-                        id="field"
-                        value={formData.field || ''}
-                        onChange={(e) => setFormData({ ...formData, field: e.target.value })}
-                        placeholder="Computer Science"
-                      />
-                    </div>
-                  </div>
+      }
+    />
+  );
+});
 
-                  <div className="space-y-2">
-                    <Label htmlFor="institution">Institution *</Label>
-                    <Input
-                      id="institution"
-                      value={formData.institution || ''}
-                      onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
-                      placeholder="University of California, Berkeley"
-                    />
-                  </div>
+EducationManager.displayName = 'EducationManager';
 
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="startDate">Start Date *</Label>
-                      <Input
-                        id="startDate"
-                        type="month"
-                        value={formData.startDate || ''}
-                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="endDate">End Date</Label>
-                      <Input
-                        id="endDate"
-                        type="month"
-                        value={formData.endDate || ''}
-                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="grade">Grade/GPA</Label>
-                      <Input
-                        id="grade"
-                        value={formData.grade || ''}
-                        onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                        placeholder="3.8 GPA"
-                      />
-                    </div>
-                  </div>
+// Edit Form Component
+interface EducationEditFormProps {
+  formData: Partial<ProfileEducation>;
+  onFieldChange: (field: keyof ProfileEducation, value: any) => void;
+  onDone: () => void;
+}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description || ''}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Honors, relevant coursework, thesis topic..."
-                      rows={3}
-                    />
-                  </div>
+function EducationEditForm({
+  formData,
+  onFieldChange,
+  onDone,
+}: EducationEditFormProps) {
+  // Check if end date is before start date
+  const isEndDateBeforeStart = (() => {
+    if (!formData.start_date || !formData.end_date) return false;
+    return formData.end_date < formData.start_date;
+  })();
 
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={handleCancel}>
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleSave}
-                      disabled={!formData.degree || !formData.institution || !formData.startDate}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save
-                    </Button>
-                  </div>
-                </CardContent>
-              ) : (
-                // View Mode
-                <>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle>
-                          {education.degree}
-                          {education.field && ` in ${education.field}`}
-                        </CardTitle>
-                        <CardDescription>{education.institution}</CardDescription>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {education.startDate} - {education.endDate || 'Present'}
-                          {education.grade && ` • ${education.grade}`}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(education)}
-                          disabled={editingId !== null}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(education.id)}
-                          disabled={editingId !== null}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  {education.description && (
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        {education.description}
-                      </p>
-                    </CardContent>
-                  )}
-                </>
-              )}
-            </Card>
-          ))}
+  return (
+    <>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Edit Education</CardTitle>
+          <Button variant="ghost" size="sm" onClick={onDone}>
+            Done
+          </Button>
         </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="degree">Degree *</Label>
+            <Input
+              id="degree"
+              value={formData.degree || ''}
+              onChange={(e) => onFieldChange('degree', e.target.value)}
+              placeholder="Bachelor of Science"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="field">Field of Study</Label>
+            <Input
+              id="field"
+              value={formData.field || ''}
+              onChange={(e) => onFieldChange('field', e.target.value)}
+              placeholder="Computer Science"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="institution">Institution *</Label>
+          <Input
+            id="institution"
+            value={formData.institution || ''}
+            onChange={(e) => onFieldChange('institution', e.target.value)}
+            placeholder="University of California, Berkeley"
+          />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="space-y-2">
+            <Label>Start Date *</Label>
+            <MonthYearPicker
+              value={formData.start_date || ''}
+              onChange={(value) => onFieldChange('start_date', value)}
+              placeholder="Select start date"
+              showFutureWarning
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>End Date</Label>
+            <MonthYearPicker
+              value={formData.end_date || ''}
+              onChange={(value) => onFieldChange('end_date', value)}
+              placeholder="Select end date"
+              showFutureWarning
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="grade">Grade/GPA</Label>
+            <Input
+              id="grade"
+              value={formData.grade || ''}
+              onChange={(e) => onFieldChange('grade', e.target.value)}
+              placeholder="3.8 GPA"
+            />
+          </div>
+        </div>
+
+        {isEndDateBeforeStart && (
+          <p className="flex items-center gap-1 text-sm text-amber-600">
+            <AlertTriangle className="h-4 w-4" />
+            End date cannot be before start date
+          </p>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            value={formData.description || ''}
+            onChange={(e) => onFieldChange('description', e.target.value)}
+            placeholder="Honors, relevant coursework, thesis topic..."
+            rows={3}
+          />
+        </div>
+      </CardContent>
+    </>
+  );
+}
+
+// View Card Component
+interface EducationViewCardProps {
+  education: ProfileEducation;
+  onEdit: () => void;
+  onDelete: () => void;
+  disabled: boolean;
+}
+
+function EducationViewCard({
+  education,
+  onEdit,
+  onDelete,
+  disabled,
+}: EducationViewCardProps) {
+  return (
+    <>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>
+              {education.degree}
+              {education.field && ` in ${education.field}`}
+            </CardTitle>
+            <CardDescription>{education.institution}</CardDescription>
+            <p className="text-sm text-muted-foreground mt-1">
+              {formatDateRange(education.start_date, education.end_date)}
+              {education.grade && ` • ${education.grade}`}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEdit}
+              disabled={disabled}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onDelete}
+              disabled={disabled}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      {education.description && (
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {education.description}
+          </p>
+        </CardContent>
       )}
-    </div>
+    </>
+  );
+}
+
+// Overlay component shown while dragging
+function EducationCardOverlay({ education }: { education: ProfileEducation }) {
+  return (
+    <Card className="shadow-xl rotate-3 cursor-grabbing opacity-80">
+      <CardHeader>
+        <div>
+          <CardTitle>
+            {education.degree}
+            {education.field && ` in ${education.field}`}
+          </CardTitle>
+          <CardDescription>{education.institution}</CardDescription>
+          <p className="text-sm text-muted-foreground mt-1">
+            {formatDateRange(education.start_date, education.end_date)}
+            {education.grade && ` • ${education.grade}`}
+          </p>
+        </div>
+      </CardHeader>
+    </Card>
   );
 }
