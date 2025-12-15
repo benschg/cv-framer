@@ -32,8 +32,8 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
   const {
     items: experiences,
-    editingId,
-    formData,
+    isExpanded,
+    getFormData,
     loading,
     saving,
     handleAdd,
@@ -62,20 +62,23 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
     onSaveSuccessChange,
   });
 
-  const handleBulletChange = (index: number, value: string) => {
+  const handleBulletChange = (id: string, index: number, value: string) => {
+    const formData = getFormData(id) as Partial<ProfileWorkExperience>;
     const newBullets = [...(formData.bullets || [])];
     newBullets[index] = value;
-    handleFieldChange('bullets', newBullets);
+    handleFieldChange(id, 'bullets', newBullets);
   };
 
-  const handleAddBullet = () => {
-    handleFieldChange('bullets', [...(formData.bullets || []), '']);
+  const handleAddBullet = (id: string) => {
+    const formData = getFormData(id) as Partial<ProfileWorkExperience>;
+    handleFieldChange(id, 'bullets', [...(formData.bullets || []), '']);
   };
 
-  const handleRemoveBullet = (index: number) => {
+  const handleRemoveBullet = (id: string, index: number) => {
+    const formData = getFormData(id) as Partial<ProfileWorkExperience>;
     const newBullets = [...(formData.bullets || [])];
     newBullets.splice(index, 1);
-    handleFieldChange('bullets', newBullets);
+    handleFieldChange(id, 'bullets', newBullets);
   };
 
   // Expose methods to parent via ref
@@ -95,32 +98,36 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
     <ProfileCardManager
       items={experiences}
       onDragEnd={handleDragEnd}
-      renderCard={(experience) => (
-        <SortableCard
-          id={experience.id}
-          disabled={editingId !== null && editingId !== experience.id}
-          showDragHandle={editingId !== experience.id}
-        >
-          {editingId === experience.id ? (
-            <ExperienceEditForm
-              formData={formData}
-              onFieldChange={handleFieldChange}
-              onMultiFieldChange={handleMultiFieldChange}
-              onBulletChange={handleBulletChange}
-              onAddBullet={handleAddBullet}
-              onRemoveBullet={handleRemoveBullet}
-              onDone={handleDone}
-            />
-          ) : (
-            <ExperienceViewCard
-              experience={experience}
-              onEdit={() => handleEdit(experience)}
-              onDelete={() => handleDelete(experience.id)}
-              disabled={editingId !== null || saving}
-            />
-          )}
-        </SortableCard>
-      )}
+      renderCard={(experience) => {
+        const expanded = isExpanded(experience.id);
+        const formData = getFormData(experience.id);
+        return (
+          <SortableCard
+            id={experience.id}
+            disabled={false}
+            showDragHandle={!expanded}
+          >
+            {expanded ? (
+              <ExperienceEditForm
+                formData={formData}
+                onFieldChange={(field, value) => handleFieldChange(experience.id, field, value)}
+                onMultiFieldChange={(updates) => handleMultiFieldChange(experience.id, updates)}
+                onBulletChange={(index, value) => handleBulletChange(experience.id, index, value)}
+                onAddBullet={() => handleAddBullet(experience.id)}
+                onRemoveBullet={(index) => handleRemoveBullet(experience.id, index)}
+                onDone={() => handleDone(experience.id)}
+              />
+            ) : (
+              <ExperienceViewCard
+                experience={experience}
+                onEdit={() => handleEdit(experience)}
+                onDelete={() => handleDelete(experience.id)}
+                disabled={saving}
+              />
+            )}
+          </SortableCard>
+        );
+      }}
       renderDragOverlay={(experience) => (
         <ExperienceCardOverlay experience={experience} />
       )}

@@ -25,8 +25,8 @@ export function useProfileManager<T extends { id: string; display_order?: number
   } = config;
 
   const [items, setItems] = useState<T[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<T>>({});
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [formDataMap, setFormDataMap] = useState<Map<string, Partial<T>>>(new Map());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -67,8 +67,9 @@ export function useProfileManager<T extends { id: string; display_order?: number
       alert('Failed to create item');
     } else if (data) {
       setItems([data, ...items]);
-      setEditingId(data.id);
-      setFormData(data);
+      // Expand the new item and set its form data
+      setExpandedIds((prev) => new Set(prev).add(data.id));
+      setFormDataMap((prev) => new Map(prev).set(data.id, data));
       onSaveSuccessChange?.(true);
       setTimeout(() => {
         onSaveSuccessChange?.(false);
@@ -77,9 +78,23 @@ export function useProfileManager<T extends { id: string; display_order?: number
   };
 
   const handleEdit = (item: T) => {
-    setEditingId(item.id);
-    setFormData(item);
+    // Toggle expansion - if already expanded, collapse it; otherwise expand
+    setExpandedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(item.id)) {
+        newSet.delete(item.id);
+      } else {
+        newSet.add(item.id);
+        // Initialize form data for this item
+        setFormDataMap((prevMap) => new Map(prevMap).set(item.id, item));
+      }
+      return newSet;
+    });
   };
+
+  const isExpanded = (id: string) => expandedIds.has(id);
+
+  const getFormData = (id: string) => formDataMap.get(id) || {};
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this item?')) {
@@ -100,10 +115,17 @@ export function useProfileManager<T extends { id: string; display_order?: number
       alert('Failed to delete item');
     } else {
       setItems(items.filter((e) => e.id !== id));
-      if (editingId === id) {
-        setEditingId(null);
-        setFormData({});
-      }
+      // Clean up expanded state and form data
+      setExpandedIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+      setFormDataMap((prev) => {
+        const newMap = new Map(prev);
+        newMap.delete(id);
+        return newMap;
+      });
       onSaveSuccessChange?.(true);
       setTimeout(() => {
         onSaveSuccessChange?.(false);
@@ -111,86 +133,87 @@ export function useProfileManager<T extends { id: string; display_order?: number
     }
   };
 
-  const handleDone = () => {
-    setEditingId(null);
-    setFormData({});
+  const handleDone = (id: string) => {
+    setExpandedIds((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(id);
+      return newSet;
+    });
   };
 
   // Auto-save handler with debouncing
   const handleFieldChange = useCallback(
-    (field: keyof T, value: any) => {
-      const updatedData = { ...formData, [field]: value } as Partial<T>;
-      setFormData(updatedData);
+    (id: string, field: keyof T, value: any) => {
+      const currentFormData = formDataMap.get(id) || {};
+      const updatedData = { ...currentFormData, [field]: value } as Partial<T>;
+      setFormDataMap((prev) => new Map(prev).set(id, updatedData));
 
-      // Auto-save if we're editing an existing entry
-      if (editingId) {
-        onSavingChange?.(true);
-        onSaveSuccessChange?.(false);
+      // Auto-save
+      onSavingChange?.(true);
+      onSaveSuccessChange?.(false);
 
-        const debouncedSave = debounce(
-          `profile-item-${editingId}`,
-          async () => {
-            const { data, error } = await updateItem(editingId, updatedData);
+      const debouncedSave = debounce(
+        `profile-item-${id}`,
+        async () => {
+          const { data, error } = await updateItem(id, updatedData);
 
-            onSavingChange?.(false);
+          onSavingChange?.(false);
 
-            if (!error && data) {
-              onSaveSuccessChange?.(true);
-              setItems((prevItems) =>
-                prevItems.map((item) => (item.id === editingId ? data : item))
-              );
-              setTimeout(() => {
-                onSaveSuccessChange?.(false);
-              }, 2000);
-            } else if (error) {
-              console.error('Auto-save failed:', error);
-            }
-          },
-          1000
-        );
+          if (!error && data) {
+            onSaveSuccessChange?.(true);
+            setItems((prevItems) =>
+              prevItems.map((item) => (item.id === id ? data : item))
+            );
+            setTimeout(() => {
+              onSaveSuccessChange?.(false);
+            }, 2000);
+          } else if (error) {
+            console.error('Auto-save failed:', error);
+          }
+        },
+        1000
+      );
 
-        debouncedSave();
-      }
+      debouncedSave();
     },
-    [editingId, formData, onSavingChange, onSaveSuccessChange, updateItem]
+    [formDataMap, onSavingChange, onSaveSuccessChange, updateItem]
   );
 
   // Helper to update multiple fields at once
   const handleMultiFieldChange = useCallback(
-    (updates: Partial<T>) => {
-      const updatedData = { ...formData, ...updates };
-      setFormData(updatedData);
+    (id: string, updates: Partial<T>) => {
+      const currentFormData = formDataMap.get(id) || {};
+      const updatedData = { ...currentFormData, ...updates };
+      setFormDataMap((prev) => new Map(prev).set(id, updatedData));
 
-      if (editingId) {
-        onSavingChange?.(true);
-        onSaveSuccessChange?.(false);
+      onSavingChange?.(true);
+      onSaveSuccessChange?.(false);
 
-        const debouncedSave = debounce(
-          `profile-item-${editingId}`,
-          async () => {
-            const { data, error } = await updateItem(editingId, updatedData);
+      const debouncedSave = debounce(
+        `profile-item-${id}`,
+        async () => {
+          const { data, error } = await updateItem(id, updatedData);
 
-            onSavingChange?.(false);
+          onSavingChange?.(false);
 
-            if (!error && data) {
-              onSaveSuccessChange?.(true);
-              setItems((prevItems) =>
-                prevItems.map((item) => (item.id === editingId ? data : item))
-              );
-              setTimeout(() => {
-                onSaveSuccessChange?.(false);
-              }, 2000);
-            } else if (error) {
-              console.error('Auto-save failed:', error);
-            }
-          },
-          1000
-        );
+          if (!error && data) {
+            onSaveSuccessChange?.(true);
+            setItems((prevItems) =>
+              prevItems.map((item) => (item.id === id ? data : item))
+            );
+            setTimeout(() => {
+              onSaveSuccessChange?.(false);
+            }, 2000);
+          } else if (error) {
+            console.error('Auto-save failed:', error);
+          }
+        },
+        1000
+      );
 
-        debouncedSave();
-      }
+      debouncedSave();
     },
-    [editingId, formData, onSavingChange, onSaveSuccessChange, updateItem]
+    [formDataMap, onSavingChange, onSaveSuccessChange, updateItem]
   );
 
   const handleDragEnd = async (oldIndex: number, newIndex: number) => {
@@ -228,8 +251,9 @@ export function useProfileManager<T extends { id: string; display_order?: number
 
   return {
     items,
-    editingId,
-    formData,
+    expandedIds,
+    isExpanded,
+    getFormData,
     loading,
     saving,
     activeId,
@@ -241,6 +265,5 @@ export function useProfileManager<T extends { id: string; display_order?: number
     handleFieldChange,
     handleMultiFieldChange,
     handleDragEnd,
-    setFormData,
   };
 }
