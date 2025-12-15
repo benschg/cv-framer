@@ -401,7 +401,25 @@ export async function fetchCertificationDocuments(
     .eq('certification_id', certificationId)
     .order('display_order', { ascending: true });
 
-  return { data, error };
+  if (error || !data) {
+    return { data, error };
+  }
+
+  // Generate signed URLs for each document (valid for 1 hour)
+  const documentsWithSignedUrls = await Promise.all(
+    data.map(async (doc) => {
+      const { data: signedUrlData } = await supabase.storage
+        .from('certification-documents')
+        .createSignedUrl(doc.storage_path, 3600); // 1 hour expiry
+
+      return {
+        ...doc,
+        document_url: signedUrlData?.signedUrl || doc.document_url,
+      };
+    })
+  );
+
+  return { data: documentsWithSignedUrls, error: null };
 }
 
 // Create certification document
@@ -427,17 +445,18 @@ export async function createCertificationDocument(
     return { data: null, error: uploadError };
   }
 
-  const { data: { publicUrl } } = supabase.storage
+  // Generate a signed URL (valid for 1 hour)
+  const { data: signedUrlData } = await supabase.storage
     .from('certification-documents')
-    .getPublicUrl(filePath);
+    .createSignedUrl(filePath, 3600);
 
-  // Create document record
+  // Create document record with signed URL
   const { data, error } = await supabase
     .from('certification_documents')
     .insert({
       certification_id: certificationId,
       user_id: userId,
-      document_url: publicUrl,
+      document_url: signedUrlData?.signedUrl || '', // Temporary signed URL
       document_name: file.name,
       storage_path: filePath,
       file_type: file.type,
