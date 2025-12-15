@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, Zap, LucideIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, Zap, Upload, LucideIcon, Sparkles } from 'lucide-react';
 
 interface ProfileSection {
   title: string;
@@ -54,10 +55,20 @@ export function CareerInfoNavigation() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Career Information</CardTitle>
-        <CardDescription>
-          Manage your professional background that will be used across all your CVs
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Career Information</CardTitle>
+            <CardDescription>
+              Manage your professional background that will be used across all your CVs
+            </CardDescription>
+          </div>
+          <Link href="/profile/import-cv">
+            <Button variant="outline" className="gap-2">
+              <Upload className="h-4 w-4" />
+              Import from CV
+            </Button>
+          </Link>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 sm:grid-cols-2">

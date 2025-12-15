@@ -638,3 +638,157 @@ export function convertToReference(profile: ProfileReference): Reference {
     documentName: profile.document_name ?? undefined,
   };
 }
+
+// ============================================
+// BULK IMPORT (for CV upload)
+// ============================================
+
+/**
+ * Bulk create work experiences from CV import
+ * Automatically assigns display_order based on existing count
+ */
+export async function bulkCreateWorkExperiences(
+  experiences: Array<Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
+): Promise<{ data: ProfileWorkExperience[] | null; error: any }> {
+  const { userId, error: authError } = await getCurrentUserId();
+  if (authError || !userId) {
+    return { data: null, error: authError };
+  }
+
+  // Get current count for display_order offset
+  const { data: existing } = await fetchWorkExperiences();
+  const startOrder = existing?.length || 0;
+
+  // Add user_id and display_order to each item
+  const itemsToInsert = experiences.map((exp, idx) => ({
+    ...exp,
+    user_id: userId,
+    display_order: startOrder + idx,
+  }));
+
+  const { data, error } = await supabase
+    .from('profile_work_experiences')
+    .insert(itemsToInsert)
+    .select();
+
+  return { data, error };
+}
+
+/**
+ * Bulk create educations from CV import
+ * Automatically assigns display_order based on existing count
+ */
+export async function bulkCreateEducations(
+  educations: Array<Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
+): Promise<{ data: ProfileEducation[] | null; error: any }> {
+  const { userId, error: authError } = await getCurrentUserId();
+  if (authError || !userId) {
+    return { data: null, error: authError };
+  }
+
+  const { data: existing } = await fetchEducations();
+  const startOrder = existing?.length || 0;
+
+  const itemsToInsert = educations.map((edu, idx) => ({
+    ...edu,
+    user_id: userId,
+    display_order: startOrder + idx,
+  }));
+
+  const { data, error } = await supabase
+    .from('profile_educations')
+    .insert(itemsToInsert)
+    .select();
+
+  return { data, error };
+}
+
+/**
+ * Bulk create skill categories from CV import
+ * Automatically assigns display_order based on existing count
+ */
+export async function bulkCreateSkillCategories(
+  categories: Array<Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
+): Promise<{ data: ProfileSkillCategory[] | null; error: any }> {
+  const { userId, error: authError } = await getCurrentUserId();
+  if (authError || !userId) {
+    return { data: null, error: authError };
+  }
+
+  const { data: existing } = await fetchSkillCategories();
+  const startOrder = existing?.length || 0;
+
+  const itemsToInsert = categories.map((cat, idx) => ({
+    ...cat,
+    user_id: userId,
+    display_order: startOrder + idx,
+  }));
+
+  const { data, error } = await supabase
+    .from('profile_skill_categories')
+    .insert(itemsToInsert)
+    .select();
+
+  return { data, error };
+}
+
+/**
+ * Bulk create key competences from CV import
+ * Automatically assigns display_order based on existing count
+ */
+export async function bulkCreateKeyCompetences(
+  competences: Array<Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
+): Promise<{ data: ProfileKeyCompetence[] | null; error: any }> {
+  const { userId, error: authError } = await getCurrentUserId();
+  if (authError || !userId) {
+    return { data: null, error: authError };
+  }
+
+  const { data: existing } = await fetchKeyCompetences();
+  const startOrder = existing?.length || 0;
+
+  const itemsToInsert = competences.map((comp, idx) => ({
+    ...comp,
+    user_id: userId,
+    display_order: startOrder + idx,
+  }));
+
+  const { data, error } = await supabase
+    .from('profile_key_competences')
+    .insert(itemsToInsert)
+    .select();
+
+  return { data, error };
+}
+
+/**
+ * Bulk create certifications from CV import (without documents)
+ * Automatically assigns display_order based on existing count
+ */
+export async function bulkCreateCertifications(
+  certifications: Array<Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order' | 'document_url' | 'document_name' | 'storage_path'>>
+): Promise<{ data: ProfileCertification[] | null; error: any }> {
+  const { userId, error: authError } = await getCurrentUserId();
+  if (authError || !userId) {
+    return { data: null, error: authError };
+  }
+
+  const { data: existing } = await fetchCertifications();
+  const startOrder = existing?.length || 0;
+
+  const itemsToInsert = certifications.map((cert, idx) => ({
+    ...cert,
+    user_id: userId,
+    display_order: startOrder + idx,
+    document_url: null,
+    document_name: null,
+    storage_path: null,
+  }));
+
+  const { data, error } = await supabase
+    .from('profile_certifications')
+    .insert(itemsToInsert)
+    .select();
+
+  return { data, error };
+}
