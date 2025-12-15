@@ -153,21 +153,6 @@ export default function PublicCVPage() {
           </section>
         )}
 
-        {/* Key Competences */}
-        {content.keyCompetences && content.keyCompetences.length > 0 && (
-          <section className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Key Competences</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {content.keyCompetences.map((comp, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-medium text-gray-900">{comp.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{comp.description}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground py-4">
           <p>Created with CV Builder</p>

@@ -24,7 +24,6 @@ export function generateCVHTML(data: CVTemplateData): string {
   const styles = generateStyles(settings);
   const headerHTML = generateHeader(content, userProfile, settings, photoUrl);
   const profileHTML = generateProfile(content);
-  const keyCompetencesHTML = generateKeyCompetences(content);
 
   return `
 <!DOCTYPE html>
@@ -39,7 +38,6 @@ export function generateCVHTML(data: CVTemplateData): string {
   <div class="cv-container">
     ${headerHTML}
     ${profileHTML}
-    ${keyCompetencesHTML}
   </div>
 </body>
 </html>
@@ -147,30 +145,6 @@ function generateStyles(settings: DisplaySettings): string {
       text-align: justify;
     }
 
-    /* Key Competences */
-    .competences-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .competence-item {
-      padding: 8px;
-      background: #f9fafb;
-      border-radius: 4px;
-    }
-
-    .competence-title {
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 2px;
-    }
-
-    .competence-description {
-      font-size: 9pt;
-      color: #6b7280;
-    }
-
     /* Print styles */
     @media print {
       body {
@@ -239,30 +213,6 @@ function generateProfile(content: CVContent): string {
     <section class="section">
       <h2 class="section-title">Profile</h2>
       <p class="profile-text">${content.profile}</p>
-    </section>
-  `;
-}
-
-function generateKeyCompetences(content: CVContent): string {
-  if (!content.keyCompetences || content.keyCompetences.length === 0) return '';
-
-  const competencesHTML = content.keyCompetences
-    .map(
-      (comp) => `
-      <div class="competence-item">
-        <div class="competence-title">${comp.title}</div>
-        <div class="competence-description">${comp.description}</div>
-      </div>
-    `
-    )
-    .join('');
-
-  return `
-    <section class="section">
-      <h2 class="section-title">Key Competences</h2>
-      <div class="competences-grid">
-        ${competencesHTML}
-      </div>
     </section>
   `;
 }

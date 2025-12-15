@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, LucideIcon } from 'lucide-react';
+import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, Zap, LucideIcon } from 'lucide-react';
 
 interface ProfileSection {
   title: string;
@@ -29,6 +29,12 @@ const profileSections: ProfileSection[] = [
     description: 'Organize your skills by category',
     href: '/profile/skills',
     icon: Code,
+  },
+  {
+    title: 'Key Competences',
+    description: 'Define your core professional competences',
+    href: '/profile/key-competences',
+    icon: Zap,
   },
   {
     title: 'Certifications',

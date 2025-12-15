@@ -78,7 +78,6 @@ export interface GeneratedCVContent {
   tagline?: string;
   profile?: string;
   slogan?: string;
-  keyCompetences?: Array<{ title: string; description: string }>;
 }
 
 // Analyze a job posting to extract company research
@@ -140,7 +139,7 @@ export async function generateCVContent(
     ? 'Generate all content in German (Deutsch).'
     : 'Generate all content in English.';
 
-  const sectionsToGenerate = sections || ['tagline', 'profile', 'keyCompetences'];
+  const sectionsToGenerate = sections || ['tagline', 'profile'];
 
   const prompt = `You are an expert CV writer. Generate professional CV content based on the provided self-marketing data.
 
@@ -169,8 +168,7 @@ Return a JSON object with this structure:
 {
   ${sectionsToGenerate.includes('tagline') ? '"tagline": "A compelling one-line professional tagline",' : ''}
   ${sectionsToGenerate.includes('profile') ? '"profile": "A 3-4 sentence professional summary highlighting key strengths and value proposition",' : ''}
-  ${sectionsToGenerate.includes('slogan') ? '"slogan": "A memorable personal slogan or motto",' : ''}
-  ${sectionsToGenerate.includes('keyCompetences') ? '"keyCompetences": [{"title": "Competence Title", "description": "Brief description of this competence"}]' : ''}
+  ${sectionsToGenerate.includes('slogan') ? '"slogan": "A memorable personal slogan or motto"' : ''}
 }
 
 Guidelines:

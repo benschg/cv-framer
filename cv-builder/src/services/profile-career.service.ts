@@ -14,6 +14,7 @@ import type {
   ProfileSkillCategory,
   ProfileCertification,
   ProfileReference,
+  ProfileKeyCompetence,
 } from '@/types/profile-career.types';
 
 const supabase = createClient();
@@ -147,6 +148,7 @@ export type {
   ProfileSkillCategory,
   ProfileCertification,
   ProfileReference,
+  ProfileKeyCompetence,
 } from '@/types/profile-career.types';
 
 // Debounce utility for auto-save
@@ -268,6 +270,38 @@ export async function deleteSkillCategory(id: string): Promise<{ error: any }> {
 export const autoSaveSkillCategory = createAutoSave<ProfileSkillCategory>(
   updateSkillCategory,
   'skill-category'
+);
+
+// ============================================
+// KEY COMPETENCES
+// ============================================
+
+export async function fetchKeyCompetences(): Promise<{ data: ProfileKeyCompetence[] | null; error: any }> {
+  return fetchProfileData<ProfileKeyCompetence>('profile_key_competences', [
+    { column: 'display_order', ascending: true },
+  ]);
+}
+
+export async function createKeyCompetence(
+  competence: Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+): Promise<{ data: ProfileKeyCompetence | null; error: any }> {
+  return createProfileData<ProfileKeyCompetence>('profile_key_competences', competence);
+}
+
+export async function updateKeyCompetence(
+  id: string,
+  updates: Partial<Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<{ data: ProfileKeyCompetence | null; error: any }> {
+  return updateProfileData<ProfileKeyCompetence>('profile_key_competences', id, updates);
+}
+
+export async function deleteKeyCompetence(id: string): Promise<{ error: any }> {
+  return deleteProfileData('profile_key_competences', id);
+}
+
+export const autoSaveKeyCompetence = createAutoSave<ProfileKeyCompetence>(
+  updateKeyCompetence,
+  'key-competence'
 );
 
 // ============================================

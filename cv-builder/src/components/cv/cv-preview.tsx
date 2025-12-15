@@ -36,7 +36,6 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
   const labels = {
     profile: language === 'de' ? 'Profil' : 'Profile',
-    keyCompetences: language === 'de' ? 'Kernkompetenzen' : 'Key Competences',
   };
 
   return (
@@ -95,29 +94,8 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         </section>
       )}
 
-      {/* Key Competences */}
-      {content.keyCompetences && content.keyCompetences.length > 0 && (
-        <section className="mb-5">
-          <h2
-            className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
-          >
-            {labels.keyCompetences}
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {content.keyCompetences.map((comp) => (
-              <div key={comp.id} className="p-2 bg-gray-50 rounded">
-                <div className="font-semibold text-gray-900 text-xs">{comp.title}</div>
-                <div className="text-xs text-gray-500">{comp.description}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Empty state */}
-      {!content.profile &&
-        (!content.keyCompetences || content.keyCompetences.length === 0) && (
+      {!content.profile && (
           <div className="text-center py-8 text-gray-400">
             <p className="text-sm">
               {language === 'de'

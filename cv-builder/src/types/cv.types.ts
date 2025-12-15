@@ -39,17 +39,10 @@ export interface CVContent {
   profile?: string;
   slogan?: string;
   selected_photo_id?: string | null; // UUID of selected photo from profile_photos
-  keyCompetences?: KeyCompetence[];
   projects?: Project[];
   references?: Reference[];
   languages?: LanguageSkill[];
   certifications?: Certification[];
-}
-
-export interface KeyCompetence {
-  id: string;
-  title: string;
-  description: string;
 }
 
 export interface Project {

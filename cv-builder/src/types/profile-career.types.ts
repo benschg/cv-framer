@@ -17,6 +17,17 @@ export type ProfileSkillCategory = Tables['profile_skill_categories']['Row'];
 export type ProfileCertification = Tables['profile_certifications']['Row'];
 export type ProfileReference = Tables['profile_references']['Row'];
 
+// Manual type for profile_key_competences (pending database.types.ts regeneration)
+export interface ProfileKeyCompetence {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  display_order: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 // Insert types (what you pass to INSERT queries)
 export type ProfileWorkExperienceInsert = Tables['profile_work_experiences']['Insert'];
 export type ProfileEducationInsert = Tables['profile_educations']['Insert'];
@@ -37,3 +48,4 @@ export type NewProfileEducation = Omit<ProfileEducation, 'id' | 'user_id' | 'cre
 export type NewProfileSkillCategory = Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
 export type NewProfileCertification = Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
 export type NewProfileReference = Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+export type NewProfileKeyCompetence = Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
