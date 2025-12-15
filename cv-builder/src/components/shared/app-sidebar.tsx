@@ -46,6 +46,7 @@ const navigation = [
   {
     label: 'Build',
     items: [
+      { title: 'Profile', href: '/profile', icon: User },
       { title: 'Werbeflaechen', href: '/werbeflaechen', icon: Target },
       { title: 'My CVs', href: '/cv', icon: FileText },
       { title: 'Cover Letters', href: '/cover-letter', icon: Mail },
@@ -122,12 +123,6 @@ export function AppSidebar() {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuItem asChild>
-              <Link href="/profile" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/settings" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
