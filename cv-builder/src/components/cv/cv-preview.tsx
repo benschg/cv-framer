@@ -1,8 +1,11 @@
 'use client';
 
 import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
+import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Star } from 'lucide-react';
 import { ReactNode } from 'react';
+import { formatDateRange } from '@/lib/utils';
 
 interface CVPreviewProps {
   content: CVContent;
@@ -13,9 +16,17 @@ interface CVPreviewProps {
   userInitials?: string;
   /** Optional: Custom render for the photo (e.g., wrapped in a Popover) */
   photoElement?: ReactNode;
+  /** Work experiences with per-CV selections */
+  workExperiences?: CVWorkExperienceWithSelection[];
+  /** Educations with per-CV selections */
+  educations?: CVEducationWithSelection[];
+  /** Skill categories with per-CV selections */
+  skillCategories?: CVSkillCategoryWithSelection[];
+  /** Key competences with per-CV selections */
+  keyCompetences?: CVKeyCompetenceWithSelection[];
 }
 
-export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U', photoElement }: CVPreviewProps) {
+export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U', photoElement, workExperiences, educations, skillCategories, keyCompetences }: CVPreviewProps) {
   const accentColor = settings?.accentColor || '#2563eb';
   const textColor = settings?.textColor || '#111827';
   const fontFamily = settings?.fontFamily || 'sans-serif';
@@ -36,7 +47,31 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
   const labels = {
     profile: language === 'de' ? 'Profil' : 'Profile',
+    workExperience: language === 'de' ? 'Berufserfahrung' : 'Work Experience',
+    education: language === 'de' ? 'Ausbildung' : 'Education',
+    skills: language === 'de' ? 'Fähigkeiten' : 'Skills',
+    keyCompetences: language === 'de' ? 'Kernkompetenzen' : 'Key Competences',
   };
+
+  // Only show sections if the settings are enabled
+  const showWorkExperience = settings?.showWorkExperience !== false;
+  const showEducation = settings?.showEducation !== false;
+  const showSkills = settings?.showSkills !== false;
+  const showKeyCompetences = settings?.showKeyCompetences !== false;
+
+  // Filter to only selected items
+  const selectedWorkExperiences = showWorkExperience
+    ? (workExperiences?.filter(exp => exp.selection.is_selected) || [])
+    : [];
+  const selectedEducations = showEducation
+    ? (educations?.filter(edu => edu.selection.is_selected) || [])
+    : [];
+  const selectedSkillCategories = showSkills
+    ? (skillCategories?.filter(cat => cat.selection.is_selected) || [])
+    : [];
+  const selectedKeyCompetences = showKeyCompetences
+    ? (keyCompetences?.filter(comp => comp.selection.is_selected) || [])
+    : [];
 
   return (
     <div
@@ -94,8 +129,172 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         </section>
       )}
 
+      {/* Work Experience */}
+      {selectedWorkExperiences.length > 0 && (
+        <section className="mb-5">
+          <h2
+            className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
+            style={{ color: accentColor }}
+          >
+            {labels.workExperience}
+          </h2>
+          <div className="space-y-3">
+            {selectedWorkExperiences.map((exp) => {
+              // Use override or fall back to profile description
+              const description = exp.selection.description_override ?? exp.description;
+              // Filter bullets based on selection
+              const bullets = exp.selection.selected_bullet_indices === null
+                ? exp.bullets
+                : (exp.bullets || []).filter((_, i) =>
+                    exp.selection.selected_bullet_indices!.includes(i)
+                  );
+
+              return (
+                <div key={exp.id} className="text-sm">
+                  <div className="flex justify-between items-baseline">
+                    <div className="flex items-center gap-1">
+                      <span className="font-semibold">{exp.title}</span>
+                      {exp.selection.is_favorite && (
+                        <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {formatDateRange(exp.start_date, exp.end_date, exp.current)}
+                    </span>
+                  </div>
+                  <p className="text-gray-600">
+                    {exp.company}
+                    {exp.location && `, ${exp.location}`}
+                  </p>
+                  {description && (
+                    <p className="text-gray-700 mt-1">{description}</p>
+                  )}
+                  {bullets && bullets.length > 0 && (
+                    <ul className="list-disc list-inside mt-1 space-y-0.5 text-gray-700">
+                      {bullets.map((bullet, i) => (
+                        <li key={i}>{bullet}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Education */}
+      {selectedEducations.length > 0 && (
+        <section className="mb-5">
+          <h2
+            className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
+            style={{ color: accentColor }}
+          >
+            {labels.education}
+          </h2>
+          <div className="space-y-3">
+            {selectedEducations.map((edu) => {
+              const description = edu.selection.description_override ?? edu.description;
+
+              return (
+                <div key={edu.id} className="text-sm">
+                  <div className="flex justify-between items-baseline">
+                    <div className="flex items-center gap-1">
+                      <span className="font-semibold">{edu.degree}</span>
+                      {edu.selection.is_favorite && (
+                        <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {formatDateRange(edu.start_date, edu.end_date)}
+                    </span>
+                  </div>
+                  <p className="text-gray-600">
+                    {edu.institution}
+                    {edu.field && ` \u2022 ${edu.field}`}
+                  </p>
+                  {edu.grade && (
+                    <p className="text-gray-500 text-xs">{edu.grade}</p>
+                  )}
+                  {description && (
+                    <p className="text-gray-700 mt-1">{description}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Skills */}
+      {selectedSkillCategories.length > 0 && (
+        <section className="mb-5">
+          <h2
+            className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
+            style={{ color: accentColor }}
+          >
+            {labels.skills}
+          </h2>
+          <div className="space-y-2">
+            {selectedSkillCategories.map((cat) => {
+              // Filter skills based on selection
+              const skills = cat.selection.selected_skill_indices === null
+                ? cat.skills
+                : cat.skills.filter((_, i) =>
+                    cat.selection.selected_skill_indices!.includes(i)
+                  );
+
+              return (
+                <div key={cat.id} className="text-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold">{cat.category}:</span>
+                    {cat.selection.is_favorite && (
+                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-gray-700">
+                    {skills.join(', ')}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Key Competences */}
+      {selectedKeyCompetences.length > 0 && (
+        <section className="mb-5">
+          <h2
+            className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
+            style={{ color: accentColor }}
+          >
+            {labels.keyCompetences}
+          </h2>
+          <div className="space-y-2">
+            {selectedKeyCompetences.map((comp) => {
+              const description = comp.selection.description_override ?? comp.description;
+
+              return (
+                <div key={comp.id} className="text-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold">{comp.title}</span>
+                    {comp.selection.is_favorite && (
+                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                    )}
+                  </div>
+                  {description && (
+                    <p className="text-gray-700">{description}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Empty state */}
-      {!content.profile && (
+      {!content.profile && selectedWorkExperiences.length === 0 && selectedEducations.length === 0 && selectedSkillCategories.length === 0 && selectedKeyCompetences.length === 0 && (
           <div className="text-center py-8 text-gray-400">
             <p className="text-sm">
               {language === 'de'

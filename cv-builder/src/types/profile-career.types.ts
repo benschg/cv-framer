@@ -18,6 +18,51 @@ export type ProfileCertification = Tables['profile_certifications']['Row'];
 export type ProfileReference = Tables['profile_references']['Row'];
 export type CertificationDocument = Tables['certification_documents']['Row'];
 
+// CV Work Experience Selection (junction table for per-CV customization)
+export type CVWorkExperienceSelection = Tables['cv_work_experience_selections']['Row'];
+export type CVWorkExperienceSelectionInsert = Tables['cv_work_experience_selections']['Insert'];
+export type CVWorkExperienceSelectionUpdate = Tables['cv_work_experience_selections']['Update'];
+
+// CV Education Selection (junction table for per-CV customization)
+export type CVEducationSelection = Tables['cv_education_selections']['Row'];
+export type CVEducationSelectionInsert = Tables['cv_education_selections']['Insert'];
+export type CVEducationSelectionUpdate = Tables['cv_education_selections']['Update'];
+
+// CV Skill Category Selection (junction table for per-CV customization)
+export type CVSkillCategorySelection = Tables['cv_skill_category_selections']['Row'];
+export type CVSkillCategorySelectionInsert = Tables['cv_skill_category_selections']['Insert'];
+export type CVSkillCategorySelectionUpdate = Tables['cv_skill_category_selections']['Update'];
+
+// CV Key Competence Selection (junction table for per-CV customization)
+export type CVKeyCompetenceSelection = Tables['cv_key_competence_selections']['Row'];
+export type CVKeyCompetenceSelectionInsert = Tables['cv_key_competence_selections']['Insert'];
+export type CVKeyCompetenceSelectionUpdate = Tables['cv_key_competence_selections']['Update'];
+
+// Composite type for CV editor: work experience merged with CV-specific selection
+export interface CVWorkExperienceWithSelection {
+  // From profile_work_experiences
+  id: string;
+  company: string;
+  title: string;
+  location: string | null;
+  start_date: string;
+  end_date: string | null;
+  current: boolean | null;
+  description: string | null;
+  bullets: string[] | null;
+  display_order: number | null;
+
+  // From cv_work_experience_selections (or defaults if no selection exists)
+  selection: {
+    id?: string; // undefined if no selection record exists yet
+    is_selected: boolean;
+    is_favorite: boolean;
+    display_order: number;
+    description_override: string | null;
+    selected_bullet_indices: number[] | null; // null means all bullets
+  };
+}
+
 // Manual type for profile_key_competences (pending database.types.ts regeneration)
 export interface ProfileKeyCompetence {
   id: string;
@@ -27,6 +72,65 @@ export interface ProfileKeyCompetence {
   display_order: number | null;
   created_at: string | null;
   updated_at: string | null;
+}
+
+// Composite type for CV editor: education merged with CV-specific selection
+export interface CVEducationWithSelection {
+  // From profile_educations
+  id: string;
+  institution: string;
+  degree: string;
+  field: string | null;
+  start_date: string;
+  end_date: string | null;
+  description: string | null;
+  grade: string | null;
+  display_order: number | null;
+
+  // From cv_education_selections (or defaults if no selection exists)
+  selection: {
+    id?: string;
+    is_selected: boolean;
+    is_favorite: boolean;
+    display_order: number;
+    description_override: string | null;
+  };
+}
+
+// Composite type for CV editor: skill category merged with CV-specific selection
+export interface CVSkillCategoryWithSelection {
+  // From profile_skill_categories
+  id: string;
+  category: string;
+  skills: string[];
+  display_order: number | null;
+
+  // From cv_skill_category_selections (or defaults if no selection exists)
+  selection: {
+    id?: string;
+    is_selected: boolean;
+    is_favorite: boolean;
+    display_order: number;
+    selected_skill_indices: number[] | null; // null means all skills
+  };
+}
+
+// Composite type for CV editor: key competence merged with CV-specific selection
+export interface CVKeyCompetenceWithSelection {
+  // From profile_key_competences
+  id: string;
+  title: string;
+  description: string | null;
+  display_order: number | null;
+
+  // From cv_key_competence_selections (or defaults if no selection exists)
+  selection: {
+    id?: string;
+    is_selected: boolean;
+    is_favorite: boolean;
+    display_order: number;
+    description_override: string | null;
+  };
 }
 
 // Insert types (what you pass to INSERT queries)

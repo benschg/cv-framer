@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      certification_documents: {
+        Row: {
+          certification_id: string
+          display_order: number | null
+          document_name: string
+          document_url: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          storage_path: string
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          certification_id: string
+          display_order?: number | null
+          document_name: string
+          document_url: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          storage_path: string
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          certification_id?: string
+          display_order?: number | null
+          document_name?: string
+          document_url?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          storage_path?: string
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certification_documents_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "profile_certifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cover_letters: {
         Row: {
           ai_metadata: Json | null
@@ -136,6 +183,159 @@ export type Database = {
           },
         ]
       }
+      cv_education_selections: {
+        Row: {
+          created_at: string | null
+          cv_id: string
+          description_override: string | null
+          display_order: number | null
+          education_id: string
+          id: string
+          is_favorite: boolean | null
+          is_selected: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cv_id: string
+          description_override?: string | null
+          display_order?: number | null
+          education_id: string
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cv_id?: string
+          description_override?: string | null
+          display_order?: number | null
+          education_id?: string
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_education_selections_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cv_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_education_selections_education_id_fkey"
+            columns: ["education_id"]
+            isOneToOne: false
+            referencedRelation: "profile_educations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cv_key_competence_selections: {
+        Row: {
+          created_at: string | null
+          cv_id: string
+          description_override: string | null
+          display_order: number | null
+          id: string
+          is_favorite: boolean | null
+          is_selected: boolean | null
+          key_competence_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cv_id: string
+          description_override?: string | null
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          key_competence_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cv_id?: string
+          description_override?: string | null
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          key_competence_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_key_competence_selections_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cv_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_key_competence_selections_key_competence_id_fkey"
+            columns: ["key_competence_id"]
+            isOneToOne: false
+            referencedRelation: "profile_key_competences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cv_skill_category_selections: {
+        Row: {
+          created_at: string | null
+          cv_id: string
+          display_order: number | null
+          id: string
+          is_favorite: boolean | null
+          is_selected: boolean | null
+          selected_skill_indices: number[] | null
+          skill_category_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cv_id: string
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          selected_skill_indices?: number[] | null
+          skill_category_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cv_id?: string
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          selected_skill_indices?: number[] | null
+          skill_category_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_skill_category_selections_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cv_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_skill_category_selections_skill_category_id_fkey"
+            columns: ["skill_category_id"]
+            isOneToOne: false
+            referencedRelation: "profile_skill_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cv_templates: {
         Row: {
           created_at: string | null
@@ -177,6 +377,60 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      cv_work_experience_selections: {
+        Row: {
+          created_at: string | null
+          cv_id: string
+          description_override: string | null
+          display_order: number | null
+          id: string
+          is_favorite: boolean | null
+          is_selected: boolean | null
+          selected_bullet_indices: number[] | null
+          updated_at: string | null
+          work_experience_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          cv_id: string
+          description_override?: string | null
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          selected_bullet_indices?: number[] | null
+          updated_at?: string | null
+          work_experience_id: string
+        }
+        Update: {
+          created_at?: string | null
+          cv_id?: string
+          description_override?: string | null
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          selected_bullet_indices?: number[] | null
+          updated_at?: string | null
+          work_experience_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_work_experience_selections_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cv_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_work_experience_selections_work_experience_id_fkey"
+            columns: ["work_experience_id"]
+            isOneToOne: false
+            referencedRelation: "profile_work_experiences"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       job_applications: {
         Row: {
@@ -360,60 +614,6 @@ export type Database = {
         }
         Relationships: []
       }
-      certification_documents: {
-        Row: {
-          certification_id: string
-          display_order: number | null
-          document_name: string
-          document_url: string
-          file_size: number | null
-          file_type: string | null
-          id: string
-          storage_path: string
-          uploaded_at: string | null
-          user_id: string
-        }
-        Insert: {
-          certification_id: string
-          display_order?: number | null
-          document_name: string
-          document_url: string
-          file_size?: number | null
-          file_type?: string | null
-          id?: string
-          storage_path: string
-          uploaded_at?: string | null
-          user_id: string
-        }
-        Update: {
-          certification_id?: string
-          display_order?: number | null
-          document_name?: string
-          document_url?: string
-          file_size?: number | null
-          file_type?: string | null
-          id?: string
-          storage_path?: string
-          uploaded_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "certification_documents_certification_id_fkey"
-            columns: ["certification_id"]
-            isOneToOne: false
-            referencedRelation: "profile_certifications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "certification_documents_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       profile_educations: {
         Row: {
           created_at: string | null
@@ -454,6 +654,36 @@ export type Database = {
           id?: string
           institution?: string
           start_date?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profile_key_competences: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          title?: string
           updated_at?: string | null
           user_id?: string
         }
@@ -780,15 +1010,9 @@ export type Database = {
           created_at: string | null
           default_profile: string | null
           default_tagline: string | null
-          email: string | null
-          first_name: string | null
           github_url: string | null
           id: string
-          last_name: string | null
           linkedin_url: string | null
-          location: string | null
-          phone: string | null
-          photo_url: string | null
           portfolio_url: string | null
           preferred_language: string | null
           primary_photo_id: string | null
@@ -801,15 +1025,9 @@ export type Database = {
           created_at?: string | null
           default_profile?: string | null
           default_tagline?: string | null
-          email?: string | null
-          first_name?: string | null
           github_url?: string | null
           id?: string
-          last_name?: string | null
           linkedin_url?: string | null
-          location?: string | null
-          phone?: string | null
-          photo_url?: string | null
           portfolio_url?: string | null
           preferred_language?: string | null
           primary_photo_id?: string | null
@@ -822,15 +1040,9 @@ export type Database = {
           created_at?: string | null
           default_profile?: string | null
           default_tagline?: string | null
-          email?: string | null
-          first_name?: string | null
           github_url?: string | null
           id?: string
-          last_name?: string | null
           linkedin_url?: string | null
-          location?: string | null
-          phone?: string | null
-          photo_url?: string | null
           portfolio_url?: string | null
           preferred_language?: string | null
           primary_photo_id?: string | null
