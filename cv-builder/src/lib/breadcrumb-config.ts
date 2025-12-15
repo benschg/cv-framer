@@ -41,6 +41,10 @@ export const routeConfig: Record<string, RouteConfig> = {
     label: 'Certifications',
     parent: '/profile',
   },
+  '/profile/references': {
+    label: 'References',
+    parent: '/profile',
+  },
   '/settings': {
     label: 'Settings',
   },

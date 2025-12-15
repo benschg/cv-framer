@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
-import { Loader2, Save, Plus, Briefcase, GraduationCap, Code, Award, ChevronRight } from 'lucide-react';
+import { Loader2, Save, Plus, Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck } from 'lucide-react';
 import { PhotoUpload } from '@/components/profile/photo-upload';
 import { PhotoGallery } from '@/components/profile/photo-gallery';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
@@ -103,6 +103,12 @@ export default function ProfilePage() {
       description: 'Add professional certifications',
       href: '/profile/certifications',
       icon: Award,
+    },
+    {
+      title: 'References',
+      description: 'Upload reference letters',
+      href: '/profile/references',
+      icon: UserCheck,
     },
   ];
 

@@ -104,6 +104,9 @@ export interface Reference {
   email?: string;
   phone?: string;
   quote?: string;
+  linkedPosition?: string; // Optional link to a work experience position
+  documentUrl?: string; // URL to uploaded reference letter (image or PDF)
+  documentName?: string; // Original filename of the document
 }
 
 export interface LanguageSkill {
@@ -120,6 +123,8 @@ export interface Certification {
   expiryDate?: string;
   url?: string;
   credentialId?: string;
+  documentUrl?: string; // URL to uploaded certificate document (image or PDF)
+  documentName?: string; // Original filename of the document
 }
 
 export interface JobContext {

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2, Save, X, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Save, X, ExternalLink, Upload, FileText, Image as ImageIcon } from 'lucide-react';
 import { generateId } from '@/services/cv.service';
 import type { Certification } from '@/types/cv.types';
 
@@ -13,6 +13,8 @@ export function CertificationsManager() {
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Certification>>({});
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAdd = () => {
     const newCertification: Certification = {
@@ -61,6 +63,55 @@ export function CertificationsManager() {
       setEditingId(null);
       setFormData({});
     }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type (images and PDFs only)
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload an image (JPG, PNG, WebP) or PDF file');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB');
+      return;
+    }
+
+    setUploadingFile(true);
+
+    try {
+      // TODO: Upload to storage when API is ready
+      // For now, create a local object URL for preview
+      const objectUrl = URL.createObjectURL(file);
+
+      setFormData({
+        ...formData,
+        documentUrl: objectUrl,
+        documentName: file.name,
+      });
+    } catch (error) {
+      console.error('File upload error:', error);
+      alert('Failed to upload file');
+    } finally {
+      setUploadingFile(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveDocument = () => {
+    setFormData({
+      ...formData,
+      documentUrl: undefined,
+      documentName: undefined,
+    });
   };
 
   return (
@@ -154,6 +205,69 @@ export function CertificationsManager() {
                     />
                   </div>
 
+                  {/* Certificate Document Upload */}
+                  <div className="space-y-2">
+                    <Label>Certificate Document</Label>
+                    {formData.documentUrl ? (
+                      <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
+                        <div className="flex-shrink-0">
+                          {formData.documentName?.toLowerCase().endsWith('.pdf') ? (
+                            <FileText className="h-8 w-8 text-red-500" />
+                          ) : (
+                            <ImageIcon className="h-8 w-8 text-blue-500" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{formData.documentName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formData.documentName?.toLowerCase().endsWith('.pdf') ? 'PDF Document' : 'Image'}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(formData.documentUrl, '_blank')}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveDocument}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingFile}
+                          className="w-full"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          {uploadingFile ? 'Uploading...' : 'Upload Certificate (Image or PDF)'}
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Accepted formats: JPG, PNG, WebP, PDF (Max 10MB)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex justify-end gap-2 pt-4">
                     <Button type="button" variant="outline" onClick={handleCancel}>
                       Cancel
@@ -180,17 +294,34 @@ export function CertificationsManager() {
                           {cert.expiryDate && <span>• Expires {cert.expiryDate}</span>}
                           {cert.credentialId && <span>• ID: {cert.credentialId}</span>}
                         </div>
-                        {cert.url && (
-                          <a
-                            href={cert.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-2 text-sm text-primary hover:underline"
-                          >
-                            Verify credential
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        )}
+                        <div className="flex flex-wrap gap-3 mt-2">
+                          {cert.url && (
+                            <a
+                              href={cert.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                            >
+                              Verify credential
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
+                          {cert.documentUrl && (
+                            <a
+                              href={cert.documentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                            >
+                              {cert.documentName?.toLowerCase().endsWith('.pdf') ? (
+                                <FileText className="h-3 w-3" />
+                              ) : (
+                                <ImageIcon className="h-3 w-3" />
+                              )}
+                              View certificate
+                            </a>
+                          )}
+                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Button
