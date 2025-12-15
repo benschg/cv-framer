@@ -877,13 +877,29 @@ export default function CVEditorPage() {
       {/* Preview Section */}
       <Card id="preview-section">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Preview
-            <Badge variant="outline" className="font-normal">Live</Badge>
-          </CardTitle>
-          <CardDescription>
-            This is how your CV will look when exported
-          </CardDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                Preview
+                <Badge variant="outline" className="font-normal">Live</Badge>
+              </CardTitle>
+              <CardDescription>
+                This is how your CV will look when exported
+              </CardDescription>
+            </div>
+            <Select
+              value={cv.display_settings?.format || 'A4'}
+              onValueChange={(value) => updateDisplaySettings('format', value as 'A4' | 'Letter')}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A4">A4</SelectItem>
+                <SelectItem value="Letter">Letter</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <CVPreview
