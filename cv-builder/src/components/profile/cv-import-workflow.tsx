@@ -4,8 +4,8 @@ import { useState, useRef, DragEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
   UploadArea,
@@ -38,12 +38,12 @@ interface CVImportWorkflowProps {
 
 type WorkflowStep = 'upload' | 'analyzing' | 'review' | 'importing' | 'complete';
 
-interface SectionSelection {
-  workExperiences: boolean;
-  educations: boolean;
-  skillCategories: boolean;
-  keyCompetences: boolean;
-  certifications: boolean;
+interface ItemSelection {
+  workExperiences: number[]; // Array of indices
+  educations: number[];
+  skillCategories: number[];
+  keyCompetences: number[];
+  certifications: number[];
 }
 
 interface ImportResult {
@@ -58,12 +58,12 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [extractionResult, setExtractionResult] = useState<CVExtractionResult | null>(null);
-  const [sectionSelection, setSectionSelection] = useState<SectionSelection>({
-    workExperiences: true,
-    educations: true,
-    skillCategories: true,
-    keyCompetences: true,
-    certifications: true,
+  const [itemSelection, setItemSelection] = useState<ItemSelection>({
+    workExperiences: [],
+    educations: [],
+    skillCategories: [],
+    keyCompetences: [],
+    certifications: [],
   });
   const [importResults, setImportResults] = useState<Record<string, ImportResult>>({});
 
@@ -151,9 +151,18 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
         return;
       }
 
+      // Pre-select all items by default
+      setItemSelection({
+        workExperiences: data.extractedData.workExperiences.map((_: any, idx: number) => idx),
+        educations: data.extractedData.educations.map((_: any, idx: number) => idx),
+        skillCategories: data.extractedData.skillCategories.map((_: any, idx: number) => idx),
+        keyCompetences: data.extractedData.keyCompetences.map((_: any, idx: number) => idx),
+        certifications: data.extractedData.certifications.map((_: any, idx: number) => idx),
+      });
+
       // Show success feedback
       toast.success(`Extracted ${totalItems} items from CV`, {
-        description: 'Review the data below and select sections to import.',
+        description: 'Review the data below and select items to import.',
       });
 
       setCurrentStep('review');
@@ -167,6 +176,32 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
     }
   };
 
+  const toggleItemSelection = (section: keyof ItemSelection, index: number) => {
+    setItemSelection((prev) => {
+      const currentSelection = prev[section];
+      const isSelected = currentSelection.includes(index);
+
+      return {
+        ...prev,
+        [section]: isSelected
+          ? currentSelection.filter((i) => i !== index)
+          : [...currentSelection, index].sort((a, b) => a - b),
+      };
+    });
+  };
+
+  const toggleSectionSelection = (section: keyof ItemSelection, totalItems: number) => {
+    setItemSelection((prev) => {
+      const allIndices = Array.from({ length: totalItems }, (_, i) => i);
+      const isAllSelected = prev[section].length === totalItems;
+
+      return {
+        ...prev,
+        [section]: isAllSelected ? [] : allIndices,
+      };
+    });
+  };
+
   const handleImport = async () => {
     if (!extractionResult) return;
 
@@ -174,15 +209,16 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
     const results: Record<string, ImportResult> = {};
 
     try {
-      // Import selected sections sequentially
+      // Import selected items sequentially
       // Filter out incomplete entries (null required fields) before importing
-      if (sectionSelection.workExperiences && extractionResult.extractedData.workExperiences.length > 0) {
-        const validExperiences = extractionResult.extractedData.workExperiences.filter(
-          (exp) => exp.company && exp.title && exp.start_date
-        );
-        if (validExperiences.length > 0) {
+      if (itemSelection.workExperiences.length > 0) {
+        const selectedItems = itemSelection.workExperiences
+          .map((idx) => extractionResult.extractedData.workExperiences[idx])
+          .filter((exp) => exp.company && exp.title && exp.start_date);
+
+        if (selectedItems.length > 0) {
           const { data, error } = await bulkCreateWorkExperiences(
-            validExperiences as any // Cast to bypass null check since we filtered
+            selectedItems as any
           );
           results.workExperiences = {
             success: !error,
@@ -192,13 +228,14 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
         }
       }
 
-      if (sectionSelection.educations && extractionResult.extractedData.educations.length > 0) {
-        const validEducations = extractionResult.extractedData.educations.filter(
-          (edu) => edu.institution && edu.degree && edu.start_date
-        );
-        if (validEducations.length > 0) {
+      if (itemSelection.educations.length > 0) {
+        const selectedItems = itemSelection.educations
+          .map((idx) => extractionResult.extractedData.educations[idx])
+          .filter((edu) => edu.institution && edu.degree && edu.start_date);
+
+        if (selectedItems.length > 0) {
           const { data, error } = await bulkCreateEducations(
-            validEducations as any // Cast to bypass null check since we filtered
+            selectedItems as any
           );
           results.educations = {
             success: !error,
@@ -208,13 +245,14 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
         }
       }
 
-      if (sectionSelection.skillCategories && extractionResult.extractedData.skillCategories.length > 0) {
-        const validCategories = extractionResult.extractedData.skillCategories.filter(
-          (cat) => cat.category && cat.skills.length > 0
-        );
-        if (validCategories.length > 0) {
+      if (itemSelection.skillCategories.length > 0) {
+        const selectedItems = itemSelection.skillCategories
+          .map((idx) => extractionResult.extractedData.skillCategories[idx])
+          .filter((cat) => cat.category && cat.skills.length > 0);
+
+        if (selectedItems.length > 0) {
           const { data, error } = await bulkCreateSkillCategories(
-            validCategories as any // Cast to bypass null check since we filtered
+            selectedItems as any
           );
           results.skillCategories = {
             success: !error,
@@ -224,13 +262,14 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
         }
       }
 
-      if (sectionSelection.keyCompetences && extractionResult.extractedData.keyCompetences.length > 0) {
-        const validCompetences = extractionResult.extractedData.keyCompetences.filter(
-          (comp) => comp.title
-        );
-        if (validCompetences.length > 0) {
+      if (itemSelection.keyCompetences.length > 0) {
+        const selectedItems = itemSelection.keyCompetences
+          .map((idx) => extractionResult.extractedData.keyCompetences[idx])
+          .filter((comp) => comp.title);
+
+        if (selectedItems.length > 0) {
           const { data, error } = await bulkCreateKeyCompetences(
-            validCompetences as any // Cast to bypass null check since we filtered
+            selectedItems as any
           );
           results.keyCompetences = {
             success: !error,
@@ -240,13 +279,14 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
         }
       }
 
-      if (sectionSelection.certifications && extractionResult.extractedData.certifications.length > 0) {
-        const validCertifications = extractionResult.extractedData.certifications.filter(
-          (cert) => cert.name && cert.issuer
-        );
-        if (validCertifications.length > 0) {
+      if (itemSelection.certifications.length > 0) {
+        const selectedItems = itemSelection.certifications
+          .map((idx) => extractionResult.extractedData.certifications[idx])
+          .filter((cert) => cert.name && cert.issuer);
+
+        if (selectedItems.length > 0) {
           const { data, error } = await bulkCreateCertifications(
-            validCertifications as any // Cast to bypass null check since we filtered
+            selectedItems as any
           );
           results.certifications = {
             success: !error,
@@ -285,12 +325,12 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
   const handleReset = () => {
     setSelectedFile(null);
     setExtractionResult(null);
-    setSectionSelection({
-      workExperiences: true,
-      educations: true,
-      skillCategories: true,
-      keyCompetences: true,
-      certifications: true,
+    setItemSelection({
+      workExperiences: [],
+      educations: [],
+      skillCategories: [],
+      keyCompetences: [],
+      certifications: [],
     });
     setImportResults({});
     setCurrentStep('upload');
@@ -301,11 +341,11 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
 
   const getConfidenceBadge = (confidence: number) => {
     if (confidence >= 0.9) {
-      return <Badge variant="default" className="bg-green-500">High Confidence</Badge>;
+      return <Badge variant="default" className="bg-green-500 text-xs">High</Badge>;
     } else if (confidence >= 0.7) {
-      return <Badge variant="secondary">Medium Confidence</Badge>;
+      return <Badge variant="secondary" className="text-xs">Medium</Badge>;
     } else if (confidence > 0) {
-      return <Badge variant="destructive">Low Confidence</Badge>;
+      return <Badge variant="destructive" className="text-xs">Low</Badge>;
     }
     return null;
   };
@@ -352,18 +392,20 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
 
   // Render review step
   if (currentStep === 'review' && extractionResult) {
-    const hasAnySelection = Object.values(sectionSelection).some((v) => v);
-    const totalSelected = Object.entries(sectionSelection)
-      .filter(([key, value]) => value && extractionResult.sectionCounts[key as keyof typeof extractionResult.sectionCounts] > 0)
-      .reduce((sum, [key]) => sum + extractionResult.sectionCounts[key as keyof typeof extractionResult.sectionCounts], 0);
+    const totalSelected =
+      itemSelection.workExperiences.length +
+      itemSelection.educations.length +
+      itemSelection.skillCategories.length +
+      itemSelection.keyCompetences.length +
+      itemSelection.certifications.length;
 
     return (
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Review Extracted Data</CardTitle>
+            <CardTitle>Review & Select Items to Import</CardTitle>
             <CardDescription>
-              Select which sections to import. Extracted data will be added to your existing profile.
+              Select individual items to import. Imported data will be added to your existing profile.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -382,124 +424,230 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
               </div>
             )}
 
-            {/* Section checkboxes */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium">Select sections to import:</h3>
-
-              {/* Work Experience */}
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="work-exp"
-                    checked={sectionSelection.workExperiences}
-                    onCheckedChange={(checked) =>
-                      setSectionSelection((prev) => ({ ...prev, workExperiences: !!checked }))
-                    }
-                    disabled={extractionResult.sectionCounts.workExperiences === 0}
-                  />
-                  <label htmlFor="work-exp" className="flex items-center gap-2 cursor-pointer">
+            {/* Work Experience Items */}
+            {extractionResult.extractedData.workExperiences.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <Briefcase className="h-4 w-4" />
-                    <span className="font-medium">Work Experience</span>
-                    <Badge variant="outline">{extractionResult.sectionCounts.workExperiences} items</Badge>
-                  </label>
+                    <h3 className="text-sm font-semibold">Work Experience</h3>
+                    <Badge variant="outline" className="text-xs">
+                      {itemSelection.workExperiences.length}/{extractionResult.extractedData.workExperiences.length}
+                    </Badge>
+                    {getConfidenceBadge(extractionResult.confidence.workExperiences)}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleSectionSelection('workExperiences', extractionResult.extractedData.workExperiences.length)}
+                  >
+                    {itemSelection.workExperiences.length === extractionResult.extractedData.workExperiences.length ? 'Deselect All' : 'Select All'}
+                  </Button>
                 </div>
-                {getConfidenceBadge(extractionResult.confidence.workExperiences)}
+                <div className="space-y-2">
+                  {extractionResult.extractedData.workExperiences.map((exp, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                      <Checkbox
+                        id={`work-${idx}`}
+                        checked={itemSelection.workExperiences.includes(idx)}
+                        onCheckedChange={() => toggleItemSelection('workExperiences', idx)}
+                        className="mt-0.5"
+                      />
+                      <label htmlFor={`work-${idx}`} className="flex-1 cursor-pointer">
+                        <p className="text-sm font-medium">{exp.title || 'Untitled Position'}</p>
+                        <p className="text-xs text-muted-foreground">{exp.company || 'Unknown Company'}</p>
+                        {(exp.start_date || exp.end_date) && (
+                          <p className="text-xs text-muted-foreground">
+                            {exp.start_date || '?'} - {exp.current ? 'Present' : exp.end_date || '?'}
+                          </p>
+                        )}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {/* Education */}
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="education"
-                    checked={sectionSelection.educations}
-                    onCheckedChange={(checked) =>
-                      setSectionSelection((prev) => ({ ...prev, educations: !!checked }))
-                    }
-                    disabled={extractionResult.sectionCounts.educations === 0}
-                  />
-                  <label htmlFor="education" className="flex items-center gap-2 cursor-pointer">
-                    <GraduationCap className="h-4 w-4" />
-                    <span className="font-medium">Education</span>
-                    <Badge variant="outline">{extractionResult.sectionCounts.educations} items</Badge>
-                  </label>
+            {/* Education Items */}
+            {extractionResult.extractedData.educations.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4" />
+                      <h3 className="text-sm font-semibold">Education</h3>
+                      <Badge variant="outline" className="text-xs">
+                        {itemSelection.educations.length}/{extractionResult.extractedData.educations.length}
+                      </Badge>
+                      {getConfidenceBadge(extractionResult.confidence.educations)}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleSectionSelection('educations', extractionResult.extractedData.educations.length)}
+                    >
+                      {itemSelection.educations.length === extractionResult.extractedData.educations.length ? 'Deselect All' : 'Select All'}
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {extractionResult.extractedData.educations.map((edu, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                        <Checkbox
+                          id={`edu-${idx}`}
+                          checked={itemSelection.educations.includes(idx)}
+                          onCheckedChange={() => toggleItemSelection('educations', idx)}
+                          className="mt-0.5"
+                        />
+                        <label htmlFor={`edu-${idx}`} className="flex-1 cursor-pointer">
+                          <p className="text-sm font-medium">{edu.degree || 'Untitled Degree'}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {edu.field && `${edu.field} • `}{edu.institution || 'Unknown Institution'}
+                          </p>
+                          {(edu.start_date || edu.end_date) && (
+                            <p className="text-xs text-muted-foreground">
+                              {edu.start_date || '?'} - {edu.end_date || 'Present'}
+                            </p>
+                          )}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                {getConfidenceBadge(extractionResult.confidence.educations)}
-              </div>
+              </>
+            )}
 
-              {/* Skills */}
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="skills"
-                    checked={sectionSelection.skillCategories}
-                    onCheckedChange={(checked) =>
-                      setSectionSelection((prev) => ({ ...prev, skillCategories: !!checked }))
-                    }
-                    disabled={extractionResult.sectionCounts.skillCategories === 0}
-                  />
-                  <label htmlFor="skills" className="flex items-center gap-2 cursor-pointer">
-                    <Code className="h-4 w-4" />
-                    <span className="font-medium">Skills</span>
-                    <Badge variant="outline">{extractionResult.sectionCounts.skillCategories} categories</Badge>
-                  </label>
+            {/* Skills Items */}
+            {extractionResult.extractedData.skillCategories.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Code className="h-4 w-4" />
+                      <h3 className="text-sm font-semibold">Skills</h3>
+                      <Badge variant="outline" className="text-xs">
+                        {itemSelection.skillCategories.length}/{extractionResult.extractedData.skillCategories.length}
+                      </Badge>
+                      {getConfidenceBadge(extractionResult.confidence.skillCategories)}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleSectionSelection('skillCategories', extractionResult.extractedData.skillCategories.length)}
+                    >
+                      {itemSelection.skillCategories.length === extractionResult.extractedData.skillCategories.length ? 'Deselect All' : 'Select All'}
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {extractionResult.extractedData.skillCategories.map((cat, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                        <Checkbox
+                          id={`skill-${idx}`}
+                          checked={itemSelection.skillCategories.includes(idx)}
+                          onCheckedChange={() => toggleItemSelection('skillCategories', idx)}
+                          className="mt-0.5"
+                        />
+                        <label htmlFor={`skill-${idx}`} className="flex-1 cursor-pointer">
+                          <p className="text-sm font-medium">{cat.category || 'Untitled Category'}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {cat.skills.slice(0, 5).join(', ')}{cat.skills.length > 5 ? '...' : ''}
+                          </p>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                {getConfidenceBadge(extractionResult.confidence.skillCategories)}
-              </div>
+              </>
+            )}
 
-              {/* Key Competences */}
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="competences"
-                    checked={sectionSelection.keyCompetences}
-                    onCheckedChange={(checked) =>
-                      setSectionSelection((prev) => ({ ...prev, keyCompetences: !!checked }))
-                    }
-                    disabled={extractionResult.sectionCounts.keyCompetences === 0}
-                  />
-                  <label htmlFor="competences" className="flex items-center gap-2 cursor-pointer">
-                    <Zap className="h-4 w-4" />
-                    <span className="font-medium">Key Competences</span>
-                    <Badge variant="outline">{extractionResult.sectionCounts.keyCompetences} items</Badge>
-                  </label>
+            {/* Key Competences Items */}
+            {extractionResult.extractedData.keyCompetences.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4" />
+                      <h3 className="text-sm font-semibold">Key Competences</h3>
+                      <Badge variant="outline" className="text-xs">
+                        {itemSelection.keyCompetences.length}/{extractionResult.extractedData.keyCompetences.length}
+                      </Badge>
+                      {getConfidenceBadge(extractionResult.confidence.keyCompetences)}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleSectionSelection('keyCompetences', extractionResult.extractedData.keyCompetences.length)}
+                    >
+                      {itemSelection.keyCompetences.length === extractionResult.extractedData.keyCompetences.length ? 'Deselect All' : 'Select All'}
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {extractionResult.extractedData.keyCompetences.map((comp, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                        <Checkbox
+                          id={`comp-${idx}`}
+                          checked={itemSelection.keyCompetences.includes(idx)}
+                          onCheckedChange={() => toggleItemSelection('keyCompetences', idx)}
+                          className="mt-0.5"
+                        />
+                        <label htmlFor={`comp-${idx}`} className="flex-1 cursor-pointer">
+                          <p className="text-sm font-medium">{comp.title || 'Untitled Competence'}</p>
+                          {comp.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2">{comp.description}</p>
+                          )}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                {getConfidenceBadge(extractionResult.confidence.keyCompetences)}
-              </div>
+              </>
+            )}
 
-              {/* Certifications */}
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="certifications"
-                    checked={sectionSelection.certifications}
-                    onCheckedChange={(checked) =>
-                      setSectionSelection((prev) => ({ ...prev, certifications: !!checked }))
-                    }
-                    disabled={extractionResult.sectionCounts.certifications === 0}
-                  />
-                  <label htmlFor="certifications" className="flex items-center gap-2 cursor-pointer">
-                    <Award className="h-4 w-4" />
-                    <span className="font-medium">Certifications</span>
-                    <Badge variant="outline">{extractionResult.sectionCounts.certifications} items</Badge>
-                  </label>
+            {/* Certifications Items */}
+            {extractionResult.extractedData.certifications.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4" />
+                      <h3 className="text-sm font-semibold">Certifications</h3>
+                      <Badge variant="outline" className="text-xs">
+                        {itemSelection.certifications.length}/{extractionResult.extractedData.certifications.length}
+                      </Badge>
+                      {getConfidenceBadge(extractionResult.confidence.certifications)}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleSectionSelection('certifications', extractionResult.extractedData.certifications.length)}
+                    >
+                      {itemSelection.certifications.length === extractionResult.extractedData.certifications.length ? 'Deselect All' : 'Select All'}
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {extractionResult.extractedData.certifications.map((cert, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+                        <Checkbox
+                          id={`cert-${idx}`}
+                          checked={itemSelection.certifications.includes(idx)}
+                          onCheckedChange={() => toggleItemSelection('certifications', idx)}
+                          className="mt-0.5"
+                        />
+                        <label htmlFor={`cert-${idx}`} className="flex-1 cursor-pointer">
+                          <p className="text-sm font-medium">{cert.name || 'Untitled Certification'}</p>
+                          <p className="text-xs text-muted-foreground">{cert.issuer || 'Unknown Issuer'}</p>
+                          {cert.date && (
+                            <p className="text-xs text-muted-foreground">Issued: {cert.date}</p>
+                          )}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                {getConfidenceBadge(extractionResult.confidence.certifications)}
-              </div>
-            </div>
-
-            {/* Confidence warning */}
-            {Object.values(extractionResult.confidence).some((c) => c < 0.7 && c > 0) && (
-              <div className="flex items-start gap-2 p-3 border border-amber-200 rounded-lg bg-amber-50 dark:bg-amber-950/20">
-                <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-amber-900 dark:text-amber-100">
-                    Low confidence detected
-                  </p>
-                  <p className="text-amber-700 dark:text-amber-200">
-                    Some sections have low extraction confidence. Please review imported data carefully and edit as needed.
-                  </p>
-                </div>
-              </div>
+              </>
             )}
 
             {/* Data will be merged info */}
@@ -510,17 +658,10 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
                   Data will be merged
                 </p>
                 <p className="text-blue-700 dark:text-blue-200">
-                  Imported data will be added to your existing profile. Existing entries will not be replaced or modified.
+                  Imported items will be added to your existing profile. Existing entries will not be replaced or modified.
                 </p>
               </div>
             </div>
-
-            {/* Reasoning */}
-            {extractionResult.reasoning && (
-              <div className="text-sm text-muted-foreground italic border-l-2 pl-3">
-                {extractionResult.reasoning}
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -529,8 +670,8 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
           <Button variant="outline" onClick={handleReset}>
             Cancel
           </Button>
-          <Button onClick={handleImport} disabled={!hasAnySelection || totalSelected === 0}>
-            Import {totalSelected > 0 ? `${totalSelected} Items` : 'Selected Sections'}
+          <Button onClick={handleImport} disabled={totalSelected === 0}>
+            Import {totalSelected > 0 ? `${totalSelected} Item${totalSelected !== 1 ? 's' : ''}` : 'Selected Items'}
           </Button>
         </div>
       </div>
