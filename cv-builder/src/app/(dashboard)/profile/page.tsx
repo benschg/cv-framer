@@ -133,6 +133,8 @@ export default function ProfilePage() {
           onChange={handleChange}
         />
 
+        <CareerInfoNavigation />
+
         <ProfessionalLinksForm formData={formData} onChange={handleChange} />
 
         {/* Save Button */}
@@ -157,8 +159,6 @@ export default function ProfilePage() {
           </Button>
         </div>
       </form>
-
-      <CareerInfoNavigation />
     </div>
   );
 }
