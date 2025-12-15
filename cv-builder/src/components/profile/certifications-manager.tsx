@@ -5,14 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, Trash2, Loader2, ExternalLink, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
+import { AlertTriangle, Trash2, Loader2, ExternalLink, FileText, Image as ImageIcon } from 'lucide-react';
+import { CertificationDocumentsManager } from './certification-documents-manager';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
 import { formatMonthYear } from '@/lib/utils';
+import { toast } from 'sonner';
 import {
   fetchCertifications,
   createCertification,
   deleteCertification,
   updateCertification,
+  createCertificationDocument,
   type ProfileCertification,
 } from '@/services/profile-career.service';
 import { useProfileManager } from '@/hooks/use-profile-manager';
@@ -26,6 +29,7 @@ interface CertificationsManagerProps {
 
 export interface CertificationsManagerRef {
   handleAdd: () => void;
+  handleAddWithData: (data: Partial<ProfileCertification>, file?: File) => Promise<void>;
 }
 
 export const CertificationsManager = forwardRef<CertificationsManagerRef, CertificationsManagerProps>(
@@ -63,9 +67,52 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
     onSaveSuccessChange,
   });
 
+  const handleAddWithData = async (data: Partial<ProfileCertification>, file?: File) => {
+    try {
+      const result = await createCertification(data as any);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      const certificationId = result.data?.id;
+      const certificationName = result.data?.name || 'Certification';
+
+      // If a file was provided, upload it to the newly created certification
+      if (file && certificationId) {
+        toast.loading('Uploading document...', { id: 'cert-upload' });
+
+        const uploadResult = await createCertificationDocument(certificationId, file);
+        if (uploadResult.error) {
+          console.error('Error uploading document:', uploadResult.error);
+          toast.error('Document upload failed', {
+            id: 'cert-upload',
+            description: 'The certification was created but the document could not be uploaded. You can add it later.',
+          });
+        } else {
+          toast.success('Certification and document added!', {
+            id: 'cert-upload',
+            description: `${certificationName} with ${file.name}`,
+          });
+        }
+      }
+
+      // Manually refresh the list
+      const { data: refreshedData } = await fetchCertifications();
+      if (refreshedData) {
+        // Small delay to show the success toast before reload
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error creating certification:', error);
+      throw error;
+    }
+  };
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     handleAdd,
+    handleAddWithData,
   }));
 
   if (loading) {
@@ -95,6 +142,7 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
                 onFieldChange={(field, value) => handleFieldChange(certification.id, field, value)}
                 onMultiFieldChange={(updates) => handleMultiFieldChange(certification.id, updates)}
                 onDone={() => handleDone(certification.id)}
+                isSaving={saving}
               />
             ) : (
               <CertificationViewCard
@@ -130,6 +178,7 @@ interface CertificationEditFormProps {
   onFieldChange: (field: keyof ProfileCertification, value: any) => void;
   onMultiFieldChange: (updates: Partial<ProfileCertification>) => void;
   onDone: () => void;
+  isSaving?: boolean;
 }
 
 function CertificationEditForm({
@@ -137,62 +186,13 @@ function CertificationEditForm({
   onFieldChange,
   onMultiFieldChange,
   onDone,
+  isSaving = false,
 }: CertificationEditFormProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingFile, setUploadingFile] = useState(false);
-
   // Check if expiry date is before issue date
   const isExpiryBeforeIssue = (() => {
     if (!formData.date || !formData.expiry_date) return false;
     return formData.expiry_date < formData.date;
   })();
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type (images and PDFs only)
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
-    if (!validTypes.includes(file.type)) {
-      alert('Please upload an image (JPG, PNG, WebP) or PDF file');
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File size must be less than 10MB');
-      return;
-    }
-
-    setUploadingFile(true);
-
-    try {
-      // TODO: Upload to storage when API is ready
-      // For now, create a local object URL for preview
-      const objectUrl = URL.createObjectURL(file);
-
-      onMultiFieldChange({
-        document_url: objectUrl,
-        document_name: file.name,
-      });
-    } catch (error) {
-      console.error('File upload error:', error);
-      alert('Failed to upload file');
-    } finally {
-      setUploadingFile(false);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleRemoveDocument = () => {
-    onMultiFieldChange({
-      document_url: '',
-      document_name: '',
-    });
-  };
 
   return (
     <>
@@ -277,68 +277,16 @@ function CertificationEditForm({
           />
         </div>
 
-        {/* Certificate Document Upload */}
-        <div className="space-y-2">
-          <Label>Certificate Document</Label>
-          {formData.document_url ? (
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
-              <div className="flex-shrink-0">
-                {formData.document_name?.toLowerCase().endsWith('.pdf') ? (
-                  <FileText className="h-8 w-8 text-red-500" />
-                ) : (
-                  <ImageIcon className="h-8 w-8 text-blue-500" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{formData.document_name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {formData.document_name?.toLowerCase().endsWith('.pdf') ? 'PDF Document' : 'Image'}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.open(formData.document_url || '', '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveDocument}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingFile}
-                className="w-full"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                {uploadingFile ? 'Uploading...' : 'Upload Certificate (Image or PDF)'}
-              </Button>
-              <p className="text-xs text-muted-foreground mt-1">
-                Accepted formats: JPG, PNG, WebP, PDF (Max 10MB)
-              </p>
-            </div>
-          )}
-        </div>
+        {/* Certificate Documents */}
+        {formData.id && (
+          <div className="space-y-2">
+            <Label>Certificate Documents</Label>
+            <CertificationDocumentsManager
+              certificationId={formData.id}
+              disabled={isSaving}
+            />
+          </div>
+        )}
       </CardContent>
     </>
   );
@@ -358,6 +306,8 @@ function CertificationViewCard({
   onDelete,
   disabled,
 }: CertificationViewCardProps) {
+  const [showDocuments, setShowDocuments] = useState(false);
+
   return (
     <>
       <CardHeader>
@@ -382,21 +332,16 @@ function CertificationViewCard({
                   <ExternalLink className="h-3 w-3" />
                 </a>
               )}
-              {certification.document_url && (
-                <a
-                  href={certification.document_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  {certification.document_name?.toLowerCase().endsWith('.pdf') ? (
-                    <FileText className="h-3 w-3" />
-                  ) : (
-                    <ImageIcon className="h-3 w-3" />
-                  )}
-                  View certificate
-                </a>
-              )}
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={() => setShowDocuments(!showDocuments)}
+                className="h-auto p-0 text-sm"
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                {showDocuments ? 'Hide documents' : 'View documents'}
+              </Button>
             </div>
           </div>
           <div className="flex gap-2">
@@ -419,6 +364,14 @@ function CertificationViewCard({
           </div>
         </div>
       </CardHeader>
+      {showDocuments && (
+        <CardContent>
+          <CertificationDocumentsManager
+            certificationId={certification.id}
+            disabled={disabled}
+          />
+        </CardContent>
+      )}
     </>
   );
 }

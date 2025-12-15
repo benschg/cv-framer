@@ -360,6 +360,60 @@ export type Database = {
         }
         Relationships: []
       }
+      certification_documents: {
+        Row: {
+          certification_id: string
+          display_order: number | null
+          document_name: string
+          document_url: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          storage_path: string
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          certification_id: string
+          display_order?: number | null
+          document_name: string
+          document_url: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          storage_path: string
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          certification_id?: string
+          display_order?: number | null
+          document_name?: string
+          document_url?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          storage_path?: string
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certification_documents_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "profile_certifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certification_documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profile_educations: {
         Row: {
           created_at: string | null

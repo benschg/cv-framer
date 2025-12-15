@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Loader2, ExternalLink, Upload, FileText, Image as ImageIcon, X, Mail, Phone } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   fetchReferences,
   createReference,
   deleteReference,
   updateReference,
+  uploadReferenceLetter,
   type ProfileReference,
 } from '@/services/profile-career.service';
 import { useProfileManager } from '@/hooks/use-profile-manager';
@@ -26,6 +28,7 @@ interface ReferencesManagerProps {
 
 export interface ReferencesManagerRef {
   handleAdd: () => void;
+  handleAddWithData: (data: Partial<ProfileReference>, file?: File) => Promise<void>;
 }
 
 export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesManagerProps>(
@@ -65,9 +68,93 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
     onSaveSuccessChange,
   });
 
+  const handleAddWithData = async (data: Partial<ProfileReference>, file?: File) => {
+    try {
+      let documentUrl = '';
+      let documentName = '';
+      let storagePath = '';
+
+      // If a file was provided, upload it first and get the URL
+      if (file) {
+        toast.loading('Uploading document...', { id: 'ref-upload' });
+
+        // We need to create the reference first to get an ID, then upload the document
+        // For now, create without the document, then update with document info
+        const tempResult = await createReference(data as any);
+        if (tempResult.error) {
+          throw new Error(tempResult.error);
+        }
+
+        const referenceId = tempResult.data?.id;
+        const referenceName = tempResult.data?.name || 'Reference';
+
+        if (referenceId) {
+          // Get current user ID for upload
+          const { data: { user } } = await (await import('@/lib/supabase/client')).createClient().auth.getUser();
+          if (!user) {
+            throw new Error('User not authenticated');
+          }
+
+          const uploadResult = await uploadReferenceLetter(user.id, referenceId, file);
+          if (uploadResult.error) {
+            console.error('Error uploading document:', uploadResult.error);
+            toast.error('Document upload failed', {
+              id: 'ref-upload',
+              description: 'The reference was created but the document could not be uploaded. You can add it later.',
+            });
+          } else {
+            documentUrl = uploadResult.data?.url || '';
+            storagePath = uploadResult.data?.path || '';
+            documentName = file.name;
+
+            // Update the reference with document info
+            await updateReference(referenceId, {
+              document_url: documentUrl,
+              document_name: documentName,
+              storage_path: storagePath,
+            });
+
+            toast.success('Reference and document added!', {
+              id: 'ref-upload',
+              description: `${referenceName} with ${file.name}`,
+            });
+          }
+        }
+
+        // Manually refresh the list
+        const { data: refreshedData } = await fetchReferences();
+        if (refreshedData) {
+          // The useProfileManager hook doesn't expose a way to refresh,
+          // so we need to reload the page
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Show toast before reload
+          window.location.reload();
+        }
+      } else {
+        // No file, just create the reference
+        const result = await createReference(data as any);
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        toast.success('Reference added!');
+
+        // Manually refresh the list
+        const { data: refreshedData } = await fetchReferences();
+        if (refreshedData) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      console.error('Error adding reference:', error);
+      throw error;
+    }
+  };
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     handleAdd,
+    handleAddWithData,
   }));
 
   if (loading) {

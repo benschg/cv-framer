@@ -1,0 +1,387 @@
+'use client';
+
+import { useState, useRef, DragEvent } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Sparkles, AlertTriangle } from 'lucide-react';
+import { MonthYearPicker } from '@/components/ui/month-year-picker';
+import { toast } from 'sonner';
+import type { ProfileCertification } from '@/services/profile-career.service';
+import { UploadArea, AnalyzingState, DocumentPreview, ConfidenceWarning, validateFile } from './ai-upload-shared';
+
+interface AICertificationUploadDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAdd: (certification: Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>, file?: File) => Promise<void>;
+}
+
+export function AICertificationUploadDialog({
+  open,
+  onOpenChange,
+  onAdd,
+}: AICertificationUploadDialogProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [extractedData, setExtractedData] = useState<any>(null);
+  const [confidence, setConfidence] = useState<Record<string, number>>({});
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  // Form state for editing extracted data
+  const [formData, setFormData] = useState({
+    name: '',
+    issuer: '',
+    date: '',
+    expiry_date: '',
+    credential_id: '',
+    url: '',
+    document_url: '',
+    document_name: '',
+    storage_path: '',
+  });
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleFileSelect = async (file: File) => {
+    // Validate file
+    const validation = validateFile(file);
+    if (!validation.valid) {
+      toast.error(validation.error!, {
+        description: validation.errorDescription,
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    setAnalyzing(true);
+
+    try {
+      // Call analysis API
+      const formDataToSend = new FormData();
+      formDataToSend.append('file', file);
+
+      const response = await fetch('/api/certifications/analyze', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Analysis failed');
+      }
+
+      // Store extracted data and confidence
+      setExtractedData(data.extractedData);
+      setConfidence(data.confidence);
+
+      // Populate form with extracted data (document will be uploaded after certification creation)
+      setFormData({
+        name: data.extractedData.name || '',
+        issuer: data.extractedData.issuer || '',
+        date: data.extractedData.date || '',
+        expiry_date: data.extractedData.expiry_date || '',
+        credential_id: data.extractedData.credential_id || '',
+        url: data.extractedData.url || '',
+        document_url: '',
+        document_name: '',
+        storage_path: '',
+      });
+
+      // Success feedback
+      const extractedCount = Object.values(data.extractedData).filter(v => v !== null).length;
+      if (extractedCount === 0) {
+        toast.warning('No data extracted', {
+          description: 'AI could not read the certificate. Please enter the details manually below.',
+        });
+      } else if (extractedCount < 3) {
+        toast.info(`Partial extraction: ${extractedCount} field(s) found`, {
+          description: 'Please review and fill in the remaining fields.',
+        });
+      } else {
+        toast.success(`Successfully extracted ${extractedCount} field(s)`, {
+          description: 'Please review the information below before adding.',
+        });
+      }
+
+    } catch (error) {
+      console.error('Analysis error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+
+      toast.error('Analysis failed', {
+        description: errorMessage === 'Analysis failed'
+          ? 'Unable to analyze the certificate. The document may be unclear or in an unsupported format. Please enter details manually.'
+          : errorMessage,
+      });
+
+      // Fall back to manual entry with document preview
+      const objectUrl = URL.createObjectURL(file);
+      setFormData({
+        name: '',
+        issuer: '',
+        date: '',
+        expiry_date: '',
+        credential_id: '',
+        url: '',
+        document_url: objectUrl,
+        document_name: file.name,
+        storage_path: '',
+      });
+
+      // Still show the form for manual entry
+      setExtractedData({
+        name: null,
+        issuer: null,
+        date: null,
+        expiry_date: null,
+        credential_id: null,
+        url: null,
+      });
+      setConfidence({
+        name: 0,
+        issuer: 0,
+        date: 0,
+        expiry_date: 0,
+        credential_id: 0,
+        url: 0,
+      });
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAdd = async () => {
+    // Validate required fields
+    if (!formData.name || !formData.issuer) {
+      toast.error('Required fields missing', {
+        description: 'Please fill in at least the Certification Name and Issuing Organization.',
+      });
+      return;
+    }
+
+    setAdding(true);
+    try {
+      // Pass the selected file to the parent so it can be uploaded after certification creation
+      await onAdd(formData, selectedFile || undefined);
+
+      // Success toast is shown by the parent component with document info
+      // Reset and close
+      handleReset();
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error adding certification:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+
+      toast.error('Failed to add certification', {
+        description: errorMessage || 'Please try again or contact support if the problem persists.',
+      });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const handleReset = () => {
+    setSelectedFile(null);
+    setAnalyzing(false);
+    setExtractedData(null);
+    setConfidence({});
+    setFormData({
+      name: '',
+      issuer: '',
+      date: '',
+      expiry_date: '',
+      credential_id: '',
+      url: '',
+      document_url: '',
+      document_name: '',
+      storage_path: '',
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCancel = () => {
+    handleReset();
+    onOpenChange(false);
+  };
+
+  // Check if expiry date is before issue date
+  const isExpiryBeforeIssue = formData.date && formData.expiry_date && formData.expiry_date < formData.date;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Add Certification using AI
+          </DialogTitle>
+          <DialogDescription>
+            Upload a certificate image or PDF. AI will extract the details for you to review and edit.
+          </DialogDescription>
+        </DialogHeader>
+
+        {!selectedFile && !analyzing ? (
+          <UploadArea
+            isDragging={isDragging}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onChooseFile={() => fileInputRef.current?.click()}
+            fileInputRef={fileInputRef}
+            onFileChange={handleFileInputChange}
+            documentType="certificate"
+          />
+        ) : analyzing ? (
+          <AnalyzingState documentType="certificate" />
+        ) : (
+          // Review and edit form
+          <div className="space-y-4">
+            {/* Document preview */}
+            {selectedFile && extractedData && (
+              <DocumentPreview
+                file={selectedFile}
+                extractedFieldCount={Object.values(extractedData).filter(v => v !== null).length}
+                documentType="certification"
+              />
+            )}
+
+            {/* Form fields */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="ai-name">Certification Name *</Label>
+                <Input
+                  id="ai-name"
+                  value={formData.name}
+                  onChange={(e) => handleFieldChange('name', e.target.value)}
+                  placeholder="AWS Certified Solutions Architect"
+                />
+                <ConfidenceWarning confidence={confidence.name || 0} hasValue={!!formData.name} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ai-issuer">Issuing Organization *</Label>
+                <Input
+                  id="ai-issuer"
+                  value={formData.issuer}
+                  onChange={(e) => handleFieldChange('issuer', e.target.value)}
+                  placeholder="Amazon Web Services"
+                />
+                <ConfidenceWarning confidence={confidence.issuer || 0} hasValue={!!formData.issuer} />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Issue Date</Label>
+                <MonthYearPicker
+                  value={formData.date}
+                  onChange={(value) => handleFieldChange('date', value)}
+                  placeholder="Select issue date"
+                  showFutureWarning
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Expiry Date</Label>
+                <MonthYearPicker
+                  value={formData.expiry_date}
+                  onChange={(value) => handleFieldChange('expiry_date', value)}
+                  placeholder="Select expiry date"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty if it doesn't expire
+                </p>
+              </div>
+            </div>
+
+            {isExpiryBeforeIssue && (
+              <p className="flex items-center gap-1 text-sm text-amber-600">
+                <AlertTriangle className="h-4 w-4" />
+                Expiry date cannot be before issue date
+              </p>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="ai-credential-id">Credential ID</Label>
+              <Input
+                id="ai-credential-id"
+                value={formData.credential_id}
+                onChange={(e) => handleFieldChange('credential_id', e.target.value)}
+                placeholder="ABC123XYZ"
+              />
+              <ConfidenceWarning confidence={confidence.credential_id || 0} hasValue={!!formData.credential_id} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ai-url">Verification URL</Label>
+              <Input
+                id="ai-url"
+                type="url"
+                value={formData.url}
+                onChange={(e) => handleFieldChange('url', e.target.value)}
+                placeholder="https://..."
+              />
+              <ConfidenceWarning confidence={confidence.url || 0} hasValue={!!formData.url} />
+            </div>
+          </div>
+        )}
+
+        {extractedData && (
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={handleCancel} disabled={adding}>
+              Cancel
+            </Button>
+            <Button onClick={handleAdd} disabled={adding}>
+              {adding ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                'Add Certification'
+              )}
+            </Button>
+          </DialogFooter>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

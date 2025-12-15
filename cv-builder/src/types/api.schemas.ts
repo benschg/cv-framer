@@ -612,3 +612,33 @@ export type UploadedCV = z.infer<typeof UploadedCVSchema>;
 export type CVUploadResponse = z.infer<typeof CVUploadResponseSchema>;
 export type GetUploadedCVsResponse = z.infer<typeof GetUploadedCVsResponseSchema>;
 export type UploadedCVDetailResponse = z.infer<typeof UploadedCVDetailResponseSchema>;
+
+// ============================================
+// CERTIFICATION ANALYSIS SCHEMAS
+// ============================================
+
+// POST /api/certifications/analyze (FormData - validated manually)
+export const AnalyzeCertificationResponseSchema = z.object({
+  extractedData: z.object({
+    name: z.string().nullable(),
+    issuer: z.string().nullable(),
+    date: z.string().nullable(), // YYYY-MM format
+    expiry_date: z.string().nullable(),
+    credential_id: z.string().nullable(),
+    url: z.string().nullable(),
+  }),
+  confidence: z.object({
+    name: z.number().min(0).max(1),
+    issuer: z.number().min(0).max(1),
+    date: z.number().min(0).max(1),
+    expiry_date: z.number().min(0).max(1),
+    credential_id: z.number().min(0).max(1),
+    url: z.number().min(0).max(1),
+  }),
+  documentUploaded: z.boolean(),
+  documentUrl: z.string().optional(),
+  storagePath: z.string().optional(),
+  documentName: z.string(),
+});
+
+export type AnalyzeCertificationResponse = z.infer<typeof AnalyzeCertificationResponseSchema>;
