@@ -1,18 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Plus } from 'lucide-react';
+import { PhotoUpload } from '@/components/profile/photo-upload';
+import { PhotoGallery } from '@/components/profile/photo-gallery';
+import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
+import type { ProfilePhoto } from '@/types/api.schemas';
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+
+  // Photo state
+  const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
+  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
 
   // Form state - pre-filled with user data
   const [formData, setFormData] = useState({
@@ -26,6 +36,21 @@ export default function ProfilePage() {
     websiteUrl: '',
     defaultTagline: '',
   });
+
+  // Load photos
+  const loadPhotos = async () => {
+    setLoadingPhotos(true);
+    const result = await fetchProfilePhotos();
+    if (result.data) {
+      setPhotos(result.data.photos);
+      setPrimaryPhoto(result.data.primaryPhoto);
+    }
+    setLoadingPhotos(false);
+  };
+
+  useEffect(() => {
+    loadPhotos();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -50,6 +75,10 @@ export default function ProfilePage() {
     ? `${formData.firstName.charAt(0)}${formData.lastName?.charAt(0) || ''}`
     : user?.email?.charAt(0).toUpperCase() || 'U';
 
+  const primaryPhotoUrl = primaryPhoto
+    ? getPhotoPublicUrl(primaryPhoto.storage_path)
+    : user?.user_metadata?.avatar_url;
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
@@ -60,27 +89,62 @@ export default function ProfilePage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Profile Photo */}
+        {/* Profile Photos */}
         <Card>
           <CardHeader>
-            <CardTitle>Profile Photo</CardTitle>
+            <CardTitle>Profile Photos</CardTitle>
             <CardDescription>
-              Your photo will appear on your CV and shared links
+              Upload multiple photos and choose which one to use for each CV
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex items-center gap-6">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback className="text-xl">{userInitials}</AvatarFallback>
-            </Avatar>
-            <div className="space-y-2">
-              <Button type="button" variant="outline" disabled>
-                Change Photo
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                Photo upload coming soon
-              </p>
+          <CardContent className="space-y-6">
+            {/* Current Primary Photo */}
+            <div className="flex items-center gap-6">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={primaryPhotoUrl} />
+                <AvatarFallback className="text-xl">{userInitials}</AvatarFallback>
+              </Avatar>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  {primaryPhoto ? 'Primary Photo' : 'No photos uploaded'}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowUpload(!showUpload)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {showUpload ? 'Hide Upload' : 'Add Photo'}
+                </Button>
+              </div>
             </div>
+
+            {/* Upload Section */}
+            {showUpload && (
+              <div>
+                <PhotoUpload
+                  onUploadComplete={() => {
+                    loadPhotos();
+                    setShowUpload(false);
+                  }}
+                  isPrimary={photos.length === 0}
+                />
+              </div>
+            )}
+
+            {/* Photo Gallery */}
+            {loadingPhotos ? (
+              <div className="text-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+              </div>
+            ) : (
+              <PhotoGallery
+                photos={photos}
+                primaryPhoto={primaryPhoto}
+                onUpdate={loadPhotos}
+                userInitials={userInitials}
+              />
+            )}
           </CardContent>
         </Card>
 
