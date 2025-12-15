@@ -14,10 +14,9 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   signInWithGoogle: () => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUpWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
+  signInWithOTP: (email: string) => Promise<{ error: string | null }>;
+  verifyOTP: (email: string, token: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -86,12 +85,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase]);
 
-  const signInWithEmail = useCallback(async (email: string, password: string) => {
+  const signInWithOTP = useCallback(async (email: string) => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
+      options: {
+        shouldCreateUser: true,
+      },
     });
 
     if (error) {
@@ -103,15 +104,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   }, [supabase]);
 
-  const signUpWithEmail = useCallback(async (email: string, password: string) => {
+  const verifyOTP = useCallback(async (email: string, token: string) => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.verifyOtp({
       email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      token,
+      type: 'email',
     });
 
     if (error) {
@@ -133,30 +132,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase]);
 
-  const resetPassword = useCallback(async (email: string) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
-
-    if (error) {
-      setState(prev => ({ ...prev, loading: false, error: error.message }));
-      return { error: error.message };
-    }
-
-    setState(prev => ({ ...prev, loading: false }));
-    return { error: null };
-  }, [supabase]);
-
   return (
     <AuthContext.Provider value={{
       ...state,
       signInWithGoogle,
-      signInWithEmail,
-      signUpWithEmail,
+      signInWithOTP,
+      verifyOTP,
       signOut,
-      resetPassword,
     }}>
       {children}
     </AuthContext.Provider>
