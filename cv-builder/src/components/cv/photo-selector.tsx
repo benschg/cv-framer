@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, UserX } from 'lucide-react';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { Loader2 } from 'lucide-react';
 import type { ProfilePhoto } from '@/types/api.schemas';
@@ -51,7 +51,10 @@ export function PhotoSelector({ selectedPhotoId, onChange, userInitials }: Photo
   }
 
   // Determine which photo to display
-  const selectedPhoto = selectedPhotoId
+  const isNoPhoto = selectedPhotoId === 'none';
+  const selectedPhoto = isNoPhoto
+    ? null
+    : selectedPhotoId
     ? photos.find(p => p.id === selectedPhotoId) || primaryPhoto
     : primaryPhoto;
 
@@ -71,10 +74,16 @@ export function PhotoSelector({ selectedPhotoId, onChange, userInitials }: Photo
 
       <div className="flex-1 space-y-1">
         <p className="text-sm font-medium">
-          {isUsingPrimary ? 'Primary Photo (Default)' : selectedPhoto?.filename}
+          {isNoPhoto
+            ? 'No Photo'
+            : isUsingPrimary
+            ? 'Primary Photo (Default)'
+            : selectedPhoto?.filename}
         </p>
         <p className="text-xs text-muted-foreground">
-          {isUsingPrimary
+          {isNoPhoto
+            ? 'CV will be generated without a photo'
+            : isUsingPrimary
             ? 'Using your default profile photo'
             : 'Custom photo for this CV'}
         </p>
@@ -90,6 +99,35 @@ export function PhotoSelector({ selectedPhotoId, onChange, userInitials }: Photo
         </PopoverTrigger>
         <PopoverContent className="w-80 p-0" align="end">
           <div className="max-h-[400px] overflow-y-auto">
+            {/* No Photo Option */}
+            <button
+              onClick={() => {
+                onChange('none');
+                setOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                isNoPhoto ? 'bg-accent' : ''
+              }`}
+            >
+              <Avatar className="h-12 w-12">
+                <AvatarFallback>
+                  <UserX className="h-6 w-6 text-muted-foreground" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 text-left">
+                <p className="font-medium text-sm">No Photo</p>
+                <p className="text-xs text-muted-foreground">
+                  Generate CV without a photo
+                </p>
+              </div>
+              {isNoPhoto && (
+                <Check className="h-4 w-4 text-primary" />
+              )}
+            </button>
+
+            {/* Separator */}
+            <div className="border-t my-1" />
+
             {/* Primary Photo Option */}
             <button
               onClick={() => {
