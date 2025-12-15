@@ -210,10 +210,7 @@ export function AICertificationUploadDialog({
       // Pass the selected file to the parent so it can be uploaded after certification creation
       await onAdd(formData, selectedFile || undefined);
 
-      toast.success('Certification added!', {
-        description: `${formData.name} has been added to your profile.`,
-      });
-
+      // Success toast is shown by the parent component with document info
       // Reset and close
       handleReset();
       onOpenChange(false);
@@ -313,21 +310,23 @@ export function AICertificationUploadDialog({
           // Review and edit form
           <div className="space-y-4">
             {/* Document preview */}
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
-              <div className="flex-shrink-0">
-                {formData.document_name?.toLowerCase().endsWith('.pdf') ? (
-                  <FileText className="h-8 w-8 text-red-500" />
-                ) : (
-                  <ImageIcon className="h-8 w-8 text-blue-500" />
-                )}
+            {selectedFile && (
+              <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
+                <div className="flex-shrink-0">
+                  {selectedFile.name.toLowerCase().endsWith('.pdf') ? (
+                    <FileText className="h-8 w-8 text-red-500" />
+                  ) : (
+                    <ImageIcon className="h-8 w-8 text-blue-500" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {extractedData && Object.values(extractedData).filter(v => v !== null).length} field(s) extracted • Will be uploaded with certification
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{formData.document_name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {extractedData && Object.values(extractedData).filter(v => v !== null).length} field(s) extracted
-                </p>
-              </div>
-            </div>
+            )}
 
             {/* Form fields */}
             <div className="grid gap-4 md:grid-cols-2">

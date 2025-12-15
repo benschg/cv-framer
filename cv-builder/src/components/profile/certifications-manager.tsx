@@ -75,25 +75,32 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
       }
 
       const certificationId = result.data?.id;
+      const certificationName = result.data?.name || 'Certification';
 
       // If a file was provided, upload it to the newly created certification
       if (file && certificationId) {
+        toast.loading('Uploading document...', { id: 'cert-upload' });
+
         const uploadResult = await createCertificationDocument(certificationId, file);
         if (uploadResult.error) {
           console.error('Error uploading document:', uploadResult.error);
           toast.error('Document upload failed', {
-            description: 'The certification was created but the document could not be uploaded.',
+            id: 'cert-upload',
+            description: 'The certification was created but the document could not be uploaded. You can add it later.',
           });
         } else {
-          toast.success('Document uploaded successfully');
+          toast.success('Certification and document added!', {
+            id: 'cert-upload',
+            description: `${certificationName} with ${file.name}`,
+          });
         }
       }
 
       // Manually refresh the list
       const { data: refreshedData } = await fetchCertifications();
       if (refreshedData) {
-        // The useProfileManager hook will handle this through its own state
-        // We just need to wait for it to complete
+        // Small delay to show the success toast before reload
+        await new Promise(resolve => setTimeout(resolve, 1000));
         window.location.reload();
       }
     } catch (error) {
