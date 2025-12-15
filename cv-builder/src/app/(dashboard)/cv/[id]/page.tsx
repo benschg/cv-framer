@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,19 +28,17 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { fetchCV, updateCV, generateId } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
-import { CVPreview } from '@/components/cv/cv-preview';
 import { PhotoSelector } from '@/components/cv/photo-selector';
 import { FormatSettings } from '@/components/cv/format-settings';
+import { CVPreviewSection } from '@/components/cv/cv-preview-section';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { CVDocument, CVContent, KeyCompetence, DisplaySettings } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
 
 export default function CVEditorPage() {
   const params = useParams();
-  const router = useRouter();
   const cvId = params.id as string;
   const { user } = useAuth();
 
@@ -630,149 +628,17 @@ export default function CVEditorPage() {
       />
 
       {/* Preview Section */}
-      <Card id="preview-section">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                Preview
-                <Badge variant="outline" className="font-normal">Live</Badge>
-              </CardTitle>
-              <CardDescription>
-                This is how your CV will look when exported
-              </CardDescription>
-            </div>
-            <Select
-              value={cv.display_settings?.format || 'A4'}
-              onValueChange={(value) => updateDisplaySettings('format', value as 'A4' | 'Letter')}
-            >
-              <SelectTrigger className="w-[120px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="A4">A4</SelectItem>
-                <SelectItem value="Letter">Letter</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <CVPreview
-            content={content}
-            language={cv.language}
-            settings={cv.display_settings}
-            photoUrl={photoUrl}
-            userInitials={getUserInitials(user)}
-            photoElement={
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                    title="Change photo"
-                  >
-                    <Avatar className="h-24 w-24 flex-shrink-0">
-                      <AvatarImage src={photoUrl || undefined} alt={getUserInitials(user)} />
-                      <AvatarFallback className="text-2xl">{getUserInitials(user)}</AvatarFallback>
-                    </Avatar>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-0" align="start">
-                  <div className="max-h-[400px] overflow-y-auto">
-                    {/* No Photo Option */}
-                    <button
-                      onClick={() => {
-                        updateField('selected_photo_id', 'none');
-                      }}
-                      className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
-                        content.selected_photo_id === 'none' ? 'bg-accent' : ''
-                      }`}
-                    >
-                      <Avatar className="h-12 w-12">
-                        <AvatarFallback>
-                          <UserX className="h-6 w-6 text-muted-foreground" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 text-left">
-                        <p className="font-medium text-sm">No Photo</p>
-                        <p className="text-xs text-muted-foreground">
-                          Generate CV without a photo
-                        </p>
-                      </div>
-                      {content.selected_photo_id === 'none' && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </button>
-
-                    {/* Separator */}
-                    <div className="border-t my-1" />
-
-                    {/* Primary Photo Option */}
-                    <button
-                      onClick={() => {
-                        updateField('selected_photo_id', null);
-                      }}
-                      className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
-                        !content.selected_photo_id || content.selected_photo_id === primaryPhoto?.id ? 'bg-accent' : ''
-                      }`}
-                    >
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage
-                          src={primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : undefined}
-                        />
-                        <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 text-left">
-                        <p className="font-medium text-sm">Primary Photo (Default)</p>
-                        <p className="text-xs text-muted-foreground">
-                          {primaryPhoto ? primaryPhoto.filename : 'No primary photo set'}
-                        </p>
-                      </div>
-                      {(!content.selected_photo_id || content.selected_photo_id === primaryPhoto?.id) && (
-                        <Check className="h-4 w-4 text-primary" />
-                      )}
-                    </button>
-
-                    {/* Separator */}
-                    {photos.filter(p => !p.is_primary).length > 0 && (
-                      <div className="border-t my-1" />
-                    )}
-
-                    {/* Other Photos */}
-                    {photos.filter(p => !p.is_primary).map((photo) => {
-                      const isSelected = content.selected_photo_id === photo.id;
-                      return (
-                        <button
-                          key={photo.id}
-                          onClick={() => {
-                            updateField('selected_photo_id', photo.id);
-                          }}
-                          className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
-                            isSelected ? 'bg-accent' : ''
-                          }`}
-                        >
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
-                            <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 text-left">
-                            <p className="font-medium text-sm">{photo.filename}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {(photo.file_size / 1024).toFixed(0)} KB
-                            </p>
-                          </div>
-                          {isSelected && (
-                            <Check className="h-4 w-4 text-primary" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            }
-          />
-        </CardContent>
-      </Card>
+      <CVPreviewSection
+        content={content}
+        language={cv.language}
+        displaySettings={cv.display_settings}
+        photoUrl={photoUrl}
+        userInitials={getUserInitials(user)}
+        photos={photos}
+        primaryPhoto={primaryPhoto}
+        onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
+        onFormatChange={(format) => updateDisplaySettings('format', format)}
+      />
 
         </div>
       </div>
