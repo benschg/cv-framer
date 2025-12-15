@@ -23,7 +23,8 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
     Letter: { width: 216, height: 279 }
   };
 
-  const { width: pageWidth } = pageDimensions[format];
+  const { width: pageWidth, height: pageHeight } = pageDimensions[format];
+  const aspectRatio = pageHeight / pageWidth;
 
   const formatDate = (dateStr?: string): string => {
     if (!dateStr) return '';
@@ -55,7 +56,11 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
   return (
     <div
       className="bg-white text-gray-900 p-8 rounded-lg shadow-sm border mx-auto font-sans text-[10pt] leading-relaxed"
-      style={{ maxWidth: `${pageWidth}mm` }}
+      style={{
+        width: `${pageWidth}mm`,
+        minHeight: `${pageHeight}mm`,
+        aspectRatio: `${pageWidth} / ${pageHeight}`
+      }}
     >
       {/* Header */}
       <header
