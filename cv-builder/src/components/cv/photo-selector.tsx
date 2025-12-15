@@ -13,13 +13,21 @@ interface PhotoSelectorProps {
   selectedPhotoId: string | null;
   onChange: (photoId: string | null) => void;
   userInitials: string;
+  /** Optional: Control popover open state externally */
+  open?: boolean;
+  /** Optional: Callback when popover open state changes */
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function PhotoSelector({ selectedPhotoId, onChange, userInitials }: PhotoSelectorProps) {
+export function PhotoSelector({ selectedPhotoId, onChange, userInitials, open: externalOpen, onOpenChange: externalOnOpenChange }: PhotoSelectorProps) {
   const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  // Use external state if provided, otherwise use internal state
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = externalOnOpenChange || setInternalOpen;
 
   useEffect(() => {
     const loadPhotos = async () => {

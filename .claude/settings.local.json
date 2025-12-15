@@ -15,7 +15,9 @@
       "Bash(bun add:*)",
       "Bash(cat:*)",
       "Bash(git reset:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(find:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

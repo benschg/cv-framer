@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Save,
   Download,
@@ -19,9 +20,11 @@ import {
   Plus,
   Trash2,
   GripVertical,
-  Pencil,
+  Check,
+  UserX,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/shared/breadcrumb';
+import { EditableBreadcrumb } from '@/components/shared/editable-breadcrumb';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { fetchCV, updateCV, generateId } from '@/services/cv.service';
@@ -48,8 +51,7 @@ export default function CVEditorPage() {
   const [generating, setGenerating] = useState(false);
   const [regeneratingSection, setRegeneratingSection] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editedName, setEditedName] = useState('');
+  const [photoPopoverOpen, setPhotoPopoverOpen] = useState(false);
 
   // Editable content
   const [content, setContent] = useState<CVContent>({});
@@ -135,35 +137,6 @@ export default function CVEditorPage() {
     setSaving(false);
   };
 
-  const handleNameEdit = () => {
-    if (cv) {
-      setEditedName(cv.name);
-      setIsEditingName(true);
-    }
-  };
-
-  const handleNameSave = async () => {
-    if (!cv || !editedName.trim()) {
-      setIsEditingName(false);
-      return;
-    }
-
-    const result = await updateCV(cvId, {
-      name: editedName.trim(),
-    });
-
-    if (result.error) {
-      setError(result.error);
-    } else if (result.data) {
-      setCv(result.data);
-    }
-    setIsEditingName(false);
-  };
-
-  const handleNameCancel = () => {
-    setIsEditingName(false);
-    setEditedName('');
-  };
 
   const updateField = (field: keyof CVContent, value: unknown) => {
     setContent(prev => ({ ...prev, [field]: value }));
@@ -414,45 +387,124 @@ export default function CVEditorPage() {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
 
-        {isEditingName ? (
-          <div className="flex items-center gap-2">
-            <Input
-              value={editedName}
-              onChange={(e) => setEditedName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleNameSave();
-                if (e.key === 'Escape') handleNameCancel();
-              }}
-              className="h-8 w-64"
-              autoFocus
-            />
-            <Button size="sm" variant="ghost" onClick={handleNameSave}>
-              <Save className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="ghost" onClick={handleNameCancel}>
-              ×
-            </Button>
-          </div>
-        ) : (
-          <>
-            <button
-              onClick={handleNameEdit}
-              className="group flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary transition-colors"
-            >
-              <span>My CVs</span>
-              <span className="text-muted-foreground">/</span>
-              <span className="flex items-center gap-1">
-                {cv.name}
-                <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </span>
-            </button>
-          </>
-        )}
+        <EditableBreadcrumb
+          parentLabel="My CVs"
+          parentHref="/cv"
+          currentLabel={cv.name}
+          onSave={async (newName) => {
+            const result = await updateCV(cvId, { name: newName });
+            if (result.data) setCv(result.data);
+          }}
+        />
 
-        <Avatar className="h-8 w-8 flex-shrink-0 hidden sm:block ml-2">
-          <AvatarImage src={photoUrl || undefined} />
-          <AvatarFallback className="text-xs">{getUserInitials(user)}</AvatarFallback>
-        </Avatar>
+        <Popover open={photoPopoverOpen} onOpenChange={setPhotoPopoverOpen}>
+          <PopoverTrigger asChild>
+            <button
+              className="flex-shrink-0 hidden sm:block ml-2 cursor-pointer hover:opacity-80 transition-opacity"
+              title="Change photo"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={photoUrl || undefined} />
+                <AvatarFallback className="text-xs">{getUserInitials(user)}</AvatarFallback>
+              </Avatar>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0" align="start">
+            <div className="max-h-[400px] overflow-y-auto">
+              {/* No Photo Option */}
+              <button
+                onClick={() => {
+                  updateField('selected_photo_id', 'none');
+                  setPhotoPopoverOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                  content.selected_photo_id === 'none' ? 'bg-accent' : ''
+                }`}
+              >
+                <Avatar className="h-12 w-12">
+                  <AvatarFallback>
+                    <UserX className="h-6 w-6 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-sm">No Photo</p>
+                  <p className="text-xs text-muted-foreground">
+                    Generate CV without a photo
+                  </p>
+                </div>
+                {content.selected_photo_id === 'none' && (
+                  <Check className="h-4 w-4 text-primary" />
+                )}
+              </button>
+
+              {/* Separator */}
+              <div className="border-t my-1" />
+
+              {/* Primary Photo Option */}
+              <button
+                onClick={() => {
+                  updateField('selected_photo_id', null);
+                  setPhotoPopoverOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                  !content.selected_photo_id || content.selected_photo_id === primaryPhoto?.id ? 'bg-accent' : ''
+                }`}
+              >
+                <Avatar className="h-12 w-12">
+                  <AvatarImage
+                    src={primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : undefined}
+                  />
+                  <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-sm">Primary Photo (Default)</p>
+                  <p className="text-xs text-muted-foreground">
+                    {primaryPhoto ? primaryPhoto.filename : 'No primary photo set'}
+                  </p>
+                </div>
+                {(!content.selected_photo_id || content.selected_photo_id === primaryPhoto?.id) && (
+                  <Check className="h-4 w-4 text-primary" />
+                )}
+              </button>
+
+              {/* Separator */}
+              {photos.filter(p => !p.is_primary).length > 0 && (
+                <div className="border-t my-1" />
+              )}
+
+              {/* Other Photos */}
+              {photos.filter(p => !p.is_primary).map((photo) => {
+                const isSelected = content.selected_photo_id === photo.id;
+                return (
+                  <button
+                    key={photo.id}
+                    onClick={() => {
+                      updateField('selected_photo_id', photo.id);
+                      setPhotoPopoverOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                      isSelected ? 'bg-accent' : ''
+                    }`}
+                  >
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
+                      <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 text-left">
+                      <p className="font-medium text-sm">{photo.filename}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(photo.file_size / 1024).toFixed(0)} KB
+                      </p>
+                    </div>
+                    {isSelected && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
         {cv.job_context?.company && (
           <div className="min-w-0 flex-1 hidden lg:block ml-2">
             <p className="text-sm text-muted-foreground truncate">
@@ -967,6 +1019,113 @@ export default function CVEditorPage() {
             settings={cv.display_settings}
             photoUrl={photoUrl}
             userInitials={getUserInitials(user)}
+            photoElement={
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                    title="Change photo"
+                  >
+                    <Avatar className="h-24 w-24 flex-shrink-0">
+                      <AvatarImage src={photoUrl || undefined} alt={getUserInitials(user)} />
+                      <AvatarFallback className="text-2xl">{getUserInitials(user)}</AvatarFallback>
+                    </Avatar>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="start">
+                  <div className="max-h-[400px] overflow-y-auto">
+                    {/* No Photo Option */}
+                    <button
+                      onClick={() => {
+                        updateField('selected_photo_id', 'none');
+                      }}
+                      className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                        content.selected_photo_id === 'none' ? 'bg-accent' : ''
+                      }`}
+                    >
+                      <Avatar className="h-12 w-12">
+                        <AvatarFallback>
+                          <UserX className="h-6 w-6 text-muted-foreground" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 text-left">
+                        <p className="font-medium text-sm">No Photo</p>
+                        <p className="text-xs text-muted-foreground">
+                          Generate CV without a photo
+                        </p>
+                      </div>
+                      {content.selected_photo_id === 'none' && (
+                        <Check className="h-4 w-4 text-primary" />
+                      )}
+                    </button>
+
+                    {/* Separator */}
+                    <div className="border-t my-1" />
+
+                    {/* Primary Photo Option */}
+                    <button
+                      onClick={() => {
+                        updateField('selected_photo_id', null);
+                      }}
+                      className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                        !content.selected_photo_id || content.selected_photo_id === primaryPhoto?.id ? 'bg-accent' : ''
+                      }`}
+                    >
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage
+                          src={primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : undefined}
+                        />
+                        <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 text-left">
+                        <p className="font-medium text-sm">Primary Photo (Default)</p>
+                        <p className="text-xs text-muted-foreground">
+                          {primaryPhoto ? primaryPhoto.filename : 'No primary photo set'}
+                        </p>
+                      </div>
+                      {(!content.selected_photo_id || content.selected_photo_id === primaryPhoto?.id) && (
+                        <Check className="h-4 w-4 text-primary" />
+                      )}
+                    </button>
+
+                    {/* Separator */}
+                    {photos.filter(p => !p.is_primary).length > 0 && (
+                      <div className="border-t my-1" />
+                    )}
+
+                    {/* Other Photos */}
+                    {photos.filter(p => !p.is_primary).map((photo) => {
+                      const isSelected = content.selected_photo_id === photo.id;
+                      return (
+                        <button
+                          key={photo.id}
+                          onClick={() => {
+                            updateField('selected_photo_id', photo.id);
+                          }}
+                          className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                            isSelected ? 'bg-accent' : ''
+                          }`}
+                        >
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
+                            <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 text-left">
+                            <p className="font-medium text-sm">{photo.filename}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {(photo.file_size / 1024).toFixed(0)} KB
+                            </p>
+                          </div>
+                          {isSelected && (
+                            <Check className="h-4 w-4 text-primary" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            }
           />
         </CardContent>
       </Card>

@@ -2,6 +2,7 @@
 
 import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ReactNode } from 'react';
 
 interface CVPreviewProps {
   content: CVContent;
@@ -10,9 +11,11 @@ interface CVPreviewProps {
   language?: 'en' | 'de';
   photoUrl?: string | null;
   userInitials?: string;
+  /** Optional: Custom render for the photo (e.g., wrapped in a Popover) */
+  photoElement?: ReactNode;
 }
 
-export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U' }: CVPreviewProps) {
+export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U', photoElement }: CVPreviewProps) {
   const accentColor = settings?.accentColor || '#2563eb';
   const showPhoto = settings?.showPhoto !== false && photoUrl;
   const format = settings?.format || 'A4';
@@ -84,10 +87,12 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
             </div>
           </div>
           {showPhoto && (
-            <Avatar className="h-24 w-24 flex-shrink-0">
-              <AvatarImage src={photoUrl} alt={name} />
-              <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
-            </Avatar>
+            photoElement || (
+              <Avatar className="h-24 w-24 flex-shrink-0">
+                <AvatarImage src={photoUrl} alt={name} />
+                <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
+              </Avatar>
+            )
           )}
         </div>
       </header>
