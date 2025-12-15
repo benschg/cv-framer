@@ -39,43 +39,11 @@ export interface CVContent {
   profile?: string;
   slogan?: string;
   selected_photo_id?: string | null; // UUID of selected photo from profile_photos
-  workExperience?: WorkExperience[];
-  education?: Education[];
-  skills?: SkillCategory[];
   keyCompetences?: KeyCompetence[];
   projects?: Project[];
   references?: Reference[];
   languages?: LanguageSkill[];
   certifications?: Certification[];
-}
-
-export interface WorkExperience {
-  id: string;
-  company: string;
-  title: string;
-  location?: string;
-  startDate: string;
-  endDate?: string;
-  current?: boolean;
-  description?: string;
-  bullets: string[];
-}
-
-export interface Education {
-  id: string;
-  institution: string;
-  degree: string;
-  field?: string;
-  startDate: string;
-  endDate?: string;
-  description?: string;
-  grade?: string;
-}
-
-export interface SkillCategory {
-  id: string;
-  category: string;
-  skills: string[];
 }
 
 export interface KeyCompetence {
@@ -173,7 +141,6 @@ export interface DisplaySettings {
   theme: 'light' | 'dark';
   format: 'A4' | 'Letter';
   showPhoto: boolean;
-  showExperience: boolean;
   showAttachments: boolean;
   privacyLevel: 'none' | 'personal' | 'full';
   accentColor?: string;

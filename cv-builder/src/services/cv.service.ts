@@ -245,9 +245,6 @@ export function generateId(): string {
 export function getDefaultCVContent(): Record<string, unknown> {
   return {
     summary: '',
-    experience: [],
-    education: [],
-    skills: [],
     languages: [],
     certifications: [],
   };
@@ -260,7 +257,6 @@ export function getDefaultDisplaySettings(): Record<string, unknown> {
   return {
     theme: 'light',
     showPhoto: true,
-    showExperience: true,
     showAttachments: false,
     privacyLevel: 'personal',
   };

@@ -219,16 +219,11 @@ export const RegenerateItemSchema = z.object({
   current_content: z.string().optional(),
   custom_instructions: z.string().optional(),
   language: LanguageSchema.optional(),
-  experience_context: z.object({
-    company: z.string(),
-    title: z.string(),
-    description: z.string().optional(),
-  }).optional(),
 });
 
 export const RegenerateItemResponseSchema = z.object({
   section: z.string(),
-  content: z.union([z.string(), z.array(z.string())]),
+  content: z.string(),
   ai_metadata: AIMetadataSchema,
 });
 

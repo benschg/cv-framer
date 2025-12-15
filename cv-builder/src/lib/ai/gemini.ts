@@ -79,13 +79,6 @@ export interface GeneratedCVContent {
   profile?: string;
   slogan?: string;
   keyCompetences?: Array<{ title: string; description: string }>;
-  workExperience?: Array<{
-    company: string;
-    title: string;
-    startDate: string;
-    endDate?: string;
-    bullets: string[];
-  }>;
 }
 
 // Analyze a job posting to extract company research
@@ -241,56 +234,6 @@ Generate a new version of this section that:
 Return ONLY the new content for this section, no JSON wrapping, no explanations.`;
 
   return generateContent(prompt);
-}
-
-// Generate work experience bullets from a job description
-export async function generateExperienceBullets(
-  company: string,
-  title: string,
-  description: string,
-  werbeflaechenData?: Record<string, unknown>,
-  jobContext?: {
-    requiredSkills?: string[];
-    keywords?: string[];
-  },
-  language: 'en' | 'de' = 'en'
-): Promise<string[]> {
-  const languageInstructions = language === 'de'
-    ? 'Generate bullets in German (Deutsch).'
-    : 'Generate bullets in English.';
-
-  const prompt = `Generate 3-5 achievement-focused bullet points for this work experience.
-
-${languageInstructions}
-
-Company: ${company}
-Job Title: ${title}
-Role Description: ${description}
-
-${werbeflaechenData ? `
-Relevant achievements from self-marketing data:
-${JSON.stringify(werbeflaechenData, null, 2)}
-` : ''}
-
-${jobContext?.requiredSkills ? `
-Skills to highlight (if applicable): ${jobContext.requiredSkills.join(', ')}
-` : ''}
-
-${jobContext?.keywords ? `
-Keywords to incorporate (if natural): ${jobContext.keywords.join(', ')}
-` : ''}
-
-Guidelines:
-- Start each bullet with a strong action verb
-- Include quantifiable results where possible (%, $, time saved, etc.)
-- Focus on impact and outcomes, not just tasks
-- Keep each bullet to 1-2 lines
-- Make bullets relevant to the target role if context provided
-
-Return a JSON array of strings:
-["bullet 1", "bullet 2", "bullet 3"]`;
-
-  return generateJSON<string[]>(prompt);
 }
 
 // Types for job posting URL parsing

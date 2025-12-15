@@ -7,7 +7,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
-import type { WorkExperience, Education, SkillCategory, Certification, Reference } from '@/types/cv.types';
+import type { Certification, Reference } from '@/types/cv.types';
 import type {
   ProfileWorkExperience,
   ProfileEducation,
@@ -438,53 +438,6 @@ export async function deleteReferenceLetter(storagePath: string): Promise<{ erro
 // ============================================
 // CONVERSION UTILITIES
 // ============================================
-
-/**
- * Convert ProfileWorkExperience to CV WorkExperience format
- * Converts null values to undefined for CV types
- */
-export function convertToWorkExperience(profile: ProfileWorkExperience): WorkExperience {
-  return {
-    id: profile.id,
-    company: profile.company,
-    title: profile.title,
-    location: profile.location ?? undefined,
-    startDate: profile.start_date,
-    endDate: profile.end_date ?? undefined,
-    current: profile.current ?? false,
-    description: profile.description ?? undefined,
-    bullets: profile.bullets ?? [],
-  };
-}
-
-/**
- * Convert ProfileEducation to CV Education format
- * Converts null values to undefined for CV types
- */
-export function convertToEducation(profile: ProfileEducation): Education {
-  return {
-    id: profile.id,
-    institution: profile.institution,
-    degree: profile.degree,
-    field: profile.field ?? undefined,
-    startDate: profile.start_date,
-    endDate: profile.end_date ?? undefined,
-    description: profile.description ?? undefined,
-    grade: profile.grade ?? undefined,
-  };
-}
-
-/**
- * Convert ProfileSkillCategory to CV SkillCategory format
- * Converts null values to undefined for CV types
- */
-export function convertToSkillCategory(profile: ProfileSkillCategory): SkillCategory {
-  return {
-    id: profile.id,
-    category: profile.category,
-    skills: profile.skills,
-  };
-}
 
 /**
  * Convert ProfileCertification to CV Certification format

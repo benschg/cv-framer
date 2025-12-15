@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, Lock, Calendar, MapPin, Mail, Phone, Linkedin, Github } from 'lucide-react';
+import { AlertCircle, Lock, MapPin, Mail, Phone, Linkedin, Github } from 'lucide-react';
 import type { CVDocument, CVContent, UserProfile, ShareLink } from '@/types/cv.types';
 
 interface SharedCVData {
@@ -168,76 +168,6 @@ export default function PublicCVPage() {
           </section>
         )}
 
-        {/* Work Experience */}
-        {content.workExperience && content.workExperience.length > 0 && (
-          <section className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Work Experience</h2>
-            <div className="space-y-6">
-              {content.workExperience.map((exp, index) => (
-                <div key={index} className="border-l-2 border-primary/20 pl-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium text-gray-900">{exp.title}</h3>
-                      <p className="text-gray-700">{exp.company}</p>
-                    </div>
-                    <span className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate)}
-                    </span>
-                  </div>
-                  {exp.bullets && exp.bullets.length > 0 && (
-                    <ul className="mt-2 space-y-1 text-gray-600">
-                      {exp.bullets.map((bullet, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className="text-primary mt-1.5">•</span>
-                          <span>{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Education */}
-        {content.education && content.education.length > 0 && (
-          <section className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Education</h2>
-            <div className="space-y-4">
-              {content.education.map((edu, index) => (
-                <div key={index} className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      {edu.degree}{edu.field ? ` in ${edu.field}` : ''}
-                    </h3>
-                    <p className="text-gray-700">{edu.institution}</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {formatDate(edu.endDate) || 'Present'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Skills */}
-        {content.skills && content.skills.length > 0 && (
-          <section className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Skills</h2>
-            <div className="space-y-3">
-              {content.skills.map((cat, index) => (
-                <div key={index}>
-                  <span className="font-medium text-gray-900">{cat.category}: </span>
-                  <span className="text-gray-600">{cat.skills.join(', ')}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground py-4">
           <p>Created with CV Builder</p>
@@ -245,15 +175,4 @@ export default function PublicCVPage() {
       </div>
     </div>
   );
-}
-
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return '';
-  try {
-    const [year, month] = dateStr.split('-');
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  } catch {
-    return dateStr;
-  }
 }

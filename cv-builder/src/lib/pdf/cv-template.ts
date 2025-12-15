@@ -16,7 +16,6 @@ export function generateCVHTML(data: CVTemplateData): string {
     theme: 'light',
     format: 'A4',
     showPhoto: true,
-    showExperience: true,
     showAttachments: false,
     privacyLevel: 'personal',
   };
@@ -26,9 +25,6 @@ export function generateCVHTML(data: CVTemplateData): string {
   const headerHTML = generateHeader(content, userProfile, settings, photoUrl);
   const profileHTML = generateProfile(content);
   const keyCompetencesHTML = generateKeyCompetences(content);
-  const experienceHTML = generateExperience(content);
-  const educationHTML = generateEducation(content);
-  const skillsHTML = generateSkills(content);
 
   return `
 <!DOCTYPE html>
@@ -44,9 +40,6 @@ export function generateCVHTML(data: CVTemplateData): string {
     ${headerHTML}
     ${profileHTML}
     ${keyCompetencesHTML}
-    ${experienceHTML}
-    ${educationHTML}
-    ${skillsHTML}
   </div>
 </body>
 </html>
@@ -178,87 +171,6 @@ function generateStyles(settings: DisplaySettings): string {
       color: #6b7280;
     }
 
-    /* Experience */
-    .experience-item {
-      margin-bottom: 14px;
-      page-break-inside: avoid;
-    }
-
-    .experience-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 4px;
-    }
-
-    .experience-title {
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .experience-company {
-      color: #374151;
-    }
-
-    .experience-date {
-      font-size: 9pt;
-      color: #6b7280;
-      white-space: nowrap;
-    }
-
-    .experience-bullets {
-      list-style: disc;
-      margin-left: 18px;
-      margin-top: 6px;
-    }
-
-    .experience-bullets li {
-      margin-bottom: 3px;
-      color: #374151;
-    }
-
-    /* Education */
-    .education-item {
-      margin-bottom: 10px;
-      page-break-inside: avoid;
-    }
-
-    .education-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .education-degree {
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .education-institution {
-      color: #374151;
-    }
-
-    .education-date {
-      font-size: 9pt;
-      color: #6b7280;
-    }
-
-    /* Skills */
-    .skills-category {
-      margin-bottom: 8px;
-    }
-
-    .skills-category-name {
-      font-weight: 600;
-      color: #111827;
-      display: inline;
-    }
-
-    .skills-list {
-      display: inline;
-      color: #374151;
-    }
-
     /* Print styles */
     @media print {
       body {
@@ -353,104 +265,4 @@ function generateKeyCompetences(content: CVContent): string {
       </div>
     </section>
   `;
-}
-
-function generateExperience(content: CVContent): string {
-  if (!content.workExperience || content.workExperience.length === 0) return '';
-
-  const experienceHTML = content.workExperience
-    .map((exp) => {
-      const dateRange = exp.current
-        ? `${formatDate(exp.startDate)} - Present`
-        : `${formatDate(exp.startDate)} - ${formatDate(exp.endDate)}`;
-
-      const bulletsHTML =
-        exp.bullets && exp.bullets.length > 0
-          ? `<ul class="experience-bullets">${exp.bullets.map((b) => `<li>${b}</li>`).join('')}</ul>`
-          : '';
-
-      return `
-        <div class="experience-item">
-          <div class="experience-header">
-            <div>
-              <div class="experience-title">${exp.title}</div>
-              <div class="experience-company">${exp.company}${exp.location ? `, ${exp.location}` : ''}</div>
-            </div>
-            <div class="experience-date">${dateRange}</div>
-          </div>
-          ${bulletsHTML}
-        </div>
-      `;
-    })
-    .join('');
-
-  return `
-    <section class="section">
-      <h2 class="section-title">Work Experience</h2>
-      ${experienceHTML}
-    </section>
-  `;
-}
-
-function generateEducation(content: CVContent): string {
-  if (!content.education || content.education.length === 0) return '';
-
-  const educationHTML = content.education
-    .map((edu) => {
-      const dateRange = edu.endDate ? formatDate(edu.endDate) : 'Present';
-
-      return `
-        <div class="education-item">
-          <div class="education-header">
-            <div>
-              <div class="education-degree">${edu.degree}${edu.field ? ` in ${edu.field}` : ''}</div>
-              <div class="education-institution">${edu.institution}</div>
-            </div>
-            <div class="education-date">${dateRange}</div>
-          </div>
-        </div>
-      `;
-    })
-    .join('');
-
-  return `
-    <section class="section">
-      <h2 class="section-title">Education</h2>
-      ${educationHTML}
-    </section>
-  `;
-}
-
-function generateSkills(content: CVContent): string {
-  if (!content.skills || content.skills.length === 0) return '';
-
-  const skillsHTML = content.skills
-    .map(
-      (cat) => `
-      <div class="skills-category">
-        <span class="skills-category-name">${cat.category}:</span>
-        <span class="skills-list">${cat.skills.join(', ')}</span>
-      </div>
-    `
-    )
-    .join('');
-
-  return `
-    <section class="section">
-      <h2 class="section-title">Skills</h2>
-      ${skillsHTML}
-    </section>
-  `;
-}
-
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return '';
-
-  try {
-    const [year, month] = dateStr.split('-');
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  } catch {
-    return dateStr;
-  }
 }
