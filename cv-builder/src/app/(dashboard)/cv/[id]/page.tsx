@@ -19,6 +19,7 @@ import {
   Plus,
   Trash2,
   GripVertical,
+  Pencil,
 } from 'lucide-react';
 import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -47,6 +48,8 @@ export default function CVEditorPage() {
   const [generating, setGenerating] = useState(false);
   const [regeneratingSection, setRegeneratingSection] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
 
   // Editable content
   const [content, setContent] = useState<CVContent>({});
@@ -130,6 +133,36 @@ export default function CVEditorPage() {
       setCv(result.data);
     }
     setSaving(false);
+  };
+
+  const handleNameEdit = () => {
+    if (cv) {
+      setEditedName(cv.name);
+      setIsEditingName(true);
+    }
+  };
+
+  const handleNameSave = async () => {
+    if (!cv || !editedName.trim()) {
+      setIsEditingName(false);
+      return;
+    }
+
+    const result = await updateCV(cvId, {
+      name: editedName.trim(),
+    });
+
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data) {
+      setCv(result.data);
+    }
+    setIsEditingName(false);
+  };
+
+  const handleNameCancel = () => {
+    setIsEditingName(false);
+    setEditedName('');
   };
 
   const updateField = (field: keyof CVContent, value: unknown) => {
@@ -380,7 +413,42 @@ export default function CVEditorPage() {
       <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 bg-background">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb currentLabel={cv.name} data={cv} />
+
+        {isEditingName ? (
+          <div className="flex items-center gap-2">
+            <Input
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleNameSave();
+                if (e.key === 'Escape') handleNameCancel();
+              }}
+              className="h-8 w-64"
+              autoFocus
+            />
+            <Button size="sm" variant="ghost" onClick={handleNameSave}>
+              <Save className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="ghost" onClick={handleNameCancel}>
+              ×
+            </Button>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={handleNameEdit}
+              className="group flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+            >
+              <span>My CVs</span>
+              <span className="text-muted-foreground">/</span>
+              <span className="flex items-center gap-1">
+                {cv.name}
+                <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </span>
+            </button>
+          </>
+        )}
+
         <Avatar className="h-8 w-8 flex-shrink-0 hidden sm:block ml-2">
           <AvatarImage src={photoUrl || undefined} />
           <AvatarFallback className="text-xs">{getUserInitials(user)}</AvatarFallback>
