@@ -412,6 +412,109 @@ Return your response as ONLY valid JSON (no markdown, no explanations outside th
   return JSON.parse(cleanedText) as CertificationExtraction;
 }
 
+export interface ExtractedReferenceData {
+  name: string | null;
+  title: string | null;
+  company: string | null;
+  relationship: string | null;
+  email: string | null;
+  phone: string | null;
+  quote: string | null;
+}
+
+export interface ReferenceExtraction {
+  extractedData: ExtractedReferenceData;
+  confidence: {
+    name: number;
+    title: number;
+    company: number;
+    relationship: number;
+    email: number;
+    phone: number;
+    quote: number;
+  };
+  reasoning: string;
+}
+
+export async function extractReferenceData(
+  fileBuffer: Buffer,
+  mimeType: string,
+  modelName: GeminiModel = 'gemini-2.0-flash'
+): Promise<ReferenceExtraction> {
+  const model = getModel(modelName);
+
+  const prompt = `Analyze this reference letter or document and extract structured information.
+
+Extract the following fields:
+1. Reference Name (full name of the person providing the reference)
+2. Title (job title/position of the reference)
+3. Company (organization where the reference works/worked)
+4. Relationship (how they know the candidate, e.g., "Former Manager", "Colleague", "Professor")
+5. Email (contact email address)
+6. Phone (contact phone number)
+7. Quote (a brief notable quote or recommendation from the letter, 1-2 sentences max)
+
+For each field provide:
+- Extracted value (or null if not found)
+- Confidence score (0.0-1.0, only 0.8+ if very clear)
+- Brief reasoning
+
+IMPORTANT:
+- Use null for fields you cannot confidently extract
+- Be conservative with confidence scores
+- For Quote, extract the most impactful sentence or key recommendation
+- Phone numbers should preserve formatting (e.g., "+1-555-123-4567" or "(555) 123-4567")
+
+Return ONLY valid JSON:
+{
+  "extractedData": {
+    "name": "string" | null,
+    "title": "string" | null,
+    "company": "string" | null,
+    "relationship": "string" | null,
+    "email": "string" | null,
+    "phone": "string" | null,
+    "quote": "string" | null
+  },
+  "confidence": {
+    "name": 0.0-1.0,
+    "title": 0.0-1.0,
+    "company": 0.0-1.0,
+    "relationship": 0.0-1.0,
+    "email": 0.0-1.0,
+    "phone": 0.0-1.0,
+    "quote": 0.0-1.0
+  },
+  "reasoning": "Brief explanation of what you observed and any challenges in extraction"
+}`;
+
+  // Use Gemini Vision API
+  const base64Data = fileBuffer.toString('base64');
+  const imagePart = {
+    inlineData: {
+      data: base64Data,
+      mimeType: mimeType,
+    },
+  };
+
+  const result = await model.generateContent([prompt, imagePart]);
+  const text = result.response.text();
+
+  // Clean and parse JSON
+  let cleanedText = text.trim();
+  if (cleanedText.startsWith('```json')) {
+    cleanedText = cleanedText.slice(7);
+  } else if (cleanedText.startsWith('```')) {
+    cleanedText = cleanedText.slice(3);
+  }
+  if (cleanedText.endsWith('```')) {
+    cleanedText = cleanedText.slice(0, -3);
+  }
+  cleanedText = cleanedText.trim();
+
+  return JSON.parse(cleanedText) as ReferenceExtraction;
+}
+
 // Types for cover letter generation
 export interface GeneratedCoverLetterContent {
   subject?: string;

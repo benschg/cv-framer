@@ -12,23 +12,23 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Sparkles } from 'lucide-react';
-import { MonthYearPicker } from '@/components/ui/month-year-picker';
 import { toast } from 'sonner';
-import type { ProfileCertification } from '@/services/profile-career.service';
+import type { ProfileReference } from '@/services/profile-career.service';
 import { UploadArea, AnalyzingState, DocumentPreview, ConfidenceWarning, validateFile } from './ai-upload-shared';
 
-interface AICertificationUploadDialogProps {
+interface AIReferenceUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (certification: Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>, file?: File) => Promise<void>;
+  onAdd: (reference: Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>, file?: File) => Promise<void>;
 }
 
-export function AICertificationUploadDialog({
+export function AIReferenceUploadDialog({
   open,
   onOpenChange,
   onAdd,
-}: AICertificationUploadDialogProps) {
+}: AIReferenceUploadDialogProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -40,11 +40,13 @@ export function AICertificationUploadDialog({
   // Form state for editing extracted data
   const [formData, setFormData] = useState({
     name: '',
-    issuer: '',
-    date: '',
-    expiry_date: '',
-    credential_id: '',
-    url: '',
+    title: '',
+    company: '',
+    relationship: '',
+    email: '',
+    phone: '',
+    quote: '',
+    linked_position: '',
     document_url: '',
     document_name: '',
     storage_path: '',
@@ -94,7 +96,7 @@ export function AICertificationUploadDialog({
       const formDataToSend = new FormData();
       formDataToSend.append('file', file);
 
-      const response = await fetch('/api/certifications/analyze', {
+      const response = await fetch('/api/references/analyze', {
         method: 'POST',
         body: formDataToSend,
       });
@@ -109,14 +111,16 @@ export function AICertificationUploadDialog({
       setExtractedData(data.extractedData);
       setConfidence(data.confidence);
 
-      // Populate form with extracted data (document will be uploaded after certification creation)
+      // Populate form with extracted data (document will be uploaded after reference creation)
       setFormData({
         name: data.extractedData.name || '',
-        issuer: data.extractedData.issuer || '',
-        date: data.extractedData.date || '',
-        expiry_date: data.extractedData.expiry_date || '',
-        credential_id: data.extractedData.credential_id || '',
-        url: data.extractedData.url || '',
+        title: data.extractedData.title || '',
+        company: data.extractedData.company || '',
+        relationship: data.extractedData.relationship || '',
+        email: data.extractedData.email || '',
+        phone: data.extractedData.phone || '',
+        quote: data.extractedData.quote || '',
+        linked_position: '',
         document_url: '',
         document_name: '',
         storage_path: '',
@@ -126,7 +130,7 @@ export function AICertificationUploadDialog({
       const extractedCount = Object.values(data.extractedData).filter(v => v !== null).length;
       if (extractedCount === 0) {
         toast.warning('No data extracted', {
-          description: 'AI could not read the certificate. Please enter the details manually below.',
+          description: 'AI could not read the reference letter. Please enter the details manually below.',
         });
       } else if (extractedCount < 3) {
         toast.info(`Partial extraction: ${extractedCount} field(s) found`, {
@@ -144,7 +148,7 @@ export function AICertificationUploadDialog({
 
       toast.error('Analysis failed', {
         description: errorMessage === 'Analysis failed'
-          ? 'Unable to analyze the certificate. The document may be unclear or in an unsupported format. Please enter details manually.'
+          ? 'Unable to analyze the reference letter. The document may be unclear or in an unsupported format. Please enter details manually.'
           : errorMessage,
       });
 
@@ -152,11 +156,13 @@ export function AICertificationUploadDialog({
       const objectUrl = URL.createObjectURL(file);
       setFormData({
         name: '',
-        issuer: '',
-        date: '',
-        expiry_date: '',
-        credential_id: '',
-        url: '',
+        title: '',
+        company: '',
+        relationship: '',
+        email: '',
+        phone: '',
+        quote: '',
+        linked_position: '',
         document_url: objectUrl,
         document_name: file.name,
         storage_path: '',
@@ -165,19 +171,21 @@ export function AICertificationUploadDialog({
       // Still show the form for manual entry
       setExtractedData({
         name: null,
-        issuer: null,
-        date: null,
-        expiry_date: null,
-        credential_id: null,
-        url: null,
+        title: null,
+        company: null,
+        relationship: null,
+        email: null,
+        phone: null,
+        quote: null,
       });
       setConfidence({
         name: 0,
-        issuer: 0,
-        date: 0,
-        expiry_date: 0,
-        credential_id: 0,
-        url: 0,
+        title: 0,
+        company: 0,
+        relationship: 0,
+        email: 0,
+        phone: 0,
+        quote: 0,
       });
     } finally {
       setAnalyzing(false);
@@ -190,16 +198,16 @@ export function AICertificationUploadDialog({
 
   const handleAdd = async () => {
     // Validate required fields
-    if (!formData.name || !formData.issuer) {
+    if (!formData.name || !formData.title || !formData.company) {
       toast.error('Required fields missing', {
-        description: 'Please fill in at least the Certification Name and Issuing Organization.',
+        description: 'Please fill in at least the Name, Title, and Company.',
       });
       return;
     }
 
     setAdding(true);
     try {
-      // Pass the selected file to the parent so it can be uploaded after certification creation
+      // Pass the selected file to the parent so it can be uploaded after reference creation
       await onAdd(formData, selectedFile || undefined);
 
       // Success toast is shown by the parent component with document info
@@ -207,10 +215,10 @@ export function AICertificationUploadDialog({
       handleReset();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error adding certification:', error);
+      console.error('Error adding reference:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
-      toast.error('Failed to add certification', {
+      toast.error('Failed to add reference', {
         description: errorMessage || 'Please try again or contact support if the problem persists.',
       });
     } finally {
@@ -225,11 +233,13 @@ export function AICertificationUploadDialog({
     setConfidence({});
     setFormData({
       name: '',
-      issuer: '',
-      date: '',
-      expiry_date: '',
-      credential_id: '',
-      url: '',
+      title: '',
+      company: '',
+      relationship: '',
+      email: '',
+      phone: '',
+      quote: '',
+      linked_position: '',
       document_url: '',
       document_name: '',
       storage_path: '',
@@ -244,19 +254,16 @@ export function AICertificationUploadDialog({
     onOpenChange(false);
   };
 
-  // Check if expiry date is before issue date
-  const isExpiryBeforeIssue = formData.date && formData.expiry_date && formData.expiry_date < formData.date;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Add Certification using AI
+            Add Reference using AI
           </DialogTitle>
           <DialogDescription>
-            Upload a certificate image or PDF. AI will extract the details for you to review and edit.
+            Upload a reference letter image or PDF. AI will extract the details for you to review and edit.
           </DialogDescription>
         </DialogHeader>
 
@@ -269,10 +276,10 @@ export function AICertificationUploadDialog({
             onChooseFile={() => fileInputRef.current?.click()}
             fileInputRef={fileInputRef}
             onFileChange={handleFileInputChange}
-            documentType="certificate"
+            documentType="reference letter"
           />
         ) : analyzing ? (
-          <AnalyzingState documentType="certificate" />
+          <AnalyzingState documentType="reference letter" />
         ) : (
           // Review and edit form
           <div className="space-y-4">
@@ -281,85 +288,92 @@ export function AICertificationUploadDialog({
               <DocumentPreview
                 file={selectedFile}
                 extractedFieldCount={Object.values(extractedData).filter(v => v !== null).length}
-                documentType="certification"
+                documentType="reference"
               />
             )}
 
             {/* Form fields */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="ai-name">Certification Name *</Label>
+                <Label htmlFor="ai-name">Reference Name *</Label>
                 <Input
                   id="ai-name"
                   value={formData.name}
                   onChange={(e) => handleFieldChange('name', e.target.value)}
-                  placeholder="AWS Certified Solutions Architect"
+                  placeholder="John Smith"
                 />
                 <ConfidenceWarning confidence={confidence.name || 0} hasValue={!!formData.name} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ai-issuer">Issuing Organization *</Label>
+                <Label htmlFor="ai-title">Title *</Label>
                 <Input
-                  id="ai-issuer"
-                  value={formData.issuer}
-                  onChange={(e) => handleFieldChange('issuer', e.target.value)}
-                  placeholder="Amazon Web Services"
+                  id="ai-title"
+                  value={formData.title}
+                  onChange={(e) => handleFieldChange('title', e.target.value)}
+                  placeholder="Senior Manager"
                 />
-                <ConfidenceWarning confidence={confidence.issuer || 0} hasValue={!!formData.issuer} />
+                <ConfidenceWarning confidence={confidence.title || 0} hasValue={!!formData.title} />
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>Issue Date</Label>
-                <MonthYearPicker
-                  value={formData.date}
-                  onChange={(value) => handleFieldChange('date', value)}
-                  placeholder="Select issue date"
-                  showFutureWarning
+                <Label htmlFor="ai-company">Company *</Label>
+                <Input
+                  id="ai-company"
+                  value={formData.company}
+                  onChange={(e) => handleFieldChange('company', e.target.value)}
+                  placeholder="ACME Corporation"
                 />
+                <ConfidenceWarning confidence={confidence.company || 0} hasValue={!!formData.company} />
               </div>
               <div className="space-y-2">
-                <Label>Expiry Date</Label>
-                <MonthYearPicker
-                  value={formData.expiry_date}
-                  onChange={(value) => handleFieldChange('expiry_date', value)}
-                  placeholder="Select expiry date"
+                <Label htmlFor="ai-relationship">Relationship</Label>
+                <Input
+                  id="ai-relationship"
+                  value={formData.relationship}
+                  onChange={(e) => handleFieldChange('relationship', e.target.value)}
+                  placeholder="Former Manager"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Leave empty if it doesn't expire
-                </p>
+                <ConfidenceWarning confidence={confidence.relationship || 0} hasValue={!!formData.relationship} />
               </div>
             </div>
 
-            {isExpiryBeforeIssue && (
-              <p className="flex items-center gap-1 text-sm text-amber-600">
-                <AlertTriangle className="h-4 w-4" />
-                Expiry date cannot be before issue date
-              </p>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="ai-credential-id">Credential ID</Label>
-              <Input
-                id="ai-credential-id"
-                value={formData.credential_id}
-                onChange={(e) => handleFieldChange('credential_id', e.target.value)}
-                placeholder="ABC123XYZ"
-              />
-              <ConfidenceWarning confidence={confidence.credential_id || 0} hasValue={!!formData.credential_id} />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="ai-email">Email</Label>
+                <Input
+                  id="ai-email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleFieldChange('email', e.target.value)}
+                  placeholder="john.smith@example.com"
+                />
+                <ConfidenceWarning confidence={confidence.email || 0} hasValue={!!formData.email} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ai-phone">Phone</Label>
+                <Input
+                  id="ai-phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleFieldChange('phone', e.target.value)}
+                  placeholder="+1 (555) 123-4567"
+                />
+                <ConfidenceWarning confidence={confidence.phone || 0} hasValue={!!formData.phone} />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ai-url">Verification URL</Label>
-              <Input
-                id="ai-url"
-                type="url"
-                value={formData.url}
-                onChange={(e) => handleFieldChange('url', e.target.value)}
-                placeholder="https://..."
+              <Label htmlFor="ai-quote">Notable Quote</Label>
+              <Textarea
+                id="ai-quote"
+                value={formData.quote}
+                onChange={(e) => handleFieldChange('quote', e.target.value)}
+                placeholder="Key recommendation or quote from the reference letter..."
+                rows={3}
               />
-              <ConfidenceWarning confidence={confidence.url || 0} hasValue={!!formData.url} />
+              <ConfidenceWarning confidence={confidence.quote || 0} hasValue={!!formData.quote} />
             </div>
           </div>
         )}
@@ -376,7 +390,7 @@ export function AICertificationUploadDialog({
                   Adding...
                 </>
               ) : (
-                'Add Certification'
+                'Add Reference'
               )}
             </Button>
           </DialogFooter>
