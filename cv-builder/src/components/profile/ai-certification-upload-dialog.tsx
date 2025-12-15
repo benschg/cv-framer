@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
 import { toast } from 'sonner';
 import type { ProfileCertification } from '@/services/profile-career.service';
