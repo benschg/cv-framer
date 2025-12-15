@@ -44,8 +44,13 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
     workExperience: language === 'de' ? 'Berufserfahrung' : 'Work Experience',
   };
 
+  // Only show work experiences if the setting is enabled
+  const showWorkExperience = settings?.showWorkExperience !== false;
+
   // Filter to only selected work experiences
-  const selectedWorkExperiences = workExperiences?.filter(exp => exp.selection.is_selected) || [];
+  const selectedWorkExperiences = showWorkExperience
+    ? (workExperiences?.filter(exp => exp.selection.is_selected) || [])
+    : [];
 
   return (
     <div

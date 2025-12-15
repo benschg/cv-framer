@@ -128,6 +128,7 @@ export const DisplaySettingsSchema = z.object({
   format: z.enum(['A4', 'Letter']).default('A4'),
   showPhoto: z.boolean().default(true),
   showAttachments: z.boolean().default(false),
+  showWorkExperience: z.boolean().default(true),
   privacyLevel: PrivacyLevelSchema,
   accentColor: z.string().optional(),
   fontFamily: z.string().optional(),

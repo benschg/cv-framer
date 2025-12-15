@@ -574,6 +574,8 @@ export default function CVEditorPage() {
         workExperiences={workExperiences}
         onChange={setWorkExperiences}
         language={cv.language}
+        showWorkExperience={cv.display_settings?.showWorkExperience !== false}
+        onShowWorkExperienceChange={(show) => updateDisplaySettings('showWorkExperience', show)}
       />
 
       {/* Format Settings */}

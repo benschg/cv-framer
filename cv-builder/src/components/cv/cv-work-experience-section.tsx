@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Briefcase,
@@ -22,12 +23,16 @@ interface CVWorkExperienceSectionProps {
   workExperiences: CVWorkExperienceWithSelection[];
   onChange: (experiences: CVWorkExperienceWithSelection[]) => void;
   language?: 'en' | 'de';
+  showWorkExperience?: boolean;
+  onShowWorkExperienceChange: (show: boolean) => void;
 }
 
 export function CVWorkExperienceSection({
   workExperiences,
   onChange,
   language = 'en',
+  showWorkExperience = true,
+  onShowWorkExperienceChange,
 }: CVWorkExperienceSectionProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -45,6 +50,7 @@ export function CVWorkExperienceSection({
     favorite: language === 'de' ? 'Favorit' : 'Favorite',
     removeFavorite: language === 'de' ? 'Favorit entfernen' : 'Remove from favorites',
     customize: language === 'de' ? 'Anpassen' : 'Customize',
+    showInCV: language === 'de' ? 'Im CV anzeigen' : 'Show in CV',
   };
 
   const toggleExpand = (id: string) => {
@@ -123,10 +129,22 @@ export function CVWorkExperienceSection({
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5" />
-            {labels.title}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5" />
+              {labels.title}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="show-work-exp" className="text-sm text-muted-foreground">
+                {labels.showInCV}
+              </Label>
+              <Switch
+                id="show-work-exp"
+                checked={showWorkExperience}
+                onCheckedChange={onShowWorkExperienceChange}
+              />
+            </div>
+          </div>
           <CardDescription>{labels.noExperiences}</CardDescription>
         </CardHeader>
       </Card>
@@ -134,14 +152,27 @@ export function CVWorkExperienceSection({
   }
 
   return (
-    <Card>
+    <Card className={!showWorkExperience ? 'opacity-60' : ''}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Briefcase className="h-5 w-5" />
-          {labels.title}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5" />
+            {labels.title}
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="show-work-exp" className="text-sm text-muted-foreground">
+              {labels.showInCV}
+            </Label>
+            <Switch
+              id="show-work-exp"
+              checked={showWorkExperience}
+              onCheckedChange={onShowWorkExperienceChange}
+            />
+          </div>
+        </div>
         <CardDescription>{labels.description}</CardDescription>
       </CardHeader>
+      {showWorkExperience && (
       <CardContent className="space-y-3">
         {workExperiences.map((exp) => {
           const isExpanded = expandedIds.has(exp.id);
@@ -218,7 +249,7 @@ export function CVWorkExperienceSection({
               {/* Expanded Content */}
               <Collapsible open={isExpanded}>
                 <CollapsibleContent className="px-3 pb-3">
-                  <div className="pt-3 border-t space-y-4">
+                  <div className="pt-3 border-t ml-7 space-y-4">
                     {/* Description Override */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -260,7 +291,7 @@ export function CVWorkExperienceSection({
                     {exp.bullets && exp.bullets.length > 0 && (
                       <div className="space-y-2">
                         <Label className="text-sm">{labels.selectBullets}</Label>
-                        <div className="space-y-2">
+                        <div className="space-y-2 ml-1">
                           {exp.bullets.map((bullet, index) => (
                             <div key={index} className="flex items-start gap-2">
                               <Checkbox
@@ -283,6 +314,7 @@ export function CVWorkExperienceSection({
           );
         })}
       </CardContent>
+      )}
     </Card>
   );
 }
