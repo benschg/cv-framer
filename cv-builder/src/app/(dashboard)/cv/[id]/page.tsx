@@ -13,11 +13,9 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   Save,
   Download,
-  Share2,
   Sparkles,
   Loader2,
   Eye,
-  Settings,
   Plus,
   Trash2,
   GripVertical,
@@ -32,7 +30,6 @@ import { PhotoSelector } from '@/components/cv/photo-selector';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import { createClient } from '@/lib/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { CVDocument, CVContent, WorkExperience, Education, SkillCategory, KeyCompetence, DisplaySettings } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
@@ -906,20 +903,6 @@ export default function CVEditorPage() {
         </CardContent>
       </Card>
 
-      {/* Bottom Save Button */}
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => router.push('/cv')}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} disabled={saving} className="gap-2">
-          {saving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
-          Save Changes
-        </Button>
-      </div>
         </div>
       </div>
     </>
