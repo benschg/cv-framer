@@ -29,7 +29,10 @@ import { CVPreview } from '@/components/cv/cv-preview';
 import { PhotoSelector } from '@/components/cv/photo-selector';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials } from '@/lib/user-utils';
+import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
+import { createClient } from '@/lib/supabase/client';
 import type { CVDocument, CVContent, WorkExperience, Education, SkillCategory, KeyCompetence } from '@/types/cv.types';
+import type { ProfilePhoto } from '@/types/api.schemas';
 
 export default function CVEditorPage() {
   const params = useParams();
@@ -48,6 +51,11 @@ export default function CVEditorPage() {
   // Editable content
   const [content, setContent] = useState<CVContent>({});
 
+  // Photo state
+  const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
+  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
   useEffect(() => {
     const loadCV = async () => {
       const result = await fetchCV(cvId);
@@ -61,6 +69,53 @@ export default function CVEditorPage() {
     };
     loadCV();
   }, [cvId]);
+
+  // Load photos
+  useEffect(() => {
+    const loadPhotos = async () => {
+      const result = await fetchProfilePhotos();
+      if (result.data) {
+        setPhotos(result.data.photos);
+        setPrimaryPhoto(result.data.primaryPhoto);
+      }
+    };
+    if (user) {
+      loadPhotos();
+    }
+  }, [user]);
+
+  // Update photo URL when selected photo or primary photo changes
+  useEffect(() => {
+    const updatePhotoUrl = async () => {
+      const selectedPhotoId = content.selected_photo_id;
+
+      if (selectedPhotoId === 'none') {
+        // No photo
+        setPhotoUrl(null);
+      } else if (selectedPhotoId && selectedPhotoId !== 'none') {
+        // User selected a specific photo
+        const selectedPhoto = photos.find(p => p.id === selectedPhotoId);
+        if (selectedPhoto) {
+          setPhotoUrl(getPhotoPublicUrl(selectedPhoto.storage_path));
+        } else {
+          // Photo not found in list, fallback to primary
+          setPhotoUrl(primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : null);
+        }
+      } else if (!selectedPhotoId || selectedPhotoId === null) {
+        // Use primary photo
+        if (primaryPhoto) {
+          setPhotoUrl(getPhotoPublicUrl(primaryPhoto.storage_path));
+        } else if (user?.user_metadata?.avatar_url) {
+          // Fallback to OAuth avatar
+          setPhotoUrl(user.user_metadata.avatar_url);
+        } else {
+          setPhotoUrl(null);
+        }
+      }
+    };
+
+    updatePhotoUrl();
+  }, [content.selected_photo_id, photos, primaryPhoto, user]);
 
   const handleSave = async () => {
     if (!cv) return;
@@ -789,6 +844,8 @@ export default function CVEditorPage() {
             content={content}
             language={cv.language}
             settings={cv.display_settings}
+            photoUrl={photoUrl}
+            userInitials={getUserInitials(user)}
           />
         </CardContent>
       </Card>

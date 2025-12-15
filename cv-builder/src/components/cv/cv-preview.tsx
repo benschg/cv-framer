@@ -1,16 +1,20 @@
 'use client';
 
 import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface CVPreviewProps {
   content: CVContent;
   userProfile?: UserProfile;
   settings?: Partial<DisplaySettings> | null;
   language?: 'en' | 'de';
+  photoUrl?: string | null;
+  userInitials?: string;
 }
 
-export function CVPreview({ content, userProfile, settings, language = 'en' }: CVPreviewProps) {
+export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U' }: CVPreviewProps) {
   const accentColor = settings?.accentColor || '#2563eb';
+  const showPhoto = settings?.showPhoto !== false && photoUrl;
 
   const formatDate = (dateStr?: string): string => {
     if (!dateStr) return '';
@@ -46,18 +50,28 @@ export function CVPreview({ content, userProfile, settings, language = 'en' }: C
         className="mb-5 pb-4"
         style={{ borderBottom: `2px solid ${accentColor}` }}
       >
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">{name}</h1>
-        {content.tagline && (
-          <p className="text-sm font-medium mb-2" style={{ color: accentColor }}>
-            {content.tagline}
-          </p>
-        )}
-        <div className="text-xs text-gray-500 flex flex-wrap gap-3">
-          {userProfile?.email && <span>{userProfile.email}</span>}
-          {userProfile?.phone && <span>{userProfile.phone}</span>}
-          {userProfile?.location && <span>{userProfile.location}</span>}
-          {userProfile?.linkedin_url && <span>LinkedIn</span>}
-          {userProfile?.github_url && <span>GitHub</span>}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">{name}</h1>
+            {content.tagline && (
+              <p className="text-sm font-medium mb-2" style={{ color: accentColor }}>
+                {content.tagline}
+              </p>
+            )}
+            <div className="text-xs text-gray-500 flex flex-wrap gap-3">
+              {userProfile?.email && <span>{userProfile.email}</span>}
+              {userProfile?.phone && <span>{userProfile.phone}</span>}
+              {userProfile?.location && <span>{userProfile.location}</span>}
+              {userProfile?.linkedin_url && <span>LinkedIn</span>}
+              {userProfile?.github_url && <span>GitHub</span>}
+            </div>
+          </div>
+          {showPhoto && (
+            <Avatar className="h-24 w-24 flex-shrink-0">
+              <AvatarImage src={photoUrl} alt={name} />
+              <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
+            </Avatar>
+          )}
         </div>
       </header>
 
