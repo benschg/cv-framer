@@ -3,16 +3,18 @@ import type { CVContent, CVDocument, UserProfile, DisplaySettings } from '@/type
 export interface CVTemplateData {
   cv: CVDocument;
   userProfile?: UserProfile;
+  photoUrl?: string | null;
 }
 
 /**
  * Generate HTML for CV PDF export
  */
 export function generateCVHTML(data: CVTemplateData): string {
-  const { cv, userProfile } = data;
+  const { cv, userProfile, photoUrl } = data;
   const content = cv.content;
   const defaultSettings: DisplaySettings = {
     theme: 'light',
+    format: 'A4',
     showPhoto: true,
     showExperience: true,
     showAttachments: false,
@@ -21,7 +23,7 @@ export function generateCVHTML(data: CVTemplateData): string {
   const settings: DisplaySettings = { ...defaultSettings, ...cv.display_settings };
 
   const styles = generateStyles(settings);
-  const headerHTML = generateHeader(content, userProfile, settings);
+  const headerHTML = generateHeader(content, userProfile, settings, photoUrl);
   const profileHTML = generateProfile(content);
   const keyCompetencesHTML = generateKeyCompetences(content);
   const experienceHTML = generateExperience(content);
@@ -80,6 +82,25 @@ function generateStyles(settings: DisplaySettings): string {
       margin-bottom: 20px;
       padding-bottom: 15px;
       border-bottom: 2px solid ${accentColor};
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .header-text {
+      flex: 1;
+    }
+
+    .header-photo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
     }
 
     .header-name {
@@ -255,7 +276,8 @@ function generateStyles(settings: DisplaySettings): string {
 function generateHeader(
   content: CVContent,
   userProfile?: UserProfile,
-  settings?: DisplaySettings
+  settings?: DisplaySettings,
+  photoUrl?: string | null
 ): string {
   const name = userProfile
     ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim()
@@ -279,11 +301,21 @@ function generateHeader(
     contactItems.push(`<span>GitHub</span>`);
   }
 
+  const showPhoto = settings?.showPhoto !== false && photoUrl;
+  const photoHTML = showPhoto
+    ? `<img src="${photoUrl}" alt="${name}" class="header-photo" />`
+    : '';
+
   return `
     <header class="header">
-      <h1 class="header-name">${name}</h1>
-      ${content.tagline ? `<p class="header-tagline">${content.tagline}</p>` : ''}
-      ${contactItems.length > 0 ? `<div class="header-contact">${contactItems.join('')}</div>` : ''}
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="header-name">${name}</h1>
+          ${content.tagline ? `<p class="header-tagline">${content.tagline}</p>` : ''}
+          ${contactItems.length > 0 ? `<div class="header-contact">${contactItems.join('')}</div>` : ''}
+        </div>
+        ${photoHTML}
+      </div>
     </header>
   `;
 }

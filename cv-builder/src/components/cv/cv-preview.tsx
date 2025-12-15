@@ -1,16 +1,35 @@
 'use client';
 
 import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ReactNode } from 'react';
 
 interface CVPreviewProps {
   content: CVContent;
   userProfile?: UserProfile;
   settings?: Partial<DisplaySettings> | null;
   language?: 'en' | 'de';
+  photoUrl?: string | null;
+  userInitials?: string;
+  /** Optional: Custom render for the photo (e.g., wrapped in a Popover) */
+  photoElement?: ReactNode;
 }
 
-export function CVPreview({ content, userProfile, settings, language = 'en' }: CVPreviewProps) {
+export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U', photoElement }: CVPreviewProps) {
   const accentColor = settings?.accentColor || '#2563eb';
+  const textColor = settings?.textColor || '#111827';
+  const fontFamily = settings?.fontFamily || 'sans-serif';
+  const showPhoto = settings?.showPhoto !== false && photoUrl;
+  const format = settings?.format || 'A4';
+
+  // Page dimensions in mm
+  const pageDimensions = {
+    A4: { width: 210, height: 297 },
+    Letter: { width: 216, height: 279 }
+  };
+
+  const { width: pageWidth, height: pageHeight } = pageDimensions[format];
+  const aspectRatio = pageHeight / pageWidth;
 
   const formatDate = (dateStr?: string): string => {
     if (!dateStr) return '';
@@ -40,24 +59,45 @@ export function CVPreview({ content, userProfile, settings, language = 'en' }: C
   };
 
   return (
-    <div className="bg-white text-gray-900 p-8 rounded-lg shadow-sm border max-w-[210mm] mx-auto font-sans text-[10pt] leading-relaxed">
+    <div
+      className="bg-white p-8 rounded-lg shadow-sm border mx-auto text-[10pt] leading-relaxed"
+      style={{
+        width: `${pageWidth}mm`,
+        minHeight: `${pageHeight}mm`,
+        aspectRatio: `${pageWidth} / ${pageHeight}`,
+        fontFamily: fontFamily,
+        color: textColor
+      }}
+    >
       {/* Header */}
       <header
         className="mb-5 pb-4"
         style={{ borderBottom: `2px solid ${accentColor}` }}
       >
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">{name}</h1>
-        {content.tagline && (
-          <p className="text-sm font-medium mb-2" style={{ color: accentColor }}>
-            {content.tagline}
-          </p>
-        )}
-        <div className="text-xs text-gray-500 flex flex-wrap gap-3">
-          {userProfile?.email && <span>{userProfile.email}</span>}
-          {userProfile?.phone && <span>{userProfile.phone}</span>}
-          {userProfile?.location && <span>{userProfile.location}</span>}
-          {userProfile?.linkedin_url && <span>LinkedIn</span>}
-          {userProfile?.github_url && <span>GitHub</span>}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">{name}</h1>
+            {content.tagline && (
+              <p className="text-sm font-medium mb-2" style={{ color: accentColor }}>
+                {content.tagline}
+              </p>
+            )}
+            <div className="text-xs text-gray-500 flex flex-wrap gap-3">
+              {userProfile?.email && <span>{userProfile.email}</span>}
+              {userProfile?.phone && <span>{userProfile.phone}</span>}
+              {userProfile?.location && <span>{userProfile.location}</span>}
+              {userProfile?.linkedin_url && <span>LinkedIn</span>}
+              {userProfile?.github_url && <span>GitHub</span>}
+            </div>
+          </div>
+          {showPhoto && (
+            photoElement || (
+              <Avatar className="h-24 w-24 flex-shrink-0">
+                <AvatarImage src={photoUrl} alt={name} />
+                <AvatarFallback className="text-2xl">{userInitials}</AvatarFallback>
+              </Avatar>
+            )
+          )}
         </div>
       </header>
 

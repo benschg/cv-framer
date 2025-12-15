@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -11,6 +12,11 @@ import {
   User,
   LogOut,
   Home,
+  GraduationCap,
+  Award,
+  Code,
+  Wrench,
+  UserCheck,
 } from 'lucide-react';
 import { CVBuilderLogo } from './cv-builder-logo';
 import {
@@ -35,6 +41,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
 import { ThemeToggle } from './theme-toggle';
+import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
+import { getUserInitials, getDisplayName } from '@/lib/user-utils';
+import type { ProfilePhoto } from '@/types/api.schemas';
 
 const navigation = [
   {
@@ -46,6 +55,12 @@ const navigation = [
   {
     label: 'Build',
     items: [
+      { title: 'Profile', href: '/profile', icon: User },
+      { title: 'Work Experience', href: '/profile/experience', icon: Briefcase, indent: true },
+      { title: 'Education', href: '/profile/education', icon: GraduationCap, indent: true },
+      { title: 'Skills', href: '/profile/skills', icon: Code, indent: true },
+      { title: 'Certifications', href: '/profile/certifications', icon: Award, indent: true },
+      { title: 'References', href: '/profile/references', icon: UserCheck, indent: true },
       { title: 'Werbeflaechen', href: '/werbeflaechen', icon: Target },
       { title: 'My CVs', href: '/cv', icon: FileText },
       { title: 'Cover Letters', href: '/cover-letter', icon: Mail },
@@ -62,10 +77,26 @@ const navigation = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
 
-  const userInitials = user?.email
-    ? user.email.charAt(0).toUpperCase()
-    : 'U';
+  useEffect(() => {
+    const loadPrimaryPhoto = async () => {
+      const result = await fetchProfilePhotos();
+      if (result.data?.primaryPhoto) {
+        setPrimaryPhoto(result.data.primaryPhoto);
+      }
+    };
+
+    if (user) {
+      loadPrimaryPhoto();
+    }
+  }, [user]);
+
+  const avatarUrl = primaryPhoto
+    ? getPhotoPublicUrl(primaryPhoto.storage_path)
+    : user?.user_metadata?.avatar_url;
+  const userInitials = getUserInitials(user);
+  const displayName = getDisplayName(user);
 
   return (
     <Sidebar>
@@ -87,6 +118,7 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       asChild
                       isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
+                      className={'indent' in item && item.indent ? 'pl-8' : ''}
                     >
                       <Link href={item.href}>
                         <item.icon className="h-4 w-4" />
@@ -109,12 +141,12 @@ export function AppSidebar() {
         <DropdownMenu>
           <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <AvatarImage src={avatarUrl} />
               <AvatarFallback>{userInitials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 text-left text-sm">
               <p className="font-medium truncate">
-                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                {displayName}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {user?.email}
@@ -122,12 +154,6 @@ export function AppSidebar() {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuItem asChild>
-              <Link href="/profile" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/settings" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />

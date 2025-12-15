@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { generatePDFFromHTML } from '@/lib/pdf/generator';
 import { generateCVHTML } from '@/lib/pdf/cv-template';
-import type { CVDocument, UserProfile } from '@/types/cv.types';
+import type { CVDocument, UserProfile, CVContent } from '@/types/cv.types';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -43,10 +43,52 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .eq('user_id', user.id)
       .single();
 
+    // Determine photo URL based on CV content selection
+    let photoUrl: string | null = null;
+    const content = cv.content as CVContent;
+    const selectedPhotoId = content?.selected_photo_id;
+
+    if (selectedPhotoId && selectedPhotoId !== 'none') {
+      // User selected a specific photo
+      const { data: photo } = await supabase
+        .from('profile_photos')
+        .select('storage_path')
+        .eq('id', selectedPhotoId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (photo) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('profile-photos')
+          .getPublicUrl(photo.storage_path);
+        photoUrl = publicUrl;
+      }
+    } else if (!selectedPhotoId || selectedPhotoId === null) {
+      // No selection - use primary photo
+      const { data: primaryPhoto } = await supabase
+        .from('profile_photos')
+        .select('storage_path')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .single();
+
+      if (primaryPhoto) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('profile-photos')
+          .getPublicUrl(primaryPhoto.storage_path);
+        photoUrl = publicUrl;
+      } else if (user.user_metadata?.avatar_url) {
+        // Fallback to OAuth avatar
+        photoUrl = user.user_metadata.avatar_url;
+      }
+    }
+    // If selectedPhotoId === 'none', photoUrl stays null (no photo)
+
     // Generate HTML
     const html = generateCVHTML({
       cv: cv as CVDocument,
       userProfile: profile as UserProfile | undefined,
+      photoUrl,
     });
 
     // Generate PDF

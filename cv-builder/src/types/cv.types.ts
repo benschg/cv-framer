@@ -38,6 +38,7 @@ export interface CVContent {
   tagline?: string;
   profile?: string;
   slogan?: string;
+  selected_photo_id?: string | null; // UUID of selected photo from profile_photos
   workExperience?: WorkExperience[];
   education?: Education[];
   skills?: SkillCategory[];
@@ -103,6 +104,9 @@ export interface Reference {
   email?: string;
   phone?: string;
   quote?: string;
+  linkedPosition?: string; // Optional link to a work experience position
+  documentUrl?: string; // URL to uploaded reference letter (image or PDF)
+  documentName?: string; // Original filename of the document
 }
 
 export interface LanguageSkill {
@@ -119,6 +123,8 @@ export interface Certification {
   expiryDate?: string;
   url?: string;
   credentialId?: string;
+  documentUrl?: string; // URL to uploaded certificate document (image or PDF)
+  documentName?: string; // Original filename of the document
 }
 
 export interface JobContext {
@@ -165,12 +171,14 @@ export interface AIMetadata {
 
 export interface DisplaySettings {
   theme: 'light' | 'dark';
+  format: 'A4' | 'Letter';
   showPhoto: boolean;
   showExperience: boolean;
   showAttachments: boolean;
   privacyLevel: 'none' | 'personal' | 'full';
   accentColor?: string;
   fontFamily?: string;
+  textColor?: string;
 }
 
 export interface WerbeflaechenSnapshot {

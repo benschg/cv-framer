@@ -125,6 +125,7 @@ export const AutofillWerbeflaechenResponseSchema = z.object({
 
 export const DisplaySettingsSchema = z.object({
   theme: z.enum(['light', 'dark']).default('light'),
+  format: z.enum(['A4', 'Letter']).default('A4'),
   showPhoto: z.boolean().default(true),
   showExperience: z.boolean().default(true),
   showAttachments: z.boolean().default(false),
@@ -287,6 +288,54 @@ export const PublicCVResponseSchema = z.object({
     created_at: z.string(),
   }),
 });
+
+// ============================================
+// PROFILE PHOTO SCHEMAS
+// ============================================
+
+export const ProfilePhotoSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  storage_path: z.string(),
+  filename: z.string(),
+  file_size: z.number(),
+  mime_type: z.string(),
+  width: z.number().nullable(),
+  height: z.number().nullable(),
+  is_primary: z.boolean(),
+  display_order: z.number(),
+  upload_source: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export type ProfilePhoto = z.infer<typeof ProfilePhotoSchema>;
+
+// POST /api/profile-photos/upload
+export const UploadProfilePhotoResponseSchema = z.object({
+  photo: ProfilePhotoSchema,
+  publicUrl: z.string(),
+});
+
+export type UploadProfilePhotoResponse = z.infer<typeof UploadProfilePhotoResponseSchema>;
+
+// GET /api/profile-photos
+export const GetProfilePhotosResponseSchema = z.object({
+  photos: z.array(ProfilePhotoSchema),
+  primaryPhoto: ProfilePhotoSchema.nullable(),
+});
+
+export type GetProfilePhotosResponse = z.infer<typeof GetProfilePhotosResponseSchema>;
+
+// PATCH /api/profile-photos/[id]/set-primary
+export const SetPrimaryPhotoResponseSchema = z.object({
+  success: z.boolean(),
+  photo: ProfilePhotoSchema,
+});
+
+export type SetPrimaryPhotoResponse = z.infer<typeof SetPrimaryPhotoResponseSchema>;
+
+// DELETE /api/profile-photos/[id] - uses SuccessResponseSchema
 
 // ============================================
 // COVER LETTER SCHEMAS
