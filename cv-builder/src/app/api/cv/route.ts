@@ -58,7 +58,6 @@ export async function POST(request: NextRequest) {
       display_settings = {
         theme: 'light',
         showPhoto: true,
-        showExperience: true,
         showAttachments: false,
         privacyLevel: 'personal',
       },
