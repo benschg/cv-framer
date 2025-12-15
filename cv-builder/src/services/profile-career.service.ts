@@ -496,9 +496,32 @@ export async function deleteCertificationDocumentRecord(
 // ============================================
 
 export async function fetchReferences(): Promise<{ data: ProfileReference[] | null; error: any }> {
-  return fetchProfileData<ProfileReference>('profile_references', [
+  const result = await fetchProfileData<ProfileReference>('profile_references', [
     { column: 'display_order', ascending: true },
   ]);
+
+  if (result.error || !result.data) {
+    return result;
+  }
+
+  // Generate signed URLs for reference documents with storage paths
+  const referencesWithSignedUrls = await Promise.all(
+    result.data.map(async (reference) => {
+      if (reference.storage_path) {
+        const { data: signedUrlData } = await supabase.storage
+          .from('reference-letters')
+          .createSignedUrl(reference.storage_path, 3600); // 1 hour expiry
+
+        return {
+          ...reference,
+          document_url: signedUrlData?.signedUrl || reference.document_url,
+        };
+      }
+      return reference;
+    })
+  );
+
+  return { data: referencesWithSignedUrls, error: null };
 }
 
 export async function createReference(
@@ -554,12 +577,13 @@ export async function uploadReferenceLetter(
     return { data: null, error: uploadError };
   }
 
-  const { data: { publicUrl } } = supabase.storage
+  // Generate a signed URL (valid for 1 hour)
+  const { data: signedUrlData } = await supabase.storage
     .from('reference-letters')
-    .getPublicUrl(filePath);
+    .createSignedUrl(filePath, 3600);
 
   return {
-    data: { url: publicUrl, path: filePath },
+    data: { url: signedUrlData?.signedUrl || '', path: filePath },
     error: null,
   };
 }
