@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Check, ChevronDown } from 'lucide-react';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { Loader2 } from 'lucide-react';
 import type { ProfilePhoto } from '@/types/api.schemas';
@@ -19,6 +19,7 @@ export function PhotoSelector({ selectedPhotoId, onChange, userInitials }: Photo
   const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const loadPhotos = async () => {
@@ -49,50 +50,111 @@ export function PhotoSelector({ selectedPhotoId, onChange, userInitials }: Photo
     );
   }
 
-  return (
-    <RadioGroup
-      value={selectedPhotoId || 'primary'}
-      onValueChange={(value) => onChange(value === 'primary' ? null : value)}
-    >
-      <div className="space-y-3">
-        {/* Primary Photo Option */}
-        <div className="flex items-center space-x-3 border rounded-lg p-3">
-          <RadioGroupItem value="primary" id="primary" />
-          <Label htmlFor="primary" className="flex items-center gap-3 cursor-pointer flex-1">
-            <Avatar className="h-12 w-12">
-              <AvatarImage
-                src={primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : undefined}
-              />
-              <AvatarFallback>{userInitials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium">Primary Photo (Default)</p>
-              <p className="text-xs text-muted-foreground">
-                {primaryPhoto ? primaryPhoto.filename : 'No primary photo set'}
-              </p>
-            </div>
-          </Label>
-        </div>
+  // Determine which photo to display
+  const selectedPhoto = selectedPhotoId
+    ? photos.find(p => p.id === selectedPhotoId) || primaryPhoto
+    : primaryPhoto;
 
-        {/* Other Photos */}
-        {photos.filter(p => !p.is_primary).map((photo) => (
-          <div key={photo.id} className="flex items-center space-x-3 border rounded-lg p-3">
-            <RadioGroupItem value={photo.id} id={photo.id} />
-            <Label htmlFor={photo.id} className="flex items-center gap-3 cursor-pointer flex-1">
+  const selectedPhotoUrl = selectedPhoto
+    ? getPhotoPublicUrl(selectedPhoto.storage_path)
+    : undefined;
+
+  const isUsingPrimary = !selectedPhotoId || selectedPhotoId === primaryPhoto?.id;
+
+  return (
+    <div className="flex items-center gap-4">
+      {/* Current selection display */}
+      <Avatar className="h-16 w-16">
+        <AvatarImage src={selectedPhotoUrl} />
+        <AvatarFallback className="text-lg">{userInitials}</AvatarFallback>
+      </Avatar>
+
+      <div className="flex-1 space-y-1">
+        <p className="text-sm font-medium">
+          {isUsingPrimary ? 'Primary Photo (Default)' : selectedPhoto?.filename}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {isUsingPrimary
+            ? 'Using your default profile photo'
+            : 'Custom photo for this CV'}
+        </p>
+      </div>
+
+      {/* Photo picker popover */}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            Change Photo
+            <ChevronDown className="h-4 w-4 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 p-0" align="end">
+          <div className="max-h-[400px] overflow-y-auto">
+            {/* Primary Photo Option */}
+            <button
+              onClick={() => {
+                onChange(null);
+                setOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                isUsingPrimary ? 'bg-accent' : ''
+              }`}
+            >
               <Avatar className="h-12 w-12">
-                <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
+                <AvatarImage
+                  src={primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : undefined}
+                />
                 <AvatarFallback>{userInitials}</AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-medium">{photo.filename}</p>
+              <div className="flex-1 text-left">
+                <p className="font-medium text-sm">Primary Photo (Default)</p>
                 <p className="text-xs text-muted-foreground">
-                  {(photo.file_size / 1024).toFixed(0)} KB
+                  {primaryPhoto ? primaryPhoto.filename : 'No primary photo set'}
                 </p>
               </div>
-            </Label>
+              {isUsingPrimary && (
+                <Check className="h-4 w-4 text-primary" />
+              )}
+            </button>
+
+            {/* Separator */}
+            {photos.filter(p => !p.is_primary).length > 0 && (
+              <div className="border-t my-1" />
+            )}
+
+            {/* Other Photos */}
+            {photos.filter(p => !p.is_primary).map((photo) => {
+              const isSelected = selectedPhotoId === photo.id;
+              return (
+                <button
+                  key={photo.id}
+                  onClick={() => {
+                    onChange(photo.id);
+                    setOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                    isSelected ? 'bg-accent' : ''
+                  }`}
+                >
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
+                    <AvatarFallback>{userInitials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 text-left">
+                    <p className="font-medium text-sm">{photo.filename}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(photo.file_size / 1024).toFixed(0)} KB
+                    </p>
+                  </div>
+                  {isSelected && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </button>
+              );
+            })}
           </div>
-        ))}
-      </div>
-    </RadioGroup>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
