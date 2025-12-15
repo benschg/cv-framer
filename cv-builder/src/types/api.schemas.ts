@@ -127,7 +127,6 @@ export const DisplaySettingsSchema = z.object({
   theme: z.enum(['light', 'dark']).default('light'),
   format: z.enum(['A4', 'Letter']).default('A4'),
   showPhoto: z.boolean().default(true),
-  showExperience: z.boolean().default(true),
   showAttachments: z.boolean().default(false),
   privacyLevel: PrivacyLevelSchema,
   accentColor: z.string().optional(),
@@ -219,16 +218,11 @@ export const RegenerateItemSchema = z.object({
   current_content: z.string().optional(),
   custom_instructions: z.string().optional(),
   language: LanguageSchema.optional(),
-  experience_context: z.object({
-    company: z.string(),
-    title: z.string(),
-    description: z.string().optional(),
-  }).optional(),
 });
 
 export const RegenerateItemResponseSchema = z.object({
   section: z.string(),
-  content: z.union([z.string(), z.array(z.string())]),
+  content: z.string(),
   ai_metadata: AIMetadataSchema,
 });
 

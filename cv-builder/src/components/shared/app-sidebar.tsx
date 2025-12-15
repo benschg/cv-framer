@@ -17,6 +17,7 @@ import {
   Code,
   Wrench,
   UserCheck,
+  Zap,
 } from 'lucide-react';
 import { CVBuilderLogo } from './cv-builder-logo';
 import {
@@ -59,6 +60,7 @@ const navigation = [
       { title: 'Work Experience', href: '/profile/experience', icon: Briefcase, indent: true },
       { title: 'Education', href: '/profile/education', icon: GraduationCap, indent: true },
       { title: 'Skills', href: '/profile/skills', icon: Code, indent: true },
+      { title: 'Key Competences', href: '/profile/key-competences', icon: Zap, indent: true },
       { title: 'Certifications', href: '/profile/certifications', icon: Award, indent: true },
       { title: 'References', href: '/profile/references', icon: UserCheck, indent: true },
       { title: 'Werbeflaechen', href: '/werbeflaechen', icon: Target },

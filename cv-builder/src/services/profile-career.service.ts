@@ -7,13 +7,14 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
-import type { WorkExperience, Education, SkillCategory, Certification, Reference } from '@/types/cv.types';
+import type { Certification, Reference } from '@/types/cv.types';
 import type {
   ProfileWorkExperience,
   ProfileEducation,
   ProfileSkillCategory,
   ProfileCertification,
   ProfileReference,
+  ProfileKeyCompetence,
 } from '@/types/profile-career.types';
 
 const supabase = createClient();
@@ -147,6 +148,7 @@ export type {
   ProfileSkillCategory,
   ProfileCertification,
   ProfileReference,
+  ProfileKeyCompetence,
 } from '@/types/profile-career.types';
 
 // Debounce utility for auto-save
@@ -268,6 +270,38 @@ export async function deleteSkillCategory(id: string): Promise<{ error: any }> {
 export const autoSaveSkillCategory = createAutoSave<ProfileSkillCategory>(
   updateSkillCategory,
   'skill-category'
+);
+
+// ============================================
+// KEY COMPETENCES
+// ============================================
+
+export async function fetchKeyCompetences(): Promise<{ data: ProfileKeyCompetence[] | null; error: any }> {
+  return fetchProfileData<ProfileKeyCompetence>('profile_key_competences', [
+    { column: 'display_order', ascending: true },
+  ]);
+}
+
+export async function createKeyCompetence(
+  competence: Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+): Promise<{ data: ProfileKeyCompetence | null; error: any }> {
+  return createProfileData<ProfileKeyCompetence>('profile_key_competences', competence);
+}
+
+export async function updateKeyCompetence(
+  id: string,
+  updates: Partial<Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<{ data: ProfileKeyCompetence | null; error: any }> {
+  return updateProfileData<ProfileKeyCompetence>('profile_key_competences', id, updates);
+}
+
+export async function deleteKeyCompetence(id: string): Promise<{ error: any }> {
+  return deleteProfileData('profile_key_competences', id);
+}
+
+export const autoSaveKeyCompetence = createAutoSave<ProfileKeyCompetence>(
+  updateKeyCompetence,
+  'key-competence'
 );
 
 // ============================================
@@ -438,53 +472,6 @@ export async function deleteReferenceLetter(storagePath: string): Promise<{ erro
 // ============================================
 // CONVERSION UTILITIES
 // ============================================
-
-/**
- * Convert ProfileWorkExperience to CV WorkExperience format
- * Converts null values to undefined for CV types
- */
-export function convertToWorkExperience(profile: ProfileWorkExperience): WorkExperience {
-  return {
-    id: profile.id,
-    company: profile.company,
-    title: profile.title,
-    location: profile.location ?? undefined,
-    startDate: profile.start_date,
-    endDate: profile.end_date ?? undefined,
-    current: profile.current ?? false,
-    description: profile.description ?? undefined,
-    bullets: profile.bullets ?? [],
-  };
-}
-
-/**
- * Convert ProfileEducation to CV Education format
- * Converts null values to undefined for CV types
- */
-export function convertToEducation(profile: ProfileEducation): Education {
-  return {
-    id: profile.id,
-    institution: profile.institution,
-    degree: profile.degree,
-    field: profile.field ?? undefined,
-    startDate: profile.start_date,
-    endDate: profile.end_date ?? undefined,
-    description: profile.description ?? undefined,
-    grade: profile.grade ?? undefined,
-  };
-}
-
-/**
- * Convert ProfileSkillCategory to CV SkillCategory format
- * Converts null values to undefined for CV types
- */
-export function convertToSkillCategory(profile: ProfileSkillCategory): SkillCategory {
-  return {
-    id: profile.id,
-    category: profile.category,
-    skills: profile.skills,
-  };
-}
 
 /**
  * Convert ProfileCertification to CV Certification format

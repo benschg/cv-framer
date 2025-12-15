@@ -78,14 +78,6 @@ export interface GeneratedCVContent {
   tagline?: string;
   profile?: string;
   slogan?: string;
-  keyCompetences?: Array<{ title: string; description: string }>;
-  workExperience?: Array<{
-    company: string;
-    title: string;
-    startDate: string;
-    endDate?: string;
-    bullets: string[];
-  }>;
 }
 
 // Analyze a job posting to extract company research
@@ -147,7 +139,7 @@ export async function generateCVContent(
     ? 'Generate all content in German (Deutsch).'
     : 'Generate all content in English.';
 
-  const sectionsToGenerate = sections || ['tagline', 'profile', 'keyCompetences'];
+  const sectionsToGenerate = sections || ['tagline', 'profile'];
 
   const prompt = `You are an expert CV writer. Generate professional CV content based on the provided self-marketing data.
 
@@ -176,8 +168,7 @@ Return a JSON object with this structure:
 {
   ${sectionsToGenerate.includes('tagline') ? '"tagline": "A compelling one-line professional tagline",' : ''}
   ${sectionsToGenerate.includes('profile') ? '"profile": "A 3-4 sentence professional summary highlighting key strengths and value proposition",' : ''}
-  ${sectionsToGenerate.includes('slogan') ? '"slogan": "A memorable personal slogan or motto",' : ''}
-  ${sectionsToGenerate.includes('keyCompetences') ? '"keyCompetences": [{"title": "Competence Title", "description": "Brief description of this competence"}]' : ''}
+  ${sectionsToGenerate.includes('slogan') ? '"slogan": "A memorable personal slogan or motto"' : ''}
 }
 
 Guidelines:
@@ -241,56 +232,6 @@ Generate a new version of this section that:
 Return ONLY the new content for this section, no JSON wrapping, no explanations.`;
 
   return generateContent(prompt);
-}
-
-// Generate work experience bullets from a job description
-export async function generateExperienceBullets(
-  company: string,
-  title: string,
-  description: string,
-  werbeflaechenData?: Record<string, unknown>,
-  jobContext?: {
-    requiredSkills?: string[];
-    keywords?: string[];
-  },
-  language: 'en' | 'de' = 'en'
-): Promise<string[]> {
-  const languageInstructions = language === 'de'
-    ? 'Generate bullets in German (Deutsch).'
-    : 'Generate bullets in English.';
-
-  const prompt = `Generate 3-5 achievement-focused bullet points for this work experience.
-
-${languageInstructions}
-
-Company: ${company}
-Job Title: ${title}
-Role Description: ${description}
-
-${werbeflaechenData ? `
-Relevant achievements from self-marketing data:
-${JSON.stringify(werbeflaechenData, null, 2)}
-` : ''}
-
-${jobContext?.requiredSkills ? `
-Skills to highlight (if applicable): ${jobContext.requiredSkills.join(', ')}
-` : ''}
-
-${jobContext?.keywords ? `
-Keywords to incorporate (if natural): ${jobContext.keywords.join(', ')}
-` : ''}
-
-Guidelines:
-- Start each bullet with a strong action verb
-- Include quantifiable results where possible (%, $, time saved, etc.)
-- Focus on impact and outcomes, not just tasks
-- Keep each bullet to 1-2 lines
-- Make bullets relevant to the target role if context provided
-
-Return a JSON array of strings:
-["bullet 1", "bullet 2", "bullet 3"]`;
-
-  return generateJSON<string[]>(prompt);
 }
 
 // Types for job posting URL parsing
