@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Check, UserX } from 'lucide-react';
 import { CVPreview } from './cv-preview';
 import { getPhotoPublicUrl } from '@/services/profile-photo.service';
-import type { CVContent, DisplaySettings } from '@/types/cv.types';
+import type { CVContent, DisplaySettings, UserProfile } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 
@@ -26,6 +26,7 @@ interface CVPreviewSectionProps {
   educations?: CVEducationWithSelection[];
   skillCategories?: CVSkillCategoryWithSelection[];
   keyCompetences?: CVKeyCompetenceWithSelection[];
+  userProfile?: UserProfile;
 }
 
 export function CVPreviewSection({
@@ -42,6 +43,7 @@ export function CVPreviewSection({
   educations,
   skillCategories,
   keyCompetences,
+  userProfile,
 }: CVPreviewSectionProps) {
   const renderPhotoPopover = () => (
     <Popover>
@@ -184,6 +186,7 @@ export function CVPreviewSection({
           educations={educations}
           skillCategories={skillCategories}
           keyCompetences={keyCompetences}
+          userProfile={userProfile}
         />
       </CardContent>
     </Card>

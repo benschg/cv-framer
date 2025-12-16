@@ -33,7 +33,7 @@ import { CVEducationSection } from '@/components/cv/cv-education-section';
 import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
 import { CVKeyCompetencesSection } from '@/components/cv/cv-key-competences-section';
 import { useAuth } from '@/contexts/auth-context';
-import { getUserInitials } from '@/lib/user-utils';
+import { getUserInitials, getUserName, getUserPhone, getUserLocation } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { fetchCVWorkExperiences, bulkUpsertCVWorkExperienceSelections } from '@/services/cv-work-experience.service';
 import { fetchCVEducations, bulkUpsertCVEducationSelections } from '@/services/cv-education.service';
@@ -713,6 +713,18 @@ export default function CVEditorPage() {
         educations={educations}
         skillCategories={skillCategories}
         keyCompetences={keyCompetences}
+        userProfile={user ? {
+          id: user.id,
+          user_id: user.id,
+          first_name: getUserName(user).firstName,
+          last_name: getUserName(user).lastName,
+          email: user.email,
+          phone: getUserPhone(user),
+          location: getUserLocation(user),
+          preferred_language: cv.language,
+          created_at: user.created_at,
+          updated_at: user.updated_at || user.created_at,
+        } : undefined}
       />
 
         </div>
