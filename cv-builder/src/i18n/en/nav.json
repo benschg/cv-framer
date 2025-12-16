@@ -10,7 +10,8 @@
   "groups": {
     "overview": "Overview",
     "build": "Build",
-    "track": "Track"
+    "track": "Track",
+    "guides": "Guides"
   },
   "items": {
     "dashboard": "Dashboard",
@@ -24,7 +25,8 @@
     "werbeflaechen": "Werbeflaechen",
     "myCVs": "My CVs",
     "coverLetters": "Cover Letters",
-    "applications": "Applications"
+    "applications": "Applications",
+    "atsFormatting": "ATS Formatting"
   },
   "user": {
     "theme": "Theme",

@@ -10,7 +10,8 @@
   "groups": {
     "overview": "Übersicht",
     "build": "Erstellen",
-    "track": "Verfolgen"
+    "track": "Verfolgen",
+    "guides": "Leitfäden"
   },
   "items": {
     "dashboard": "Dashboard",
@@ -24,7 +25,8 @@
     "werbeflaechen": "Werbeflächen",
     "myCVs": "Meine Lebensläufe",
     "coverLetters": "Anschreiben",
-    "applications": "Bewerbungen"
+    "applications": "Bewerbungen",
+    "atsFormatting": "ATS-Formatierung"
   },
   "user": {
     "theme": "Design",

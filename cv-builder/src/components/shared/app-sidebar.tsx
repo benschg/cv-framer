@@ -84,6 +84,12 @@ export function AppSidebar() {
         { title: t('nav.items.applications'), href: '/applications', icon: Briefcase },
       ],
     },
+    {
+      label: t('nav.groups.guides'),
+      items: [
+        { title: t('nav.items.atsFormatting'), href: '/guide/ats-formatting', icon: BookOpen },
+      ],
+    },
   ];
 
   useEffect(() => {
