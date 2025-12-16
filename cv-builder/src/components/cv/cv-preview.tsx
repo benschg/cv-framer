@@ -75,15 +75,70 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
   return (
     <div
-      className="bg-white p-8 rounded-lg shadow-sm border mx-auto text-[10pt] leading-relaxed"
+      className="cv-preview-container"
       style={{
-        width: `${pageWidth}mm`,
-        minHeight: `${pageHeight}mm`,
-        aspectRatio: `${pageWidth} / ${pageHeight}`,
         fontFamily: fontFamily,
         color: textColor
       }}
     >
+      <style jsx>{`
+        .cv-preview-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .cv-page {
+          background: white;
+          padding: 2rem;
+          border-radius: 0.5rem;
+          box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+          border: 1px solid rgb(229 231 235);
+          margin: 0 auto;
+          position: relative;
+        }
+
+        .cv-page::after {
+          content: '';
+          position: absolute;
+          bottom: -1rem;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 80%;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgb(209 213 219), transparent);
+        }
+
+        .cv-page:last-child::after {
+          display: none;
+        }
+
+        @media print {
+          .cv-preview-container {
+            gap: 0;
+          }
+          .cv-page {
+            page-break-after: always;
+            break-after: page;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+          }
+          .cv-page:last-child {
+            page-break-after: auto;
+          }
+          .cv-page::after {
+            display: none;
+          }
+        }
+      `}</style>
+      <div
+        className="cv-page text-[10pt] leading-relaxed"
+        style={{
+          width: `${pageWidth}mm`,
+          minHeight: `${pageHeight}mm`,
+        }}
+      >
       {/* Header */}
       <header
         className="mb-5 pb-4"
@@ -303,6 +358,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
             </p>
           </div>
         )}
+      </div>
     </div>
   );
 }
