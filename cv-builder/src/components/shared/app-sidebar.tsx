@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -51,7 +51,7 @@ import type { ProfilePhoto } from '@/types/api.schemas';
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
@@ -110,11 +110,23 @@ export function AppSidebar() {
     }
   }, [user]);
 
-  const avatarUrl = primaryPhoto
-    ? getPhotoPublicUrl(primaryPhoto.storage_path)
-    : user?.user_metadata?.avatar_url;
-  const userInitials = getUserInitials(user);
-  const displayName = getDisplayName(user);
+  // Memoize computed values to ensure they update when user changes
+  const avatarUrl = useMemo(
+    () => primaryPhoto
+      ? getPhotoPublicUrl(primaryPhoto.storage_path)
+      : user?.user_metadata?.avatar_url,
+    [primaryPhoto, user?.user_metadata?.avatar_url]
+  );
+
+  const userInitials = useMemo(
+    () => getUserInitials(user),
+    [user]
+  );
+
+  const displayName = useMemo(
+    () => getDisplayName(user),
+    [user]
+  );
 
   return (
     <Sidebar>
@@ -180,12 +192,11 @@ export function AppSidebar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => signOut()}
-                className="flex items-center gap-2 text-destructive focus:text-destructive"
-              >
-                <LogOut className="h-4 w-4" />
-                {t('nav.user.signOut')}
+              <DropdownMenuItem asChild>
+                <Link href="/logout" className="flex items-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  {t('nav.user.signOut')}
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
