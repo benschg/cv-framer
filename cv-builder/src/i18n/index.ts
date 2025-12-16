@@ -5,7 +5,6 @@ import profileEn from './en/profile.json';
 import applicationsEn from './en/applications.json';
 import cvEn from './en/cv.json';
 import coverLetterEn from './en/coverLetter.json';
-import werbeflaechenEn from './en/werbeflaechen.json';
 import settingsEn from './en/settings.json';
 import errorsEn from './en/errors.json';
 import guidesEn from './en/guides.json';
@@ -17,7 +16,6 @@ import profileDe from './de/profile.json';
 import applicationsDe from './de/applications.json';
 import cvDe from './de/cv.json';
 import coverLetterDe from './de/coverLetter.json';
-import werbeflaechenDe from './de/werbeflaechen.json';
 import settingsDe from './de/settings.json';
 import errorsDe from './de/errors.json';
 import guidesDe from './de/guides.json';
@@ -30,7 +28,6 @@ const en = {
   applications: applicationsEn,
   cv: cvEn,
   coverLetter: coverLetterEn,
-  werbeflaechen: werbeflaechenEn,
   settings: settingsEn,
   errors: errorsEn,
   guides: guidesEn,
@@ -44,7 +41,6 @@ const de = {
   applications: applicationsDe,
   cv: cvDe,
   coverLetter: coverLetterDe,
-  werbeflaechen: werbeflaechenDe,
   settings: settingsDe,
   errors: errorsDe,
   guides: guidesDe,

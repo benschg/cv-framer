@@ -79,7 +79,6 @@ export function AppSidebar() {
         { title: t('nav.items.keyCompetences'), href: '/profile/key-competences', icon: Zap, indent: true },
         { title: t('nav.items.certifications'), href: '/profile/certifications', icon: Award, indent: true },
         { title: t('nav.items.references'), href: '/profile/references', icon: UserCheck, indent: true },
-        { title: t('nav.items.werbeflaechen'), href: '/werbeflaechen', icon: Target },
         { title: t('nav.items.myCVs'), href: '/cv', icon: FileText },
         { title: t('nav.items.coverLetters'), href: '/cover-letter', icon: Mail },
       ],
