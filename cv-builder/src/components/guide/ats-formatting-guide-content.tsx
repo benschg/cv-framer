@@ -1,21 +1,59 @@
+'use client';
+
 import { CheckCircle2, XCircle, FileType, Search, AlertCircle, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export function ATSFormattingGuideContent() {
+  const { t } = useAppTranslation();
+
+  const fonts = ['Arial', 'Helvetica', 'Times New Roman', 'Garamond', 'Georgia', 'Cambria'];
+
+  const elementsToAvoid = [
+    t('guides.atsFormatting.elementsToAvoid.items.tables'),
+    t('guides.atsFormatting.elementsToAvoid.items.textBoxes'),
+    t('guides.atsFormatting.elementsToAvoid.items.images'),
+    t('guides.atsFormatting.elementsToAvoid.items.columns'),
+    t('guides.atsFormatting.elementsToAvoid.items.headers'),
+    t('guides.atsFormatting.elementsToAvoid.items.headings'),
+    t('guides.atsFormatting.elementsToAvoid.items.hyperlinks'),
+    t('guides.atsFormatting.elementsToAvoid.items.fonts'),
+  ];
+
+  const acceptableElements = [
+    t('guides.atsFormatting.acceptableElements.items.bold'),
+    t('guides.atsFormatting.acceptableElements.items.italics'),
+    t('guides.atsFormatting.acceptableElements.items.underlines'),
+    t('guides.atsFormatting.acceptableElements.items.bullets'),
+    t('guides.atsFormatting.acceptableElements.items.colors'),
+  ];
+
+  const scanningItems = [
+    t('guides.atsFormatting.scanningStrategy.items.format'),
+    t('guides.atsFormatting.scanningStrategy.items.contact'),
+    t('guides.atsFormatting.scanningStrategy.items.recent'),
+  ];
+
+  const keywordItems = [
+    t('guides.atsFormatting.keywords.items.skills'),
+    t('guides.atsFormatting.keywords.items.attention'),
+    t('guides.atsFormatting.keywords.items.requirements'),
+  ];
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Hero Section */}
       <div className="space-y-4">
         <Badge variant="secondary" className="mb-2">
-          Guide
+          {t('guides.atsFormatting.badge')}
         </Badge>
         <h1 className="text-4xl font-bold tracking-tight">
-          ATS Formatting Guide
+          {t('guides.atsFormatting.title')}
         </h1>
         <p className="text-xl text-muted-foreground">
-          Learn how to optimize your CV for Applicant Tracking Systems to increase your chances of getting noticed by recruiters.
+          {t('guides.atsFormatting.subtitle')}
         </p>
       </div>
 
@@ -24,18 +62,15 @@ export function ATSFormattingGuideContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            What is Resume Parsing?
+            {t('guides.atsFormatting.whatIsAts.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Resume/CV parsing is an important feature of many Applicant Tracking Systems (ATS).
-            The ability to parse resumes allows for the automatic extraction, storage, and analysis of resume data.
+            {t('guides.atsFormatting.whatIsAts.description1')}
           </p>
           <p className="text-muted-foreground">
-            The system helps candidates populate application fields automatically and assists recruiters in
-            identifying potential job matches. Companies use parsed data primarily to help applicants complete
-            applications and suggest relevant positions.
+            {t('guides.atsFormatting.whatIsAts.description2')}
           </p>
         </CardContent>
       </Card>
@@ -43,10 +78,9 @@ export function ATSFormattingGuideContent() {
       {/* Alert Box */}
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Pro Tip</AlertTitle>
+        <AlertTitle>{t('guides.atsFormatting.proTip.title')}</AlertTitle>
         <AlertDescription>
-          Many professionals maintain two versions of their CV: one optimized for ATS parsing
-          and another with enhanced visual design for direct human review.
+          {t('guides.atsFormatting.proTip.description')}
         </AlertDescription>
       </Alert>
 
@@ -55,24 +89,15 @@ export function ATSFormattingGuideContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <XCircle className="h-5 w-5 text-destructive" />
-            Elements to Avoid
+            {t('guides.atsFormatting.elementsToAvoid.title')}
           </CardTitle>
           <CardDescription>
-            These formatting elements can confuse ATS systems and may cause your CV to be incorrectly parsed
+            {t('guides.atsFormatting.elementsToAvoid.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {[
-              'Tables',
-              'Text boxes',
-              'Logos, images, and graphics',
-              'Multiple columns',
-              'Headers and footers',
-              'Uncommon section headings',
-              'Hyperlinks on important terms',
-              'Uncommon or decorative fonts'
-            ].map((item) => (
+            {elementsToAvoid.map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                 <span>{item}</span>
@@ -87,21 +112,15 @@ export function ATSFormattingGuideContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-green-600" />
-            Acceptable Formatting Elements
+            {t('guides.atsFormatting.acceptableElements.title')}
           </CardTitle>
           <CardDescription>
-            These formatting options are safe to use and will be correctly parsed by most ATS systems
+            {t('guides.atsFormatting.acceptableElements.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {[
-              'Bold text for emphasis',
-              'Italics for titles or subtle emphasis',
-              'Underlines (particularly in headings)',
-              'Standard bullet points',
-              'Colors (note: ATS will convert all text to the same color)'
-            ].map((item) => (
+            {acceptableElements.map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                 <span>{item}</span>
@@ -118,18 +137,20 @@ export function ATSFormattingGuideContent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileType className="h-5 w-5" />
-              File Format
+              {t('guides.atsFormatting.fileFormat.title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
-              <p className="font-semibold text-green-900 dark:text-green-100">Recommended: .docx</p>
+              <p className="font-semibold text-green-900 dark:text-green-100">
+                {t('guides.atsFormatting.fileFormat.recommended')}
+              </p>
               <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                .docx format is the most accurately parsed by ATS systems
+                {t('guides.atsFormatting.fileFormat.description')}
               </p>
             </div>
             <p className="text-sm text-muted-foreground">
-              While PDFs preserve formatting better for human readers, .docx files are better for ATS parsing.
+              {t('guides.atsFormatting.fileFormat.note')}
             </p>
           </CardContent>
         </Card>
@@ -137,15 +158,15 @@ export function ATSFormattingGuideContent() {
         {/* Fonts */}
         <Card>
           <CardHeader>
-            <CardTitle>Font Selection</CardTitle>
+            <CardTitle>{t('guides.atsFormatting.fonts.title')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Stick to universal, professional fonts that ATS systems recognize:
+              {t('guides.atsFormatting.fonts.description')}
             </p>
             <div className="flex flex-wrap gap-2">
-              {['Arial', 'Helvetica', 'Times New Roman', 'Garamond', 'Georgia', 'Cambria'].map((font) => (
-                <Badge key={font} variant="secondary">
+              {fonts.map((font) => (
+                <Badge key={font} variant="secondary" style={{ fontFamily: font }}>
                   {font}
                 </Badge>
               ))}
@@ -157,29 +178,22 @@ export function ATSFormattingGuideContent() {
       {/* Scanning Strategy */}
       <Card>
         <CardHeader>
-          <CardTitle>Scanning Strategy</CardTitle>
+          <CardTitle>{t('guides.atsFormatting.scanningStrategy.title')}</CardTitle>
           <CardDescription>
-            How ATS systems read your CV
+            {t('guides.atsFormatting.scanningStrategy.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Like a human reader, ATS systems scan from left to right and top to bottom.
-            Structure your CV to accommodate this reading pattern:
+            {t('guides.atsFormatting.scanningStrategy.intro')}
           </p>
           <ul className="space-y-2 text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-              <span>Use chronological or combination resume formats (avoid functional layouts)</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-              <span>Place contact information at the top of the page</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-              <span>List your most recent positions first</span>
-            </li>
+            {scanningItems.map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span>{item}</span>
+              </li>
+            ))}
           </ul>
         </CardContent>
       </Card>
@@ -187,35 +201,28 @@ export function ATSFormattingGuideContent() {
       {/* Keywords */}
       <Card>
         <CardHeader>
-          <CardTitle>Keywords Matter</CardTitle>
+          <CardTitle>{t('guides.atsFormatting.keywords.title')}</CardTitle>
           <CardDescription>
-            Strategic keyword placement is crucial for ATS success
+            {t('guides.atsFormatting.keywords.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            ATS systems search for specific keywords related to the job requirements. To optimize your CV:
+            {t('guides.atsFormatting.keywords.intro')}
           </p>
           <ul className="space-y-2 text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-              <span>Include hard skills that match the job posting</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-              <span>Pay special attention to keywords that appear multiple times in the job description</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-              <span>Focus on terms near the requirements section</span>
-            </li>
+            {keywordItems.map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span>{item}</span>
+              </li>
+            ))}
           </ul>
           <Alert variant="warning">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Warning</AlertTitle>
+            <AlertTitle>{t('guides.atsFormatting.keywords.warning.title')}</AlertTitle>
             <AlertDescription>
-              Misspelling certain words and phrases could immediately disqualify your resume.
-              Always proofread carefully, especially for technical terms and job-specific keywords.
+              {t('guides.atsFormatting.keywords.warning.description')}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -224,12 +231,11 @@ export function ATSFormattingGuideContent() {
       {/* Source Attribution */}
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
-          <CardTitle className="text-base">Source Attribution</CardTitle>
+          <CardTitle className="text-base">{t('guides.atsFormatting.source.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-3">
-            This guide is based on information from Roche's Resume Parsing FAQ, which provides
-            valuable insights into how major employers use ATS systems.
+            {t('guides.atsFormatting.source.description')}
           </p>
           <a
             href="https://careers.roche.com/global/en/resume-parsing-faq"
@@ -237,7 +243,7 @@ export function ATSFormattingGuideContent() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
           >
-            View Original Source at Roche Careers
+            {t('guides.atsFormatting.source.link')}
             <ExternalLink className="h-4 w-4" />
           </a>
         </CardContent>
@@ -248,14 +254,14 @@ export function ATSFormattingGuideContent() {
         <CardContent className="pt-6">
           <div className="space-y-4 text-center">
             <h3 className="text-2xl font-bold">
-              Ready to Create an ATS-Optimized CV?
+              {t('guides.atsFormatting.cta.title')}
             </h3>
             <p className="text-primary-foreground/90">
-              Our CV Builder automatically formats your resume to be ATS-friendly while maintaining a professional appearance.
+              {t('guides.atsFormatting.cta.description')}
             </p>
             <div className="flex gap-4 justify-center pt-2">
               <a href="/cv" className="inline-flex items-center justify-center rounded-md bg-primary-foreground text-primary px-6 py-2 text-sm font-medium hover:opacity-90 transition-opacity">
-                Create Your CV
+                {t('guides.atsFormatting.cta.button')}
               </a>
             </div>
           </div>

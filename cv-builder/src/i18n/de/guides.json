@@ -1,0 +1,85 @@
+{
+  "atsFormatting": {
+    "title": "ATS-Formatierungs-Leitfaden",
+    "badge": "Leitfaden",
+    "subtitle": "Erfahren Sie, wie Sie Ihren Lebenslauf für Applicant Tracking Systeme optimieren, um Ihre Chancen zu erhöhen, von Recruitern wahrgenommen zu werden.",
+    "whatIsAts": {
+      "title": "Was ist Resume Parsing?",
+      "description1": "Resume/CV-Parsing ist eine wichtige Funktion vieler Applicant Tracking Systeme (ATS). Die Fähigkeit, Lebensläufe zu parsen, ermöglicht die automatische Extraktion, Speicherung und Analyse von Lebenslaufdaten.",
+      "description2": "Das System hilft Kandidaten, Bewerbungsfelder automatisch auszufüllen, und unterstützt Recruiter bei der Identifizierung potenzieller Job-Matches. Unternehmen nutzen geparste Daten hauptsächlich, um Bewerbern beim Ausfüllen von Bewerbungen zu helfen und relevante Positionen vorzuschlagen."
+    },
+    "proTip": {
+      "title": "Profi-Tipp",
+      "description": "Viele Profis pflegen zwei Versionen ihres Lebenslaufs: eine für ATS-Parsing optimierte und eine mit verbessertem visuellen Design für die direkte menschliche Überprüfung."
+    },
+    "elementsToAvoid": {
+      "title": "Zu vermeidende Elemente",
+      "description": "Diese Formatierungselemente können ATS-Systeme verwirren und dazu führen, dass Ihr Lebenslauf falsch geparst wird",
+      "items": {
+        "tables": "Tabellen",
+        "textBoxes": "Textfelder",
+        "images": "Logos, Bilder und Grafiken",
+        "columns": "Mehrere Spalten",
+        "headers": "Kopf- und Fußzeilen",
+        "headings": "Ungewöhnliche Abschnittsüberschriften",
+        "hyperlinks": "Hyperlinks auf wichtigen Begriffen",
+        "fonts": "Ungewöhnliche oder dekorative Schriftarten"
+      }
+    },
+    "acceptableElements": {
+      "title": "Akzeptable Formatierungselemente",
+      "description": "Diese Formatierungsoptionen sind sicher zu verwenden und werden von den meisten ATS-Systemen korrekt geparst",
+      "items": {
+        "bold": "Fettdruck zur Hervorhebung",
+        "italics": "Kursiv für Titel oder subtile Hervorhebung",
+        "underlines": "Unterstreichungen (besonders in Überschriften)",
+        "bullets": "Standard-Aufzählungszeichen",
+        "colors": "Farben (Hinweis: ATS konvertiert allen Text in dieselbe Farbe)"
+      }
+    },
+    "fileFormat": {
+      "title": "Dateiformat",
+      "recommended": "Empfohlen: .docx",
+      "description": ".docx-Format wird von ATS-Systemen am genauesten geparst",
+      "note": "Während PDFs die Formatierung für menschliche Leser besser bewahren, sind .docx-Dateien besser für ATS-Parsing."
+    },
+    "fonts": {
+      "title": "Schriftartenauswahl",
+      "description": "Verwenden Sie universelle, professionelle Schriftarten, die ATS-Systeme erkennen:"
+    },
+    "scanningStrategy": {
+      "title": "Scan-Strategie",
+      "description": "Wie ATS-Systeme Ihren Lebenslauf lesen",
+      "intro": "Wie ein menschlicher Leser scannen ATS-Systeme von links nach rechts und von oben nach unten. Strukturieren Sie Ihren Lebenslauf entsprechend:",
+      "items": {
+        "format": "Verwenden Sie chronologische oder kombinierte Lebenslaufformate (vermeiden Sie funktionale Layouts)",
+        "contact": "Platzieren Sie Kontaktinformationen oben auf der Seite",
+        "recent": "Listen Sie Ihre neuesten Positionen zuerst auf"
+      }
+    },
+    "keywords": {
+      "title": "Keywords sind wichtig",
+      "description": "Strategische Keyword-Platzierung ist entscheidend für ATS-Erfolg",
+      "intro": "ATS-Systeme suchen nach spezifischen Keywords, die sich auf die Job-Anforderungen beziehen. Um Ihren Lebenslauf zu optimieren:",
+      "items": {
+        "skills": "Fügen Sie Hard Skills ein, die zur Stellenausschreibung passen",
+        "attention": "Achten Sie besonders auf Keywords, die mehrfach in der Stellenbeschreibung erscheinen",
+        "requirements": "Konzentrieren Sie sich auf Begriffe in der Nähe des Anforderungsbereichs"
+      },
+      "warning": {
+        "title": "Warnung",
+        "description": "Rechtschreibfehler bei bestimmten Wörtern und Phrasen könnten Ihren Lebenslauf sofort disqualifizieren. Korrekturlesen Sie immer sorgfältig, besonders bei technischen Begriffen und jobspezifischen Keywords."
+      }
+    },
+    "source": {
+      "title": "Quellenangabe",
+      "description": "Dieser Leitfaden basiert auf Informationen aus Roches Resume Parsing FAQ, die wertvolle Einblicke bietet, wie große Arbeitgeber ATS-Systeme nutzen.",
+      "link": "Originalquelle bei Roche Careers ansehen"
+    },
+    "cta": {
+      "title": "Bereit, einen ATS-optimierten Lebenslauf zu erstellen?",
+      "description": "Unser CV Builder formatiert Ihren Lebenslauf automatisch ATS-freundlich und bewahrt gleichzeitig ein professionelles Erscheinungsbild.",
+      "button": "Lebenslauf erstellen"
+    }
+  }
+}

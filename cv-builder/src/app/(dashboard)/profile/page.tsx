@@ -1,27 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { Loader2, Save } from 'lucide-react';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { getUserInitials, getUserName, getUserPhone, getUserLocation } from '@/lib/user-utils';
 import type { ProfilePhoto } from '@/types/api.schemas';
-import { toast } from 'sonner';
 import { BasicInfoForm } from '@/components/profile/basic-info-form';
 import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
 import { DefaultCvSettingsForm } from '@/components/profile/default-cv-settings-form';
 import { ProfessionalLinksForm } from '@/components/profile/professional-links-form';
 import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
-import { useTranslations } from '@/hooks/use-translations';
-import { useUserPreferences } from '@/contexts/user-preferences-context';
+import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { debounce } from '@/services/profile-career.service';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function ProfilePage() {
   const { user, updateUserProfile } = useAuth();
-  const { language } = useUserPreferences();
-  const { t } = useTranslations(language);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const { t } = useAppTranslation();
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Photo state
   const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
@@ -73,38 +70,44 @@ export default function ProfilePage() {
     loadPhotos();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Auto-save handler with debouncing
+  const handleFieldChange = useCallback((name: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
-    setIsSaved(false);
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    // Trigger auto-save
+    setIsSaving(true);
+    setSaveSuccess(false);
 
-    // Save basic info to auth.user_metadata
-    const { error } = await updateUserProfile({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      phone: formData.phone,
-      location: formData.location,
-    });
+    const debouncedSave = debounce(
+      `profile-basic-info-${name}`,
+      async () => {
+        const { error } = await updateUserProfile({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          location: formData.location,
+          [name]: value, // Include the latest value
+        });
 
-    if (error) {
-      toast.error(`${t('profile.saveError')}: ${error}`);
-      setIsLoading(false);
-      return;
-    }
+        setIsSaving(false);
 
-    // TODO: Save professional links and default tagline to a separate table if needed
+        if (!error) {
+          setSaveSuccess(true);
+          setTimeout(() => {
+            setSaveSuccess(false);
+          }, 2000);
+        } else {
+          console.error('Auto-save failed:', error);
+        }
+      },
+      1000
+    );
 
-    setIsLoading(false);
-    setIsSaved(true);
-    toast.success(t('profile.saveSuccess'));
-  };
+    debouncedSave();
+  }, [formData, updateUserProfile]);
 
   const userInitials = getUserInitials(user);
   const primaryPhotoUrl = primaryPhoto
@@ -112,16 +115,17 @@ export default function ProfilePage() {
     : user?.user_metadata?.avatar_url;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('profile.title')}</h1>
-        <p className="text-muted-foreground">
-          {t('profile.subtitle')}
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <BasicInfoForm formData={formData} onChange={handleChange} />
+    <ProfilePageLayout
+      title={t('profile.title')}
+      description={t('profile.subtitle')}
+      isSaving={isSaving}
+      saveSuccess={saveSuccess}
+    >
+      <div className="space-y-6">
+        <BasicInfoForm
+          formData={formData}
+          onChange={handleFieldChange}
+        />
 
         <ProfilePhotosCard
           photos={photos}
@@ -134,35 +138,16 @@ export default function ProfilePage() {
 
         <DefaultCvSettingsForm
           defaultTagline={formData.defaultTagline}
-          onChange={handleChange}
+          onChange={handleFieldChange}
         />
 
         <CareerInfoNavigation />
 
-        <ProfessionalLinksForm formData={formData} onChange={handleChange} />
-
-        {/* Save Button */}
-        <div className="flex justify-end gap-4">
-          {isSaved && (
-            <p className="text-sm text-green-600 self-center">
-              {t('profile.savedMessage')}
-            </p>
-          )}
-          <Button type="submit" disabled={isLoading} className="gap-2">
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t('profile.saving')}
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                {t('profile.saveButton')}
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
-    </div>
+        <ProfessionalLinksForm
+          formData={formData}
+          onChange={handleFieldChange}
+        />
+      </div>
+    </ProfilePageLayout>
   );
 }

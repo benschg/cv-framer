@@ -1,0 +1,85 @@
+{
+  "atsFormatting": {
+    "title": "ATS Formatting Guide",
+    "badge": "Guide",
+    "subtitle": "Learn how to optimize your CV for Applicant Tracking Systems to increase your chances of getting noticed by recruiters.",
+    "whatIsAts": {
+      "title": "What is Resume Parsing?",
+      "description1": "Resume/CV parsing is an important feature of many Applicant Tracking Systems (ATS). The ability to parse resumes allows for the automatic extraction, storage, and analysis of resume data.",
+      "description2": "The system helps candidates populate application fields automatically and assists recruiters in identifying potential job matches. Companies use parsed data primarily to help applicants complete applications and suggest relevant positions."
+    },
+    "proTip": {
+      "title": "Pro Tip",
+      "description": "Many professionals maintain two versions of their CV: one optimized for ATS parsing and another with enhanced visual design for direct human review."
+    },
+    "elementsToAvoid": {
+      "title": "Elements to Avoid",
+      "description": "These formatting elements can confuse ATS systems and may cause your CV to be incorrectly parsed",
+      "items": {
+        "tables": "Tables",
+        "textBoxes": "Text boxes",
+        "images": "Logos, images, and graphics",
+        "columns": "Multiple columns",
+        "headers": "Headers and footers",
+        "headings": "Uncommon section headings",
+        "hyperlinks": "Hyperlinks on important terms",
+        "fonts": "Uncommon or decorative fonts"
+      }
+    },
+    "acceptableElements": {
+      "title": "Acceptable Formatting Elements",
+      "description": "These formatting options are safe to use and will be correctly parsed by most ATS systems",
+      "items": {
+        "bold": "Bold text for emphasis",
+        "italics": "Italics for titles or subtle emphasis",
+        "underlines": "Underlines (particularly in headings)",
+        "bullets": "Standard bullet points",
+        "colors": "Colors (note: ATS will convert all text to the same color)"
+      }
+    },
+    "fileFormat": {
+      "title": "File Format",
+      "recommended": "Recommended: .docx",
+      "description": ".docx format is the most accurately parsed by ATS systems",
+      "note": "While PDFs preserve formatting better for human readers, .docx files are better for ATS parsing."
+    },
+    "fonts": {
+      "title": "Font Selection",
+      "description": "Stick to universal, professional fonts that ATS systems recognize:"
+    },
+    "scanningStrategy": {
+      "title": "Scanning Strategy",
+      "description": "How ATS systems read your CV",
+      "intro": "Like a human reader, ATS systems scan from left to right and top to bottom. Structure your CV to accommodate this reading pattern:",
+      "items": {
+        "format": "Use chronological or combination resume formats (avoid functional layouts)",
+        "contact": "Place contact information at the top of the page",
+        "recent": "List your most recent positions first"
+      }
+    },
+    "keywords": {
+      "title": "Keywords Matter",
+      "description": "Strategic keyword placement is crucial for ATS success",
+      "intro": "ATS systems search for specific keywords related to the job requirements. To optimize your CV:",
+      "items": {
+        "skills": "Include hard skills that match the job posting",
+        "attention": "Pay special attention to keywords that appear multiple times in the job description",
+        "requirements": "Focus on terms near the requirements section"
+      },
+      "warning": {
+        "title": "Warning",
+        "description": "Misspelling certain words and phrases could immediately disqualify your resume. Always proofread carefully, especially for technical terms and job-specific keywords."
+      }
+    },
+    "source": {
+      "title": "Source Attribution",
+      "description": "This guide is based on information from Roche's Resume Parsing FAQ, which provides valuable insights into how major employers use ATS systems.",
+      "link": "View Original Source at Roche Careers"
+    },
+    "cta": {
+      "title": "Ready to Create an ATS-Optimized CV?",
+      "description": "Our CV Builder automatically formats your resume to be ATS-friendly while maintaining a professional appearance.",
+      "button": "Create Your CV"
+    }
+  }
+}

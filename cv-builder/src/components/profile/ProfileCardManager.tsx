@@ -79,7 +79,11 @@ export function ProfileCardManager<T extends { id: string }>({
         strategy={verticalListSortingStrategy}
       >
         <div className="space-y-4">
-          {items.map((item, index) => renderCard(item, index))}
+          {items.map((item, index) => (
+            <div key={item.id}>
+              {renderCard(item, index)}
+            </div>
+          ))}
         </div>
       </SortableContext>
 

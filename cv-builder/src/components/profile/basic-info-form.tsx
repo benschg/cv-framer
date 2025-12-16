@@ -13,11 +13,15 @@ interface BasicInfoFormProps {
     phone: string;
     location: string;
   };
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (name: string, value: string) => void;
 }
 
 export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
   const { t } = useAppTranslation();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.name, e.target.value);
+  };
 
   return (
     <Card>
@@ -35,7 +39,7 @@ export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
               id="firstName"
               name="firstName"
               value={formData.firstName}
-              onChange={onChange}
+              onChange={handleInputChange}
               placeholder={t('profile.basicInfo.firstNamePlaceholder')}
             />
           </div>
@@ -45,7 +49,7 @@ export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
               id="lastName"
               name="lastName"
               value={formData.lastName}
-              onChange={onChange}
+              onChange={handleInputChange}
               placeholder={t('profile.basicInfo.lastNamePlaceholder')}
             />
           </div>
@@ -57,7 +61,7 @@ export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
             name="email"
             type="email"
             value={formData.email}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder={t('profile.basicInfo.emailPlaceholder')}
             disabled
           />
@@ -73,7 +77,7 @@ export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
               name="phone"
               type="tel"
               value={formData.phone}
-              onChange={onChange}
+              onChange={handleInputChange}
               placeholder={t('profile.basicInfo.phonePlaceholder')}
             />
           </div>
@@ -83,7 +87,7 @@ export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
               id="location"
               name="location"
               value={formData.location}
-              onChange={onChange}
+              onChange={handleInputChange}
               placeholder={t('profile.basicInfo.locationPlaceholder')}
             />
           </div>

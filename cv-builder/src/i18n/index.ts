@@ -8,6 +8,7 @@ import coverLetterEn from './en/coverLetter.json';
 import werbeflaechenEn from './en/werbeflaechen.json';
 import settingsEn from './en/settings.json';
 import errorsEn from './en/errors.json';
+import guidesEn from './en/guides.json';
 
 import commonDe from './de/common.json';
 import authDe from './de/auth.json';
@@ -19,6 +20,7 @@ import coverLetterDe from './de/coverLetter.json';
 import werbeflaechenDe from './de/werbeflaechen.json';
 import settingsDe from './de/settings.json';
 import errorsDe from './de/errors.json';
+import guidesDe from './de/guides.json';
 
 const en = {
   common: commonEn,
@@ -31,6 +33,7 @@ const en = {
   werbeflaechen: werbeflaechenEn,
   settings: settingsEn,
   errors: errorsEn,
+  guides: guidesEn,
 };
 
 const de = {
@@ -44,6 +47,7 @@ const de = {
   werbeflaechen: werbeflaechenDe,
   settings: settingsDe,
   errors: errorsDe,
+  guides: guidesDe,
 };
 
 export type Language = 'en' | 'de';
