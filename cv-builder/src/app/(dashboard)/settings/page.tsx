@@ -16,7 +16,7 @@ export default function SettingsPage() {
 
   const { t } = useTranslations(language);
 
-  const handleLanguageChange = async (newLanguage: 'en' | 'de') => {
+  const handleLanguageChange = async (newLanguage: 'en' | 'de' | 'dev') => {
     const { error } = await setLanguage(newLanguage);
     if (error) {
       toast.error(t('settings.errorSavingLanguage'));
@@ -116,9 +116,27 @@ export default function SettingsPage() {
                 <Globe className="h-4 w-4" />
                 {t('settings.german')}
               </Button>
+              {process.env.NODE_ENV === 'development' && (
+                <Button
+                  variant={language === 'dev' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleLanguageChange('dev')}
+                  className="gap-2"
+                  disabled={preferencesLoading}
+                  title="Kannada pseudo-locale (development only)"
+                >
+                  <Globe className="h-4 w-4" />
+                  DEV (ಕನ್ನಡ)
+                </Button>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
               {t('settings.languageHint')}
+              {process.env.NODE_ENV === 'development' && language === 'dev' && (
+                <span className="block mt-1 text-amber-600">
+                  Warning: DEV pseudo-locale is session-only and will reset on page refresh.
+                </span>
+              )}
             </p>
           </div>
         </CardContent>
