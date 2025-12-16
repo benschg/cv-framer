@@ -18,6 +18,11 @@ export type ProfileCertification = Tables['profile_certifications']['Row'];
 export type ProfileReference = Tables['profile_references']['Row'];
 export type CertificationDocument = Tables['certification_documents']['Row'];
 
+// NEW: Motivation & Vision, Highlights, Projects types
+export type ProfileMotivationVision = Tables['profile_motivation_vision']['Row'];
+export type ProfileHighlight = Tables['profile_highlights']['Row'];
+export type ProfileProject = Tables['profile_projects']['Row'];
+
 // CV Work Experience Selection (junction table for per-CV customization)
 export type CVWorkExperienceSelection = Tables['cv_work_experience_selections']['Row'];
 export type CVWorkExperienceSelectionInsert = Tables['cv_work_experience_selections']['Insert'];
@@ -37,6 +42,11 @@ export type CVSkillCategorySelectionUpdate = Tables['cv_skill_category_selection
 export type CVKeyCompetenceSelection = Tables['cv_key_competence_selections']['Row'];
 export type CVKeyCompetenceSelectionInsert = Tables['cv_key_competence_selections']['Insert'];
 export type CVKeyCompetenceSelectionUpdate = Tables['cv_key_competence_selections']['Update'];
+
+// CV Project Selection (junction table for per-CV customization)
+export type CVProjectSelection = Tables['cv_project_selections']['Row'];
+export type CVProjectSelectionInsert = Tables['cv_project_selections']['Insert'];
+export type CVProjectSelectionUpdate = Tables['cv_project_selections']['Update'];
 
 // Composite type for CV editor: work experience merged with CV-specific selection
 export interface CVWorkExperienceWithSelection {
@@ -133,6 +143,31 @@ export interface CVKeyCompetenceWithSelection {
   };
 }
 
+// Composite type for CV editor: project merged with CV-specific selection
+export interface CVProjectWithSelection {
+  // From profile_projects
+  id: string;
+  name: string;
+  description: string | null;
+  role: string | null;
+  technologies: string[] | null;
+  url: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  current: boolean | null;
+  outcome: string | null;
+  display_order: number | null;
+
+  // From cv_project_selections (or defaults if no selection exists)
+  selection: {
+    id?: string;
+    is_selected: boolean;
+    is_favorite: boolean;
+    display_order: number;
+    description_override: string | null;
+  };
+}
+
 // Insert types (what you pass to INSERT queries)
 export type ProfileWorkExperienceInsert = Tables['profile_work_experiences']['Insert'];
 export type ProfileEducationInsert = Tables['profile_educations']['Insert'];
@@ -140,6 +175,11 @@ export type ProfileSkillCategoryInsert = Tables['profile_skill_categories']['Ins
 export type ProfileCertificationInsert = Tables['profile_certifications']['Insert'];
 export type ProfileReferenceInsert = Tables['profile_references']['Insert'];
 export type CertificationDocumentInsert = Tables['certification_documents']['Insert'];
+
+// NEW: Insert types for new profile tables
+export type ProfileMotivationVisionInsert = Tables['profile_motivation_vision']['Insert'];
+export type ProfileHighlightInsert = Tables['profile_highlights']['Insert'];
+export type ProfileProjectInsert = Tables['profile_projects']['Insert'];
 
 // Update types (what you pass to UPDATE queries)
 export type ProfileWorkExperienceUpdate = Tables['profile_work_experiences']['Update'];
@@ -149,6 +189,11 @@ export type ProfileCertificationUpdate = Tables['profile_certifications']['Updat
 export type ProfileReferenceUpdate = Tables['profile_references']['Update'];
 export type CertificationDocumentUpdate = Tables['certification_documents']['Update'];
 
+// NEW: Update types for new profile tables
+export type ProfileMotivationVisionUpdate = Tables['profile_motivation_vision']['Update'];
+export type ProfileHighlightUpdate = Tables['profile_highlights']['Update'];
+export type ProfileProjectUpdate = Tables['profile_projects']['Update'];
+
 // Helper type for creating new entries (omits auto-generated fields)
 export type NewProfileWorkExperience = Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
 export type NewProfileEducation = Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
@@ -157,3 +202,11 @@ export type NewProfileCertification = Omit<ProfileCertification, 'id' | 'user_id
 export type NewProfileReference = Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
 export type NewProfileKeyCompetence = Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
 export type NewCertificationDocument = Omit<CertificationDocument, 'id' | 'user_id' | 'uploaded_at'>;
+
+// NEW: Helper types for new profile tables
+export type NewProfileMotivationVision = Omit<ProfileMotivationVision, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+export type NewProfileHighlight = Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+export type NewProfileProject = Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+
+// Type alias for highlight types
+export type HighlightType = 'highlight' | 'achievement' | 'mehrwert' | 'usp';

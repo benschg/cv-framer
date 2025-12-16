@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       certification_documents: {
@@ -281,6 +306,57 @@ export type Database = {
             columns: ["key_competence_id"]
             isOneToOne: false
             referencedRelation: "profile_key_competences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cv_project_selections: {
+        Row: {
+          created_at: string | null
+          cv_id: string
+          description_override: string | null
+          display_order: number | null
+          id: string
+          is_favorite: boolean | null
+          is_selected: boolean | null
+          profile_project_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cv_id: string
+          description_override?: string | null
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          profile_project_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cv_id?: string
+          description_override?: string | null
+          display_order?: number | null
+          id?: string
+          is_favorite?: boolean | null
+          is_selected?: boolean | null
+          profile_project_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_project_selections_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cv_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_project_selections_profile_project_id_fkey"
+            columns: ["profile_project_id"]
+            isOneToOne: false
+            referencedRelation: "profile_projects"
             referencedColumns: ["id"]
           },
         ]
@@ -563,6 +639,30 @@ export type Database = {
           },
         ]
       }
+      policy_acknowledgments: {
+        Row: {
+          acknowledged_at: string | null
+          id: string
+          policy_type: string
+          policy_version: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          id?: string
+          policy_type: string
+          policy_version: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          id?: string
+          policy_type?: string
+          policy_version?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_certifications: {
         Row: {
           created_at: string | null
@@ -659,6 +759,42 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_highlights: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          metric: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          metric?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          metric?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_key_competences: {
         Row: {
           created_at: string | null
@@ -686,6 +822,51 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      profile_motivation_vision: {
+        Row: {
+          career_goals: string | null
+          created_at: string | null
+          how_passions_relate: string | null
+          id: string
+          mission: string | null
+          passions: string[] | null
+          purpose: string | null
+          updated_at: string | null
+          user_id: string
+          vision: string | null
+          what_drives_you: string | null
+          why_this_field: string | null
+        }
+        Insert: {
+          career_goals?: string | null
+          created_at?: string | null
+          how_passions_relate?: string | null
+          id?: string
+          mission?: string | null
+          passions?: string[] | null
+          purpose?: string | null
+          updated_at?: string | null
+          user_id: string
+          vision?: string | null
+          what_drives_you?: string | null
+          why_this_field?: string | null
+        }
+        Update: {
+          career_goals?: string | null
+          created_at?: string | null
+          how_passions_relate?: string | null
+          id?: string
+          mission?: string | null
+          passions?: string[] | null
+          purpose?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vision?: string | null
+          what_drives_you?: string | null
+          why_this_field?: string | null
         }
         Relationships: []
       }
@@ -734,6 +915,57 @@ export type Database = {
           upload_source?: string | null
           user_id?: string
           width?: number | null
+        }
+        Relationships: []
+      }
+      profile_projects: {
+        Row: {
+          created_at: string | null
+          current: boolean | null
+          description: string | null
+          display_order: number | null
+          end_date: string | null
+          id: string
+          name: string
+          outcome: string | null
+          role: string | null
+          start_date: string | null
+          technologies: string[] | null
+          updated_at: string | null
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current?: boolean | null
+          description?: string | null
+          display_order?: number | null
+          end_date?: string | null
+          id?: string
+          name: string
+          outcome?: string | null
+          role?: string | null
+          start_date?: string | null
+          technologies?: string[] | null
+          updated_at?: string | null
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current?: boolean | null
+          description?: string | null
+          display_order?: number | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          outcome?: string | null
+          role?: string | null
+          start_date?: string | null
+          technologies?: string[] | null
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1013,9 +1245,12 @@ export type Database = {
           github_url: string | null
           id: string
           linkedin_url: string | null
+          personal_motto: string | null
           portfolio_url: string | null
           preferred_language: string | null
           primary_photo_id: string | null
+          privacy_policy_accepted_at: string | null
+          privacy_policy_version: string | null
           timezone: string | null
           updated_at: string | null
           user_id: string
@@ -1028,9 +1263,12 @@ export type Database = {
           github_url?: string | null
           id?: string
           linkedin_url?: string | null
+          personal_motto?: string | null
           portfolio_url?: string | null
           preferred_language?: string | null
           primary_photo_id?: string | null
+          privacy_policy_accepted_at?: string | null
+          privacy_policy_version?: string | null
           timezone?: string | null
           updated_at?: string | null
           user_id: string
@@ -1043,9 +1281,12 @@ export type Database = {
           github_url?: string | null
           id?: string
           linkedin_url?: string | null
+          personal_motto?: string | null
           portfolio_url?: string | null
           preferred_language?: string | null
           primary_photo_id?: string | null
+          privacy_policy_accepted_at?: string | null
+          privacy_policy_version?: string | null
           timezone?: string | null
           updated_at?: string | null
           user_id?: string
@@ -1243,6 +1484,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
