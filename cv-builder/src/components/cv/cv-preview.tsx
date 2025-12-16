@@ -1,9 +1,11 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ReactNode } from 'react';
 import { formatDateRange } from '@/lib/utils';
 
@@ -27,6 +29,10 @@ interface CVPreviewProps {
 }
 
 export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U', photoElement, workExperiences, educations, skillCategories, keyCompetences }: CVPreviewProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [totalPages, setTotalPages] = useState(1);
+
   const accentColor = settings?.accentColor || '#2563eb';
   const textColor = settings?.textColor || '#111827';
   const fontFamily = settings?.fontFamily || 'sans-serif';
@@ -40,6 +46,21 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
   };
 
   const { width: pageWidth, height: pageHeight } = pageDimensions[format];
+
+  // Calculate total pages based on content height
+  useEffect(() => {
+    if (contentRef.current) {
+      const contentHeight = contentRef.current.scrollHeight;
+      // Convert mm to pixels (assuming 96 DPI: 1mm ≈ 3.7795px)
+      const pageHeightPx = pageHeight * 3.7795;
+      const calculatedPages = Math.ceil(contentHeight / pageHeightPx);
+      setTotalPages(Math.max(1, calculatedPages));
+      // Reset to page 1 if current page exceeds total
+      if (currentPage > calculatedPages) {
+        setCurrentPage(1);
+      }
+    }
+  }, [content, workExperiences, educations, skillCategories, keyCompetences, pageHeight, currentPage]);
 
   const name = userProfile
     ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim()
@@ -73,6 +94,9 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
     ? (keyCompetences?.filter(comp => comp.selection.is_selected) || [])
     : [];
 
+  const pageHeightPx = pageHeight * 3.7795; // Convert mm to px
+  const offsetY = -(currentPage - 1) * pageHeightPx;
+
   return (
     <div
       className="space-y-4"
@@ -81,21 +105,47 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         color: textColor
       }}
     >
+      {/* Page navigation */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mb-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Page viewport */}
       <div
-        className="bg-white p-8 rounded-lg shadow-sm border mx-auto text-[10pt] leading-relaxed relative"
+        className="bg-white rounded-lg shadow-sm border mx-auto relative"
         style={{
           width: `${pageWidth}mm`,
-          minHeight: `${pageHeight}mm`,
-          boxShadow: '0 0 0 1px rgba(0,0,0,0.1)',
-          backgroundImage: `repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent ${pageHeight - 1}mm,
-            rgba(200, 200, 200, 0.3) ${pageHeight - 1}mm,
-            rgba(200, 200, 200, 0.3) ${pageHeight}mm
-          )`
+          height: `${pageHeight}mm`,
+          overflow: 'hidden'
         }}
       >
+        <div
+          ref={contentRef}
+          className="p-8 text-[10pt] leading-relaxed transition-transform duration-300"
+          style={{
+            transform: `translateY(${offsetY}px)`,
+          }}
+        >
       {/* Header */}
       <header
         className="mb-5 pb-4"
@@ -315,17 +365,13 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
             </p>
           </div>
         )}
+        </div>
       </div>
 
       {/* Page info */}
-      <div className="text-center mt-4">
+      <div className="text-center mt-2">
         <p className="text-xs text-muted-foreground">
-          {format} format • Scroll to see all pages
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          {language === 'de'
-            ? 'Seitenumbrüche werden durch horizontale Linien angezeigt'
-            : 'Page breaks indicated by horizontal lines'}
+          {format} format • {totalPages} {totalPages === 1 ? 'page' : 'pages'}
         </p>
       </div>
     </div>
