@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/auth-context';
+import { useTranslations } from '@/hooks/use-translations';
 import { Loader2, Mail } from 'lucide-react';
 import { PrivacyPolicyDialog } from '@/components/legal/privacy-policy-dialog';
 import Link from 'next/link';
@@ -21,6 +22,7 @@ export function SignupForm() {
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
 
   const { signInWithOTP, verifyOTP } = useAuth();
+  const { t } = useTranslations('en'); // TODO: Get language from context when auth pages support language switching
   const router = useRouter();
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -68,20 +70,20 @@ export function SignupForm() {
             <Mail className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold">Check your email</h3>
+            <h3 className="font-semibold">{t('auth.verification.title')}</h3>
             <p className="text-sm text-muted-foreground">
-              We sent a code to <span className="font-medium">{email}</span>
+              {t('auth.verification.sentTo')} <span className="font-medium">{email}</span>
             </p>
           </div>
         </div>
 
         <form onSubmit={handleOtpSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="otp">Verification Code</Label>
+            <Label htmlFor="otp">{t('auth.verification.codeLabel')}</Label>
             <Input
               id="otp"
               type="text"
-              placeholder="Enter 6-digit code"
+              placeholder={t('auth.verification.codePlaceholder')}
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
               required
@@ -101,10 +103,10 @@ export function SignupForm() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verifying...
+                {t('auth.verification.verifying')}
               </>
             ) : (
-              'Verify Code'
+              t('auth.verification.verifyButton')
             )}
           </Button>
 
@@ -115,7 +117,7 @@ export function SignupForm() {
             onClick={handleBackToEmail}
             disabled={isLoading}
           >
-            Use a different email
+            {t('auth.verification.useDifferentEmail')}
           </Button>
         </form>
       </div>
@@ -125,11 +127,11 @@ export function SignupForm() {
   return (
     <form onSubmit={handleEmailSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t('auth.form.emailLabel')}</Label>
         <Input
           id="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder={t('auth.form.emailPlaceholder')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -173,15 +175,15 @@ export function SignupForm() {
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Sending code...
+            {t('auth.verification.sendingCode')}
           </>
         ) : (
-          'Continue with Email'
+          t('auth.form.continueWithEmail')
         )}
       </Button>
 
       <p className="text-xs text-center text-muted-foreground">
-        We'll send you a one-time code to create your account
+        {t('auth.form.signupMessage')}
       </p>
 
       {/* Privacy Policy Dialog */}
