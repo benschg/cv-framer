@@ -9,7 +9,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            &copy; {currentYear} {LEGAL_CONFIG.companyName === '[YOUR COMPANY NAME]' ? 'CV Builder' : LEGAL_CONFIG.companyName}. All rights reserved.
+            &copy; {currentYear} {LEGAL_CONFIG.companyName}. All rights reserved.
           </p>
           <nav className="flex gap-4 text-sm">
             <Link
