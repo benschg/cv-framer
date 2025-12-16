@@ -556,208 +556,213 @@ export default function CVEditorPage() {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 min-h-0">
-        <div className="max-w-4xl mx-auto space-y-6">
+      {/* Content - Split Layout */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 overflow-hidden">
+        {/* Left Side - Configuration (scrollable) */}
+        <div className="flex-1 lg:w-1/2 overflow-y-auto">
+          <div className="max-w-3xl mx-auto space-y-6 pb-6">
+            {/* Photo Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Photo Settings</CardTitle>
+                <CardDescription>
+                  Choose which photo to use for this CV (defaults to your primary photo)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PhotoSelector
+                  selectedPhotoId={content.selected_photo_id || null}
+                  onChange={(photoId) => updateField('selected_photo_id', photoId)}
+                  userInitials={getUserInitials(user)}
+                />
+              </CardContent>
+            </Card>
 
-      {/* Photo Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Photo Settings</CardTitle>
-          <CardDescription>
-            Choose which photo to use for this CV (defaults to your primary photo)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <PhotoSelector
-            selectedPhotoId={content.selected_photo_id || null}
-            onChange={(photoId) => updateField('selected_photo_id', photoId)}
-            userInitials={getUserInitials(user)}
-          />
-        </CardContent>
-      </Card>
+            {/* AI Generate Button */}
+            <Card className="border-dashed border-primary/50 bg-primary/5">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-medium">AI-Powered Generation</p>
+                      <p className="text-sm text-muted-foreground">
+                        Generate content from your profile data
+                        {cv.job_context?.company && ` tailored for ${cv.job_context.company}`}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleGenerateAll}
+                    disabled={generating}
+                    className="gap-2"
+                  >
+                    {generating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Generate Content
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* AI Generate Button */}
-      <Card className="border-dashed border-primary/50 bg-primary/5">
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <div>
-                <p className="font-medium">AI-Powered Generation</p>
-                <p className="text-sm text-muted-foreground">
-                  Generate content from your profile data
-                  {cv.job_context?.company && ` tailored for ${cv.job_context.company}`}
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={handleGenerateAll}
-              disabled={generating}
-              className="gap-2"
-            >
-              {generating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Generate Content
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            {/* Profile Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile</CardTitle>
+                <CardDescription>Your professional summary and tagline</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="tagline">Tagline</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => handleRegenerateSection('tagline')}
+                      disabled={regeneratingSection === 'tagline'}
+                    >
+                      {regeneratingSection === 'tagline' ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3" />
+                      )}
+                      Regenerate
+                    </Button>
+                  </div>
+                  <Input
+                    id="tagline"
+                    placeholder="e.g., Senior Software Engineer | React & Node.js"
+                    value={content.tagline || ''}
+                    onChange={(e) => updateField('tagline', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="profile">Professional Summary</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs gap-1"
+                      onClick={() => handleRegenerateSection('profile')}
+                      disabled={regeneratingSection === 'profile'}
+                    >
+                      {regeneratingSection === 'profile' ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3" />
+                      )}
+                      Regenerate
+                    </Button>
+                  </div>
+                  <Textarea
+                    id="profile"
+                    placeholder="Write a brief summary of your professional background..."
+                    rows={4}
+                    value={content.profile || ''}
+                    onChange={(e) => updateField('profile', e.target.value)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Profile Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Your professional summary and tagline</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="tagline">Tagline</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs gap-1"
-                onClick={() => handleRegenerateSection('tagline')}
-                disabled={regeneratingSection === 'tagline'}
-              >
-                {regeneratingSection === 'tagline' ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3 w-3" />
-                )}
-                Regenerate
-              </Button>
-            </div>
-            <Input
-              id="tagline"
-              placeholder="e.g., Senior Software Engineer | React & Node.js"
-              value={content.tagline || ''}
-              onChange={(e) => updateField('tagline', e.target.value)}
+            {/* Work Experience Section */}
+            <CVWorkExperienceSection
+              cvId={cvId}
+              workExperiences={workExperiences}
+              onChange={setWorkExperiences}
+              language={cv.language}
+              showWorkExperience={cv.display_settings?.showWorkExperience !== false}
+              onShowWorkExperienceChange={(show) => updateDisplaySettings('showWorkExperience', show)}
+            />
+
+            {/* Education Section */}
+            <CVEducationSection
+              cvId={cvId}
+              educations={educations}
+              onChange={setEducations}
+              language={cv.language}
+              showEducation={cv.display_settings?.showEducation !== false}
+              onShowEducationChange={(show) => updateDisplaySettings('showEducation', show)}
+            />
+
+            {/* Skills Section */}
+            <CVSkillCategoriesSection
+              cvId={cvId}
+              skillCategories={skillCategories}
+              onChange={setSkillCategories}
+              language={cv.language}
+              showSkills={cv.display_settings?.showSkills !== false}
+              onShowSkillsChange={(show) => updateDisplaySettings('showSkills', show)}
+            />
+
+            {/* Key Competences Section */}
+            <CVKeyCompetencesSection
+              cvId={cvId}
+              keyCompetences={keyCompetences}
+              onChange={setKeyCompetences}
+              language={cv.language}
+              showKeyCompetences={cv.display_settings?.showKeyCompetences !== false}
+              onShowKeyCompetencesChange={(show) => updateDisplaySettings('showKeyCompetences', show)}
+            />
+
+            {/* Projects Section */}
+            <CVProjectsSection
+              cvId={cvId}
+              projects={projects}
+              onChange={setProjects}
+              language={cv.language}
+              showProjects={cv.display_settings?.showProjects !== false}
+              onShowProjectsChange={(show) => updateDisplaySettings('showProjects', show)}
+            />
+
+            {/* Format Settings */}
+            <FormatSettings
+              displaySettings={cv.display_settings}
+              onUpdateSettings={updateDisplaySettings}
             />
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="profile">Professional Summary</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs gap-1"
-                onClick={() => handleRegenerateSection('profile')}
-                disabled={regeneratingSection === 'profile'}
-              >
-                {regeneratingSection === 'profile' ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3 w-3" />
-                )}
-                Regenerate
-              </Button>
-            </div>
-            <Textarea
-              id="profile"
-              placeholder="Write a brief summary of your professional background..."
-              rows={4}
-              value={content.profile || ''}
-              onChange={(e) => updateField('profile', e.target.value)}
+        </div>
+
+        {/* Right Side - Preview (scrollable, sticky on large screens) */}
+        <div className="flex-1 lg:w-1/2">
+          <div className="sticky top-0">
+            <CVPreviewSection
+              content={content}
+              language={cv.language}
+              displaySettings={cv.display_settings}
+              photoUrl={photoUrl}
+              userInitials={getUserInitials(user)}
+              photos={photos}
+              primaryPhoto={primaryPhoto}
+              onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
+              onFormatChange={(format) => updateDisplaySettings('format', format)}
+              workExperiences={workExperiences}
+              educations={educations}
+              skillCategories={skillCategories}
+              keyCompetences={keyCompetences}
+              userProfile={user ? {
+                id: user.id,
+                user_id: user.id,
+                first_name: getUserName(user).firstName,
+                last_name: getUserName(user).lastName,
+                email: user.email,
+                phone: getUserPhone(user),
+                location: getUserLocation(user),
+                preferred_language: cv.language,
+                created_at: user.created_at,
+                updated_at: user.updated_at || user.created_at,
+              } : undefined}
             />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Work Experience Section */}
-      <CVWorkExperienceSection
-        cvId={cvId}
-        workExperiences={workExperiences}
-        onChange={setWorkExperiences}
-        language={cv.language}
-        showWorkExperience={cv.display_settings?.showWorkExperience !== false}
-        onShowWorkExperienceChange={(show) => updateDisplaySettings('showWorkExperience', show)}
-      />
-
-      {/* Education Section */}
-      <CVEducationSection
-        cvId={cvId}
-        educations={educations}
-        onChange={setEducations}
-        language={cv.language}
-        showEducation={cv.display_settings?.showEducation !== false}
-        onShowEducationChange={(show) => updateDisplaySettings('showEducation', show)}
-      />
-
-      {/* Skills Section */}
-      <CVSkillCategoriesSection
-        cvId={cvId}
-        skillCategories={skillCategories}
-        onChange={setSkillCategories}
-        language={cv.language}
-        showSkills={cv.display_settings?.showSkills !== false}
-        onShowSkillsChange={(show) => updateDisplaySettings('showSkills', show)}
-      />
-
-      {/* Key Competences Section */}
-      <CVKeyCompetencesSection
-        cvId={cvId}
-        keyCompetences={keyCompetences}
-        onChange={setKeyCompetences}
-        language={cv.language}
-        showKeyCompetences={cv.display_settings?.showKeyCompetences !== false}
-        onShowKeyCompetencesChange={(show) => updateDisplaySettings('showKeyCompetences', show)}
-      />
-
-      {/* Projects Section */}
-      <CVProjectsSection
-        cvId={cvId}
-        projects={projects}
-        onChange={setProjects}
-        language={cv.language}
-        showProjects={cv.display_settings?.showProjects !== false}
-        onShowProjectsChange={(show) => updateDisplaySettings('showProjects', show)}
-      />
-
-      {/* Format Settings */}
-      <FormatSettings
-        displaySettings={cv.display_settings}
-        onUpdateSettings={updateDisplaySettings}
-      />
-
-      {/* Preview Section */}
-      <CVPreviewSection
-        content={content}
-        language={cv.language}
-        displaySettings={cv.display_settings}
-        photoUrl={photoUrl}
-        userInitials={getUserInitials(user)}
-        photos={photos}
-        primaryPhoto={primaryPhoto}
-        onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
-        onFormatChange={(format) => updateDisplaySettings('format', format)}
-        workExperiences={workExperiences}
-        educations={educations}
-        skillCategories={skillCategories}
-        keyCompetences={keyCompetences}
-        userProfile={user ? {
-          id: user.id,
-          user_id: user.id,
-          first_name: getUserName(user).firstName,
-          last_name: getUserName(user).lastName,
-          email: user.email,
-          phone: getUserPhone(user),
-          location: getUserLocation(user),
-          preferred_language: cv.language,
-          created_at: user.created_at,
-          updated_at: user.updated_at || user.created_at,
-        } : undefined}
-      />
-
         </div>
       </div>
     </>
