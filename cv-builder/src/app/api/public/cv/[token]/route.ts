@@ -49,27 +49,41 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'CV not found' }, { status: 404 });
     }
 
-    // Fetch user profile based on privacy level
+    // Fetch user from auth to get profile data from user_metadata
     let userProfile = null;
     if (shareLink.privacy_level !== 'full') {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', shareLink.user_id)
-        .single();
+      // Get user data from auth (admin access required for service role)
+      const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(shareLink.user_id);
 
-      if (profile) {
+      if (!userError && user) {
+        const firstName = user.user_metadata?.first_name || '';
+        const lastName = user.user_metadata?.last_name || '';
+        const email = user.email || '';
+        const phone = user.user_metadata?.phone || '';
+        const location = user.user_metadata?.location || '';
+
         // Filter profile data based on privacy level
         if (shareLink.privacy_level === 'personal') {
           // Hide contact info but show name and location
           userProfile = {
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            location: profile.location,
+            first_name: firstName,
+            last_name: lastName,
+            location: location,
           };
         } else {
           // No privacy - show everything
-          userProfile = profile;
+          userProfile = {
+            id: user.id,
+            user_id: user.id,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+            location: location,
+            preferred_language: (cv.language || 'en') as 'en' | 'de',
+            created_at: user.created_at,
+            updated_at: user.updated_at || user.created_at,
+          };
         }
       }
     }

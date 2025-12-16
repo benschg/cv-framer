@@ -36,12 +36,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'CV not found' }, { status: 404 });
     }
 
-    // Fetch user profile for header info
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
+    // Create user profile from auth.user_metadata for header info
+    const profile: UserProfile | undefined = user ? {
+      id: user.id,
+      user_id: user.id,
+      first_name: user.user_metadata?.first_name || '',
+      last_name: user.user_metadata?.last_name || '',
+      email: user.email || '',
+      phone: user.user_metadata?.phone || '',
+      location: user.user_metadata?.location || '',
+      preferred_language: (cv.language || 'en') as 'en' | 'de',
+      created_at: user.created_at,
+      updated_at: user.updated_at || user.created_at,
+    } : undefined;
 
     // Determine photo URL based on CV content selection
     let photoUrl: string | null = null;
@@ -87,7 +94,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Generate HTML
     const html = generateCVHTML({
       cv: cv as CVDocument,
-      userProfile: profile as UserProfile | undefined,
+      userProfile: profile,
       photoUrl,
     });
 
