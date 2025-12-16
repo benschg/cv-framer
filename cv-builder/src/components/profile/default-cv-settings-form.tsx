@@ -8,12 +8,16 @@ import { useUserPreferences } from '@/contexts/user-preferences-context';
 
 interface DefaultCvSettingsFormProps {
   defaultTagline: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (name: string, value: string) => void;
 }
 
 export function DefaultCvSettingsForm({ defaultTagline, onChange }: DefaultCvSettingsFormProps) {
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.name, e.target.value);
+  };
 
   return (
     <Card>
@@ -30,7 +34,7 @@ export function DefaultCvSettingsForm({ defaultTagline, onChange }: DefaultCvSet
             id="defaultTagline"
             name="defaultTagline"
             value={defaultTagline}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder={t('profile.defaultCvSettings.taglinePlaceholder')}
           />
           <p className="text-xs text-muted-foreground">

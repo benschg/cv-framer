@@ -11,11 +11,15 @@ interface ProfessionalLinksFormProps {
     githubUrl: string;
     websiteUrl: string;
   };
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (name: string, value: string) => void;
 }
 
 export function ProfessionalLinksForm({ formData, onChange }: ProfessionalLinksFormProps) {
   const { t } = useAppTranslation();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.name, e.target.value);
+  };
 
   return (
     <Card>
@@ -33,7 +37,7 @@ export function ProfessionalLinksForm({ formData, onChange }: ProfessionalLinksF
             name="linkedinUrl"
             type="url"
             value={formData.linkedinUrl}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder={t('profile.professionalLinks.linkedinPlaceholder')}
           />
         </div>
@@ -44,7 +48,7 @@ export function ProfessionalLinksForm({ formData, onChange }: ProfessionalLinksF
             name="githubUrl"
             type="url"
             value={formData.githubUrl}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder={t('profile.professionalLinks.githubPlaceholder')}
           />
         </div>
@@ -55,7 +59,7 @@ export function ProfessionalLinksForm({ formData, onChange }: ProfessionalLinksF
             name="websiteUrl"
             type="url"
             value={formData.websiteUrl}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder={t('profile.professionalLinks.websitePlaceholder')}
           />
         </div>
