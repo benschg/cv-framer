@@ -55,6 +55,7 @@ export function AppSidebar() {
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const navigation = [
     {
@@ -91,6 +92,10 @@ export function AppSidebar() {
       ],
     },
   ];
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const loadPrimaryPhoto = async () => {
@@ -151,38 +156,40 @@ export function AppSidebar() {
           <span className="text-sm text-muted-foreground">{t('nav.user.theme')}</span>
           <ThemeToggle />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={avatarUrl} />
-              <AvatarFallback>{userInitials}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 text-left text-sm">
-              <p className="font-medium truncate">
-                {displayName}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {user?.email}
-              </p>
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuItem asChild>
-              <Link href="/settings" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                {t('nav.user.settings')}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => signOut()}
-              className="flex items-center gap-2 text-destructive focus:text-destructive"
-            >
-              <LogOut className="h-4 w-4" />
-              {t('nav.user.signOut')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {mounted && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={avatarUrl} />
+                <AvatarFallback>{userInitials}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 text-left text-sm">
+                <p className="font-medium truncate">
+                  {displayName}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user?.email}
+                </p>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  {t('nav.user.settings')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => signOut()}
+                className="flex items-center gap-2 text-destructive focus:text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+                {t('nav.user.signOut')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </SidebarFooter>
     </Sidebar>
   );
