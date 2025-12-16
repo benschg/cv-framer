@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Check, UserX, Minus, Plus } from 'lucide-react';
-import { CVPreview } from './cv-preview';
+import { CVPreviewMultiPage } from './cv-preview-multi-page';
 import { getPhotoPublicUrl } from '@/services/profile-photo.service';
 import type { CVContent, DisplaySettings, UserProfile } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
@@ -24,6 +24,7 @@ interface CVPreviewSectionProps {
   primaryPhoto: ProfilePhoto | null;
   onPhotoSelect: (photoId: string | null) => void;
   onFormatChange: (format: 'A4' | 'Letter') => void;
+  onPageBreakToggle: (sectionId: string) => void;
   workExperiences?: CVWorkExperienceWithSelection[];
   educations?: CVEducationWithSelection[];
   skillCategories?: CVSkillCategoryWithSelection[];
@@ -41,6 +42,7 @@ export function CVPreviewSection({
   primaryPhoto,
   onPhotoSelect,
   onFormatChange,
+  onPageBreakToggle,
   workExperiences,
   educations,
   skillCategories,
@@ -269,7 +271,7 @@ export function CVPreviewSection({
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef} className="overflow-auto">
+        <div ref={containerRef} className="overflow-y-auto overflow-x-hidden">
           <div
             ref={previewRef}
             style={{
@@ -278,7 +280,7 @@ export function CVPreviewSection({
               width: `${100 / (effectiveZoom / 100)}%`,
             }}
           >
-            <CVPreview
+            <CVPreviewMultiPage
               content={content}
               language={language}
               settings={displaySettings}
@@ -290,6 +292,7 @@ export function CVPreviewSection({
               skillCategories={skillCategories}
               keyCompetences={keyCompetences}
               userProfile={userProfile}
+              onPageBreakToggle={onPageBreakToggle}
             />
           </div>
         </div>

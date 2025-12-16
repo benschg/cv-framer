@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { ReactNode } from 'react';
 import { formatDateRange } from '@/lib/utils';
 
@@ -29,10 +27,6 @@ interface CVPreviewProps {
 }
 
 export function CVPreview({ content, userProfile, settings, language = 'en', photoUrl, userInitials = 'U', photoElement, workExperiences, educations, skillCategories, keyCompetences }: CVPreviewProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [totalPages, setTotalPages] = useState(1);
-
   const accentColor = settings?.accentColor || '#2563eb';
   const textColor = settings?.textColor || '#111827';
   const fontFamily = settings?.fontFamily || 'sans-serif';
@@ -46,21 +40,6 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
   };
 
   const { width: pageWidth, height: pageHeight } = pageDimensions[format];
-
-  // Calculate total pages based on content height
-  useEffect(() => {
-    if (contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      // Convert mm to pixels (assuming 96 DPI: 1mm ≈ 3.7795px)
-      const pageHeightPx = pageHeight * 3.7795;
-      const calculatedPages = Math.ceil(contentHeight / pageHeightPx);
-      setTotalPages(Math.max(1, calculatedPages));
-      // Reset to page 1 if current page exceeds total
-      if (currentPage > calculatedPages) {
-        setCurrentPage(1);
-      }
-    }
-  }, [content, workExperiences, educations, skillCategories, keyCompetences, pageHeight, currentPage]);
 
   const name = userProfile
     ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim()
@@ -94,58 +73,27 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
     ? (keyCompetences?.filter(comp => comp.selection.is_selected) || [])
     : [];
 
-  const pageHeightPx = pageHeight * 3.7795; // Convert mm to px
-  const offsetY = -(currentPage - 1) * pageHeightPx;
-
+  // Simple single-page layout for now (will need multi-page logic later)
   return (
     <div
-      className="space-y-4"
+      className="space-y-6"
       style={{
         fontFamily: fontFamily,
         color: textColor
       }}
     >
-      {/* Page navigation */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
-      {/* Page viewport */}
+      {/* CV Page 1 */}
       <div
-        className="bg-white rounded-lg shadow-sm border mx-auto relative"
+        className="bg-white rounded-lg shadow-sm border mx-auto p-8 text-[10pt] leading-relaxed print:shadow-none print:border-0"
         style={{
           width: `${pageWidth}mm`,
           height: `${pageHeight}mm`,
-          overflow: 'hidden'
+          maxHeight: `${pageHeight}mm`,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        <div
-          ref={contentRef}
-          className="p-8 text-[10pt] leading-relaxed transition-transform duration-300"
-          style={{
-            transform: `translateY(${offsetY}px)`,
-          }}
-        >
       {/* Header */}
       <header
         className="mb-5 pb-4"
@@ -180,10 +128,10 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
       {/* Profile */}
       {content.profile && (
-        <section className="mb-5">
+        <section className="mb-5" style={{ pageBreakInside: 'avoid' }}>
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.profile}
           </h2>
@@ -196,7 +144,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         <section className="mb-5">
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.workExperience}
           </h2>
@@ -212,7 +160,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
                   );
 
               return (
-                <div key={exp.id} className="text-sm">
+                <div key={exp.id} className="text-sm" style={{ pageBreakInside: 'avoid' }}>
                   <div className="flex justify-between items-baseline">
                     <div className="flex items-center gap-1">
                       <span className="font-semibold">{exp.title}</span>
@@ -250,7 +198,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         <section className="mb-5">
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.education}
           </h2>
@@ -259,7 +207,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
               const description = edu.selection.description_override ?? edu.description;
 
               return (
-                <div key={edu.id} className="text-sm">
+                <div key={edu.id} className="text-sm" style={{ pageBreakInside: 'avoid' }}>
                   <div className="flex justify-between items-baseline">
                     <div className="flex items-center gap-1">
                       <span className="font-semibold">{edu.degree}</span>
@@ -290,10 +238,10 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
       {/* Skills */}
       {selectedSkillCategories.length > 0 && (
-        <section className="mb-5">
+        <section className="mb-5" style={{ pageBreakInside: 'avoid' }}>
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.skills}
           </h2>
@@ -326,10 +274,10 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
       {/* Key Competences */}
       {selectedKeyCompetences.length > 0 && (
-        <section className="mb-5">
+        <section className="mb-5" style={{ pageBreakInside: 'avoid' }}>
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.keyCompetences}
           </h2>
@@ -338,7 +286,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
               const description = comp.selection.description_override ?? comp.description;
 
               return (
-                <div key={comp.id} className="text-sm">
+                <div key={comp.id} className="text-sm" style={{ pageBreakInside: 'avoid' }}>
                   <div className="flex items-center gap-1">
                     <span className="font-semibold">{comp.title}</span>
                     {comp.selection.is_favorite && (
@@ -365,13 +313,12 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
             </p>
           </div>
         )}
-        </div>
       </div>
 
       {/* Page info */}
       <div className="text-center mt-2">
         <p className="text-xs text-muted-foreground">
-          {format} format • {totalPages} {totalPages === 1 ? 'page' : 'pages'}
+          {format} format
         </p>
       </div>
     </div>

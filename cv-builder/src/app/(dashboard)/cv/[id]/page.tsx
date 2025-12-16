@@ -215,6 +215,7 @@ export default function CVEditorPage() {
         is_selected: exp.selection.is_selected,
         is_favorite: exp.selection.is_favorite,
         display_order: index,
+        display_mode: exp.selection.display_mode,
         description_override: exp.selection.description_override,
         selected_bullet_indices: exp.selection.selected_bullet_indices,
       }));
@@ -281,6 +282,20 @@ export default function CVEditorPage() {
       ...cv.display_settings,
       [field]: value,
     };
+    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+  };
+
+  const handlePageBreakToggle = (sectionId: string) => {
+    if (!cv) return;
+    const currentBreaks = (cv.display_settings as DisplaySettings & { pageBreaks?: string[] })?.pageBreaks || [];
+    const updatedBreaks = currentBreaks.includes(sectionId)
+      ? currentBreaks.filter((id: string) => id !== sectionId)
+      : [...currentBreaks, sectionId];
+
+    const updatedSettings = {
+      ...cv.display_settings,
+      pageBreaks: updatedBreaks,
+    } as DisplaySettings;
     setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
   };
 
@@ -732,37 +747,36 @@ export default function CVEditorPage() {
           </div>
         </div>
 
-        {/* Right Side - Preview (scrollable, sticky on large screens) */}
-        <div className="flex-1 lg:w-1/2">
-          <div className="sticky top-0">
-            <CVPreviewSection
-              content={content}
-              language={cv.language}
-              displaySettings={cv.display_settings}
-              photoUrl={photoUrl}
-              userInitials={getUserInitials(user)}
-              photos={photos}
-              primaryPhoto={primaryPhoto}
-              onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
-              onFormatChange={(format) => updateDisplaySettings('format', format)}
-              workExperiences={workExperiences}
-              educations={educations}
-              skillCategories={skillCategories}
-              keyCompetences={keyCompetences}
-              userProfile={user ? {
-                id: user.id,
-                user_id: user.id,
-                first_name: getUserName(user).firstName,
-                last_name: getUserName(user).lastName,
-                email: user.email,
-                phone: getUserPhone(user),
-                location: getUserLocation(user),
-                preferred_language: cv.language,
-                created_at: user.created_at,
-                updated_at: user.updated_at || user.created_at,
-              } : undefined}
-            />
-          </div>
+        {/* Right Side - Preview (scrollable) */}
+        <div className="flex-1 lg:w-1/2 overflow-y-auto">
+          <CVPreviewSection
+            content={content}
+            language={cv.language}
+            displaySettings={cv.display_settings}
+            photoUrl={photoUrl}
+            userInitials={getUserInitials(user)}
+            photos={photos}
+            primaryPhoto={primaryPhoto}
+            onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
+            onFormatChange={(format) => updateDisplaySettings('format', format)}
+            onPageBreakToggle={handlePageBreakToggle}
+            workExperiences={workExperiences}
+            educations={educations}
+            skillCategories={skillCategories}
+            keyCompetences={keyCompetences}
+            userProfile={user ? {
+              id: user.id,
+              user_id: user.id,
+              first_name: getUserName(user).firstName,
+              last_name: getUserName(user).lastName,
+              email: user.email,
+              phone: getUserPhone(user),
+              location: getUserLocation(user),
+              preferred_language: cv.language,
+              created_at: user.created_at,
+              updated_at: user.updated_at || user.created_at,
+            } : undefined}
+          />
         </div>
       </div>
     </div>

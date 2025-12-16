@@ -144,6 +144,7 @@ export interface DisplaySettings {
   accentColor?: string;
   fontFamily?: string;
   textColor?: string;
+  pageBreaks?: string[]; // Section IDs that should start a new page
 }
 
 export interface WerbeflaechenSnapshot {
