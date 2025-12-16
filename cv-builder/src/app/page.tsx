@@ -16,6 +16,7 @@ import {
   Download,
 } from "lucide-react";
 import Image from "next/image";
+import { Footer } from "@/components/shared/footer";
 
 export default function LandingPage() {
   return (
@@ -208,11 +209,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} CV Builder. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, Lock, MapPin, Mail, Phone, Linkedin, Github } from 'lucide-react';
 import type { CVDocument, CVContent, UserProfile, ShareLink } from '@/types/cv.types';
+import { Footer } from '@/components/shared/footer';
 
 interface SharedCVData {
   cv: CVDocument;
@@ -154,9 +155,7 @@ export default function PublicCVPage() {
         )}
 
         {/* Footer */}
-        <footer className="text-center text-sm text-muted-foreground py-4">
-          <p>Created with CV Builder</p>
-        </footer>
+        <Footer />
       </div>
     </div>
   );

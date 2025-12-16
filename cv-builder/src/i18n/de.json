@@ -342,5 +342,55 @@
     "forgotPassword": "Passwort vergessen?",
     "noAccount": "Noch kein Konto?",
     "hasAccount": "Bereits ein Konto?"
+  },
+  "legal": {
+    "privacy": {
+      "title": "Datenschutzerklärung",
+      "lastUpdated": "Letzte Aktualisierung",
+      "version": "Version",
+      "effectiveDate": "Gültig ab",
+      "tableOfContents": "Inhaltsverzeichnis",
+      "readPolicy": "Datenschutzerklärung",
+      "iAccept": "Ich akzeptiere",
+      "iAgree": "Ich habe die",
+      "and": "und die",
+      "viewChanges": "Änderungen ansehen",
+      "downloadData": "Ihre Daten herunterladen",
+      "exportData": "Daten exportieren",
+      "exportingData": "Exportiere...",
+      "dataExported": "Ihre Daten wurden heruntergeladen",
+      "sections": {
+        "introduction": "Einleitung",
+        "informationCollection": "Welche Informationen wir sammeln",
+        "howWeUse": "Wie wir Ihre Informationen verwenden",
+        "aiProcessing": "KI-gestützte Funktionen",
+        "dataStorage": "Datenspeicherung und Sicherheit",
+        "thirdParty": "Drittanbieterdienste",
+        "yourRights": "Ihre Datenschutzrechte",
+        "cookies": "Cookies und Tracking",
+        "childrens": "Datenschutz für Kinder",
+        "international": "Internationale Datenübermittlungen",
+        "sharing": "Weitergabe Ihrer Daten",
+        "changes": "Änderungen dieser Richtlinie",
+        "contact": "Kontakt"
+      }
+    },
+    "footer": {
+      "copyright": "Alle Rechte vorbehalten",
+      "privacy": "Datenschutzerklärung",
+      "terms": "Nutzungsbedingungen",
+      "contact": "Kontakt"
+    },
+    "updateBanner": {
+      "message": "Wir haben unsere Datenschutzerklärung aktualisiert. Bitte überprüfen Sie die Änderungen.",
+      "review": "Überprüfen",
+      "understand": "Verstanden"
+    },
+    "legalAndPrivacy": "Rechtliches & Datenschutz",
+    "legalAndPrivacyDescription": "Überprüfen Sie unsere Richtlinien und verwalten Sie Ihre Daten",
+    "viewPolicy": "Ansehen",
+    "learnHowWeHandle": "Erfahren Sie, wie wir mit Ihren Daten umgehen",
+    "exportAllData": "Exportieren Sie alle Ihre Informationen (JSON)",
+    "termsOfService": "Nutzungsbedingungen"
   }
 }

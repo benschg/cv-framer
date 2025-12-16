@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/auth-context';
 import { useTranslations } from '@/hooks/use-translations';
-import { AlertCircle, Globe, Moon, Sun } from 'lucide-react';
+import { AlertCircle, Download, ExternalLink, FileText, Globe, Moon, Sun } from 'lucide-react';
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -129,6 +130,68 @@ export default function SettingsPage() {
             <Button variant="outline" onClick={() => signOut()}>
               {t('settings.signOut')}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Legal & Privacy */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Legal & Privacy
+          </CardTitle>
+          <CardDescription>
+            Review our legal documents and manage your data
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-2 border-b">
+              <div>
+                <Label className="text-base">Privacy Policy</Label>
+                <p className="text-sm text-muted-foreground">
+                  How we collect, use, and protect your data
+                </p>
+              </div>
+              <Link href="/privacy" target="_blank">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  View
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="flex items-center justify-between py-2 border-b">
+              <div>
+                <Label className="text-base">Terms of Service</Label>
+                <p className="text-sm text-muted-foreground">
+                  Rules and guidelines for using our service
+                </p>
+              </div>
+              <Link href="/terms" target="_blank">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  View
+                  <ExternalLink className="h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <div>
+                <Label className="text-base">Download Your Data</Label>
+                <p className="text-sm text-muted-foreground">
+                  Export all your personal data in JSON format (GDPR Article 15)
+                </p>
+              </div>
+              <Button variant="outline" size="sm" className="gap-2" disabled>
+                <Download className="h-4 w-4" />
+                Export Data
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Data export functionality coming soon
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -342,5 +342,55 @@
     "forgotPassword": "Forgot Password?",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?"
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last Updated",
+      "version": "Version",
+      "effectiveDate": "Effective Date",
+      "tableOfContents": "Table of Contents",
+      "readPolicy": "Privacy Policy",
+      "iAccept": "I Accept",
+      "iAgree": "I have read and agree to the",
+      "and": "and",
+      "viewChanges": "View Changes",
+      "downloadData": "Download Your Data",
+      "exportData": "Export Data",
+      "exportingData": "Exporting...",
+      "dataExported": "Your data has been downloaded",
+      "sections": {
+        "introduction": "Introduction",
+        "informationCollection": "Information We Collect",
+        "howWeUse": "How We Use Your Information",
+        "aiProcessing": "AI-Powered Features",
+        "dataStorage": "Data Storage and Security",
+        "thirdParty": "Third-Party Services",
+        "yourRights": "Your Privacy Rights",
+        "cookies": "Cookies and Tracking",
+        "childrens": "Children's Privacy",
+        "international": "International Data Transfers",
+        "sharing": "Sharing Your Data",
+        "changes": "Changes to This Policy",
+        "contact": "Contact Us"
+      }
+    },
+    "footer": {
+      "copyright": "All rights reserved",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact"
+    },
+    "updateBanner": {
+      "message": "We've updated our Privacy Policy. Please review the changes.",
+      "review": "Review",
+      "understand": "I Understand"
+    },
+    "legalAndPrivacy": "Legal & Privacy",
+    "legalAndPrivacyDescription": "Review our policies and manage your data",
+    "viewPolicy": "View",
+    "learnHowWeHandle": "Learn how we handle your data",
+    "exportAllData": "Export all your information (JSON)",
+    "termsOfService": "Terms of Service"
   }
 }
