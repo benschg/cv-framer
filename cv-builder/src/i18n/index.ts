@@ -46,23 +46,50 @@ const de = {
   errors: errorsDe,
 };
 
-export type Language = 'en' | 'de';
+export type Language = 'en' | 'de' | 'dev';
 
 export type TranslationKeys = typeof en;
 
-const translations: Record<Language, TranslationKeys> = {
+const translations: Record<'en' | 'de', TranslationKeys> = {
   en,
   de,
 };
 
+// Import pseudo-localization utility
+import { pseudoLocalizeToKannada, isPseudoLocaleAvailable } from './utils/pseudo-localize';
+
+// Cache for generated Kannada translations (lazy-initialized)
+let kannadaCache: TranslationKeys | null = null;
+
 export function getTranslations(language: Language): TranslationKeys {
+  // Handle 'dev' pseudo-locale
+  if (language === 'dev') {
+    if (!isPseudoLocaleAvailable()) {
+      console.warn('Pseudo-locale "dev" is only available in development mode. Falling back to English.');
+      return translations.en;
+    }
+
+    // Lazy initialization: generate once and cache
+    if (!kannadaCache) {
+      kannadaCache = pseudoLocalizeToKannada(translations.en) as TranslationKeys;
+    }
+    return kannadaCache;
+  }
+
   return translations[language];
 }
 
 // Helper to get nested translation value by dot notation path
 export function t(language: Language, path: string): string {
   const keys = path.split('.');
-  let value: unknown = translations[language];
+  let value: unknown;
+
+  // Get translations for the requested language (including 'dev')
+  if (language === 'dev') {
+    value = getTranslations('dev');
+  } else {
+    value = translations[language];
+  }
 
   for (const key of keys) {
     if (value && typeof value === 'object' && key in value) {

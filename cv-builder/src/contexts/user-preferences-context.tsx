@@ -43,9 +43,13 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         .single();
 
       if (data && !error) {
+        // Validate language is 'en' or 'de' (not 'dev' from database)
+        const dbLanguage = data.preferred_language || 'en';
+        const validLanguage = (dbLanguage === 'de' ? 'de' : 'en') as Language;
+
         setPreferences(prev => ({
           ...prev,
-          language: (data.preferred_language || 'en') as Language,
+          language: validLanguage,
         }));
       }
 
@@ -70,8 +74,19 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
       return { error: 'User not authenticated' };
     }
 
+    // Update local state immediately for all languages
     setPreferences(prev => ({ ...prev, language }));
 
+    // Skip database save for 'dev' language (session-only)
+    if (language === 'dev') {
+      if (process.env.NODE_ENV !== 'development') {
+        console.warn('Pseudo-locale "dev" should only be used in development mode.');
+      }
+      // Don't save to database, just keep in state
+      return { error: null };
+    }
+
+    // Save to database for 'en' and 'de'
     const { error } = await supabase
       .from('user_profiles')
       .update({ preferred_language: language })
