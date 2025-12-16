@@ -586,7 +586,7 @@ export default function CVEditorPage() {
               <div>
                 <p className="font-medium">AI-Powered Generation</p>
                 <p className="text-sm text-muted-foreground">
-                  Generate content from your Werbeflaechen data
+                  Generate content from your profile data
                   {cv.job_context?.company && ` tailored for ${cv.job_context.company}`}
                 </p>
               </div>
