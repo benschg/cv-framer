@@ -132,6 +132,7 @@ export const DisplaySettingsSchema = z.object({
   showEducation: z.boolean().default(true),
   showSkills: z.boolean().default(true),
   showKeyCompetences: z.boolean().default(true),
+  showProjects: z.boolean().default(true),
   privacyLevel: PrivacyLevelSchema,
   accentColor: z.string().optional(),
   fontFamily: z.string().optional(),

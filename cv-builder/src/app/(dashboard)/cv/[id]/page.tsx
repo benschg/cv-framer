@@ -32,6 +32,7 @@ import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-sect
 import { CVEducationSection } from '@/components/cv/cv-education-section';
 import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
 import { CVKeyCompetencesSection } from '@/components/cv/cv-key-competences-section';
+import { CVProjectsSection } from '@/components/cv/cv-projects-section';
 import { useAuth } from '@/contexts/auth-context';
 import { getUserInitials, getUserName, getUserPhone, getUserLocation } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
@@ -39,9 +40,10 @@ import { fetchCVWorkExperiences, bulkUpsertCVWorkExperienceSelections } from '@/
 import { fetchCVEducations, bulkUpsertCVEducationSelections } from '@/services/cv-education.service';
 import { fetchCVSkillCategories, bulkUpsertCVSkillCategorySelections } from '@/services/cv-skill-categories.service';
 import { fetchCVKeyCompetences, bulkUpsertCVKeyCompetenceSelections } from '@/services/cv-key-competences.service';
+import { fetchCVProjects, bulkUpsertCVProjectSelections } from '@/services/cv-projects.service';
 import type { CVDocument, CVContent, DisplaySettings } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
-import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
+import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection, CVProjectWithSelection } from '@/types/profile-career.types';
 
 export default function CVEditorPage() {
   const params = useParams();
@@ -76,6 +78,9 @@ export default function CVEditorPage() {
 
   // Key competences state
   const [keyCompetences, setKeyCompetences] = useState<CVKeyCompetenceWithSelection[]>([]);
+
+  // Projects state
+  const [projects, setProjects] = useState<CVProjectWithSelection[]>([]);
 
   useEffect(() => {
     const loadCV = async () => {
@@ -147,6 +152,17 @@ export default function CVEditorPage() {
       }
     };
     loadKeyCompetences();
+  }, [cvId]);
+
+  // Load projects
+  useEffect(() => {
+    const loadProjects = async () => {
+      const result = await fetchCVProjects(cvId);
+      if (result.data) {
+        setProjects(result.data);
+      }
+    };
+    loadProjects();
   }, [cvId]);
 
   // Update photo URL when selected photo or primary photo changes
@@ -239,6 +255,11 @@ export default function CVEditorPage() {
         description_override: comp.selection.description_override,
       }));
       await bulkUpsertCVKeyCompetenceSelections(cvId, selectionsToSave);
+    }
+
+    // Save project selections
+    if (projects.length > 0) {
+      await bulkUpsertCVProjectSelections(cvId, projects);
     }
 
     if (result.error) {
@@ -690,6 +711,16 @@ export default function CVEditorPage() {
         language={cv.language}
         showKeyCompetences={cv.display_settings?.showKeyCompetences !== false}
         onShowKeyCompetencesChange={(show) => updateDisplaySettings('showKeyCompetences', show)}
+      />
+
+      {/* Projects Section */}
+      <CVProjectsSection
+        cvId={cvId}
+        projects={projects}
+        onChange={setProjects}
+        language={cv.language}
+        showProjects={cv.display_settings?.showProjects !== false}
+        onShowProjectsChange={(show) => updateDisplaySettings('showProjects', show)}
       />
 
       {/* Format Settings */}

@@ -139,6 +139,7 @@ export interface DisplaySettings {
   showEducation?: boolean;
   showSkills?: boolean;
   showKeyCompetences?: boolean;
+  showProjects?: boolean;
   privacyLevel: 'none' | 'personal' | 'full';
   accentColor?: string;
   fontFamily?: string;
