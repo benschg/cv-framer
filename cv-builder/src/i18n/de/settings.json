@@ -23,5 +23,8 @@
   "dangerZoneDescription": "Unumkehrbare Aktionen, die Ihr Konto betreffen",
   "deleteAccount": "Konto löschen",
   "deleteAccountDescription": "Löschen Sie Ihr Konto und alle zugehörigen Daten dauerhaft. Diese Aktion kann nicht rückgängig gemacht werden.",
-  "deleteAccountDisabled": "Das Löschen des Kontos ist noch nicht verfügbar. Bitte kontaktieren Sie den Support bei Bedarf."
+  "deleteAccountDisabled": "Das Löschen des Kontos ist noch nicht verfügbar. Bitte kontaktieren Sie den Support bei Bedarf.",
+  "languageSaved": "Spracheinstellung erfolgreich gespeichert",
+  "errorSavingLanguage": "Fehler beim Speichern der Spracheinstellung",
+  "themeSaved": "Design-Einstellung erfolgreich gespeichert"
 }

@@ -23,5 +23,8 @@
   "dangerZoneDescription": "Irreversible actions that affect your account",
   "deleteAccount": "Delete Account",
   "deleteAccountDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
-  "deleteAccountDisabled": "Account deletion is not yet available. Please contact support if needed."
+  "deleteAccountDisabled": "Account deletion is not yet available. Please contact support if needed.",
+  "languageSaved": "Language preference saved successfully",
+  "errorSavingLanguage": "Failed to save language preference",
+  "themeSaved": "Theme preference saved successfully"
 }

@@ -1,20 +1,34 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/auth-context';
+import { useUserPreferences } from '@/contexts/user-preferences-context';
 import { useTranslations } from '@/hooks/use-translations';
 import { AlertCircle, Download, ExternalLink, FileText, Globe, Moon, Sun } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
-  const [language, setLanguage] = useState<'en' | 'de'>('en');
+  const { language, theme, setLanguage, setTheme, loading: preferencesLoading } = useUserPreferences();
 
   const { t } = useTranslations(language);
+
+  const handleLanguageChange = async (newLanguage: 'en' | 'de') => {
+    const { error } = await setLanguage(newLanguage);
+    if (error) {
+      toast.error(t('settings.errorSavingLanguage'));
+    } else {
+      toast.success(t('settings.languageSaved'));
+    }
+  };
+
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme);
+    toast.success(t('settings.themeSaved'));
+  };
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -40,8 +54,9 @@ export default function SettingsPage() {
               <Button
                 variant={theme === 'light' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setTheme('light')}
+                onClick={() => handleThemeChange('light')}
                 className="gap-2"
+                disabled={preferencesLoading}
               >
                 <Sun className="h-4 w-4" />
                 {t('settings.light')}
@@ -49,8 +64,9 @@ export default function SettingsPage() {
               <Button
                 variant={theme === 'dark' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setTheme('dark')}
+                onClick={() => handleThemeChange('dark')}
                 className="gap-2"
+                disabled={preferencesLoading}
               >
                 <Moon className="h-4 w-4" />
                 {t('settings.dark')}
@@ -58,7 +74,8 @@ export default function SettingsPage() {
               <Button
                 variant={theme === 'system' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setTheme('system')}
+                onClick={() => handleThemeChange('system')}
+                disabled={preferencesLoading}
               >
                 {t('settings.system')}
               </Button>
@@ -82,8 +99,9 @@ export default function SettingsPage() {
               <Button
                 variant={language === 'en' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setLanguage('en')}
+                onClick={() => handleLanguageChange('en')}
                 className="gap-2"
+                disabled={preferencesLoading}
               >
                 <Globe className="h-4 w-4" />
                 {t('settings.english')}
@@ -91,8 +109,9 @@ export default function SettingsPage() {
               <Button
                 variant={language === 'de' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setLanguage('de')}
+                onClick={() => handleLanguageChange('de')}
                 className="gap-2"
+                disabled={preferencesLoading}
               >
                 <Globe className="h-4 w-4" />
                 {t('settings.german')}

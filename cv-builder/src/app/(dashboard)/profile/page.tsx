@@ -14,10 +14,12 @@ import { DefaultCvSettingsForm } from '@/components/profile/default-cv-settings-
 import { ProfessionalLinksForm } from '@/components/profile/professional-links-form';
 import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
 import { useTranslations } from '@/hooks/use-translations';
+import { useUserPreferences } from '@/contexts/user-preferences-context';
 
 export default function ProfilePage() {
   const { user, updateUserProfile } = useAuth();
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { language } = useUserPreferences();
+  const { t } = useTranslations(language);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 

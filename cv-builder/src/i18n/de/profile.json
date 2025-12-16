@@ -155,7 +155,13 @@
     "verifyCredential": "Zertifikat verifizieren",
     "hideDocuments": "Dokumente ausblenden",
     "viewDocuments": "Dokumente anzeigen",
-    "addedSuccess": "Zertifikat und Dokument hinzugefügt!"
+    "addedSuccess": "Zertifikat und Dokument hinzugefügt!",
+    "issued": "Ausgestellt",
+    "expires": "Läuft ab",
+    "uploadingDocument": "Dokument wird hochgeladen...",
+    "uploadFailed": "Dokument-Upload fehlgeschlagen",
+    "uploadFailedDescription": "Das Zertifikat wurde erstellt, aber das Dokument konnte nicht hochgeladen werden. Sie können es später hinzufügen.",
+    "id": "ID"
   },
 
   "references": {

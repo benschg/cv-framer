@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
+import { useUserPreferences } from '@/contexts/user-preferences-context';
 import { ThemeToggle } from './theme-toggle';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { getUserInitials, getDisplayName } from '@/lib/user-utils';
@@ -51,7 +52,8 @@ import type { ProfilePhoto } from '@/types/api.schemas';
 export function AppSidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { language } = useUserPreferences();
+  const { t } = useTranslations(language);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
 
   const navigation = [

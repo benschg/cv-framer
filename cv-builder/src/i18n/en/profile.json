@@ -155,7 +155,13 @@
     "verifyCredential": "Verify credential",
     "hideDocuments": "Hide documents",
     "viewDocuments": "View documents",
-    "addedSuccess": "Certification and document added!"
+    "addedSuccess": "Certification and document added!",
+    "issued": "Issued",
+    "expires": "Expires",
+    "uploadingDocument": "Uploading document...",
+    "uploadFailed": "Document upload failed",
+    "uploadFailedDescription": "The certification was created but the document could not be uploaded. You can add it later.",
+    "id": "ID"
   },
 
   "references": {

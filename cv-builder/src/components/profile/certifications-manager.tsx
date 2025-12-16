@@ -21,6 +21,7 @@ import {
 import { useProfileManager } from '@/hooks/use-profile-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface CertificationsManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -34,6 +35,7 @@ export interface CertificationsManagerRef {
 
 export const CertificationsManager = forwardRef<CertificationsManagerRef, CertificationsManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
+  const { t } = useTranslations('en'); // TODO: Get language from user settings context
   const {
     items: certifications,
     isExpanded,
@@ -79,17 +81,17 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
 
       // If a file was provided, upload it to the newly created certification
       if (file && certificationId) {
-        toast.loading('Uploading document...', { id: 'cert-upload' });
+        toast.loading(t('profile.certifications.uploadingDocument'), { id: 'cert-upload' });
 
         const uploadResult = await createCertificationDocument(certificationId, file);
         if (uploadResult.error) {
           console.error('Error uploading document:', uploadResult.error);
-          toast.error('Document upload failed', {
+          toast.error(t('profile.certifications.uploadFailed'), {
             id: 'cert-upload',
-            description: 'The certification was created but the document could not be uploaded. You can add it later.',
+            description: t('profile.certifications.uploadFailedDescription'),
           });
         } else {
-          toast.success('Certification and document added!', {
+          toast.success(t('profile.certifications.addedSuccess'), {
             id: 'cert-upload',
             description: `${certificationName} with ${file.name}`,
           });
@@ -143,6 +145,7 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
                 onMultiFieldChange={(updates) => handleMultiFieldChange(certification.id, updates)}
                 onDone={() => handleDone(certification.id)}
                 isSaving={saving}
+                t={t}
               />
             ) : (
               <CertificationViewCard
@@ -150,6 +153,7 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
                 onEdit={() => handleEdit(certification)}
                 onDelete={() => handleDelete(certification.id)}
                 disabled={saving}
+                t={t}
               />
             )}
           </SortableCard>
@@ -161,8 +165,8 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
       emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>No certifications added yet.</p>
-            <p className="text-sm mt-1">Click "Add Certification" to get started.</p>
+            <p>{t('profile.certifications.empty')}</p>
+            <p className="text-sm mt-1">{t('profile.certifications.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -179,6 +183,7 @@ interface CertificationEditFormProps {
   onMultiFieldChange: (updates: Partial<ProfileCertification>) => void;
   onDone: () => void;
   isSaving?: boolean;
+  t: (key: string) => string;
 }
 
 function CertificationEditForm({
@@ -187,6 +192,7 @@ function CertificationEditForm({
   onMultiFieldChange,
   onDone,
   isSaving = false,
+  t,
 }: CertificationEditFormProps) {
   // Check if expiry date is before issue date
   const isExpiryBeforeIssue = (() => {
@@ -198,53 +204,53 @@ function CertificationEditForm({
     <>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Edit Certification</CardTitle>
+          <CardTitle className="text-lg">{t('profile.certifications.edit')}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onDone}>
-            Done
+            {t('profile.certifications.done')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Certification Name *</Label>
+            <Label htmlFor="name">{t('profile.certifications.name')} *</Label>
             <Input
               id="name"
               value={formData.name || ''}
               onChange={(e) => onFieldChange('name', e.target.value)}
-              placeholder="AWS Certified Solutions Architect"
+              placeholder={t('profile.certifications.namePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="issuer">Issuing Organization *</Label>
+            <Label htmlFor="issuer">{t('profile.certifications.organization')} *</Label>
             <Input
               id="issuer"
               value={formData.issuer || ''}
               onChange={(e) => onFieldChange('issuer', e.target.value)}
-              placeholder="Amazon Web Services"
+              placeholder={t('profile.certifications.organizationPlaceholder')}
             />
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Issue Date</Label>
+            <Label>{t('profile.certifications.issueDate')}</Label>
             <MonthYearPicker
               value={formData.date || ''}
               onChange={(value) => onFieldChange('date', value)}
-              placeholder="Select issue date"
+              placeholder={t('profile.certifications.issueDatePlaceholder')}
               showFutureWarning
             />
           </div>
           <div className="space-y-2">
-            <Label>Expiry Date</Label>
+            <Label>{t('profile.certifications.expiryDate')}</Label>
             <MonthYearPicker
               value={formData.expiry_date || ''}
               onChange={(value) => onFieldChange('expiry_date', value)}
-              placeholder="Select expiry date"
+              placeholder={t('profile.certifications.expiryDatePlaceholder')}
             />
             <p className="text-xs text-muted-foreground">
-              Leave empty if it doesn't expire
+              {t('profile.certifications.expiryNote')}
             </p>
           </div>
         </div>
@@ -252,35 +258,35 @@ function CertificationEditForm({
         {isExpiryBeforeIssue && (
           <p className="flex items-center gap-1 text-sm text-amber-600">
             <AlertTriangle className="h-4 w-4" />
-            Expiry date cannot be before issue date
+            {t('profile.certifications.expiryDateError')}
           </p>
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="credential_id">Credential ID</Label>
+          <Label htmlFor="credential_id">{t('profile.certifications.credentialId')}</Label>
           <Input
             id="credential_id"
             value={formData.credential_id || ''}
             onChange={(e) => onFieldChange('credential_id', e.target.value)}
-            placeholder="ABC123XYZ"
+            placeholder={t('profile.certifications.credentialIdPlaceholder')}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="url">Verification URL</Label>
+          <Label htmlFor="url">{t('profile.certifications.verificationUrl')}</Label>
           <Input
             id="url"
             type="url"
             value={formData.url || ''}
             onChange={(e) => onFieldChange('url', e.target.value)}
-            placeholder="https://..."
+            placeholder={t('profile.certifications.verificationUrlPlaceholder')}
           />
         </div>
 
         {/* Certificate Documents */}
         {formData.id && (
           <div className="space-y-2">
-            <Label>Certificate Documents</Label>
+            <Label>{t('profile.certifications.documents')}</Label>
             <CertificationDocumentsManager
               certificationId={formData.id}
               disabled={isSaving}
@@ -298,6 +304,7 @@ interface CertificationViewCardProps {
   onEdit: () => void;
   onDelete: () => void;
   disabled: boolean;
+  t: (key: string) => string;
 }
 
 function CertificationViewCard({
@@ -305,6 +312,7 @@ function CertificationViewCard({
   onEdit,
   onDelete,
   disabled,
+  t,
 }: CertificationViewCardProps) {
   const [showDocuments, setShowDocuments] = useState(false);
 
@@ -316,9 +324,9 @@ function CertificationViewCard({
             <CardTitle>{certification.name}</CardTitle>
             <CardDescription>{certification.issuer}</CardDescription>
             <div className="flex flex-wrap gap-2 mt-2 text-sm text-muted-foreground">
-              {certification.date && <span>Issued {formatMonthYear(certification.date)}</span>}
-              {certification.expiry_date && <span>• Expires {formatMonthYear(certification.expiry_date)}</span>}
-              {certification.credential_id && <span>• ID: {certification.credential_id}</span>}
+              {certification.date && <span>{t('profile.certifications.issued')} {formatMonthYear(certification.date)}</span>}
+              {certification.expiry_date && <span>• {t('profile.certifications.expires')} {formatMonthYear(certification.expiry_date)}</span>}
+              {certification.credential_id && <span>• {t('profile.certifications.id')}: {certification.credential_id}</span>}
             </div>
             <div className="flex flex-wrap gap-3 mt-2">
               {certification.url && (
@@ -328,7 +336,7 @@ function CertificationViewCard({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 >
-                  Verify credential
+                  {t('profile.certifications.verifyCredential')}
                   <ExternalLink className="h-3 w-3" />
                 </a>
               )}
@@ -340,7 +348,7 @@ function CertificationViewCard({
                 className="h-auto p-0 text-sm"
               >
                 <FileText className="h-3 w-3 mr-1" />
-                {showDocuments ? 'Hide documents' : 'View documents'}
+                {showDocuments ? t('profile.certifications.hideDocuments') : t('profile.certifications.viewDocuments')}
               </Button>
             </div>
           </div>
@@ -351,7 +359,7 @@ function CertificationViewCard({
               onClick={onEdit}
               disabled={disabled}
             >
-              Edit
+              {t('profile.certifications.editButton')}
             </Button>
             <Button
               variant="ghost"
