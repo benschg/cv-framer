@@ -152,6 +152,10 @@ export type {
   ProfileCertification,
   ProfileReference,
   ProfileKeyCompetence,
+  ProfileMotivationVision,
+  ProfileHighlight,
+  ProfileProject,
+  HighlightType,
 } from '@/types/profile-career.types';
 
 // Debounce utility for auto-save
@@ -885,15 +889,6 @@ export async function deleteHighlight(id: string): Promise<{ error: any }> {
 }
 
 /**
- * Reorder highlights
- */
-export async function reorderHighlights(
-  items: ProfileHighlight[]
-): Promise<{ data: ProfileHighlight[] | null; error: any }> {
-  return reorderProfileData<ProfileHighlight>('profile_highlights', items);
-}
-
-/**
  * Bulk create highlights (for AI import)
  */
 export async function bulkCreateHighlights(
@@ -962,15 +957,6 @@ export async function updateProject(
  */
 export async function deleteProject(id: string): Promise<{ error: any }> {
   return deleteProfileData('profile_projects', id);
-}
-
-/**
- * Reorder projects
- */
-export async function reorderProjects(
-  items: ProfileProject[]
-): Promise<{ data: ProfileProject[] | null; error: any }> {
-  return reorderProfileData<ProfileProject>('profile_projects', items);
 }
 
 /**

@@ -821,3 +821,189 @@ Return ONLY valid JSON (no markdown, no explanations, no code blocks):
 
   return JSON.parse(cleanedText) as CVExtractionResult;
 }
+
+// Types for Profile Data Extraction
+export interface ExtractedProfileData {
+  motivationVision?: {
+    vision?: string;
+    mission?: string;
+    purpose?: string;
+    what_drives_you?: string;
+    why_this_field?: string;
+    career_goals?: string;
+    passions?: string[];
+    how_passions_relate?: string;
+  };
+  highlights?: Array<{
+    type: 'highlight' | 'achievement' | 'mehrwert' | 'usp';
+    title: string;
+    description?: string;
+    metric?: string;
+  }>;
+  projects?: Array<{
+    name: string;
+    description?: string;
+    role?: string;
+    technologies?: string[];
+    url?: string;
+    start_date?: string;
+    end_date?: string;
+    current?: boolean;
+    outcome?: string;
+  }>;
+}
+
+export interface ProfileExtractionResult {
+  extractedData: ExtractedProfileData;
+  confidence: {
+    motivationVision: number;
+    highlights: number;
+    projects: number;
+  };
+  sectionCounts: {
+    motivationVision: number;
+    highlights: number;
+    projects: number;
+  };
+  reasoning: string;
+}
+
+// Extract profile-specific data from a CV document
+export async function extractProfileData(
+  fileBuffer: Buffer,
+  mimeType: string,
+  modelName: GeminiModel = 'gemini-2.0-flash'
+): Promise<ProfileExtractionResult> {
+  const model = getModel(modelName);
+
+  const prompt = `You are analyzing a CV/Resume document to extract professional motivation, career highlights, and project information. Think carefully about what you see in the document.
+
+Your task is to extract information for the following sections:
+
+1. **Motivation & Vision** - Extract any statements about professional motivation, vision, mission, or career goals
+   Look for:
+   - Vision statements (where they want to go professionally)
+   - Mission statements (their professional mission/purpose)
+   - Purpose (deeper meaning in their career)
+   - What drives them (motivations, passions in work)
+   - Why they chose their field
+   - Career goals (short-term and long-term aspirations)
+   - Professional passions (list of topics/areas they're passionate about)
+   - How passions relate to work (connection between personal interests and professional life)
+
+2. **Highlights & Achievements** - Extract career highlights, achievements, added value propositions, and unique selling points
+   For each entry, determine the type:
+   - "highlight": Career highlights or standout moments (e.g., "Led digital transformation initiative")
+   - "achievement": Measurable achievements with metrics (e.g., "Increased sales by 40%")
+   - "mehrwert": Added value propositions (e.g., "Brings cross-functional team expertise")
+   - "usp": Unique selling points (e.g., "Bilingual technical leader with startup experience")
+
+   For each extract:
+   - Type (one of the above)
+   - Title (concise statement)
+   - Description (optional elaboration)
+   - Metric (optional, for achievements - e.g., "40% increase", "$2M saved")
+
+3. **Projects** - Extract all projects mentioned (separate from work experience)
+   For each project:
+   - Name (project name or title)
+   - Description (what the project was about)
+   - Role (your role in the project)
+   - Technologies (array of technologies/tools used)
+   - URL (project website or repository if mentioned)
+   - Start date (YYYY-MM format, null if not mentioned)
+   - End date (YYYY-MM format, null if ongoing or not mentioned)
+   - Current (boolean: true if currently working on it)
+   - Outcome (results or impact of the project)
+
+CRITICAL RULES:
+- Extract ALL relevant content - do not summarize or skip entries
+- Use null for fields you cannot confidently extract
+- All dates MUST be in YYYY-MM format
+- For motivation/vision, extract inferred content even if not explicitly labeled
+- Look for summary sections, personal statements, objective statements for motivation content
+- Technologies should be an array of individual tech names (e.g., ["React", "Node.js", "PostgreSQL"])
+- Be conservative with confidence scores (only 0.8+ if very clear)
+
+Confidence scoring per section (0.0-1.0):
+- 1.0: Crystal clear, comprehensive content extracted
+- 0.9: Very clear, most content extracted successfully
+- 0.8: Good extraction, minor ambiguities
+- 0.7: Moderate confidence, some content unclear
+- 0.5: Partial extraction, limited information available
+- 0.0: No data found or section completely missing
+
+Return ONLY valid JSON (no markdown, no explanations, no code blocks):
+{
+  "extractedData": {
+    "motivationVision": {
+      "vision": "string" | null,
+      "mission": "string" | null,
+      "purpose": "string" | null,
+      "what_drives_you": "string" | null,
+      "why_this_field": "string" | null,
+      "career_goals": "string" | null,
+      "passions": ["passion1", "passion2", ...] | null,
+      "how_passions_relate": "string" | null
+    },
+    "highlights": [
+      {
+        "type": "highlight" | "achievement" | "mehrwert" | "usp",
+        "title": "string",
+        "description": "string" | null,
+        "metric": "string" | null
+      }
+    ],
+    "projects": [
+      {
+        "name": "string",
+        "description": "string" | null,
+        "role": "string" | null,
+        "technologies": ["tech1", "tech2", ...] | null,
+        "url": "string" | null,
+        "start_date": "YYYY-MM" | null,
+        "end_date": "YYYY-MM" | null,
+        "current": boolean | null,
+        "outcome": "string" | null
+      }
+    ]
+  },
+  "confidence": {
+    "motivationVision": 0.0-1.0,
+    "highlights": 0.0-1.0,
+    "projects": 0.0-1.0
+  },
+  "sectionCounts": {
+    "motivationVision": 1 (if found) or 0,
+    "highlights": number,
+    "projects": number
+  },
+  "reasoning": "Brief summary of extraction quality and what was found"
+}`;
+
+  // Use Gemini Vision API
+  const base64Data = fileBuffer.toString('base64');
+  const imagePart = {
+    inlineData: {
+      data: base64Data,
+      mimeType: mimeType,
+    },
+  };
+
+  const result = await model.generateContent([prompt, imagePart]);
+  const text = result.response.text();
+
+  // Clean and parse JSON
+  let cleanedText = text.trim();
+  if (cleanedText.startsWith('```json')) {
+    cleanedText = cleanedText.slice(7);
+  } else if (cleanedText.startsWith('```')) {
+    cleanedText = cleanedText.slice(3);
+  }
+  if (cleanedText.endsWith('```')) {
+    cleanedText = cleanedText.slice(0, -3);
+  }
+  cleanedText = cleanedText.trim();
+
+  return JSON.parse(cleanedText) as ProfileExtractionResult;
+}

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, Zap, Upload, LucideIcon, Sparkles } from 'lucide-react';
+import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, Zap, Upload, LucideIcon, Sparkles, Target, Star, FolderKanban } from 'lucide-react';
 
 interface ProfileSection {
   title: string;
@@ -13,6 +13,24 @@ interface ProfileSection {
 }
 
 const profileSections: ProfileSection[] = [
+  {
+    title: 'Motivation & Vision',
+    description: 'Your professional vision, mission, and what drives you',
+    href: '/profile/motivation-vision',
+    icon: Target,
+  },
+  {
+    title: 'Highlights & Achievements',
+    description: 'Career highlights, achievements, and unique value',
+    href: '/profile/highlights',
+    icon: Star,
+  },
+  {
+    title: 'Projects',
+    description: 'Key projects you\'ve worked on',
+    href: '/profile/projects',
+    icon: FolderKanban,
+  },
   {
     title: 'Work Experience',
     description: 'Manage your work history',
@@ -71,7 +89,7 @@ export function CareerInfoNavigation() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {profileSections.map((section) => (
             <Link
               key={section.href}

@@ -8,10 +8,11 @@ import { useUserPreferences } from '@/contexts/user-preferences-context';
 
 interface DefaultCvSettingsFormProps {
   defaultTagline: string;
+  personalMotto: string;
   onChange: (name: string, value: string) => void;
 }
 
-export function DefaultCvSettingsForm({ defaultTagline, onChange }: DefaultCvSettingsFormProps) {
+export function DefaultCvSettingsForm({ defaultTagline, personalMotto, onChange }: DefaultCvSettingsFormProps) {
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
 
@@ -39,6 +40,19 @@ export function DefaultCvSettingsForm({ defaultTagline, onChange }: DefaultCvSet
           />
           <p className="text-xs text-muted-foreground">
             {t('profile.defaultCvSettings.taglineNote')}
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="personalMotto">{t('profile.defaultCvSettings.personalMottoLabel')}</Label>
+          <Input
+            id="personalMotto"
+            name="personalMotto"
+            value={personalMotto}
+            onChange={handleInputChange}
+            placeholder={t('profile.defaultCvSettings.personalMottoPlaceholder')}
+          />
+          <p className="text-xs text-muted-foreground">
+            {t('profile.defaultCvSettings.mottoNote')}
           </p>
         </div>
       </CardContent>

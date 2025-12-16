@@ -19,6 +19,8 @@ import {
   UserCheck,
   Zap,
   BookOpen,
+  Star,
+  FolderKanban,
 } from 'lucide-react';
 import { CVBuilderLogo } from './cv-builder-logo';
 import {
@@ -68,6 +70,9 @@ export function AppSidebar() {
       label: t('nav.groups.build'),
       items: [
         { title: t('nav.items.profile'), href: '/profile', icon: User },
+        { title: t('nav.items.motivationVision'), href: '/profile/motivation-vision', icon: Target, indent: true },
+        { title: t('nav.items.highlights'), href: '/profile/highlights', icon: Star, indent: true },
+        { title: t('nav.items.projects'), href: '/profile/projects', icon: FolderKanban, indent: true },
         { title: t('nav.items.workExperience'), href: '/profile/experience', icon: Briefcase, indent: true },
         { title: t('nav.items.education'), href: '/profile/education', icon: GraduationCap, indent: true },
         { title: t('nav.items.skills'), href: '/profile/skills', icon: Code, indent: true },

@@ -16,6 +16,9 @@
   "items": {
     "dashboard": "Dashboard",
     "profile": "Profil",
+    "motivationVision": "Motivation & Vision",
+    "highlights": "Highlights & Erfolge",
+    "projects": "Projekte",
     "workExperience": "Berufserfahrung",
     "education": "Ausbildung",
     "skills": "Fähigkeiten",

@@ -39,7 +39,10 @@
     "subtitle": "Set default values for new CVs",
     "defaultTagline": "Default Tagline",
     "taglinePlaceholder": "e.g., Senior Software Engineer | React & Node.js",
-    "taglineNote": "This will be used as the default tagline for new CVs"
+    "taglineNote": "This will be used as the default tagline for new CVs",
+    "personalMottoLabel": "Personal Motto",
+    "personalMottoPlaceholder": "e.g., Innovation through collaboration",
+    "mottoNote": "A quote or motto that represents your professional philosophy"
   },
 
   "workExperience": {

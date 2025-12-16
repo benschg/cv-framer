@@ -39,7 +39,10 @@
     "subtitle": "Standardwerte für neue CVs festlegen",
     "defaultTagline": "Standard-Tagline",
     "taglinePlaceholder": "z.B. Senior Softwareentwickler | React & Node.js",
-    "taglineNote": "Dies wird als Standard-Tagline für neue CVs verwendet"
+    "taglineNote": "Dies wird als Standard-Tagline für neue CVs verwendet",
+    "personalMottoLabel": "Persönliches Motto",
+    "personalMottoPlaceholder": "z.B. Innovation durch Zusammenarbeit",
+    "mottoNote": "Ein Zitat oder Motto, das Ihre berufliche Philosophie repräsentiert"
   },
 
   "workExperience": {
