@@ -39,7 +39,10 @@
     "subtitle": "Set default values for new CVs",
     "defaultTagline": "Default Tagline",
     "taglinePlaceholder": "e.g., Senior Software Engineer | React & Node.js",
-    "taglineNote": "This will be used as the default tagline for new CVs"
+    "taglineNote": "This will be used as the default tagline for new CVs",
+    "personalMottoLabel": "Personal Motto",
+    "personalMottoPlaceholder": "e.g., Innovation through collaboration",
+    "mottoNote": "A quote or motto that represents your professional philosophy"
   },
 
   "workExperience": {
@@ -234,5 +237,98 @@
     "primaryUpdated": "Primary photo updated",
     "cannotDeleteOnly": "Cannot delete your only photo",
     "photoDeleted": "Photo deleted"
+  },
+
+  "motivationVision": {
+    "pageTitle": "Motivation & Vision",
+    "pageSubtitle": "Your professional vision, mission, and what drives you",
+    "saveButton": "Save Changes",
+    "visionTitle": "Vision",
+    "visionPlaceholder": "Where do you see yourself professionally in the future?",
+    "missionTitle": "Mission",
+    "missionPlaceholder": "What is your professional mission statement?",
+    "purposeTitle": "Purpose",
+    "purposePlaceholder": "What is your deeper purpose in your career?",
+    "whatDrivesYouTitle": "What Drives You",
+    "whatDrivesYouPlaceholder": "What motivates you in your work?",
+    "whyThisFieldTitle": "Why This Field",
+    "whyThisFieldPlaceholder": "Why did you choose this field or profession?",
+    "careerGoalsTitle": "Career Goals",
+    "careerGoalsPlaceholder": "What are your short-term and long-term career goals?",
+    "passionsTitle": "Professional Passions",
+    "passionsPlaceholder": "Enter a passion and press Enter",
+    "howPassionsRelateTitle": "How Your Passions Relate to Work",
+    "howPassionsRelatePlaceholder": "Describe how your passions connect to your professional life",
+    "addUsingAI": "Fill using AI"
+  },
+
+  "highlights": {
+    "pageTitle": "Highlights & Achievements",
+    "pageSubtitle": "Career highlights, achievements, and unique value propositions",
+    "addButton": "Add Highlight",
+    "addUsingAI": "Add using AI",
+    "empty": "No highlights added yet.",
+    "emptyAction": "Click \"Add Highlight\" to get started.",
+    "edit": "Edit Highlight",
+    "done": "Done",
+    "editButton": "Edit",
+    "typeLabel": "Type",
+    "types": {
+      "highlight": "Career Highlight",
+      "achievement": "Achievement",
+      "mehrwert": "Added Value",
+      "usp": "Unique Selling Point"
+    },
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g., Led team to 40% productivity increase",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe this highlight or achievement in detail",
+    "metricLabel": "Metric (Optional)",
+    "metricPlaceholder": "e.g., 40% increase, $2M saved, 10,000 users",
+    "filterAll": "All",
+    "filterHighlight": "Highlights",
+    "filterAchievement": "Achievements",
+    "filterMehrwert": "Added Value",
+    "filterUSP": "USPs"
+  },
+
+  "projects": {
+    "pageTitle": "Projects",
+    "pageSubtitle": "Key projects you've worked on throughout your career",
+    "addButton": "Add Project",
+    "addUsingAI": "Add using AI",
+    "empty": "No projects added yet.",
+    "emptyAction": "Click \"Add Project\" to get started.",
+    "edit": "Edit Project",
+    "done": "Done",
+    "editButton": "Edit",
+    "nameLabel": "Project Name",
+    "namePlaceholder": "e.g., E-commerce Platform Redesign",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe the project and your contributions",
+    "roleLabel": "Your Role",
+    "rolePlaceholder": "e.g., Lead Developer, Project Manager",
+    "technologiesLabel": "Technologies/Tools",
+    "technologiesPlaceholder": "Type a technology and press Enter",
+    "urlLabel": "Project URL (Optional)",
+    "urlPlaceholder": "https://...",
+    "startDate": "Start Date",
+    "startDatePlaceholder": "Select start date",
+    "endDate": "End Date",
+    "endDatePlaceholder": "Select end date",
+    "endDateError": "End date cannot be before start date",
+    "currentlyWorking": "Currently working on this",
+    "outcomeLabel": "Outcome/Results",
+    "outcomePlaceholder": "What were the results or impact of this project?"
+  },
+
+  "defaultCvSettings": {
+    "title": "Default CV Settings",
+    "subtitle": "Set default values for new CVs",
+    "defaultTagline": "Default Tagline",
+    "taglinePlaceholder": "e.g., Senior Software Engineer | React & Node.js",
+    "taglineNote": "This will be used as the default tagline for new CVs",
+    "personalMottoLabel": "Personal Motto",
+    "personalMottoPlaceholder": "A quote or motto that represents your professional philosophy"
   }
 }

@@ -40,6 +40,7 @@ export default function ProfilePage() {
     githubUrl: '',
     websiteUrl: '',
     defaultTagline: '',
+    personalMotto: '',
   });
 
   // Update form when user data changes (e.g., after login)
@@ -138,6 +139,7 @@ export default function ProfilePage() {
 
         <DefaultCvSettingsForm
           defaultTagline={formData.defaultTagline}
+          personalMotto={formData.personalMotto}
           onChange={handleFieldChange}
         />
 

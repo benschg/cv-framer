@@ -1,6 +1,3 @@
-import type { CategoryKey } from '@/types/werbeflaechen.types';
-import { getCategoryByKey } from '@/data/category-metadata';
-
 export interface BreadcrumbSegment {
   label: string;
   href: string;
@@ -47,10 +44,6 @@ export const routeConfig: Record<string, RouteConfig> = {
   },
   '/settings': {
     label: 'Settings',
-  },
-  '/werbeflaechen': {
-    label: 'Werbeflaechen',
-    parent: '/profile',
   },
   '/cover-letter': {
     label: 'Cover Letters',
@@ -105,16 +98,6 @@ export const routeConfig: Record<string, RouteConfig> = {
         return `${position} at ${company}`;
       }
       return 'Application';
-    },
-  },
-
-  // Level 3 - Werbeflaechen category routes
-  '/werbeflaechen/[category]': {
-    label: 'Category',
-    parent: '/werbeflaechen',
-    getDynamicLabel: (categoryKey: string) => {
-      const category = getCategoryByKey(categoryKey as CategoryKey);
-      return category?.en || 'Category';
     },
   },
 };

@@ -15,6 +15,9 @@ import type {
   ProfileCertification,
   ProfileReference,
   ProfileKeyCompetence,
+  ProfileMotivationVision,
+  ProfileHighlight,
+  ProfileProject,
 } from '@/types/profile-career.types';
 
 const supabase = createClient();
@@ -149,6 +152,10 @@ export type {
   ProfileCertification,
   ProfileReference,
   ProfileKeyCompetence,
+  ProfileMotivationVision,
+  ProfileHighlight,
+  ProfileProject,
+  HighlightType,
 } from '@/types/profile-career.types';
 
 // Debounce utility for auto-save
@@ -787,6 +794,193 @@ export async function bulkCreateCertifications(
 
   const { data, error } = await supabase
     .from('profile_certifications')
+    .insert(itemsToInsert)
+    .select();
+
+  return { data, error };
+}
+
+// ============================================
+// MOTIVATION & VISION
+// ============================================
+
+/**
+ * Fetch motivation & vision data for current user
+ * Note: Only one entry per user (UNIQUE constraint on user_id)
+ */
+export async function fetchMotivationVision(): Promise<{
+  data: ProfileMotivationVision | null;
+  error: any;
+}> {
+  const { data, error } = await supabase
+    .from('profile_motivation_vision')
+    .select('*')
+    .single();
+
+  return { data, error };
+}
+
+/**
+ * Create or update motivation & vision data
+ * Since there's only one entry per user, we use upsert
+ */
+export async function upsertMotivationVision(
+  updates: Partial<Omit<ProfileMotivationVision, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<{ data: ProfileMotivationVision | null; error: any }> {
+  const { userId, error: authError } = await getCurrentUserId();
+
+  if (authError || !userId) {
+    return { data: null, error: authError };
+  }
+
+  const { data, error } = await supabase
+    .from('profile_motivation_vision')
+    .upsert(
+      { ...updates, user_id: userId },
+      { onConflict: 'user_id' }
+    )
+    .select()
+    .single();
+
+  return { data, error };
+}
+
+// ============================================
+// HIGHLIGHTS & ACHIEVEMENTS
+// ============================================
+
+/**
+ * Fetch all highlights for current user
+ */
+export async function fetchHighlights(): Promise<{
+  data: ProfileHighlight[] | null;
+  error: any;
+}> {
+  return fetchProfileData<ProfileHighlight>(
+    'profile_highlights',
+    [{ column: 'display_order', ascending: true }]
+  );
+}
+
+/**
+ * Create a new highlight
+ */
+export async function createHighlight(
+  highlight: Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+): Promise<{ data: ProfileHighlight | null; error: any }> {
+  return createProfileData<ProfileHighlight>('profile_highlights', highlight);
+}
+
+/**
+ * Update a highlight
+ */
+export async function updateHighlight(
+  id: string,
+  updates: Partial<Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<{ data: ProfileHighlight | null; error: any }> {
+  return updateProfileData<ProfileHighlight>('profile_highlights', id, updates);
+}
+
+/**
+ * Delete a highlight
+ */
+export async function deleteHighlight(id: string): Promise<{ error: any }> {
+  return deleteProfileData('profile_highlights', id);
+}
+
+/**
+ * Bulk create highlights (for AI import)
+ */
+export async function bulkCreateHighlights(
+  highlights: Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>[]
+): Promise<{ data: ProfileHighlight[] | null; error: any }> {
+  const { userId, error: authError } = await getCurrentUserId();
+  if (authError || !userId) {
+    return { data: null, error: authError };
+  }
+
+  const { data: existing } = await fetchHighlights();
+  const startOrder = existing?.length || 0;
+
+  const itemsToInsert = highlights.map((highlight, idx) => ({
+    ...highlight,
+    user_id: userId,
+    display_order: startOrder + idx,
+  }));
+
+  const { data, error } = await supabase
+    .from('profile_highlights')
+    .insert(itemsToInsert)
+    .select();
+
+  return { data, error };
+}
+
+// ============================================
+// PROJECTS
+// ============================================
+
+/**
+ * Fetch all projects for current user
+ */
+export async function fetchProjects(): Promise<{
+  data: ProfileProject[] | null;
+  error: any;
+}> {
+  return fetchProfileData<ProfileProject>(
+    'profile_projects',
+    [{ column: 'display_order', ascending: true }]
+  );
+}
+
+/**
+ * Create a new project
+ */
+export async function createProject(
+  project: Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+): Promise<{ data: ProfileProject | null; error: any }> {
+  return createProfileData<ProfileProject>('profile_projects', project);
+}
+
+/**
+ * Update a project
+ */
+export async function updateProject(
+  id: string,
+  updates: Partial<Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<{ data: ProfileProject | null; error: any }> {
+  return updateProfileData<ProfileProject>('profile_projects', id, updates);
+}
+
+/**
+ * Delete a project
+ */
+export async function deleteProject(id: string): Promise<{ error: any }> {
+  return deleteProfileData('profile_projects', id);
+}
+
+/**
+ * Bulk create projects (for AI import)
+ */
+export async function bulkCreateProjects(
+  projects: Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>[]
+): Promise<{ data: ProfileProject[] | null; error: any }> {
+  const { userId, error: authError } = await getCurrentUserId();
+  if (authError || !userId) {
+    return { data: null, error: authError };
+  }
+
+  const { data: existing } = await fetchProjects();
+  const startOrder = existing?.length || 0;
+
+  const itemsToInsert = projects.map((project, idx) => ({
+    ...project,
+    user_id: userId,
+    display_order: startOrder + idx,
+  }));
+
+  const { data, error } = await supabase
+    .from('profile_projects')
     .insert(itemsToInsert)
     .select();
 

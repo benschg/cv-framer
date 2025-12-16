@@ -125,7 +125,7 @@ export default function CVDashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{translations.nav.werbeflaechen}</CardTitle>
+            <CardTitle className="text-sm font-medium">{translations.nav.profile}</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -191,14 +191,14 @@ export default function CVDashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                {translations.cv.fillOutWerbeflaechen}
+                {language === 'de' ? 'Profil vervollständigen' : 'Complete Your Profile'}
               </CardTitle>
               <CardDescription>
                 {translations.cv.completeProfile}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/werbeflaechen">
+              <Link href="/profile">
                 <Button variant="outline" className="w-full">
                   {translations.cv.getStarted}
                 </Button>

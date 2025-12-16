@@ -19,6 +19,8 @@ import {
   UserCheck,
   Zap,
   BookOpen,
+  Star,
+  FolderKanban,
 } from 'lucide-react';
 import { CVBuilderLogo } from './cv-builder-logo';
 import {
@@ -68,13 +70,15 @@ export function AppSidebar() {
       label: t('nav.groups.build'),
       items: [
         { title: t('nav.items.profile'), href: '/profile', icon: User },
+        { title: t('nav.items.motivationVision'), href: '/profile/motivation-vision', icon: Target, indent: true },
+        { title: t('nav.items.highlights'), href: '/profile/highlights', icon: Star, indent: true },
+        { title: t('nav.items.projects'), href: '/profile/projects', icon: FolderKanban, indent: true },
         { title: t('nav.items.workExperience'), href: '/profile/experience', icon: Briefcase, indent: true },
         { title: t('nav.items.education'), href: '/profile/education', icon: GraduationCap, indent: true },
         { title: t('nav.items.skills'), href: '/profile/skills', icon: Code, indent: true },
         { title: t('nav.items.keyCompetences'), href: '/profile/key-competences', icon: Zap, indent: true },
         { title: t('nav.items.certifications'), href: '/profile/certifications', icon: Award, indent: true },
         { title: t('nav.items.references'), href: '/profile/references', icon: UserCheck, indent: true },
-        { title: t('nav.items.werbeflaechen'), href: '/werbeflaechen', icon: Target },
         { title: t('nav.items.myCVs'), href: '/cv', icon: FileText },
         { title: t('nav.items.coverLetters'), href: '/cover-letter', icon: Mail },
       ],
