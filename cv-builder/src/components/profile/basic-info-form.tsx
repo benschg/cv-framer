@@ -13,7 +13,7 @@ interface BasicInfoFormProps {
     phone: string;
     location: string;
   };
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (name: string, value: string) => void;
 }
 
 export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
