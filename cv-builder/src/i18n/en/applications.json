@@ -1,0 +1,12 @@
+{
+  "title": "Applications",
+  "newApplication": "New Application",
+  "status": {
+    "draft": "Draft",
+    "applied": "Applied",
+    "interview": "Interview",
+    "offer": "Offer",
+    "rejected": "Rejected",
+    "accepted": "Accepted"
+  }
+}

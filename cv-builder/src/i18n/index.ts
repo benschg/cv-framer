@@ -1,5 +1,50 @@
-import en from './en.json';
-import de from './de.json';
+import commonEn from './en/common.json';
+import authEn from './en/auth.json';
+import navEn from './en/nav.json';
+import profileEn from './en/profile.json';
+import applicationsEn from './en/applications.json';
+import cvEn from './en/cv.json';
+import coverLetterEn from './en/coverLetter.json';
+import werbeflaechenEn from './en/werbeflaechen.json';
+import settingsEn from './en/settings.json';
+import errorsEn from './en/errors.json';
+
+import commonDe from './de/common.json';
+import authDe from './de/auth.json';
+import navDe from './de/nav.json';
+import profileDe from './de/profile.json';
+import applicationsDe from './de/applications.json';
+import cvDe from './de/cv.json';
+import coverLetterDe from './de/coverLetter.json';
+import werbeflaechenDe from './de/werbeflaechen.json';
+import settingsDe from './de/settings.json';
+import errorsDe from './de/errors.json';
+
+const en = {
+  common: commonEn,
+  auth: authEn,
+  nav: navEn,
+  profile: profileEn,
+  applications: applicationsEn,
+  cv: cvEn,
+  coverLetter: coverLetterEn,
+  werbeflaechen: werbeflaechenEn,
+  settings: settingsEn,
+  errors: errorsEn,
+};
+
+const de = {
+  common: commonDe,
+  auth: authDe,
+  nav: navDe,
+  profile: profileDe,
+  applications: applicationsDe,
+  cv: cvDe,
+  coverLetter: coverLetterDe,
+  werbeflaechen: werbeflaechenDe,
+  settings: settingsDe,
+  errors: errorsDe,
+};
 
 export type Language = 'en' | 'de';
 

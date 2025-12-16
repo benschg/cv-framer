@@ -1,0 +1,36 @@
+{
+  "cv": "Lebenslauf",
+  "coverLetter": "Anschreiben",
+  "applications": "Bewerbungen",
+  "werbeflaechen": "Werbeflächen",
+  "settings": "Einstellungen",
+  "profile": "Profil",
+  "logout": "Abmelden",
+  "logo": "CV Builder",
+  "groups": {
+    "overview": "Übersicht",
+    "build": "Erstellen",
+    "track": "Verfolgen",
+    "guides": "Leitfäden"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "profile": "Profil",
+    "workExperience": "Berufserfahrung",
+    "education": "Ausbildung",
+    "skills": "Fähigkeiten",
+    "keyCompetences": "Schlüsselkompetenzen",
+    "certifications": "Zertifikate",
+    "references": "Referenzen",
+    "werbeflaechen": "Werbeflächen",
+    "myCVs": "Meine Lebensläufe",
+    "coverLetters": "Anschreiben",
+    "applications": "Bewerbungen",
+    "atsFormatting": "ATS-Formatierung"
+  },
+  "user": {
+    "theme": "Design",
+    "settings": "Einstellungen",
+    "signOut": "Abmelden"
+  }
+}

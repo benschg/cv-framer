@@ -17,6 +17,7 @@ import {
 import { useProfileManager } from '@/hooks/use-profile-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface SkillsManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -29,6 +30,7 @@ export interface SkillsManagerRef {
 
 export const SkillsManager = forwardRef<SkillsManagerRef, SkillsManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
+  const { t } = useAppTranslation();
   const {
     items: skillCategories,
     isExpanded,
@@ -85,6 +87,7 @@ export const SkillsManager = forwardRef<SkillsManagerRef, SkillsManagerProps>(
                 formData={formData}
                 onFieldChange={(field, value) => handleFieldChange(category.id, field, value)}
                 onDone={() => handleDone(category.id)}
+                t={t}
               />
             ) : (
               <SkillCategoryViewCard
@@ -92,6 +95,7 @@ export const SkillsManager = forwardRef<SkillsManagerRef, SkillsManagerProps>(
                 onEdit={() => handleEdit(category)}
                 onDelete={() => handleDelete(category.id)}
                 disabled={saving}
+                t={t}
               />
             )}
           </SortableCard>
@@ -103,8 +107,8 @@ export const SkillsManager = forwardRef<SkillsManagerRef, SkillsManagerProps>(
       emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>No skill categories added yet.</p>
-            <p className="text-sm mt-1">Click "Add Category" to get started.</p>
+            <p>{t('profile.skills.empty')}</p>
+            <p className="text-sm mt-1">{t('profile.skills.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -119,12 +123,14 @@ interface SkillCategoryEditFormProps {
   formData: Partial<ProfileSkillCategory>;
   onFieldChange: (field: keyof ProfileSkillCategory, value: any) => void;
   onDone: () => void;
+  t: (key: string) => string;
 }
 
 function SkillCategoryEditForm({
   formData,
   onFieldChange,
   onDone,
+  t,
 }: SkillCategoryEditFormProps) {
   const [skillInput, setSkillInput] = useState('');
 
@@ -146,25 +152,25 @@ function SkillCategoryEditForm({
     <>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Edit Category</CardTitle>
+          <CardTitle className="text-lg">{t('profile.skills.edit')}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onDone}>
-            Done
+            {t('profile.skills.done')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="category">Category Name *</Label>
+          <Label htmlFor="category">{t('profile.skills.categoryName')} *</Label>
           <Input
             id="category"
             value={formData.category || ''}
             onChange={(e) => onFieldChange('category', e.target.value)}
-            placeholder="e.g., Programming Languages, Tools, Frameworks"
+            placeholder={t('profile.skills.categoryPlaceholder')}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Skills</Label>
+          <Label>{t('profile.skills.skills')}</Label>
           <div className="flex gap-2">
             <Input
               value={skillInput}
@@ -175,7 +181,7 @@ function SkillCategoryEditForm({
                   handleAddSkill();
                 }
               }}
-              placeholder="Type a skill and press Enter"
+              placeholder={t('profile.skills.skillsPlaceholder')}
             />
             <Button type="button" variant="outline" onClick={handleAddSkill}>
               <Plus className="h-4 w-4" />
@@ -209,6 +215,7 @@ interface SkillCategoryViewCardProps {
   onEdit: () => void;
   onDelete: () => void;
   disabled: boolean;
+  t: (key: string) => string;
 }
 
 function SkillCategoryViewCard({
@@ -216,6 +223,7 @@ function SkillCategoryViewCard({
   onEdit,
   onDelete,
   disabled,
+  t,
 }: SkillCategoryViewCardProps) {
   return (
     <>
@@ -223,7 +231,7 @@ function SkillCategoryViewCard({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle>{category.category}</CardTitle>
-            <CardDescription>{category.skills.length} skills</CardDescription>
+            <CardDescription>{category.skills.length} {t('profile.skills.skillsCount')}</CardDescription>
           </div>
           <div className="flex gap-2">
             <Button
@@ -232,7 +240,7 @@ function SkillCategoryViewCard({
               onClick={onEdit}
               disabled={disabled}
             >
-              Edit
+              {t('profile.skills.editButton')}
             </Button>
             <Button
               variant="ghost"

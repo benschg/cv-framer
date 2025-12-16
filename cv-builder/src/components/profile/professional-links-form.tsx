@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface ProfessionalLinksFormProps {
   formData: {
@@ -14,46 +15,48 @@ interface ProfessionalLinksFormProps {
 }
 
 export function ProfessionalLinksForm({ formData, onChange }: ProfessionalLinksFormProps) {
+  const { t } = useAppTranslation();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Professional Links</CardTitle>
+        <CardTitle>{t('profile.professionalLinks.title')}</CardTitle>
         <CardDescription>
-          Add links to your professional profiles
+          {t('profile.professionalLinks.subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+          <Label htmlFor="linkedinUrl">{t('profile.professionalLinks.linkedinUrl')}</Label>
           <Input
             id="linkedinUrl"
             name="linkedinUrl"
             type="url"
             value={formData.linkedinUrl}
             onChange={onChange}
-            placeholder="https://linkedin.com/in/yourprofile"
+            placeholder={t('profile.professionalLinks.linkedinPlaceholder')}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="githubUrl">GitHub URL</Label>
+          <Label htmlFor="githubUrl">{t('profile.professionalLinks.githubUrl')}</Label>
           <Input
             id="githubUrl"
             name="githubUrl"
             type="url"
             value={formData.githubUrl}
             onChange={onChange}
-            placeholder="https://github.com/yourusername"
+            placeholder={t('profile.professionalLinks.githubPlaceholder')}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="websiteUrl">Personal Website</Label>
+          <Label htmlFor="websiteUrl">{t('profile.professionalLinks.websiteUrl')}</Label>
           <Input
             id="websiteUrl"
             name="websiteUrl"
             type="url"
             value={formData.websiteUrl}
             onChange={onChange}
-            placeholder="https://yourwebsite.com"
+            placeholder={t('profile.professionalLinks.websitePlaceholder')}
           />
         </div>
       </CardContent>

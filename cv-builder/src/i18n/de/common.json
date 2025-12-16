@@ -1,0 +1,18 @@
+{
+  "back": "Zurück",
+  "save": "Speichern",
+  "saving": "Speichern...",
+  "cancel": "Abbrechen",
+  "delete": "Löschen",
+  "edit": "Bearbeiten",
+  "create": "Erstellen",
+  "loading": "Laden...",
+  "error": "Fehler",
+  "success": "Erfolg",
+  "changesSaved": "Änderungen gespeichert!",
+  "yes": "Ja",
+  "no": "Nein",
+  "language": "Sprache",
+  "settings": "Einstellungen",
+  "profile": "Profil"
+}

@@ -11,6 +11,7 @@ import { AlertTriangle, Trash2, Loader2 } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
 import { BulletListEditor } from '@/components/ui/bullet-list-editor';
 import { formatDateRange } from '@/lib/utils';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 import {
   fetchWorkExperiences,
   createWorkExperience,
@@ -33,6 +34,7 @@ export interface WorkExperienceManagerRef {
 
 export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkExperienceManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
+  const { t } = useAppTranslation();
   const {
     items: experiences,
     isExpanded,
@@ -97,6 +99,7 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
                 onFieldChange={(field, value) => handleFieldChange(experience.id, field, value)}
                 onMultiFieldChange={(updates) => handleMultiFieldChange(experience.id, updates)}
                 onDone={() => handleDone(experience.id)}
+                t={t}
               />
             ) : (
               <ExperienceViewCard
@@ -104,6 +107,7 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
                 onEdit={() => handleEdit(experience)}
                 onDelete={() => handleDelete(experience.id)}
                 disabled={saving}
+                t={t}
               />
             )}
           </SortableCard>
@@ -115,8 +119,8 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
       emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>No work experience added yet.</p>
-            <p className="text-sm mt-1">Click "Add Experience" to get started.</p>
+            <p>{t('profile.workExperience.empty')}</p>
+            <p className="text-sm mt-1">{t('profile.workExperience.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -132,6 +136,7 @@ interface ExperienceEditFormProps {
   onFieldChange: (field: keyof ProfileWorkExperience, value: any) => void;
   onMultiFieldChange: (updates: Partial<ProfileWorkExperience>) => void;
   onDone: () => void;
+  t: (key: string) => string;
 }
 
 function ExperienceEditForm({
@@ -139,6 +144,7 @@ function ExperienceEditForm({
   onFieldChange,
   onMultiFieldChange,
   onDone,
+  t,
 }: ExperienceEditFormProps) {
   // Check if end date is before start date
   const isEndDateBeforeStart = (() => {
@@ -150,51 +156,51 @@ function ExperienceEditForm({
     <>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Edit Experience</CardTitle>
+          <CardTitle className="text-lg">{t('profile.workExperience.edit')}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onDone}>
-            Done
+            {t('profile.workExperience.done')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="title">Job Title *</Label>
+            <Label htmlFor="title">{t('profile.workExperience.jobTitle')} *</Label>
             <Input
               id="title"
               value={formData.title || ''}
               onChange={(e) => onFieldChange('title', e.target.value)}
-              placeholder="Senior Software Engineer"
+              placeholder={t('profile.workExperience.jobTitlePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="company">Company *</Label>
+            <Label htmlFor="company">{t('profile.workExperience.company')} *</Label>
             <Input
               id="company"
               value={formData.company || ''}
               onChange={(e) => onFieldChange('company', e.target.value)}
-              placeholder="Tech Corp Inc."
+              placeholder={t('profile.workExperience.companyPlaceholder')}
             />
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Start Date *</Label>
+            <Label>{t('profile.workExperience.startDate')} *</Label>
             <MonthYearPicker
               value={formData.start_date || ''}
               onChange={(value) => onFieldChange('start_date', value)}
-              placeholder="Select start date"
+              placeholder={t('profile.workExperience.startDatePlaceholder')}
               showFutureWarning
             />
           </div>
           {!formData.current && (
             <div className="space-y-2">
-              <Label>End Date</Label>
+              <Label>{t('profile.workExperience.endDate')}</Label>
               <MonthYearPicker
                 value={formData.end_date || ''}
                 onChange={(value) => onFieldChange('end_date', value)}
-                placeholder="Select end date"
+                placeholder={t('profile.workExperience.endDatePlaceholder')}
                 showFutureWarning
               />
             </div>
@@ -204,7 +210,7 @@ function ExperienceEditForm({
         {isEndDateBeforeStart && (
           <p className="flex items-center gap-1 text-sm text-amber-600">
             <AlertTriangle className="h-4 w-4" />
-            End date cannot be before start date
+            {t('profile.workExperience.endDateError')}
           </p>
         )}
 
@@ -221,37 +227,37 @@ function ExperienceEditForm({
             }}
           />
           <Label htmlFor="current" className="text-sm font-normal cursor-pointer">
-            I currently work here
+            {t('profile.workExperience.currentlyWorkHere')}
           </Label>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
+          <Label htmlFor="location">{t('profile.workExperience.location')}</Label>
           <Input
             id="location"
             value={formData.location || ''}
             onChange={(e) => onFieldChange('location', e.target.value)}
-            placeholder="San Francisco, CA"
+            placeholder={t('profile.workExperience.locationPlaceholder')}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t('profile.workExperience.description')}</Label>
           <Textarea
             id="description"
             value={formData.description || ''}
             onChange={(e) => onFieldChange('description', e.target.value)}
-            placeholder="Brief description of your role..."
+            placeholder={t('profile.workExperience.descriptionPlaceholder')}
             rows={3}
           />
         </div>
 
         <BulletListEditor
-          label="Key Achievements & Responsibilities"
+          label={t('profile.workExperience.achievements')}
           bullets={formData.bullets || []}
           onChange={(bullets) => onFieldChange('bullets', bullets)}
-          placeholder="Achieved X% increase in..."
-          addButtonLabel="Add Bullet"
+          placeholder={t('profile.workExperience.achievementPlaceholder')}
+          addButtonLabel={t('profile.workExperience.addBullet')}
         />
       </CardContent>
     </>
@@ -264,6 +270,7 @@ interface ExperienceViewCardProps {
   onEdit: () => void;
   onDelete: () => void;
   disabled: boolean;
+  t: (key: string) => string;
 }
 
 function ExperienceViewCard({
@@ -271,6 +278,7 @@ function ExperienceViewCard({
   onEdit,
   onDelete,
   disabled,
+  t,
 }: ExperienceViewCardProps) {
   return (
     <>
@@ -293,7 +301,7 @@ function ExperienceViewCard({
               onClick={onEdit}
               disabled={disabled}
             >
-              Edit
+              {t('profile.workExperience.editButton')}
             </Button>
             <Button
               variant="ghost"

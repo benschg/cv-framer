@@ -17,6 +17,7 @@ import {
 import { useProfileManager } from '@/hooks/use-profile-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface KeyCompetencesManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -29,6 +30,7 @@ export interface KeyCompetencesManagerRef {
 
 export const KeyCompetencesManager = forwardRef<KeyCompetencesManagerRef, KeyCompetencesManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
+  const { t } = useAppTranslation();
   const {
     items: keyCompetences,
     isExpanded,
@@ -85,6 +87,7 @@ export const KeyCompetencesManager = forwardRef<KeyCompetencesManagerRef, KeyCom
                 formData={formData}
                 onFieldChange={(field, value) => handleFieldChange(competence.id, field, value)}
                 onDone={() => handleDone(competence.id)}
+                t={t}
               />
             ) : (
               <KeyCompetenceViewCard
@@ -92,6 +95,7 @@ export const KeyCompetencesManager = forwardRef<KeyCompetencesManagerRef, KeyCom
                 onEdit={() => handleEdit(competence)}
                 onDelete={() => handleDelete(competence.id)}
                 disabled={saving}
+                t={t}
               />
             )}
           </SortableCard>
@@ -103,8 +107,8 @@ export const KeyCompetencesManager = forwardRef<KeyCompetencesManagerRef, KeyCom
       emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>No key competences added yet.</p>
-            <p className="text-sm mt-1">Click "Add Competence" to get started.</p>
+            <p>{t('profile.keyCompetences.empty')}</p>
+            <p className="text-sm mt-1">{t('profile.keyCompetences.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -119,41 +123,43 @@ interface KeyCompetenceEditFormProps {
   formData: Partial<ProfileKeyCompetence>;
   onFieldChange: (field: keyof ProfileKeyCompetence, value: any) => void;
   onDone: () => void;
+  t: (key: string) => string;
 }
 
 function KeyCompetenceEditForm({
   formData,
   onFieldChange,
   onDone,
+  t,
 }: KeyCompetenceEditFormProps) {
   return (
     <>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Edit Competence</CardTitle>
+          <CardTitle className="text-lg">{t('profile.keyCompetences.edit')}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onDone}>
-            Done
+            {t('profile.keyCompetences.done')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="title">Title *</Label>
+          <Label htmlFor="title">{t('profile.keyCompetences.title')} *</Label>
           <Input
             id="title"
             value={formData.title || ''}
             onChange={(e) => onFieldChange('title', e.target.value)}
-            placeholder="e.g., Strategic Planning, Team Leadership"
+            placeholder={t('profile.keyCompetences.titlePlaceholder')}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t('profile.keyCompetences.description')}</Label>
           <Textarea
             id="description"
             value={formData.description || ''}
             onChange={(e) => onFieldChange('description', e.target.value)}
-            placeholder="Brief description of this competence..."
+            placeholder={t('profile.keyCompetences.descriptionPlaceholder')}
             rows={3}
           />
         </div>
@@ -168,6 +174,7 @@ interface KeyCompetenceViewCardProps {
   onEdit: () => void;
   onDelete: () => void;
   disabled: boolean;
+  t: (key: string) => string;
 }
 
 function KeyCompetenceViewCard({
@@ -175,6 +182,7 @@ function KeyCompetenceViewCard({
   onEdit,
   onDelete,
   disabled,
+  t,
 }: KeyCompetenceViewCardProps) {
   return (
     <>
@@ -193,7 +201,7 @@ function KeyCompetenceViewCard({
               onClick={onEdit}
               disabled={disabled}
             >
-              Edit
+              {t('profile.keyCompetences.editButton')}
             </Button>
             <Button
               variant="ghost"

@@ -6,8 +6,10 @@ import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
 import { AICertificationUploadDialog } from '@/components/profile/ai-certification-upload-dialog';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function CertificationsPage() {
+  const { t } = useAppTranslation();
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
@@ -16,9 +18,9 @@ export default function CertificationsPage() {
   return (
     <>
       <ProfilePageLayout
-        title="Certifications"
-        description="Manage your professional certifications and licenses"
-        addButtonLabel="Add Certification"
+        title={t('profile.certifications.pageTitle')}
+        description={t('profile.certifications.pageSubtitle')}
+        addButtonLabel={t('profile.certifications.addButton')}
         onAdd={() => managerRef.current?.handleAdd()}
         isSaving={isSaving}
         saveSuccess={saveSuccess}
@@ -28,7 +30,7 @@ export default function CertificationsPage() {
             onClick={() => setAiDialogOpen(true)}
           >
             <Sparkles className="h-4 w-4 mr-2" />
-            Add using AI
+            {t('profile.certifications.addUsingAI')}
           </Button>
         }
       >

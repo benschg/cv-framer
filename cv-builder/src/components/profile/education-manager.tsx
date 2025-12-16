@@ -19,6 +19,7 @@ import {
 import { useProfileManager } from '@/hooks/use-profile-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface EducationManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -31,6 +32,7 @@ export interface EducationManagerRef {
 
 export const EducationManager = forwardRef<EducationManagerRef, EducationManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
+  const { t } = useAppTranslation();
   const {
     items: educationList,
     isExpanded,
@@ -92,6 +94,7 @@ export const EducationManager = forwardRef<EducationManagerRef, EducationManager
                 formData={formData}
                 onFieldChange={(field, value) => handleFieldChange(education.id, field, value)}
                 onDone={() => handleDone(education.id)}
+                t={t}
               />
             ) : (
               <EducationViewCard
@@ -99,6 +102,7 @@ export const EducationManager = forwardRef<EducationManagerRef, EducationManager
                 onEdit={() => handleEdit(education)}
                 onDelete={() => handleDelete(education.id)}
                 disabled={saving}
+                t={t}
               />
             )}
           </SortableCard>
@@ -110,8 +114,8 @@ export const EducationManager = forwardRef<EducationManagerRef, EducationManager
       emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>No education added yet.</p>
-            <p className="text-sm mt-1">Click "Add Education" to get started.</p>
+            <p>{t('profile.education.empty')}</p>
+            <p className="text-sm mt-1">{t('profile.education.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -126,12 +130,14 @@ interface EducationEditFormProps {
   formData: Partial<ProfileEducation>;
   onFieldChange: (field: keyof ProfileEducation, value: any) => void;
   onDone: () => void;
+  t: (key: string) => string;
 }
 
 function EducationEditForm({
   formData,
   onFieldChange,
   onDone,
+  t,
 }: EducationEditFormProps) {
   // Check if end date is before start date
   const isEndDateBeforeStart = (() => {
@@ -143,70 +149,70 @@ function EducationEditForm({
     <>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Edit Education</CardTitle>
+          <CardTitle className="text-lg">{t('profile.education.edit')}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onDone}>
-            Done
+            {t('profile.education.done')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="degree">Degree *</Label>
+            <Label htmlFor="degree">{t('profile.education.degree')} *</Label>
             <Input
               id="degree"
               value={formData.degree || ''}
               onChange={(e) => onFieldChange('degree', e.target.value)}
-              placeholder="Bachelor of Science"
+              placeholder={t('profile.education.degreePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="field">Field of Study</Label>
+            <Label htmlFor="field">{t('profile.education.fieldOfStudy')}</Label>
             <Input
               id="field"
               value={formData.field || ''}
               onChange={(e) => onFieldChange('field', e.target.value)}
-              placeholder="Computer Science"
+              placeholder={t('profile.education.fieldOfStudyPlaceholder')}
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="institution">Institution *</Label>
+          <Label htmlFor="institution">{t('profile.education.institution')} *</Label>
           <Input
             id="institution"
             value={formData.institution || ''}
             onChange={(e) => onFieldChange('institution', e.target.value)}
-            placeholder="University of California, Berkeley"
+            placeholder={t('profile.education.institutionPlaceholder')}
           />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label>Start Date *</Label>
+            <Label>{t('profile.education.startDate')} *</Label>
             <MonthYearPicker
               value={formData.start_date || ''}
               onChange={(value) => onFieldChange('start_date', value)}
-              placeholder="Select start date"
+              placeholder={t('profile.education.startDatePlaceholder')}
               showFutureWarning
             />
           </div>
           <div className="space-y-2">
-            <Label>End Date</Label>
+            <Label>{t('profile.education.endDate')}</Label>
             <MonthYearPicker
               value={formData.end_date || ''}
               onChange={(value) => onFieldChange('end_date', value)}
-              placeholder="Select end date"
+              placeholder={t('profile.education.endDatePlaceholder')}
               showFutureWarning
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="grade">Grade/GPA</Label>
+            <Label htmlFor="grade">{t('profile.education.grade')}</Label>
             <Input
               id="grade"
               value={formData.grade || ''}
               onChange={(e) => onFieldChange('grade', e.target.value)}
-              placeholder="3.8 GPA"
+              placeholder={t('profile.education.gradePlaceholder')}
             />
           </div>
         </div>
@@ -214,17 +220,17 @@ function EducationEditForm({
         {isEndDateBeforeStart && (
           <p className="flex items-center gap-1 text-sm text-amber-600">
             <AlertTriangle className="h-4 w-4" />
-            End date cannot be before start date
+            {t('profile.education.endDateError')}
           </p>
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t('profile.education.description')}</Label>
           <Textarea
             id="description"
             value={formData.description || ''}
             onChange={(e) => onFieldChange('description', e.target.value)}
-            placeholder="Honors, relevant coursework, thesis topic..."
+            placeholder={t('profile.education.descriptionPlaceholder')}
             rows={3}
           />
         </div>
@@ -239,6 +245,7 @@ interface EducationViewCardProps {
   onEdit: () => void;
   onDelete: () => void;
   disabled: boolean;
+  t: (key: string) => string;
 }
 
 function EducationViewCard({
@@ -246,6 +253,7 @@ function EducationViewCard({
   onEdit,
   onDelete,
   disabled,
+  t,
 }: EducationViewCardProps) {
   return (
     <>
@@ -254,7 +262,7 @@ function EducationViewCard({
           <div className="flex-1">
             <CardTitle>
               {education.degree}
-              {education.field && ` in ${education.field}`}
+              {education.field && ` ${t('profile.education.in')} ${education.field}`}
             </CardTitle>
             <CardDescription>{education.institution}</CardDescription>
             <p className="text-sm text-muted-foreground mt-1">
@@ -269,7 +277,7 @@ function EducationViewCard({
               onClick={onEdit}
               disabled={disabled}
             >
-              Edit
+              {t('profile.education.editButton')}
             </Button>
             <Button
               variant="ghost"

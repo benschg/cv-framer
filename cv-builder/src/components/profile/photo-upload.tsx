@@ -7,6 +7,8 @@ import { Upload, Image as ImageIcon } from 'lucide-react';
 import { ImageCropper } from './image-cropper';
 import { uploadProfilePhoto } from '@/services/profile-photo.service';
 import { toast } from 'sonner';
+import { useTranslations } from '@/hooks/use-translations';
+import { useUserPreferences } from '@/contexts/user-preferences-context';
 
 interface PhotoUploadProps {
   onUploadComplete: () => void;
@@ -15,6 +17,8 @@ interface PhotoUploadProps {
 }
 
 export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = false }: PhotoUploadProps) {
+  const { language } = useUserPreferences();
+  const { t } = useTranslations(language);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedFilename, setSelectedFilename] = useState<string>('');
@@ -25,13 +29,13 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
     // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      toast.error('Invalid file type. Please upload JPEG, PNG, or WebP images.');
+      toast.error(t('profile.photoUpload.invalidType'));
       return;
     }
 
     // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('File too large. Maximum size is 10MB.');
+      toast.error(t('profile.photoUpload.fileTooLarge'));
       return;
     }
 
@@ -88,11 +92,11 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success('Photo uploaded successfully!');
+        toast.success(t('profile.photoUpload.uploadSuccess'));
         onUploadComplete();
       }
     } catch (error) {
-      toast.error('Upload failed. Please try again.');
+      toast.error(t('profile.photoUpload.uploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -115,7 +119,7 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
           ) : (
             <>
               <Upload className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Drop photo or click</span>
+              <span className="text-sm text-muted-foreground">{t('profile.photoUpload.dropOrClick')}</span>
             </>
           )}
         </div>
@@ -156,23 +160,23 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
           {uploading ? (
             <>
               <Upload className="h-12 w-12 text-muted-foreground mb-4 animate-pulse" />
-              <p className="text-sm text-muted-foreground">Uploading...</p>
+              <p className="text-sm text-muted-foreground">{t('profile.photoUpload.uploading')}</p>
             </>
           ) : (
             <>
               <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-sm font-medium mb-1">
-                Drag and drop your photo here
+                {t('profile.photoUpload.dragDrop')}
               </p>
               <p className="text-xs text-muted-foreground mb-4">
-                or click to browse
+                {t('profile.photoUpload.orClick')}
               </p>
               <Button type="button" variant="outline" size="sm">
                 <Upload className="h-4 w-4 mr-2" />
-                Choose File
+                {t('profile.photoUpload.chooseFile')}
               </Button>
               <p className="text-xs text-muted-foreground mt-4">
-                JPEG, PNG, or WebP up to 10MB
+                {t('profile.photoUpload.helpText')}
               </p>
             </>
           )}

@@ -42,51 +42,55 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
+import { useUserPreferences } from '@/contexts/user-preferences-context';
 import { ThemeToggle } from './theme-toggle';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { getUserInitials, getDisplayName } from '@/lib/user-utils';
+import { useTranslations } from '@/hooks/use-translations';
 import type { ProfilePhoto } from '@/types/api.schemas';
-
-const navigation = [
-  {
-    label: 'Overview',
-    items: [
-      { title: 'Dashboard', href: '/cv', icon: Home },
-    ],
-  },
-  {
-    label: 'Build',
-    items: [
-      { title: 'Profile', href: '/profile', icon: User },
-      { title: 'Work Experience', href: '/profile/experience', icon: Briefcase, indent: true },
-      { title: 'Education', href: '/profile/education', icon: GraduationCap, indent: true },
-      { title: 'Skills', href: '/profile/skills', icon: Code, indent: true },
-      { title: 'Key Competences', href: '/profile/key-competences', icon: Zap, indent: true },
-      { title: 'Certifications', href: '/profile/certifications', icon: Award, indent: true },
-      { title: 'References', href: '/profile/references', icon: UserCheck, indent: true },
-      { title: 'Werbeflaechen', href: '/werbeflaechen', icon: Target },
-      { title: 'My CVs', href: '/cv', icon: FileText },
-      { title: 'Cover Letters', href: '/cover-letter', icon: Mail },
-    ],
-  },
-  {
-    label: 'Track',
-    items: [
-      { title: 'Applications', href: '/applications', icon: Briefcase },
-    ],
-  },
-  {
-    label: 'Guides',
-    items: [
-      { title: 'ATS Formatting', href: '/guide/ats-formatting', icon: BookOpen },
-    ],
-  },
-];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const { language } = useUserPreferences();
+  const { t } = useTranslations(language);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
+
+  const navigation = [
+    {
+      label: t('nav.groups.overview'),
+      items: [
+        { title: t('nav.items.dashboard'), href: '/cv', icon: Home },
+      ],
+    },
+    {
+      label: t('nav.groups.build'),
+      items: [
+        { title: t('nav.items.profile'), href: '/profile', icon: User },
+        { title: t('nav.items.workExperience'), href: '/profile/experience', icon: Briefcase, indent: true },
+        { title: t('nav.items.education'), href: '/profile/education', icon: GraduationCap, indent: true },
+        { title: t('nav.items.skills'), href: '/profile/skills', icon: Code, indent: true },
+        { title: t('nav.items.keyCompetences'), href: '/profile/key-competences', icon: Zap, indent: true },
+        { title: t('nav.items.certifications'), href: '/profile/certifications', icon: Award, indent: true },
+        { title: t('nav.items.references'), href: '/profile/references', icon: UserCheck, indent: true },
+        { title: t('nav.items.werbeflaechen'), href: '/werbeflaechen', icon: Target },
+        { title: t('nav.items.myCVs'), href: '/cv', icon: FileText },
+        { title: t('nav.items.coverLetters'), href: '/cover-letter', icon: Mail },
+      ],
+    },
+    {
+      label: t('nav.groups.track'),
+      items: [
+        { title: t('nav.items.applications'), href: '/applications', icon: Briefcase },
+      ],
+    },
+    {
+      label: t('nav.groups.guides'),
+      items: [
+        { title: t('nav.items.atsFormatting'), href: '/guide/ats-formatting', icon: BookOpen },
+      ],
+    },
+  ];
 
   useEffect(() => {
     const loadPrimaryPhoto = async () => {
@@ -112,7 +116,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b p-4">
         <Link href="/cv" className="flex items-center gap-2">
           <CVBuilderLogo className="h-8 w-8" />
-          <span className="text-lg font-bold">CV Builder</span>
+          <span className="text-lg font-bold">{t('nav.logo')}</span>
         </Link>
       </SidebarHeader>
 
@@ -144,7 +148,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t p-4">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Theme</span>
+          <span className="text-sm text-muted-foreground">{t('nav.user.theme')}</span>
           <ThemeToggle />
         </div>
         <DropdownMenu>
@@ -166,7 +170,7 @@ export function AppSidebar() {
             <DropdownMenuItem asChild>
               <Link href="/settings" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                Settings
+                {t('nav.user.settings')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -175,7 +179,7 @@ export function AppSidebar() {
               className="flex items-center gap-2 text-destructive focus:text-destructive"
             >
               <LogOut className="h-4 w-4" />
-              Sign out
+              {t('nav.user.signOut')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

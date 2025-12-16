@@ -1,0 +1,12 @@
+{
+  "boundary": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred. Please try again.",
+    "tryAgain": "Try Again",
+    "home": "Home"
+  },
+  "dashboard": {
+    "title": "Something went wrong",
+    "message": "An error occurred while loading this page."
+  }
+}

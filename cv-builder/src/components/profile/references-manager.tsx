@@ -20,6 +20,7 @@ import {
 import { useProfileManager } from '@/hooks/use-profile-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface ReferencesManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -33,6 +34,7 @@ export interface ReferencesManagerRef {
 
 export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
+  const { t } = useAppTranslation();
   const {
     items: references,
     isExpanded,
@@ -76,7 +78,7 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
 
       // If a file was provided, upload it first and get the URL
       if (file) {
-        toast.loading('Uploading document...', { id: 'ref-upload' });
+        toast.loading(t('profile.references.uploadingDocument'), { id: 'ref-upload' });
 
         // We need to create the reference first to get an ID, then upload the document
         // For now, create without the document, then update with document info
@@ -98,9 +100,9 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
           const uploadResult = await uploadReferenceLetter(user.id, referenceId, file);
           if (uploadResult.error) {
             console.error('Error uploading document:', uploadResult.error);
-            toast.error('Document upload failed', {
+            toast.error(t('profile.references.uploadFailed'), {
               id: 'ref-upload',
-              description: 'The reference was created but the document could not be uploaded. You can add it later.',
+              description: t('profile.references.uploadFailedDescription'),
             });
           } else {
             documentUrl = uploadResult.data?.url || '';
@@ -114,7 +116,7 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
               storage_path: storagePath,
             });
 
-            toast.success('Reference and document added!', {
+            toast.success(t('profile.references.addedSuccess'), {
               id: 'ref-upload',
               description: `${referenceName} with ${file.name}`,
             });
@@ -136,7 +138,7 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
           throw new Error(result.error);
         }
 
-        toast.success('Reference added!');
+        toast.success(t('profile.references.addedSuccessOnly'));
 
         // Manually refresh the list
         const { data: refreshedData } = await fetchReferences();
@@ -184,6 +186,7 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
                 onFieldChange={(field, value) => handleFieldChange(reference.id, field, value)}
                 onMultiFieldChange={(updates) => handleMultiFieldChange(reference.id, updates)}
                 onDone={() => handleDone(reference.id)}
+                t={t}
               />
             ) : (
               <ReferenceViewCard
@@ -191,6 +194,7 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
                 onEdit={() => handleEdit(reference)}
                 onDelete={() => handleDelete(reference.id)}
                 disabled={saving}
+                t={t}
               />
             )}
           </SortableCard>
@@ -202,8 +206,8 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
       emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>No references added yet.</p>
-            <p className="text-sm mt-1">Click "Add Reference" to get started.</p>
+            <p>{t('profile.references.empty')}</p>
+            <p className="text-sm mt-1">{t('profile.references.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -219,6 +223,7 @@ interface ReferenceEditFormProps {
   onFieldChange: (field: keyof ProfileReference, value: any) => void;
   onMultiFieldChange: (updates: Partial<ProfileReference>) => void;
   onDone: () => void;
+  t: (key: string) => string;
 }
 
 function ReferenceEditForm({
@@ -226,6 +231,7 @@ function ReferenceEditForm({
   onFieldChange,
   onMultiFieldChange,
   onDone,
+  t,
 }: ReferenceEditFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -237,13 +243,13 @@ function ReferenceEditForm({
     // Validate file type (images and PDFs only)
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
     if (!validTypes.includes(file.type)) {
-      alert('Please upload an image (JPG, PNG, WebP) or PDF file');
+      alert(t('profile.references.invalidFileType'));
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert('File size must be less than 10MB');
+      alert(t('profile.references.fileTooLarge'));
       return;
     }
 
@@ -260,7 +266,7 @@ function ReferenceEditForm({
       });
     } catch (error) {
       console.error('File upload error:', error);
-      alert('Failed to upload file');
+      alert(t('profile.references.uploadError'));
     } finally {
       setUploadingFile(false);
       // Reset file input
@@ -281,42 +287,42 @@ function ReferenceEditForm({
     <>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Edit Reference</CardTitle>
+          <CardTitle className="text-lg">{t('profile.references.edit')}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onDone}>
-            Done
+            {t('profile.references.done')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
+            <Label htmlFor="name">{t('profile.references.fullName')} *</Label>
             <Input
               id="name"
               value={formData.name || ''}
               onChange={(e) => onFieldChange('name', e.target.value)}
-              placeholder="John Smith"
+              placeholder={t('profile.references.fullNamePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="relationship">Relationship *</Label>
+            <Label htmlFor="relationship">{t('profile.references.relationship')} *</Label>
             <Select
               value={formData.relationship || ''}
               onValueChange={(value) => onFieldChange('relationship', value)}
             >
               <SelectTrigger id="relationship">
-                <SelectValue placeholder="Select relationship" />
+                <SelectValue placeholder={t('profile.references.relationshipPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Manager">Manager</SelectItem>
-                <SelectItem value="Supervisor">Supervisor</SelectItem>
-                <SelectItem value="Colleague">Colleague</SelectItem>
-                <SelectItem value="Team Lead">Team Lead</SelectItem>
-                <SelectItem value="Professor">Professor</SelectItem>
-                <SelectItem value="Academic Advisor">Academic Advisor</SelectItem>
-                <SelectItem value="Client">Client</SelectItem>
-                <SelectItem value="Mentor">Mentor</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+                <SelectItem value="Manager">{t('profile.references.relationshipManager')}</SelectItem>
+                <SelectItem value="Supervisor">{t('profile.references.relationshipSupervisor')}</SelectItem>
+                <SelectItem value="Colleague">{t('profile.references.relationshipColleague')}</SelectItem>
+                <SelectItem value="Team Lead">{t('profile.references.relationshipTeamLead')}</SelectItem>
+                <SelectItem value="Professor">{t('profile.references.relationshipProfessor')}</SelectItem>
+                <SelectItem value="Academic Advisor">{t('profile.references.relationshipAdvisor')}</SelectItem>
+                <SelectItem value="Client">{t('profile.references.relationshipClient')}</SelectItem>
+                <SelectItem value="Mentor">{t('profile.references.relationshipMentor')}</SelectItem>
+                <SelectItem value="Other">{t('profile.references.relationshipOther')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -324,75 +330,75 @@ function ReferenceEditForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="title">Job Title *</Label>
+            <Label htmlFor="title">{t('profile.references.jobTitle')} *</Label>
             <Input
               id="title"
               value={formData.title || ''}
               onChange={(e) => onFieldChange('title', e.target.value)}
-              placeholder="Senior Software Engineer"
+              placeholder={t('profile.references.jobTitlePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="company">Company *</Label>
+            <Label htmlFor="company">{t('profile.references.company')} *</Label>
             <Input
               id="company"
               value={formData.company || ''}
               onChange={(e) => onFieldChange('company', e.target.value)}
-              placeholder="Acme Inc."
+              placeholder={t('profile.references.companyPlaceholder')}
             />
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('profile.references.email')}</Label>
             <Input
               id="email"
               type="email"
               value={formData.email || ''}
               onChange={(e) => onFieldChange('email', e.target.value)}
-              placeholder="john.smith@example.com"
+              placeholder={t('profile.references.emailPlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">{t('profile.references.phone')}</Label>
             <Input
               id="phone"
               type="tel"
               value={formData.phone || ''}
               onChange={(e) => onFieldChange('phone', e.target.value)}
-              placeholder="+1 (555) 123-4567"
+              placeholder={t('profile.references.phonePlaceholder')}
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="linked_position">Link to Work Experience (Optional)</Label>
+          <Label htmlFor="linked_position">{t('profile.references.linkedWorkExperience')}</Label>
           <Input
             id="linked_position"
             value={formData.linked_position || ''}
             onChange={(e) => onFieldChange('linked_position', e.target.value)}
-            placeholder="Software Engineer at Acme Inc."
+            placeholder={t('profile.references.linkedWorkPlaceholder')}
           />
           <p className="text-xs text-muted-foreground">
-            Link this reference to a specific position from your work experience
+            {t('profile.references.linkedWorkNote')}
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="quote">Testimonial Quote (Optional)</Label>
+          <Label htmlFor="quote">{t('profile.references.testimonial')}</Label>
           <Textarea
             id="quote"
             value={formData.quote || ''}
             onChange={(e) => onFieldChange('quote', e.target.value)}
-            placeholder="A brief testimonial or recommendation quote..."
+            placeholder={t('profile.references.testimonialPlaceholder')}
             rows={3}
           />
         </div>
 
         {/* Reference Letter Upload */}
         <div className="space-y-2">
-          <Label>Reference Letter</Label>
+          <Label>{t('profile.references.referenceLetter')}</Label>
           {formData.document_url ? (
             <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
               <div className="flex-shrink-0">
@@ -405,7 +411,7 @@ function ReferenceEditForm({
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{formData.document_name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formData.document_name?.toLowerCase().endsWith('.pdf') ? 'PDF Document' : 'Image'}
+                  {formData.document_name?.toLowerCase().endsWith('.pdf') ? t('profile.references.pdfDocument') : t('profile.references.image')}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -444,10 +450,10 @@ function ReferenceEditForm({
                 className="w-full"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {uploadingFile ? 'Uploading...' : 'Upload Reference Letter (Image or PDF)'}
+                {uploadingFile ? t('profile.photoUpload.uploading') : t('profile.references.uploadButton')}
               </Button>
               <p className="text-xs text-muted-foreground mt-1">
-                Accepted formats: JPG, PNG, WebP, PDF (Max 10MB)
+                {t('profile.references.uploadNote')}
               </p>
             </div>
           )}
@@ -463,6 +469,7 @@ interface ReferenceViewCardProps {
   onEdit: () => void;
   onDelete: () => void;
   disabled: boolean;
+  t: (key: string) => string;
 }
 
 function ReferenceViewCard({
@@ -470,6 +477,7 @@ function ReferenceViewCard({
   onEdit,
   onDelete,
   disabled,
+  t,
 }: ReferenceViewCardProps) {
   return (
     <>
@@ -525,7 +533,7 @@ function ReferenceViewCard({
                   ) : (
                     <ImageIcon className="h-3 w-3" />
                   )}
-                  View reference letter
+                  {t('profile.references.viewLetter')}
                 </a>
               </div>
             )}
@@ -537,7 +545,7 @@ function ReferenceViewCard({
               onClick={onEdit}
               disabled={disabled}
             >
-              Edit
+              {t('profile.references.editButton')}
             </Button>
             <Button
               variant="ghost"

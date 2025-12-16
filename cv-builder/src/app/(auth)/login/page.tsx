@@ -5,14 +5,17 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { LoginForm, GoogleOAuthButton } from '@/components/auth';
+import { useTranslations } from '@/hooks/use-translations';
 
 function LoginContent() {
+  const { t } = useTranslations('en'); // TODO: Get language from context when auth pages support language switching
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardTitle className="text-2xl">{t('auth.loginPage.title')}</CardTitle>
         <CardDescription>
-          Sign in to your account to continue
+          {t('auth.loginPage.subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -24,7 +27,7 @@ function LoginContent() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-card px-2 text-muted-foreground">
-              Or continue with email
+              {t('auth.loginPage.emailContinue')}
             </span>
           </div>
         </div>
@@ -32,9 +35,9 @@ function LoginContent() {
         <LoginForm />
 
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{' '}
+          {t('auth.noAccount')}{' '}
           <Link href="/signup" className="text-primary hover:underline">
-            Sign up
+            {t('auth.loginPage.signUpLink')}
           </Link>
         </p>
       </CardContent>
@@ -43,8 +46,10 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
+  const { t } = useTranslations('en');
+
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t('auth.loginPage.loading')}</div>}>
       <LoginContent />
     </Suspense>
   );

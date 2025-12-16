@@ -3,17 +3,19 @@
 import { useState, useRef } from 'react';
 import { SkillsManager, SkillsManagerRef } from '@/components/profile/skills-manager';
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function SkillsPage() {
+  const { t } = useAppTranslation();
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const managerRef = useRef<SkillsManagerRef>(null);
 
   return (
     <ProfilePageLayout
-      title="Skills"
-      description="Manage your skills organized by category"
-      addButtonLabel="Add Category"
+      title={t('profile.skills.pageTitle')}
+      description={t('profile.skills.pageSubtitle')}
+      addButtonLabel={t('profile.skills.addButton')}
       onAdd={() => managerRef.current?.handleAdd()}
       isSaving={isSaving}
       saveSuccess={saveSuccess}

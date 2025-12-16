@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthProvider } from '@/contexts/auth-context';
+import { UserPreferencesProvider } from '@/contexts/user-preferences-context';
 import { ThemeProvider } from 'next-themes';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -12,7 +13,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <AuthProvider>
-        {children}
+        <UserPreferencesProvider>
+          {children}
+        </UserPreferencesProvider>
       </AuthProvider>
     </ThemeProvider>
   );

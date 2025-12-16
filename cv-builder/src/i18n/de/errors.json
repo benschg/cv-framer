@@ -1,0 +1,12 @@
+{
+  "boundary": {
+    "title": "Etwas ist schief gelaufen",
+    "message": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "tryAgain": "Erneut versuchen",
+    "home": "Startseite"
+  },
+  "dashboard": {
+    "title": "Etwas ist schief gelaufen",
+    "message": "Beim Laden dieser Seite ist ein Fehler aufgetreten."
+  }
+}
