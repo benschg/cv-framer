@@ -207,7 +207,14 @@
     "image": "Bild",
     "viewLetter": "Referenzschreiben anzeigen",
     "addedSuccess": "Referenz und Dokument hinzugefügt!",
-    "addedSuccessOnly": "Referenz hinzugefügt!"
+    "addedSuccessOnly": "Referenz hinzugefügt!",
+    "uploadingDocument": "Dokument wird hochgeladen...",
+    "uploadFailed": "Dokument-Upload fehlgeschlagen",
+    "uploadFailedDescription": "Die Referenz wurde erstellt, aber das Dokument konnte nicht hochgeladen werden. Sie können es später hinzufügen.",
+    "invalidFileType": "Bitte laden Sie ein Bild (JPG, PNG, WebP) oder eine PDF-Datei hoch",
+    "fileTooLarge": "Dateigröße muss kleiner als 10 MB sein",
+    "uploadError": "Datei-Upload fehlgeschlagen",
+    "userNotAuthenticated": "Benutzer nicht authentifiziert"
   },
 
   "photoUpload": {
