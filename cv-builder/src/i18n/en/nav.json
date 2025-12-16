@@ -5,5 +5,30 @@
   "werbeflaechen": "Werbeflaechen",
   "settings": "Settings",
   "profile": "Profile",
-  "logout": "Logout"
+  "logout": "Logout",
+  "logo": "CV Builder",
+  "groups": {
+    "overview": "Overview",
+    "build": "Build",
+    "track": "Track"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "workExperience": "Work Experience",
+    "education": "Education",
+    "skills": "Skills",
+    "keyCompetences": "Key Competences",
+    "certifications": "Certifications",
+    "references": "References",
+    "werbeflaechen": "Werbeflaechen",
+    "myCVs": "My CVs",
+    "coverLetters": "Cover Letters",
+    "applications": "Applications"
+  },
+  "user": {
+    "theme": "Theme",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  }
 }

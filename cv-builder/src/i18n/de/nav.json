@@ -5,5 +5,30 @@
   "werbeflaechen": "Werbeflächen",
   "settings": "Einstellungen",
   "profile": "Profil",
-  "logout": "Abmelden"
+  "logout": "Abmelden",
+  "logo": "CV Builder",
+  "groups": {
+    "overview": "Übersicht",
+    "build": "Erstellen",
+    "track": "Verfolgen"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "profile": "Profil",
+    "workExperience": "Berufserfahrung",
+    "education": "Ausbildung",
+    "skills": "Fähigkeiten",
+    "keyCompetences": "Schlüsselkompetenzen",
+    "certifications": "Zertifikate",
+    "references": "Referenzen",
+    "werbeflaechen": "Werbeflächen",
+    "myCVs": "Meine Lebensläufe",
+    "coverLetters": "Anschreiben",
+    "applications": "Bewerbungen"
+  },
+  "user": {
+    "theme": "Design",
+    "settings": "Einstellungen",
+    "signOut": "Abmelden"
+  }
 }
