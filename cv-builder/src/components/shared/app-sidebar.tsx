@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -110,11 +110,23 @@ export function AppSidebar() {
     }
   }, [user]);
 
-  const avatarUrl = primaryPhoto
-    ? getPhotoPublicUrl(primaryPhoto.storage_path)
-    : user?.user_metadata?.avatar_url;
-  const userInitials = getUserInitials(user);
-  const displayName = getDisplayName(user);
+  // Memoize computed values to ensure they update when user changes
+  const avatarUrl = useMemo(
+    () => primaryPhoto
+      ? getPhotoPublicUrl(primaryPhoto.storage_path)
+      : user?.user_metadata?.avatar_url,
+    [primaryPhoto, user?.user_metadata?.avatar_url]
+  );
+
+  const userInitials = useMemo(
+    () => getUserInitials(user),
+    [user]
+  );
+
+  const displayName = useMemo(
+    () => getDisplayName(user),
+    [user]
+  );
 
   return (
     <Sidebar>
