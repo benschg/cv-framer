@@ -11,7 +11,7 @@ import { AlertCircle, Download, ExternalLink, FileText, Globe, Moon, Sun } from 
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { language, theme, setLanguage, setTheme, loading: preferencesLoading } = useUserPreferences();
 
   const { t } = useTranslations(language);
@@ -146,8 +146,10 @@ export default function SettingsPage() {
             </p>
           </div>
           <div className="pt-4">
-            <Button variant="outline" onClick={() => signOut()}>
-              {t('settings.signOut')}
+            <Button variant="outline" asChild>
+              <Link href="/logout">
+                {t('settings.signOut')}
+              </Link>
             </Button>
           </div>
         </CardContent>

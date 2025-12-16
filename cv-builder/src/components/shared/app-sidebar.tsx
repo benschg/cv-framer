@@ -51,7 +51,7 @@ import type { ProfilePhoto } from '@/types/api.schemas';
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
@@ -180,12 +180,11 @@ export function AppSidebar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => signOut()}
-                className="flex items-center gap-2 text-destructive focus:text-destructive"
-              >
-                <LogOut className="h-4 w-4" />
-                {t('nav.user.signOut')}
+              <DropdownMenuItem asChild>
+                <Link href="/logout" className="flex items-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  {t('nav.user.signOut')}
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
