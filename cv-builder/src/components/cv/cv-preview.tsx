@@ -85,8 +85,15 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         className="bg-white p-8 rounded-lg shadow-sm border mx-auto text-[10pt] leading-relaxed relative"
         style={{
           width: `${pageWidth}mm`,
-          height: `${pageHeight}mm`,
-          overflow: 'hidden'
+          minHeight: `${pageHeight}mm`,
+          boxShadow: '0 0 0 1px rgba(0,0,0,0.1)',
+          backgroundImage: `repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent ${pageHeight - 1}mm,
+            rgba(200, 200, 200, 0.3) ${pageHeight - 1}mm,
+            rgba(200, 200, 200, 0.3) ${pageHeight}mm
+          )`
         }}
       >
       {/* Header */}
@@ -310,15 +317,15 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         )}
       </div>
 
-      {/* Page number indicator */}
-      <div className="text-center">
+      {/* Page info */}
+      <div className="text-center mt-4">
         <p className="text-xs text-muted-foreground">
-          Page 1 • {format}
+          {format} format • Scroll to see all pages
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {language === 'de'
-            ? 'Hinweis: Inhalt, der diese Seite überschreitet, wird beim Export auf zusätzliche Seiten verteilt'
-            : 'Note: Content exceeding this page will flow to additional pages when exported'}
+            ? 'Seitenumbrüche werden durch horizontale Linien angezeigt'
+            : 'Page breaks indicated by horizontal lines'}
         </p>
       </div>
     </div>
