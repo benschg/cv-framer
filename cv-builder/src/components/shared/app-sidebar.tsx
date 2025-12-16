@@ -18,6 +18,7 @@ import {
   Wrench,
   UserCheck,
   Zap,
+  BookOpen,
 } from 'lucide-react';
 import { CVBuilderLogo } from './cv-builder-logo';
 import {
@@ -72,6 +73,12 @@ const navigation = [
     label: 'Track',
     items: [
       { title: 'Applications', href: '/applications', icon: Briefcase },
+    ],
+  },
+  {
+    label: 'Guides',
+    items: [
+      { title: 'ATS Formatting', href: '/guide/ats-formatting', icon: BookOpen },
     ],
   },
 ];
