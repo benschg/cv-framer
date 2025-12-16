@@ -21,7 +21,7 @@ import {
 import { useProfileManager } from '@/hooks/use-profile-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface CertificationsManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -35,7 +35,7 @@ export interface CertificationsManagerRef {
 
 export const CertificationsManager = forwardRef<CertificationsManagerRef, CertificationsManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { t } = useAppTranslation();
   const {
     items: certifications,
     isExpanded,

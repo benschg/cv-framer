@@ -10,6 +10,7 @@ import { setPrimaryPhoto, deleteProfilePhoto, getPhotoPublicUrl } from '@/servic
 import { toast } from 'sonner';
 import type { ProfilePhoto } from '@/types/api.schemas';
 import { useTranslations } from '@/hooks/use-translations';
+import { useUserPreferences } from '@/contexts/user-preferences-context';
 
 interface PhotoGalleryProps {
   photos: ProfilePhoto[];
@@ -19,7 +20,8 @@ interface PhotoGalleryProps {
 }
 
 export function PhotoGallery({ photos, primaryPhoto, onUpdate, userInitials }: PhotoGalleryProps) {
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { language } = useUserPreferences();
+  const { t } = useTranslations(language);
   const [actioningId, setActioningId] = useState<string | null>(null);
 
   const handleSetPrimary = async (photoId: string) => {

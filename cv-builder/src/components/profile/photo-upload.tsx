@@ -8,6 +8,7 @@ import { ImageCropper } from './image-cropper';
 import { uploadProfilePhoto } from '@/services/profile-photo.service';
 import { toast } from 'sonner';
 import { useTranslations } from '@/hooks/use-translations';
+import { useUserPreferences } from '@/contexts/user-preferences-context';
 
 interface PhotoUploadProps {
   onUploadComplete: () => void;
@@ -16,7 +17,8 @@ interface PhotoUploadProps {
 }
 
 export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = false }: PhotoUploadProps) {
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { language } = useUserPreferences();
+  const { t } = useTranslations(language);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedFilename, setSelectedFilename] = useState<string>('');

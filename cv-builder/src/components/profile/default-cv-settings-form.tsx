@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from '@/hooks/use-translations';
+import { useUserPreferences } from '@/contexts/user-preferences-context';
 
 interface DefaultCvSettingsFormProps {
   defaultTagline: string;
@@ -11,7 +12,8 @@ interface DefaultCvSettingsFormProps {
 }
 
 export function DefaultCvSettingsForm({ defaultTagline, onChange }: DefaultCvSettingsFormProps) {
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { language } = useUserPreferences();
+  const { t } = useTranslations(language);
 
   return (
     <Card>

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface ProfessionalLinksFormProps {
   formData: {
@@ -15,7 +15,7 @@ interface ProfessionalLinksFormProps {
 }
 
 export function ProfessionalLinksForm({ formData, onChange }: ProfessionalLinksFormProps) {
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { t } = useAppTranslation();
 
   return (
     <Card>

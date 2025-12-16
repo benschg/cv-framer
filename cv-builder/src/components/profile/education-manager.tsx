@@ -19,7 +19,7 @@ import {
 import { useProfileManager } from '@/hooks/use-profile-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface EducationManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -32,7 +32,7 @@ export interface EducationManagerRef {
 
 export const EducationManager = forwardRef<EducationManagerRef, EducationManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { t } = useAppTranslation();
   const {
     items: educationList,
     isExpanded,

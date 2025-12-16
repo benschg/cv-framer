@@ -11,7 +11,7 @@ import { AlertTriangle, Trash2, Loader2 } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
 import { BulletListEditor } from '@/components/ui/bullet-list-editor';
 import { formatDateRange } from '@/lib/utils';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 import {
   fetchWorkExperiences,
   createWorkExperience,
@@ -34,7 +34,7 @@ export interface WorkExperienceManagerRef {
 
 export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkExperienceManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { t } = useAppTranslation();
   const {
     items: experiences,
     isExpanded,
