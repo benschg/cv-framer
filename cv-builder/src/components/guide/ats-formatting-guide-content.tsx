@@ -166,7 +166,7 @@ export function ATSFormattingGuideContent() {
             </p>
             <div className="flex flex-wrap gap-2">
               {fonts.map((font) => (
-                <Badge key={font} variant="secondary">
+                <Badge key={font} variant="secondary" style={{ fontFamily: font }}>
                   {font}
                 </Badge>
               ))}
