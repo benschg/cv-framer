@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { FileText } from 'lucide-react';
+import { Footer } from '@/components/shared/footer';
 
 export default function AuthLayout({
   children,
@@ -22,6 +23,9 @@ export default function AuthLayout({
       <main className="flex-1 flex items-center justify-center p-4">
         {children}
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

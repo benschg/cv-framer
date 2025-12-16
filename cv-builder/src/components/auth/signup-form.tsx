@@ -5,8 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/auth-context';
 import { Loader2, Mail } from 'lucide-react';
+import { PrivacyPolicyDialog } from '@/components/legal/privacy-policy-dialog';
+import Link from 'next/link';
 
 export function SignupForm() {
   const [email, setEmail] = useState('');
@@ -14,6 +17,8 @@ export function SignupForm() {
   const [step, setStep] = useState<'email' | 'verify'>('email');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
 
   const { signInWithOTP, verifyOTP } = useAuth();
   const router = useRouter();
@@ -138,7 +143,33 @@ export function SignupForm() {
         </div>
       )}
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      {/* Privacy Policy Acceptance */}
+      <div className="space-y-3">
+        <div className="flex items-start gap-2">
+          <Checkbox
+            id="privacy-accept"
+            checked={acceptedPrivacy}
+            onCheckedChange={(checked) => setAcceptedPrivacy(checked as boolean)}
+            required
+          />
+          <label htmlFor="privacy-accept" className="text-sm leading-tight cursor-pointer">
+            I have read and agree to the{' '}
+            <button
+              type="button"
+              onClick={() => setShowPrivacyDialog(true)}
+              className="text-primary hover:underline font-medium"
+            >
+              Privacy Policy
+            </button>
+            {' '}and{' '}
+            <Link href="/terms" target="_blank" className="text-primary hover:underline font-medium">
+              Terms of Service
+            </Link>
+          </label>
+        </div>
+      </div>
+
+      <Button type="submit" className="w-full" disabled={isLoading || !acceptedPrivacy}>
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -152,6 +183,16 @@ export function SignupForm() {
       <p className="text-xs text-center text-muted-foreground">
         We'll send you a one-time code to create your account
       </p>
+
+      {/* Privacy Policy Dialog */}
+      <PrivacyPolicyDialog
+        open={showPrivacyDialog}
+        onOpenChange={setShowPrivacyDialog}
+        onAccept={() => {
+          setAcceptedPrivacy(true);
+          setShowPrivacyDialog(false);
+        }}
+      />
     </form>
   );
 }
