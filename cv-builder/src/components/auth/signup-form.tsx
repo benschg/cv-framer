@@ -155,17 +155,17 @@ export function SignupForm() {
             required
           />
           <label htmlFor="privacy-accept" className="text-sm leading-tight cursor-pointer">
-            I have read and agree to the{' '}
+            {t('auth.privacy.agreeText')}{' '}
             <button
               type="button"
               onClick={() => setShowPrivacyDialog(true)}
               className="text-primary hover:underline font-medium"
             >
-              Privacy Policy
+              {t('auth.privacy.privacyPolicy')}
             </button>
-            {' '}and{' '}
+            {' '}{t('auth.privacy.and')}{' '}
             <Link href="/terms" target="_blank" className="text-primary hover:underline font-medium">
-              Terms of Service
+              {t('auth.privacy.termsOfService')}
             </Link>
           </label>
         </div>
