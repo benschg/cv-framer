@@ -6,8 +6,10 @@ import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
 import { AIReferenceUploadDialog } from '@/components/profile/ai-reference-upload-dialog';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function ReferencesPage() {
+  const { t } = useAppTranslation();
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
@@ -16,9 +18,9 @@ export default function ReferencesPage() {
   return (
     <>
       <ProfilePageLayout
-        title="References"
-        description="Manage your professional references. Add contact information, upload reference letters, and link them to specific positions."
-        addButtonLabel="Add Reference"
+        title={t('profile.references.pageTitle')}
+        description={t('profile.references.pageSubtitle')}
+        addButtonLabel={t('profile.references.addButton')}
         onAdd={() => managerRef.current?.handleAdd()}
         isSaving={isSaving}
         saveSuccess={saveSuccess}
@@ -28,7 +30,7 @@ export default function ReferencesPage() {
             onClick={() => setAiDialogOpen(true)}
           >
             <Sparkles className="h-4 w-4 mr-2" />
-            Add using AI
+            {t('profile.references.addUsingAI')}
           </Button>
         }
       >

@@ -3,17 +3,19 @@
 import { useState, useRef } from 'react';
 import { WorkExperienceManager } from '@/components/profile/work-experience-manager';
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function WorkExperiencePage() {
+  const { t } = useAppTranslation();
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const managerRef = useRef<{ handleAdd: () => void }>(null);
 
   return (
     <ProfilePageLayout
-      title="Work Experience"
-      description="Manage your work history that will be used across all your CVs"
-      addButtonLabel="Add Experience"
+      title={t('profile.workExperience.pageTitle')}
+      description={t('profile.workExperience.pageSubtitle')}
+      addButtonLabel={t('profile.workExperience.addButton')}
       onAdd={() => managerRef.current?.handleAdd()}
       isSaving={isSaving}
       saveSuccess={saveSuccess}
