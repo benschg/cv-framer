@@ -13,9 +13,11 @@ import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
 import { DefaultCvSettingsForm } from '@/components/profile/default-cv-settings-form';
 import { ProfessionalLinksForm } from '@/components/profile/professional-links-form';
 import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
+import { useTranslations } from '@/hooks/use-translations';
 
 export default function ProfilePage() {
   const { user, updateUserProfile } = useAuth();
+  const { t } = useTranslations('en'); // TODO: Get language from user settings context
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -90,7 +92,7 @@ export default function ProfilePage() {
     });
 
     if (error) {
-      toast.error(`Failed to save: ${error}`);
+      toast.error(`${t('profile.saveError')}: ${error}`);
       setIsLoading(false);
       return;
     }
@@ -99,7 +101,7 @@ export default function ProfilePage() {
 
     setIsLoading(false);
     setIsSaved(true);
-    toast.success('Profile saved successfully!');
+    toast.success(t('profile.saveSuccess'));
   };
 
   const userInitials = getUserInitials(user);
@@ -110,9 +112,9 @@ export default function ProfilePage() {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('profile.title')}</h1>
         <p className="text-muted-foreground">
-          Manage your personal information and professional details
+          {t('profile.subtitle')}
         </p>
       </div>
 
@@ -141,19 +143,19 @@ export default function ProfilePage() {
         <div className="flex justify-end gap-4">
           {isSaved && (
             <p className="text-sm text-green-600 self-center">
-              Changes saved successfully!
+              {t('profile.savedMessage')}
             </p>
           )}
           <Button type="submit" disabled={isLoading} className="gap-2">
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
+                {t('profile.saving')}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Save Changes
+                {t('profile.saveButton')}
               </>
             )}
           </Button>

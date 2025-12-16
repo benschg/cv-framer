@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface BasicInfoFormProps {
   formData: {
@@ -16,72 +17,74 @@ interface BasicInfoFormProps {
 }
 
 export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
+  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Basic Information</CardTitle>
+        <CardTitle>{t('profile.basicInfo.title')}</CardTitle>
         <CardDescription>
-          Your name and contact details
+          {t('profile.basicInfo.subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
+            <Label htmlFor="firstName">{t('profile.basicInfo.firstName')}</Label>
             <Input
               id="firstName"
               name="firstName"
               value={formData.firstName}
               onChange={onChange}
-              placeholder="John"
+              placeholder={t('profile.basicInfo.firstNamePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
+            <Label htmlFor="lastName">{t('profile.basicInfo.lastName')}</Label>
             <Input
               id="lastName"
               name="lastName"
               value={formData.lastName}
               onChange={onChange}
-              placeholder="Doe"
+              placeholder={t('profile.basicInfo.lastNamePlaceholder')}
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('profile.basicInfo.email')}</Label>
           <Input
             id="email"
             name="email"
             type="email"
             value={formData.email}
             onChange={onChange}
-            placeholder="john@example.com"
+            placeholder={t('profile.basicInfo.emailPlaceholder')}
             disabled
           />
           <p className="text-xs text-muted-foreground">
-            Email is managed through your account settings
+            {t('profile.basicInfo.emailNote')}
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">{t('profile.basicInfo.phone')}</Label>
             <Input
               id="phone"
               name="phone"
               type="tel"
               value={formData.phone}
               onChange={onChange}
-              placeholder="+1 (555) 123-4567"
+              placeholder={t('profile.basicInfo.phonePlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">{t('profile.basicInfo.location')}</Label>
             <Input
               id="location"
               name="location"
               value={formData.location}
               onChange={onChange}
-              placeholder="San Francisco, CA"
+              placeholder={t('profile.basicInfo.locationPlaceholder')}
             />
           </div>
         </div>
