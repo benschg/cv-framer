@@ -207,7 +207,14 @@
     "image": "Image",
     "viewLetter": "View reference letter",
     "addedSuccess": "Reference and document added!",
-    "addedSuccessOnly": "Reference added!"
+    "addedSuccessOnly": "Reference added!",
+    "uploadingDocument": "Uploading document...",
+    "uploadFailed": "Document upload failed",
+    "uploadFailedDescription": "The reference was created but the document could not be uploaded. You can add it later.",
+    "invalidFileType": "Please upload an image (JPG, PNG, WebP) or PDF file",
+    "fileTooLarge": "File size must be less than 10MB",
+    "uploadError": "Failed to upload file",
+    "userNotAuthenticated": "User not authenticated"
   },
 
   "photoUpload": {

@@ -20,6 +20,7 @@ import {
 import { useProfileManager } from '@/hooks/use-profile-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface ReferencesManagerProps {
   onSavingChange?: (saving: boolean) => void;
