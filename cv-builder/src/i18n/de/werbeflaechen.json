@@ -1,0 +1,154 @@
+{
+  "title": "Werbeflächen",
+  "subtitle": "Ihr Selbstvermarktungs-Framework - die Grundlage für großartige Lebensläufe",
+  "categoryNotFound": "Kategorie nicht gefunden",
+  "cvCoverage": "CV-Abdeckung",
+  "excellentCoverage": "Ausgezeichnete Abdeckung",
+  "goodCoverage": "Gute Abdeckung",
+  "moreDetailsRecommended": "Mehr Details empfohlen",
+  "row": "Reihe",
+  "complete": "Vollständig",
+  "completed": "abgeschlossen",
+  "inProgress": "In Bearbeitung",
+  "notStarted": "Nicht begonnen",
+  "beginnerMode": "Anfänger",
+  "allCategories": "Alle",
+  "autofillFromCV": "Aus Lebenslauf befüllen",
+  "autofilling": "Wird ausgefüllt...",
+  "uploadCV": "CV hochladen",
+  "view": "Ansicht",
+  "progress": "Fortschritt",
+  "autofill": {
+    "title": "Werbeflaechen aus Lebenslauf befüllen",
+    "description": "Fügen Sie Ihren bestehenden Lebenslauf ein, und wir extrahieren die relevanten Informationen in Ihre Werbeflaechen-Kategorien.",
+    "uploadLabel": "Lebenslauf hochladen",
+    "chooseFile": "Datei auswählen",
+    "uploading": "Lädt hoch...",
+    "fileTypes": "PDF, DOCX oder TXT (max 5MB)",
+    "orPasteText": "oder Text einfügen",
+    "textLabel": "Lebenslauf-Text",
+    "textPlaceholder": "Fügen Sie hier Ihren Lebenslauf ein...",
+    "characters": "Zeichen",
+    "minRequired": "Mindestens 50 erforderlich",
+    "overwriteExisting": "Bestehende Einträge überschreiben",
+    "previousUploads": "Frühere Uploads",
+    "analyzing": "Analysiere...",
+    "extractAndSave": "Extrahieren & Speichern",
+    "minCharsError": "Bitte fügen Sie Ihren Lebenslauf ein (mindestens 50 Zeichen)",
+    "successMessage": "{count} Kategorien aus Ihrem Lebenslauf befüllt!",
+    "loadedFromFile": "Text aus {filename} geladen",
+    "extractedChars": "{count} Zeichen aus {filename} extrahiert",
+    "loadError": "Fehler beim Laden"
+  },
+  "rows": {
+    "1": "Werden Sie den Job lieben?",
+    "2": "Können Sie den Job machen?",
+    "3": "Können wir zusammenarbeiten?"
+  },
+  "categories": {
+    "vision_mission": {
+      "title": "Vision & Mission",
+      "description": "Ihre berufliche Vision und Mission - wohin Sie wollen und was Sie antreibt"
+    },
+    "motivation": {
+      "title": "Motivation",
+      "description": "Was Sie in Ihrer Arbeit und Karriere motiviert"
+    },
+    "passion": {
+      "title": "Leidenschaft",
+      "description": "Ihre beruflichen Leidenschaften und was Sie an Ihrer Arbeit begeistert"
+    },
+    "slogan": {
+      "title": "Slogan",
+      "description": "Ihr persönlicher beruflicher Slogan oder Leitsatz"
+    },
+    "zitat_motto": {
+      "title": "Zitat/Motto",
+      "description": "Ein Zitat oder Motto, das Ihre berufliche Philosophie widerspiegelt"
+    },
+    "highlights": {
+      "title": "Highlights",
+      "description": "Wichtige Highlights und herausragende Momente Ihrer Karriere"
+    },
+    "erfolge": {
+      "title": "Erfolge",
+      "description": "Ihre wichtigsten Erfolge und Errungenschaften"
+    },
+    "mehrwert": {
+      "title": "Mehrwert",
+      "description": "Der einzigartige Wert, den Sie Arbeitgebern bieten"
+    },
+    "projekte": {
+      "title": "Projekte",
+      "description": "Wichtige Projekte, an denen Sie gearbeitet haben"
+    },
+    "referenzen": {
+      "title": "Referenzen",
+      "description": "Berufliche Referenzen und Empfehlungen"
+    },
+    "usp": {
+      "title": "USP",
+      "description": "Was Sie als Fachkraft einzigartig wertvoll macht"
+    },
+    "corporate_design": {
+      "title": "Corporate Design",
+      "description": "Ihre persönliche Marke und Ihr berufliches Image"
+    },
+    "erfahrungswissen": {
+      "title": "Erfahrungswissen",
+      "description": "Durch Erfahrung erworbenes Wissen, das Sie auszeichnet"
+    },
+    "kernkompetenzen": {
+      "title": "Kernkompetenzen",
+      "description": "Ihre technischen Kernkompetenzen und Fachkenntnisse"
+    },
+    "schluesselkompetenzen": {
+      "title": "Schlüsselkompetenzen",
+      "description": "Ihre wichtigsten Soft Skills und zwischenmenschlichen Kompetenzen"
+    },
+    "kurzprofil": {
+      "title": "Kurzprofil",
+      "description": "Eine prägnante berufliche Zusammenfassung"
+    },
+    "berufliche_erfahrungen": {
+      "title": "Berufliche Erfahrungen",
+      "description": "Ihr Werdegang und Ihre berufliche Erfahrung"
+    },
+    "aus_weiterbildungen": {
+      "title": "Aus- & Weiterbildungen",
+      "description": "Ihre Ausbildung, Zertifizierungen und Weiterbildungen"
+    }
+  },
+  "fields": {
+    "professionalTitle": "Berufsbezeichnung",
+    "yearsExperience": "Jahre Berufserfahrung",
+    "summary": "Zusammenfassung",
+    "vision": "Ihre Vision",
+    "mission": "Ihre Mission",
+    "purpose": "Ihr Zweck",
+    "whatDrivesYou": "Was treibt Sie an?",
+    "whyThisField": "Warum dieses Berufsfeld?",
+    "careerGoals": "Karriereziele",
+    "slogan": "Ihr Slogan",
+    "tagline": "Alternative Tagline",
+    "notes": "Notizen"
+  },
+  "placeholders": {
+    "professionalTitle": "z.B. Senior Software Engineer",
+    "yearsExperience": "10",
+    "summary": "Schreiben Sie eine kurze Zusammenfassung Ihres beruflichen Profils...",
+    "vision": "Wo sehen Sie sich in 5-10 Jahren?",
+    "mission": "Was ist Ihr beruflicher Auftrag?",
+    "purpose": "Warum tun Sie, was Sie tun?",
+    "whatDrivesYou": "Beschreiben Sie, was Sie jeden Tag motiviert...",
+    "whyThisField": "Warum haben Sie sich für dieses Berufsfeld entschieden?",
+    "careerGoals": "Was sind Ihre kurzfristigen und langfristigen Karriereziele?",
+    "slogan": "Ein prägnanter Satz, der Sie beschreibt",
+    "tagline": "Eine alternative Version Ihres Slogans",
+    "notes": "Fügen Sie hier Ihre Notizen und Inhalte hinzu..."
+  },
+  "hints": {
+    "slogan": "Kurz und einprägsam - wird als Tagline in Ihrem CV verwendet",
+    "defaultForm": "Spezifische Formularfelder für diese Kategorie werden bald verfügbar sein"
+  }
+}

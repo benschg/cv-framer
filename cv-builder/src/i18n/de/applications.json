@@ -1,0 +1,12 @@
+{
+  "title": "Bewerbungen",
+  "newApplication": "Neue Bewerbung",
+  "status": {
+    "draft": "Entwurf",
+    "applied": "Beworben",
+    "interview": "Vorstellungsgespräch",
+    "offer": "Angebot",
+    "rejected": "Abgelehnt",
+    "accepted": "Angenommen"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "boundary": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred. Please try again.",
+    "tryAgain": "Try Again"
+  }
+}
