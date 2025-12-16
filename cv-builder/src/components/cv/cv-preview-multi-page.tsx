@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Star, ArrowRight } from 'lucide-react';
 import { ReactNode } from 'react';
 import { formatDateRange } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { PageBreakButton } from './page-break-button';
 
 interface CVPreviewMultiPageProps {
   content: CVContent;
@@ -167,15 +167,12 @@ export function CVPreviewMultiPage({
               {labels.profile}
             </h2>
             {onPageBreakToggle && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs gap-1"
+              <PageBreakButton
+                sectionId="profile"
+                isActive={pageBreaks.includes('profile')}
                 onClick={() => onPageBreakToggle('profile')}
-                title={pageBreaks.includes('profile') ? 'Remove page break' : 'Add page break before this section'}
-              >
-                {pageBreaks.includes('profile') ? '↑ Remove break' : '↓ New page'}
-              </Button>
+                type="section"
+              />
             )}
           </div>
           <p className="text-gray-700 text-justify">{content.profile}</p>
@@ -200,15 +197,12 @@ export function CVPreviewMultiPage({
               {labels.workExperience}
             </h2>
             {onPageBreakToggle && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs gap-1"
+              <PageBreakButton
+                sectionId="workExperience"
+                isActive={pageBreaks.includes('workExperience')}
                 onClick={() => onPageBreakToggle('workExperience')}
-                title={pageBreaks.includes('workExperience') ? 'Remove page break' : 'Add page break before this section'}
-              >
-                {pageBreaks.includes('workExperience') ? '↑ Remove break' : '↓ New page'}
-              </Button>
+                type="section"
+              />
             )}
           </div>
         </div>
@@ -245,18 +239,15 @@ export function CVPreviewMultiPage({
         id: `workExperience-${exp.id}`,
         canBreak: true,
         content: (
-          <div className={index === selectedWorkExperiences.length - 1 ? 'mb-5' : 'mb-3'}>
+          <div className={`relative ${index === selectedWorkExperiences.length - 1 ? 'mb-5' : 'mb-3'}`}>
             {onPageBreakToggle && index > 0 && (
-              <div className="flex justify-end mb-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 px-1 text-xs gap-1"
+              <div className="absolute -top-2 z-10" style={{ right: '-2cm' }}>
+                <PageBreakButton
+                  sectionId={`workExperience-${exp.id}`}
+                  isActive={pageBreaks.includes(`workExperience-${exp.id}`)}
                   onClick={() => onPageBreakToggle(`workExperience-${exp.id}`)}
-                  title={pageBreaks.includes(`workExperience-${exp.id}`) ? 'Remove page break' : 'Add page break before this item'}
-                >
-                  {pageBreaks.includes(`workExperience-${exp.id}`) ? '↑ Remove' : '↓ Page'}
-                </Button>
+                  type="item"
+                />
               </div>
             )}
             <div className="text-sm">
@@ -308,15 +299,12 @@ export function CVPreviewMultiPage({
               {labels.education}
             </h2>
             {onPageBreakToggle && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs gap-1"
+              <PageBreakButton
+                sectionId="education"
+                isActive={pageBreaks.includes('education')}
                 onClick={() => onPageBreakToggle('education')}
-                title={pageBreaks.includes('education') ? 'Remove page break' : 'Add page break before this section'}
-              >
-                {pageBreaks.includes('education') ? '↑ Remove break' : '↓ New page'}
-              </Button>
+                type="section"
+              />
             )}
           </div>
         </div>
@@ -331,18 +319,15 @@ export function CVPreviewMultiPage({
         id: `education-${edu.id}`,
         canBreak: true,
         content: (
-          <div className={index === selectedEducations.length - 1 ? 'mb-5' : 'mb-3'}>
+          <div className={`relative ${index === selectedEducations.length - 1 ? 'mb-5' : 'mb-3'}`}>
             {onPageBreakToggle && index > 0 && (
-              <div className="flex justify-end mb-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 px-1 text-xs gap-1"
+              <div className="absolute -top-2 z-10" style={{ right: '-2cm' }}>
+                <PageBreakButton
+                  sectionId={`education-${edu.id}`}
+                  isActive={pageBreaks.includes(`education-${edu.id}`)}
                   onClick={() => onPageBreakToggle(`education-${edu.id}`)}
-                  title={pageBreaks.includes(`education-${edu.id}`) ? 'Remove page break' : 'Add page break before this item'}
-                >
-                  {pageBreaks.includes(`education-${edu.id}`) ? '↑ Remove' : '↓ Page'}
-                </Button>
+                  type="item"
+                />
               </div>
             )}
             <div className="text-sm">
@@ -389,15 +374,12 @@ export function CVPreviewMultiPage({
               {labels.skills}
             </h2>
             {onPageBreakToggle && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs gap-1"
+              <PageBreakButton
+                sectionId="skills"
+                isActive={pageBreaks.includes('skills')}
                 onClick={() => onPageBreakToggle('skills')}
-                title={pageBreaks.includes('skills') ? 'Remove page break' : 'Add page break before this section'}
-              >
-                {pageBreaks.includes('skills') ? '↑ Remove break' : '↓ New page'}
-              </Button>
+                type="section"
+              />
             )}
           </div>
           <div className="space-y-2">
@@ -443,15 +425,12 @@ export function CVPreviewMultiPage({
               {labels.keyCompetences}
             </h2>
             {onPageBreakToggle && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs gap-1"
+              <PageBreakButton
+                sectionId="keyCompetences"
+                isActive={pageBreaks.includes('keyCompetences')}
                 onClick={() => onPageBreakToggle('keyCompetences')}
-                title={pageBreaks.includes('keyCompetences') ? 'Remove page break' : 'Add page break before this section'}
-              >
-                {pageBreaks.includes('keyCompetences') ? '↑ Remove break' : '↓ New page'}
-              </Button>
+                type="section"
+              />
             )}
           </div>
           <div className="space-y-2">
@@ -523,7 +502,7 @@ export function CVPreviewMultiPage({
       }}
     >
       {pages.map((pageSections, pageIndex) => (
-        <div key={pageIndex}>
+        <div key={pageIndex} style={{ overflow: 'visible' }}>
           <div
             ref={(el) => {
               if (el) pagesRef.current[pageIndex] = el;
@@ -533,7 +512,7 @@ export function CVPreviewMultiPage({
               width: `${pageWidth}mm`,
               height: `${pageHeight}mm`,
               maxHeight: `${pageHeight}mm`,
-              overflow: 'hidden',
+              overflow: 'visible',
               display: 'flex',
               flexDirection: 'column',
             }}
