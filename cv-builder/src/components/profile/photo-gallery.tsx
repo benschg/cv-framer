@@ -9,6 +9,7 @@ import { Check, Trash2, Loader2 } from 'lucide-react';
 import { setPrimaryPhoto, deleteProfilePhoto, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { toast } from 'sonner';
 import type { ProfilePhoto } from '@/types/api.schemas';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface PhotoGalleryProps {
   photos: ProfilePhoto[];
@@ -18,6 +19,7 @@ interface PhotoGalleryProps {
 }
 
 export function PhotoGallery({ photos, primaryPhoto, onUpdate, userInitials }: PhotoGalleryProps) {
+  const { t } = useTranslations('en'); // TODO: Get language from user settings context
   const [actioningId, setActioningId] = useState<string | null>(null);
 
   const handleSetPrimary = async (photoId: string) => {
@@ -27,7 +29,7 @@ export function PhotoGallery({ photos, primaryPhoto, onUpdate, userInitials }: P
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success('Primary photo updated');
+      toast.success(t('profile.photoGallery.primaryUpdated'));
       onUpdate();
     }
 
@@ -36,7 +38,7 @@ export function PhotoGallery({ photos, primaryPhoto, onUpdate, userInitials }: P
 
   const handleDelete = async (photo: ProfilePhoto) => {
     if (photos.length === 1) {
-      toast.error('Cannot delete your only photo');
+      toast.error(t('profile.photoGallery.cannotDeleteOnly'));
       return;
     }
 
@@ -50,7 +52,7 @@ export function PhotoGallery({ photos, primaryPhoto, onUpdate, userInitials }: P
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success('Photo deleted');
+      toast.success(t('profile.photoGallery.photoDeleted'));
       onUpdate();
     }
 
