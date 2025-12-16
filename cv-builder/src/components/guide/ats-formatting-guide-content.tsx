@@ -254,11 +254,8 @@ export function ATSFormattingGuideContent() {
               Our CV Builder automatically formats your resume to be ATS-friendly while maintaining a professional appearance.
             </p>
             <div className="flex gap-4 justify-center pt-2">
-              <a href="/signup" className="inline-flex items-center justify-center rounded-md bg-primary-foreground text-primary px-6 py-2 text-sm font-medium hover:opacity-90 transition-opacity">
-                Get Started Free
-              </a>
-              <a href="/cv" className="inline-flex items-center justify-center rounded-md border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground px-6 py-2 text-sm font-medium hover:bg-primary-foreground/20 transition-colors">
-                View Examples
+              <a href="/cv" className="inline-flex items-center justify-center rounded-md bg-primary-foreground text-primary px-6 py-2 text-sm font-medium hover:opacity-90 transition-opacity">
+                Create Your CV
               </a>
             </div>
           </div>
