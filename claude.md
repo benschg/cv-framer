@@ -78,10 +78,9 @@ interface ChildProps {
 - ✅ Phase 2: Authentication (login, signup, OAuth, verification)
 - ✅ Phase 3: Navigation & sidebar
 - ✅ Phase 4: Error handling & boundaries
-- ✅ Phase 5 (partial): Profile pages (basic info, photos, work experience, education, skills, key competences)
+- ✅ Phase 5: Profile pages (basic info, photos, work experience, education, skills, key competences, certifications, references)
 
 ### Remaining Work
-- Profile: certifications, references managers
 - Applications tracker
 - CV builder
 - Cover letter pages
