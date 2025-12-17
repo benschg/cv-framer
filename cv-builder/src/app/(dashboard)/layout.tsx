@@ -16,10 +16,13 @@ export default function DashboardLayout({
   // Hide the dashboard header on CV editor pages since they have their own custom header
   const isCVEditor = pathname?.match(/^\/cv\/[^/]+$/) && pathname !== '/cv/new';
 
+  // Remove padding for guide pages to prevent CV preview cutoff
+  const isGuidePage = pathname?.startsWith('/guide');
+
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="flex flex-col h-screen overflow-hidden">
+      <SidebarInset className="flex flex-col h-screen overflow-x-visible overflow-y-hidden">
         {!isCVEditor && (
           <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
@@ -28,7 +31,7 @@ export default function DashboardLayout({
             <div className="ml-auto" id="breadcrumb-header-right"></div>
           </header>
         )}
-        <main className={isCVEditor ? "flex-1 overflow-hidden flex flex-col min-h-0" : "flex-1 overflow-y-auto p-4 min-h-0"}>
+        <main className={isCVEditor ? "flex-1 overflow-hidden flex flex-col min-h-0" : isGuidePage ? "flex-1 overflow-y-auto min-h-0" : "flex-1 overflow-y-auto p-4 min-h-0"}>
           {children}
         </main>
       </SidebarInset>

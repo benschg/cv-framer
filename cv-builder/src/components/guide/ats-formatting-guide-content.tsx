@@ -43,7 +43,7 @@ export function ATSFormattingGuideContent() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 p-4">
       {/* Hero Section */}
       <div className="space-y-4">
         <Badge variant="secondary" className="mb-2">

@@ -271,7 +271,7 @@ export function CVPreviewSection({
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef} className="overflow-y-auto overflow-x-hidden">
+        <div ref={containerRef} className="overflow-y-auto overflow-x-visible -mr-6 pr-6">
           <div
             ref={previewRef}
             style={{
