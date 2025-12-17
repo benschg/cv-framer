@@ -133,6 +133,7 @@ export interface AIMetadata {
 export interface DisplaySettings {
   theme: 'light' | 'dark';
   format: 'A4' | 'Letter';
+  layoutMode?: 'single-column' | 'two-column';
   showPhoto: boolean;
   showAttachments: boolean;
   showWorkExperience?: boolean;
