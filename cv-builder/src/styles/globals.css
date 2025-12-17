@@ -108,21 +108,21 @@
   /* CV Page Animations */
   @keyframes cv-page-enter-back {
     0% {
-      transform: translateY(250px) translateX(10px) rotate(0deg);
+      transform: translateY(350px) translateX(10px) rotate(0deg);
       opacity: 0;
     }
     10% {
       opacity: 1;
     }
-    70% {
+    50% {
       transform: translateY(0px) translateX(0px) rotate(0deg);
       opacity: 1;
     }
-    80% {
+    65% {
       transform: translateY(-5px) translateX(0px) rotate(0deg);
       opacity: 1;
     }
-    90% {
+    80% {
       transform: translateY(0px) translateX(0px) rotate(8deg);
       opacity: 1;
     }
@@ -134,21 +134,21 @@
 
   @keyframes cv-page-enter-front {
     0% {
-      transform: translateY(250px) translateX(-10px) rotate(0deg);
+      transform: translateY(350px) translateX(-10px) rotate(0deg);
       opacity: 0;
     }
     10% {
       opacity: 1;
     }
-    70% {
+    50% {
       transform: translateY(0px) translateX(0px) rotate(0deg);
       opacity: 1;
     }
-    80% {
+    65% {
       transform: translateY(-5px) translateX(0px) rotate(0deg);
       opacity: 1;
     }
-    90% {
+    80% {
       transform: translateY(0px) translateX(0px) rotate(-8deg);
       opacity: 1;
     }

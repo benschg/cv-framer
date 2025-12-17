@@ -95,12 +95,12 @@ export default function LandingPage() {
             {/* Animated CV pages with hover animation */}
             <div className="relative w-40 h-40 sm:w-48 sm:h-48 transition-transform duration-500 group-hover:scale-110" key={animKey}>
               {/* Back CV page */}
-              <div className="absolute top-1/2 left-1/2 w-36 h-52 sm:w-40 sm:h-60 -ml-18 -mt-36 sm:-ml-20 sm:-mt-42 cv-page-back origin-bottom-left">
+              <div className="absolute top-1/2 left-1/2 w-36 h-52 sm:w-40 sm:h-60 -ml-18 -mt-36 sm:-ml-20 sm:-mt-42 cv-page-back origin-bottom-left drop-shadow-xl">
                 <img src="/cv-page-back.svg" alt="" className="w-full h-full" />
               </div>
 
               {/* Front CV page */}
-              <div className="absolute top-1/2 left-1/2 w-36 h-52 sm:w-40 sm:h-60 -ml-18 -mt-36 sm:-ml-20 sm:-mt-42 cv-page-front origin-bottom-right">
+              <div className="absolute top-1/2 left-1/2 w-36 h-52 sm:w-40 sm:h-60 -ml-18 -mt-36 sm:-ml-20 sm:-mt-42 cv-page-front origin-bottom-right drop-shadow-2xl">
                 <img src="/cv-page-front.svg" alt="" className="w-full h-full" />
               </div>
 
