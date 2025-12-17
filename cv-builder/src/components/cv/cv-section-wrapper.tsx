@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { CVSectionContextMenu } from './cv-section-context-menu';
+import { getSectionLabel } from './constants';
 import type { CVMainSection } from '@/types/cv-layout.types';
 
 interface CVSectionWrapperProps {
@@ -17,18 +18,8 @@ interface CVSectionWrapperProps {
   onPageProperties?: (pageIndex: number) => void;
   isHidden?: boolean;
   isInteractive?: boolean;
+  language?: 'en' | 'de';
 }
-
-const SECTION_LABELS: Record<CVMainSection, { en: string; de: string }> = {
-  header: { en: 'Header', de: 'Kopfzeile' },
-  profile: { en: 'Profile', de: 'Profil' },
-  experience: { en: 'Work Experience', de: 'Berufserfahrung' },
-  education: { en: 'Education', de: 'Ausbildung' },
-  skills: { en: 'Skills', de: 'Fähigkeiten' },
-  keyCompetences: { en: 'Key Competences', de: 'Kernkompetenzen' },
-  projects: { en: 'Projects', de: 'Projekte' },
-  references: { en: 'References', de: 'Referenzen' },
-};
 
 export function CVSectionWrapper({
   children,
@@ -43,8 +34,9 @@ export function CVSectionWrapper({
   onPageProperties,
   isHidden = false,
   isInteractive = true,
+  language = 'en',
 }: CVSectionWrapperProps) {
-  const sectionLabel = SECTION_LABELS[sectionType]?.en || sectionType;
+  const sectionLabel = getSectionLabel(sectionType, language);
 
   return (
     <CVSectionContextMenu
