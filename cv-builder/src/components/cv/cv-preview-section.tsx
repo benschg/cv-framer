@@ -166,7 +166,7 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef} className="overflow-y-auto overflow-x-visible -mr-6 pr-6">
+        <div ref={containerRef} className="overflow-auto max-h-[calc(100vh-220px)]">
           <div ref={previewRef}>
             <CVDocument
               content={content}
@@ -178,7 +178,7 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
               skillCategories={skillCategories}
               keyCompetences={keyCompetences}
               userProfile={userProfile}
-              zoom={zoomMode === 'auto' ? 0 : effectiveZoom / 100}
+              zoom={effectiveZoom / 100}
               onPageBreakToggle={onPageBreakToggle}
             />
           </div>
