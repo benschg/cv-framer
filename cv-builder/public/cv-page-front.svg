@@ -13,8 +13,13 @@
   <rect x="0" y="0" width="280" height="400" rx="16" fill="url(#paper1)" stroke="#3b82f6" stroke-width="3"/>
 
   <!-- Folded corner -->
-  <path d="M280 0 L280 50 Q280 60 270 60 L220 60 L280 0" fill="#e2e8f0"/>
-  <path d="M220 0 L280 0 L280 50 Q280 60 270 60 L220 60 L220 10 Q220 0 230 0" fill="#cbd5e1"/>
+  <clipPath id="cornerClip">
+    <rect x="0" y="0" width="280" height="400" rx="16"/>
+  </clipPath>
+  <g clip-path="url(#cornerClip)">
+    <path d="M280 0 L280 50 Q280 60 270 60 L220 60 L280 0" fill="#e2e8f0"/>
+    <path d="M220 0 L280 0 L280 50 Q280 60 270 60 L220 60 L220 10 Q220 0 230 0" fill="#cbd5e1"/>
+  </g>
 
   <!-- Profile circle -->
   <circle cx="140" cy="80" r="40" fill="#3b82f6"/>
