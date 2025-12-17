@@ -4,14 +4,17 @@ import { useRef, useEffect, useCallback } from 'react';
 import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Star, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { ReactNode } from 'react';
 import { formatDateRange } from '@/lib/utils';
 import { getDisplayModeContent } from '@/lib/cv-display-mode';
+import { filterSelectedSkills } from '@/lib/cv-skill-filter';
 import { CVSectionHeader } from './cv-section-header';
 import { CVPageBreak } from './cv-page-break';
 import { CVWorkExperienceItem } from './cv-work-experience-item';
 import { CVEducationItem } from './cv-education-item';
+import { CVSkillCategoryItem } from './cv-skill-category-item';
+import { CVKeyCompetenceItem } from './cv-key-competence-item';
 
 interface CVPreviewMultiPageProps {
   content: CVContent;
@@ -248,21 +251,14 @@ export function CVPreviewMultiPage({
         <section className="mb-5 relative">
           {renderSectionHeader(labels.skills)}
           <div className="space-y-2">
-            {selectedSkillCategories.map((cat) => {
-              const skills = cat.selection.selected_skill_indices === null
-                ? cat.skills
-                : cat.skills.filter((_, i) => cat.selection.selected_skill_indices!.includes(i));
-
-              return (
-                <div key={cat.id} className="text-sm">
-                  <div className="flex items-center gap-1">
-                    <span className="font-semibold">{cat.category}:</span>
-                    {cat.selection.is_favorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
-                  </div>
-                  <p className="text-gray-700">{skills.join(', ')}</p>
-                </div>
-              );
-            })}
+            {selectedSkillCategories.map((cat) => (
+              <CVSkillCategoryItem
+                key={cat.id}
+                category={cat.category}
+                skills={filterSelectedSkills(cat.skills, cat.selection.selected_skill_indices)}
+                isFavorite={cat.selection.is_favorite}
+              />
+            ))}
           </div>
           {renderPageBreak('skills', 'section')}
         </section>
@@ -279,18 +275,14 @@ export function CVPreviewMultiPage({
         <section className="mb-5 relative">
           {renderSectionHeader(labels.keyCompetences)}
           <div className="space-y-2">
-            {selectedKeyCompetences.map((comp) => {
-              const description = comp.selection.description_override ?? comp.description;
-              return (
-                <div key={comp.id} className="text-sm">
-                  <div className="flex items-center gap-1">
-                    <span className="font-semibold">{comp.title}</span>
-                    {comp.selection.is_favorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
-                  </div>
-                  {description && <p className="text-gray-700">{description}</p>}
-                </div>
-              );
-            })}
+            {selectedKeyCompetences.map((comp) => (
+              <CVKeyCompetenceItem
+                key={comp.id}
+                title={comp.title}
+                description={comp.selection.description_override ?? comp.description}
+                isFavorite={comp.selection.is_favorite}
+              />
+            ))}
           </div>
           {renderPageBreak('keyCompetences', 'section')}
         </section>
