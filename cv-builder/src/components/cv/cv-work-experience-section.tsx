@@ -8,15 +8,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Briefcase,
   Star,
   ChevronDown,
   ChevronRight,
   RotateCcw,
+  AlignLeft,
+  FileText,
+  Settings2,
 } from 'lucide-react';
 import { formatDateRange } from '@/lib/utils';
-import type { CVWorkExperienceWithSelection } from '@/types/profile-career.types';
+import type { CVWorkExperienceWithSelection, WorkExperienceDisplayMode } from '@/types/profile-career.types';
 
 interface CVWorkExperienceSectionProps {
   cvId: string;
@@ -41,6 +45,13 @@ export function CVWorkExperienceSection({
     description: language === 'de'
       ? 'Wählen Sie aus, welche Erfahrungen in diesem CV angezeigt werden sollen'
       : 'Select which experiences to include in this CV',
+    displayMode: language === 'de' ? 'Anzeigemodus' : 'Display Mode',
+    modeSimple: language === 'de' ? 'Einfach' : 'Simple',
+    modeWithDescription: language === 'de' ? 'Mit Beschreibung' : 'With Description',
+    modeCustom: language === 'de' ? 'Angepasst' : 'Custom',
+    modeSimpleDesc: language === 'de' ? 'Nur Grundinformationen' : 'Basic info only',
+    modeWithDescriptionDesc: language === 'de' ? 'Grundinformationen + Beschreibung' : 'Basic info + description',
+    modeCustomDesc: language === 'de' ? 'Vollständige Kontrolle' : 'Full control',
     descriptionOverride: language === 'de' ? 'Beschreibung anpassen' : 'Customize Description',
     selectBullets: language === 'de' ? 'Aufzählungspunkte auswählen' : 'Select Bullet Points',
     resetToProfile: language === 'de' ? 'Auf Profil zurücksetzen' : 'Reset to Profile',
@@ -118,6 +129,14 @@ export function CVWorkExperienceSection({
 
       return { ...exp, selection: { ...exp.selection, selected_bullet_indices: newIndices } };
     }));
+  };
+
+  const handleDisplayModeChange = (id: string, mode: WorkExperienceDisplayMode) => {
+    onChange(workExperiences.map(exp =>
+      exp.id === id
+        ? { ...exp, selection: { ...exp.selection, display_mode: mode } }
+        : exp
+    ));
   };
 
   const isBulletSelected = (exp: CVWorkExperienceWithSelection, index: number): boolean => {
@@ -211,6 +230,37 @@ export function CVWorkExperienceSection({
 
                 {/* Actions */}
                 <div className="flex items-center gap-1">
+                  {/* Display Mode Toggle Buttons */}
+                  <div className="flex items-center gap-0.5 border rounded-md">
+                    <Button
+                      variant={exp.selection.display_mode === 'simple' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      onClick={() => handleDisplayModeChange(exp.id, 'simple')}
+                      title={labels.modeSimple}
+                      className="h-7 w-7 p-0"
+                    >
+                      <AlignLeft className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant={exp.selection.display_mode === 'with_description' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      onClick={() => handleDisplayModeChange(exp.id, 'with_description')}
+                      title={labels.modeWithDescription}
+                      className="h-7 w-7 p-0"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant={exp.selection.display_mode === 'custom' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      onClick={() => handleDisplayModeChange(exp.id, 'custom')}
+                      title={labels.modeCustom}
+                      className="h-7 w-7 p-0"
+                    >
+                      <Settings2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+
                   <Button
                     variant="ghost"
                     size="sm"
@@ -250,8 +300,49 @@ export function CVWorkExperienceSection({
               <Collapsible open={isExpanded}>
                 <CollapsibleContent className="px-3 pb-3">
                   <div className="pt-3 border-t ml-7 space-y-4">
-                    {/* Description Override */}
-                    <div className="space-y-2">
+                    {/* Display Mode Selector */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">{labels.displayMode}</Label>
+                      <RadioGroup
+                        value={exp.selection.display_mode}
+                        onValueChange={(value) => handleDisplayModeChange(exp.id, value as WorkExperienceDisplayMode)}
+                        className="space-y-2"
+                      >
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem value="simple" id={`${exp.id}-simple`} className="mt-0.5" />
+                          <div className="flex-1">
+                            <Label htmlFor={`${exp.id}-simple`} className="font-medium cursor-pointer">
+                              {labels.modeSimple}
+                            </Label>
+                            <p className="text-xs text-muted-foreground">{labels.modeSimpleDesc}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem value="with_description" id={`${exp.id}-with-desc`} className="mt-0.5" />
+                          <div className="flex-1">
+                            <Label htmlFor={`${exp.id}-with-desc`} className="font-medium cursor-pointer">
+                              {labels.modeWithDescription}
+                            </Label>
+                            <p className="text-xs text-muted-foreground">{labels.modeWithDescriptionDesc}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem value="custom" id={`${exp.id}-custom`} className="mt-0.5" />
+                          <div className="flex-1">
+                            <Label htmlFor={`${exp.id}-custom`} className="font-medium cursor-pointer">
+                              {labels.modeCustom}
+                            </Label>
+                            <p className="text-xs text-muted-foreground">{labels.modeCustomDesc}</p>
+                          </div>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    {/* Custom Mode Controls (only shown in custom mode) */}
+                    {exp.selection.display_mode === 'custom' && (
+                      <>
+                        {/* Description Override */}
+                        <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label className="text-sm">{labels.descriptionOverride}</Label>
                         {exp.selection.description_override !== null && (
@@ -287,25 +378,27 @@ export function CVWorkExperienceSection({
                       )}
                     </div>
 
-                    {/* Bullet Point Selection */}
-                    {exp.bullets && exp.bullets.length > 0 && (
-                      <div className="space-y-2">
-                        <Label className="text-sm">{labels.selectBullets}</Label>
-                        <div className="space-y-2 ml-1">
-                          {exp.bullets.map((bullet, index) => (
-                            <div key={index} className="flex items-start gap-2">
-                              <Checkbox
-                                checked={isBulletSelected(exp, index)}
-                                onCheckedChange={(checked) =>
-                                  handleBulletSelectionChange(exp.id, index, !!checked)
-                                }
-                                className="mt-0.5"
-                              />
-                              <span className="text-sm">{bullet}</span>
+                        {/* Bullet Point Selection */}
+                        {exp.bullets && exp.bullets.length > 0 && (
+                          <div className="space-y-2">
+                            <Label className="text-sm">{labels.selectBullets}</Label>
+                            <div className="space-y-2 ml-1">
+                              {exp.bullets.map((bullet, index) => (
+                                <div key={index} className="flex items-start gap-2">
+                                  <Checkbox
+                                    checked={isBulletSelected(exp, index)}
+                                    onCheckedChange={(checked) =>
+                                      handleBulletSelectionChange(exp.id, index, !!checked)
+                                    }
+                                    className="mt-0.5"
+                                  />
+                                  <span className="text-sm">{bullet}</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </CollapsibleContent>

@@ -63,6 +63,7 @@ export async function fetchCVWorkExperiences(
         is_selected: sel?.is_selected ?? true, // Default: selected
         is_favorite: sel?.is_favorite ?? false,
         display_order: sel?.display_order ?? index,
+        display_mode: (sel as any)?.display_mode ?? 'custom', // Default: custom mode for backwards compatibility
         description_override: sel?.description_override ?? null,
         selected_bullet_indices: sel?.selected_bullet_indices ?? null,
       },
@@ -85,6 +86,7 @@ export async function upsertCVWorkExperienceSelection(
     is_selected?: boolean;
     is_favorite?: boolean;
     display_order?: number;
+    display_mode?: 'simple' | 'with_description' | 'custom';
     description_override?: string | null;
     selected_bullet_indices?: number[] | null;
   }
@@ -120,6 +122,7 @@ export async function bulkUpsertCVWorkExperienceSelections(
     is_selected?: boolean;
     is_favorite?: boolean;
     display_order?: number;
+    display_mode?: 'simple' | 'with_description' | 'custom';
     description_override?: string | null;
     selected_bullet_indices?: number[] | null;
   }>
@@ -134,6 +137,7 @@ export async function bulkUpsertCVWorkExperienceSelections(
     is_selected: sel.is_selected,
     is_favorite: sel.is_favorite,
     display_order: sel.display_order,
+    display_mode: sel.display_mode,
     description_override: sel.description_override,
     selected_bullet_indices: sel.selected_bullet_indices,
   }));

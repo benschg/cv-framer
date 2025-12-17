@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronDown, UserX } from 'lucide-react';
+import { Check, ChevronDown, UserX, Upload } from 'lucide-react';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import { Loader2 } from 'lucide-react';
 import type { ProfilePhoto } from '@/types/api.schemas';
@@ -52,8 +53,25 @@ export function PhotoSelector({ selectedPhotoId, onChange, userInitials, open: e
 
   if (photos.length === 0) {
     return (
-      <div className="text-sm text-muted-foreground">
-        No photos available. Upload photos in your profile.
+      <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-12 w-12">
+            <AvatarFallback>
+              <Upload className="h-6 w-6 text-muted-foreground" />
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-medium">No photos available</p>
+            <p className="text-xs text-muted-foreground">
+              Upload photos to use them in your CV
+            </p>
+          </div>
+        </div>
+        <Button asChild variant="outline">
+          <Link href="/profile">
+            Upload Photos
+          </Link>
+        </Button>
       </div>
     );
   }

@@ -73,17 +73,27 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
     ? (keyCompetences?.filter(comp => comp.selection.is_selected) || [])
     : [];
 
+  // Simple single-page layout for now (will need multi-page logic later)
   return (
     <div
-      className="bg-white p-8 rounded-lg shadow-sm border mx-auto text-[10pt] leading-relaxed"
+      className="space-y-6"
       style={{
-        width: `${pageWidth}mm`,
-        minHeight: `${pageHeight}mm`,
-        aspectRatio: `${pageWidth} / ${pageHeight}`,
         fontFamily: fontFamily,
         color: textColor
       }}
     >
+      {/* CV Page 1 */}
+      <div
+        className="bg-white rounded-lg shadow-sm border mx-auto p-8 text-[10pt] leading-relaxed print:shadow-none print:border-0"
+        style={{
+          width: `${pageWidth}mm`,
+          height: `${pageHeight}mm`,
+          maxHeight: `${pageHeight}mm`,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
       {/* Header */}
       <header
         className="mb-5 pb-4"
@@ -118,10 +128,10 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
       {/* Profile */}
       {content.profile && (
-        <section className="mb-5">
+        <section className="mb-5" style={{ pageBreakInside: 'avoid' }}>
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.profile}
           </h2>
@@ -134,7 +144,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         <section className="mb-5">
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.workExperience}
           </h2>
@@ -150,7 +160,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
                   );
 
               return (
-                <div key={exp.id} className="text-sm">
+                <div key={exp.id} className="text-sm" style={{ pageBreakInside: 'avoid' }}>
                   <div className="flex justify-between items-baseline">
                     <div className="flex items-center gap-1">
                       <span className="font-semibold">{exp.title}</span>
@@ -188,7 +198,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
         <section className="mb-5">
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.education}
           </h2>
@@ -197,7 +207,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
               const description = edu.selection.description_override ?? edu.description;
 
               return (
-                <div key={edu.id} className="text-sm">
+                <div key={edu.id} className="text-sm" style={{ pageBreakInside: 'avoid' }}>
                   <div className="flex justify-between items-baseline">
                     <div className="flex items-center gap-1">
                       <span className="font-semibold">{edu.degree}</span>
@@ -228,10 +238,10 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
       {/* Skills */}
       {selectedSkillCategories.length > 0 && (
-        <section className="mb-5">
+        <section className="mb-5" style={{ pageBreakInside: 'avoid' }}>
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.skills}
           </h2>
@@ -264,10 +274,10 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
 
       {/* Key Competences */}
       {selectedKeyCompetences.length > 0 && (
-        <section className="mb-5">
+        <section className="mb-5" style={{ pageBreakInside: 'avoid' }}>
           <h2
             className="text-xs font-bold uppercase tracking-wide mb-2 pb-1 border-b border-gray-200"
-            style={{ color: accentColor }}
+            style={{ color: accentColor, pageBreakAfter: 'avoid' }}
           >
             {labels.keyCompetences}
           </h2>
@@ -276,7 +286,7 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
               const description = comp.selection.description_override ?? comp.description;
 
               return (
-                <div key={comp.id} className="text-sm">
+                <div key={comp.id} className="text-sm" style={{ pageBreakInside: 'avoid' }}>
                   <div className="flex items-center gap-1">
                     <span className="font-semibold">{comp.title}</span>
                     {comp.selection.is_favorite && (
@@ -303,6 +313,14 @@ export function CVPreview({ content, userProfile, settings, language = 'en', pho
             </p>
           </div>
         )}
+      </div>
+
+      {/* Page info */}
+      <div className="text-center mt-2">
+        <p className="text-xs text-muted-foreground">
+          {format} format
+        </p>
+      </div>
     </div>
   );
 }

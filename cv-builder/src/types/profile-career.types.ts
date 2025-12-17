@@ -48,6 +48,9 @@ export type CVProjectSelection = Tables['cv_project_selections']['Row'];
 export type CVProjectSelectionInsert = Tables['cv_project_selections']['Insert'];
 export type CVProjectSelectionUpdate = Tables['cv_project_selections']['Update'];
 
+// Display modes for work experience in CV
+export type WorkExperienceDisplayMode = 'simple' | 'with_description' | 'custom';
+
 // Composite type for CV editor: work experience merged with CV-specific selection
 export interface CVWorkExperienceWithSelection {
   // From profile_work_experiences
@@ -68,6 +71,7 @@ export interface CVWorkExperienceWithSelection {
     is_selected: boolean;
     is_favorite: boolean;
     display_order: number;
+    display_mode: WorkExperienceDisplayMode; // simple, with_description, or custom
     description_override: string | null;
     selected_bullet_indices: number[] | null; // null means all bullets
   };
