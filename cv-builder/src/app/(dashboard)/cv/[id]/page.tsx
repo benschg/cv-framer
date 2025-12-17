@@ -23,6 +23,11 @@ import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { EditableBreadcrumb } from '@/components/shared/editable-breadcrumb';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
 import { fetchCV, updateCV } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { PhotoSelector } from '@/components/cv/photo-selector';
@@ -571,11 +576,15 @@ export default function CVEditorPage() {
         </div>
       </header>
 
-      {/* Content - Split Layout */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 overflow-hidden">
+      {/* Content - Resizable Split Layout */}
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="flex-1 min-h-0"
+      >
         {/* Left Side - Configuration (scrollable) */}
-        <div className="flex-1 lg:w-1/2 overflow-y-auto">
-          <div className="max-w-3xl mx-auto space-y-6 pb-6">
+        <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+          <div className="h-full overflow-y-auto p-4">
+            <div className="max-w-3xl mx-auto space-y-6 pb-6">
             {/* Photo Selection */}
             <Card>
               <CardHeader>
@@ -744,12 +753,16 @@ export default function CVEditorPage() {
               displaySettings={cv.display_settings}
               onUpdateSettings={updateDisplaySettings}
             />
+            </div>
           </div>
-        </div>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
 
         {/* Right Side - Preview (scrollable) */}
-        <div className="flex-1 lg:w-1/2 overflow-y-auto">
-          <CVPreviewSection
+        <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+          <div className="h-full overflow-y-auto p-4">
+            <CVPreviewSection
             content={content}
             language={cv.language}
             displaySettings={cv.display_settings}
@@ -773,8 +786,9 @@ export default function CVEditorPage() {
               updated_at: user.updated_at || user.created_at,
             } : undefined}
           />
-        </div>
-      </div>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
