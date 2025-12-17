@@ -59,12 +59,12 @@ export default function LandingPage() {
           </div>
         </div>
         <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl">
-          Create CVs That
-          <span className="text-primary"> Win Jobs</span>
+          Customize Your CV
+          <span className="text-primary"> For Every Job</span>
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
-          Use the Werbeflaechen self-marketing framework combined with AI-powered
-          customization to create professional CVs and cover letters that stand out.
+          Build thematic, skills-focused CVs tailored to each application with
+          AI-powered customization that helps you make the most impact.
         </p>
         <div className="flex justify-center gap-4">
           <Link href="/signup">
@@ -89,34 +89,34 @@ export default function LandingPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
-              <Target className="mb-2 h-10 w-10 text-primary" />
-              <CardTitle>Werbeflaechen Framework</CardTitle>
+              <Sparkles className="mb-2 h-10 w-10 text-primary" />
+              <CardTitle>Per-Application Customization</CardTitle>
               <CardDescription>
-                18 categories to structure your self-marketing, from your vision
-                to your achievements.
+                Create a unique, tailored CV for every job you apply to with
+                AI-powered optimization.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Answer three key questions: Will you love the job? Can you do it?
-                Can we work together?
+                Paste any job posting and AI automatically customizes your CV to
+                emphasize the skills and experience that matter most for that role.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <Sparkles className="mb-2 h-10 w-10 text-primary" />
-              <CardTitle>AI-Powered Customization</CardTitle>
+              <Target className="mb-2 h-10 w-10 text-primary" />
+              <CardTitle>Thematic, Skills-Focused</CardTitle>
               <CardDescription>
-                Tailor your CV to each job posting with intelligent content
-                generation.
+                Move beyond chronological resumes with thematic CVs that showcase
+                your expertise.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Paste a job posting and let AI customize your CV to highlight the
-                most relevant experience.
+                Organize your experience by skills and competencies rather than just
+                timeline, helping recruiters see your value immediately.
               </p>
             </CardContent>
           </Card>
@@ -126,14 +126,14 @@ export default function LandingPage() {
               <FileText className="mb-2 h-10 w-10 text-primary" />
               <CardTitle>Professional Templates</CardTitle>
               <CardDescription>
-                Choose from beautiful, ATS-friendly CV templates designed by
-                experts.
+                ATS-friendly templates that adapt to both thematic and chronological
+                formats.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
                 WYSIWYG editor lets you customize every detail while maintaining
-                professional formatting.
+                professional formatting for each unique application.
               </p>
             </CardContent>
           </Card>
@@ -141,16 +141,16 @@ export default function LandingPage() {
           <Card>
             <CardHeader>
               <Briefcase className="mb-2 h-10 w-10 text-primary" />
-              <CardTitle>Cover Letter Generator</CardTitle>
+              <CardTitle>Matching Cover Letters</CardTitle>
               <CardDescription>
-                Create compelling cover letters that complement your CV
-                perfectly.
+                Generate cover letters customized for each application alongside
+                your tailored CV.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                AI generates personalized cover letters based on your
-                Werbeflaechen data and the job requirements.
+                AI creates personalized cover letters that align perfectly with your
+                customized CV for each specific job posting.
               </p>
             </CardContent>
           </Card>
@@ -193,11 +193,11 @@ export default function LandingPage() {
       <section className="bg-primary py-16 text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="mb-4 text-3xl font-bold">
-            Ready to Build Your Perfect CV?
+            Ready to Customize Your CV for Every Job?
           </h2>
           <p className="mx-auto mb-8 max-w-xl text-lg opacity-90">
-            Start building your professional CV today with AI-powered tools
-            designed to help you stand out.
+            Build thematic, skills-focused CVs tailored to each application with
+            AI-powered customization that maximizes your chances.
           </p>
           <Link href="/signup">
             <Button size="lg" variant="secondary" className="gap-2">
