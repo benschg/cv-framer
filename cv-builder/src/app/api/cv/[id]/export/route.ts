@@ -101,9 +101,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       font-kerning: normal;
     }
 
-    html, body {
+    html {
+      /* Force consistent base font size - browser default is 16px */
+      font-size: 16px !important;
       margin: 0 !important;
       padding: 0 !important;
+    }
+
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 16px !important;
+      line-height: 1.5 !important;
     }
 
     /* Force CSS variables for PDF rendering */
@@ -120,10 +129,33 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       --cv-text-muted: ${themeColors.textMuted} !important;
     }
 
-    /* Ensure SVG icons are visible */
+    /* Ensure SVG icons are visible and correctly sized */
     svg {
       display: inline-block !important;
       vertical-align: middle !important;
+    }
+
+    /* Fix icon sizes - h-3 w-3 = 0.75rem = 12px at 16px base */
+    .cv-page-footer svg,
+    .cv-footer-item svg {
+      width: 12px !important;
+      height: 12px !important;
+      flex-shrink: 0 !important;
+    }
+
+    /* Fix sidebar icon sizes - h-3 w-3 = 12px */
+    .cv-sidebar svg,
+    .cv-sidebar-contact-item svg {
+      width: 12px !important;
+      height: 12px !important;
+      flex-shrink: 0 !important;
+    }
+
+    /* Fix header icon sizes - h-4 w-4 = 1rem = 16px */
+    .cv-header-contact-item svg {
+      width: 16px !important;
+      height: 16px !important;
+      flex-shrink: 0 !important;
     }
 
     /* Fix document wrapper for PDF */
@@ -149,6 +181,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       padding: 0 !important;
       transform: none !important;
       overflow: hidden !important;
+      /* Explicit base font settings */
+      font-size: 16px !important;
+      line-height: 1.5 !important;
     }
 
     .cv-page:last-child {
