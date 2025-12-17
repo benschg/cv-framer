@@ -754,10 +754,6 @@ export default function CVEditorPage() {
             language={cv.language}
             displaySettings={cv.display_settings}
             photoUrl={photoUrl}
-            userInitials={getUserInitials(user)}
-            photos={photos}
-            primaryPhoto={primaryPhoto}
-            onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
             onFormatChange={(format) => updateDisplaySettings('format', format)}
             onPageBreakToggle={handlePageBreakToggle}
             workExperiences={workExperiences}
