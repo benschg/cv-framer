@@ -42,7 +42,7 @@ export function generateCVHTML(data: CVTemplateData): string {
 
   const theme = settings.theme;
   const format = settings.format;
-  const layoutMode = settings.layoutMode || 'single-column';
+  const layoutMode = settings.layoutMode || 'two-column';
   const showPhoto = settings.showPhoto !== false && !!photoUrl;
   const showWorkExperience = settings.showWorkExperience !== false;
   const showEducation = settings.showEducation !== false;

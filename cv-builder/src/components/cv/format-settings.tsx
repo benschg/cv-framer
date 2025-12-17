@@ -130,27 +130,45 @@ export function FormatSettings({ displaySettings, onUpdateSettings }: FormatSett
           </div>
         </div>
 
-        {/* Page Format */}
-        <div className="space-y-2">
-          <Label htmlFor="format">Page Format</Label>
-          <Select
-            value={displaySettings?.format || 'A4'}
-            onValueChange={(value) => onUpdateSettings('format', value as 'A4' | 'Letter')}
-          >
-            <SelectTrigger id="format">
-              <SelectValue placeholder="Select format" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
-              <SelectItem value="Letter">Letter (8.5 × 11 in / 216 × 279 mm)</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            {displaySettings?.format === 'Letter'
-              ? 'Letter format is commonly used in the US and Canada'
-              : 'A4 format is the international standard used in most countries'}
-          </p>
+        {/* Page Format & Layout */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="format">Page Format</Label>
+            <Select
+              value={displaySettings?.format || 'A4'}
+              onValueChange={(value) => onUpdateSettings('format', value as 'A4' | 'Letter')}
+            >
+              <SelectTrigger id="format">
+                <SelectValue placeholder="Select format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
+                <SelectItem value="Letter">Letter (216 × 279 mm)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="layoutMode">Layout</Label>
+            <Select
+              value={displaySettings?.layoutMode || 'two-column'}
+              onValueChange={(value) => onUpdateSettings('layoutMode', value)}
+            >
+              <SelectTrigger id="layoutMode">
+                <SelectValue placeholder="Select layout" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="two-column">Two Column (Sidebar)</SelectItem>
+                <SelectItem value="single-column">Single Column</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+        <p className="text-xs text-muted-foreground">
+          {displaySettings?.layoutMode === 'single-column'
+            ? 'Traditional single-column layout with all sections in main content'
+            : 'Modern two-column layout with sidebar for skills, contact, and languages'}
+        </p>
 
         {/* Preview Example */}
         <div className="p-4 rounded-lg border bg-white">

@@ -64,7 +64,7 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
   ) => {
     const theme = settings?.theme || 'light';
     const format = settings?.format || 'A4';
-    const layoutMode = settings?.layoutMode || 'single-column';
+    const layoutMode = settings?.layoutMode || 'two-column';
     const showPhoto = settings?.showPhoto !== false && !!photoUrl;
     const showWorkExperience = settings?.showWorkExperience !== false;
     const showEducation = settings?.showEducation !== false;
