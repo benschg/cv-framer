@@ -4,11 +4,21 @@ import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 're
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Minus, Plus } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Minus, Plus, Settings } from 'lucide-react';
 import { CVDocument } from './cv-document';
 import type { CVContent, DisplaySettings, UserProfile } from '@/types/cv.types';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
+import type { CVMainSection } from '@/types/cv-layout.types';
 
 interface CVPreviewSectionProps {
   content: CVContent;
@@ -17,6 +27,8 @@ interface CVPreviewSectionProps {
   photoUrl: string | null;
   onFormatChange: (format: 'A4' | 'Letter') => void;
   onPageBreakToggle: (sectionId: string) => void;
+  onDisplaySettingsChange?: (key: keyof DisplaySettings, value: unknown) => void;
+  onSectionOrderChange?: (pageIndex: number, newOrder: CVMainSection[]) => void;
   workExperiences?: CVWorkExperienceWithSelection[];
   educations?: CVEducationWithSelection[];
   skillCategories?: CVSkillCategoryWithSelection[];
@@ -35,6 +47,8 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
   photoUrl,
   onFormatChange,
   onPageBreakToggle,
+  onDisplaySettingsChange,
+  onSectionOrderChange,
   workExperiences,
   educations,
   skillCategories,
@@ -43,13 +57,62 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
 }, ref) {
   const [zoomMode, setZoomMode] = useState<'auto' | number>('auto');
   const [calculatedZoom, setCalculatedZoom] = useState(100);
+  const [pagePropertiesOpen, setPagePropertiesOpen] = useState(false);
+  const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // Check if interactive mode is enabled (when callbacks are provided)
+  const isInteractive = !!(onDisplaySettingsChange || onSectionOrderChange);
 
   // Expose getPreviewHTML to parent
   useImperativeHandle(ref, () => ({
     getPreviewHTML: () => previewRef.current?.outerHTML ?? null,
   }));
+
+  // Handle section move
+  const handleSectionMove = (pageIndex: number, fromIndex: number, toIndex: number) => {
+    if (!onSectionOrderChange) return;
+
+    const pageLayouts = displaySettings?.pageLayouts || [];
+    const currentPageLayout = pageLayouts[pageIndex];
+
+    // Get the current section order (from layout or default)
+    const currentOrder = currentPageLayout?.main || ['header', 'profile', 'experience', 'education', 'skills', 'keyCompetences'] as CVMainSection[];
+
+    // Create new order by swapping
+    const newOrder = [...currentOrder];
+    const [movedSection] = newOrder.splice(fromIndex, 1);
+    newOrder.splice(toIndex, 0, movedSection);
+
+    onSectionOrderChange(pageIndex, newOrder);
+  };
+
+  // Handle section visibility toggle
+  const handleSectionToggleVisibility = (sectionType: CVMainSection) => {
+    if (!onDisplaySettingsChange) return;
+
+    // Map section types to display settings keys
+    const settingsMap: Record<string, keyof DisplaySettings> = {
+      experience: 'showWorkExperience',
+      education: 'showEducation',
+      skills: 'showSkills',
+      keyCompetences: 'showKeyCompetences',
+      projects: 'showProjects',
+    };
+
+    const settingKey = settingsMap[sectionType];
+    if (settingKey) {
+      const currentValue = displaySettings?.[settingKey] !== false;
+      onDisplaySettingsChange(settingKey, !currentValue);
+    }
+  };
+
+  // Handle page properties request (via context menu)
+  const handlePageProperties = (pageIndex: number) => {
+    setSelectedPageIndex(pageIndex);
+    setPagePropertiesOpen(true);
+  };
 
   // Calculate auto zoom based on container width
   useEffect(() => {
@@ -180,10 +243,115 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
               userProfile={userProfile}
               zoom={effectiveZoom / 100}
               onPageBreakToggle={onPageBreakToggle}
+              isInteractive={isInteractive}
+              onSectionMove={handleSectionMove}
+              onSectionToggleVisibility={handleSectionToggleVisibility}
+              onPageProperties={handlePageProperties}
             />
           </div>
         </div>
       </CardContent>
+
+      {/* Page Properties Dialog */}
+      <Dialog open={pagePropertiesOpen} onOpenChange={setPagePropertiesOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Page {selectedPageIndex + 1} Properties
+            </DialogTitle>
+            <DialogDescription>
+              Configure the layout and appearance for this page
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Page Format */}
+            <div className="space-y-2">
+              <Label>Page Format</Label>
+              <Select
+                value={displaySettings?.format || 'A4'}
+                onValueChange={(value) => {
+                  onDisplaySettingsChange?.('format', value as 'A4' | 'Letter');
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
+                  <SelectItem value="Letter">Letter (216 × 279 mm)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Layout Mode */}
+            <div className="space-y-2">
+              <Label>Layout</Label>
+              <Select
+                value={displaySettings?.layoutMode || 'two-column'}
+                onValueChange={(value) => {
+                  onDisplaySettingsChange?.('layoutMode', value);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="two-column">Two Column (Sidebar)</SelectItem>
+                  <SelectItem value="single-column">Single Column</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Accent Color */}
+            <div className="space-y-2">
+              <Label>Accent Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={displaySettings?.accentColor || '#2563eb'}
+                  onChange={(e) => onDisplaySettingsChange?.('accentColor', e.target.value)}
+                  className="w-12 h-9 p-1 cursor-pointer"
+                />
+                <Input
+                  type="text"
+                  value={displaySettings?.accentColor || '#2563eb'}
+                  onChange={(e) => onDisplaySettingsChange?.('accentColor', e.target.value)}
+                  placeholder="#2563eb"
+                  className="flex-1 font-mono text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Font Family */}
+            <div className="space-y-2">
+              <Label>Font</Label>
+              <Select
+                value={displaySettings?.fontFamily || 'sans-serif'}
+                onValueChange={(value) => onDisplaySettingsChange?.('fontFamily', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sans-serif">Sans Serif</SelectItem>
+                  <SelectItem value="serif">Serif</SelectItem>
+                  <SelectItem value="'Inter', sans-serif">Inter</SelectItem>
+                  <SelectItem value="'Roboto', sans-serif">Roboto</SelectItem>
+                  <SelectItem value="'Open Sans', sans-serif">Open Sans</SelectItem>
+                  <SelectItem value="'Georgia', serif">Georgia</SelectItem>
+                  <SelectItem value="'Times New Roman', serif">Times New Roman</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            Tip: Right-click on sections to move them up or down
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 });

@@ -326,6 +326,31 @@ export default function CVEditorPage() {
     setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
   };
 
+  // Handle section order change from the preview
+  const handleSectionOrderChange = (pageIndex: number, newOrder: string[]) => {
+    if (!cv) return;
+
+    const currentPageLayouts = cv.display_settings?.pageLayouts || [];
+
+    // Ensure we have enough page layout entries
+    const updatedPageLayouts = [...currentPageLayouts];
+    while (updatedPageLayouts.length <= pageIndex) {
+      updatedPageLayouts.push({});
+    }
+
+    // Update the main sections for this page
+    updatedPageLayouts[pageIndex] = {
+      ...updatedPageLayouts[pageIndex],
+      main: newOrder as ('header' | 'profile' | 'experience' | 'education' | 'skills' | 'keyCompetences' | 'projects' | 'references')[],
+    };
+
+    const updatedSettings = {
+      ...cv.display_settings,
+      pageLayouts: updatedPageLayouts,
+    } as DisplaySettings;
+    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+  };
+
   // Export PDF using client-rendered HTML
   const handleExport = async () => {
     if (!cv) return;
@@ -816,6 +841,8 @@ export default function CVEditorPage() {
               photoUrl={photoUrl}
               onFormatChange={(format) => updateDisplaySettings('format', format)}
               onPageBreakToggle={handlePageBreakToggle}
+              onDisplaySettingsChange={updateDisplaySettings}
+              onSectionOrderChange={handleSectionOrderChange}
               workExperiences={workExperiences}
               educations={educations}
               skillCategories={skillCategories}

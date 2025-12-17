@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useRef, useEffect, useCallback } from 'react';
+import { forwardRef } from 'react';
 import type { ReactNode } from 'react';
 import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
 import type {
@@ -12,6 +12,8 @@ import type {
 import type { CVLayoutConfig, CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
 import { CVPage } from './cv-page';
 import { CVSidebar } from './cv-sidebar';
+import { CVSectionWrapper } from './cv-section-wrapper';
+import { CVPageContextMenu } from './cv-page-context-menu';
 import {
   CVHeaderSection,
   CVProfileSection,
@@ -42,6 +44,14 @@ interface CVDocumentProps {
   zoom?: number;
   /** Callback when page break is toggled */
   onPageBreakToggle?: (sectionId: string) => void;
+  /** Enable interactive section editing (context menus, reordering) */
+  isInteractive?: boolean;
+  /** Callback when a section is moved */
+  onSectionMove?: (pageIndex: number, fromIndex: number, toIndex: number) => void;
+  /** Callback when section visibility is toggled */
+  onSectionToggleVisibility?: (sectionType: CVMainSection) => void;
+  /** Callback when page properties is requested (via context menu) */
+  onPageProperties?: (pageIndex: number) => void;
 }
 
 export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
@@ -59,6 +69,10 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
       keyCompetences,
       zoom = 0,
       onPageBreakToggle,
+      isInteractive = false,
+      onSectionMove,
+      onSectionToggleVisibility,
+      onPageProperties,
     },
     ref
   ) => {
@@ -111,6 +125,20 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
     const selectedKeyCompetences = showKeyCompetences
       ? (keyCompetences?.filter(comp => comp.selection.is_selected) || [])
       : [];
+
+    // Handle section move up
+    const handleMoveUp = (pageIndex: number, sectionIndex: number) => {
+      if (sectionIndex > 0 && onSectionMove) {
+        onSectionMove(pageIndex, sectionIndex, sectionIndex - 1);
+      }
+    };
+
+    // Handle section move down
+    const handleMoveDown = (pageIndex: number, sectionIndex: number) => {
+      if (onSectionMove) {
+        onSectionMove(pageIndex, sectionIndex, sectionIndex + 1);
+      }
+    };
 
     // Render a main content section
     const renderMainSection = (sectionType: CVMainSection): ReactNode => {
@@ -285,6 +313,36 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
           const hasSidebar = sidebarPosition !== 'none' && pageLayout.sidebar.length > 0;
           const sidebarClass = sidebarPosition === 'right' ? 'cv-two-column cv-sidebar-right' : 'cv-two-column';
 
+          // Filter out sections with no content for proper indexing
+          const visibleSections = pageLayout.main.filter(section => {
+            const rendered = renderMainSection(section);
+            return rendered !== null;
+          });
+
+          const renderWrappedSection = (sectionType: CVMainSection, indexInPage: number) => {
+            const sectionContent = renderMainSection(sectionType);
+            if (!sectionContent) return null;
+
+            const visibleIndex = visibleSections.indexOf(sectionType);
+
+            return (
+              <CVSectionWrapper
+                key={sectionType}
+                sectionType={sectionType}
+                sectionIndex={visibleIndex}
+                totalSections={visibleSections.length}
+                pageIndex={pageIndex}
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
+                onToggleVisibility={onSectionToggleVisibility}
+                onPageProperties={onPageProperties}
+                isInteractive={isInteractive}
+              >
+                {sectionContent}
+              </CVSectionWrapper>
+            );
+          };
+
           return (
             <CVPage
               key={pageIndex}
@@ -297,28 +355,34 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
               website={footerWebsite}
               zoom={zoom}
             >
-              {hasSidebar ? (
-                <div className={sidebarClass}>
-                  <CVSidebar
-                    sections={pageLayout.sidebar}
-                    userProfile={userProfile}
-                    content={content}
-                    photoUrl={photoUrl}
-                    skillCategories={skillCategories}
-                    educations={educations}
-                    showPhoto={isFirstPage && showPhoto}
-                    showPrivateInfo={privacyLevel !== 'none'}
-                    language={language}
-                  />
-                  <div className="cv-main-content">
-                    {pageLayout.main.map((sectionType) => renderMainSection(sectionType))}
+              <CVPageContextMenu
+                pageIndex={pageIndex}
+                onPageProperties={onPageProperties}
+                disabled={!isInteractive}
+              >
+                {hasSidebar ? (
+                  <div className={sidebarClass}>
+                    <CVSidebar
+                      sections={pageLayout.sidebar}
+                      userProfile={userProfile}
+                      content={content}
+                      photoUrl={photoUrl}
+                      skillCategories={skillCategories}
+                      educations={educations}
+                      showPhoto={isFirstPage && showPhoto}
+                      showPrivateInfo={privacyLevel !== 'none'}
+                      language={language}
+                    />
+                    <div className="cv-main-content">
+                      {pageLayout.main.map((sectionType, index) => renderWrappedSection(sectionType, index))}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="cv-main-content cv-full-width">
-                  {pageLayout.main.map((sectionType) => renderMainSection(sectionType))}
-                </div>
-              )}
+                ) : (
+                  <div className="cv-main-content cv-full-width">
+                    {pageLayout.main.map((sectionType, index) => renderWrappedSection(sectionType, index))}
+                  </div>
+                )}
+              </CVPageContextMenu>
             </CVPage>
           );
         })}
