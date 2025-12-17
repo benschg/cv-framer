@@ -7,7 +7,11 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Star, ArrowRight } from 'lucide-react';
 import { ReactNode } from 'react';
 import { formatDateRange } from '@/lib/utils';
-import { PageBreakButton } from './page-break-button';
+import { getDisplayModeContent } from '@/lib/cv-display-mode';
+import { CVSectionHeader } from './cv-section-header';
+import { CVPageBreak } from './cv-page-break';
+import { CVWorkExperienceItem } from './cv-work-experience-item';
+import { CVEducationItem } from './cv-education-item';
 
 interface CVPreviewMultiPageProps {
   content: CVContent;
@@ -149,33 +153,18 @@ export function CVPreviewMultiPage({
     ),
   };
 
-  // Helper: Render page break line and button
+  // Helper: Render page break
   const renderPageBreak = (sectionId: string, type: 'section' | 'item') => (
-    <>
-      {pageBreaks.includes(sectionId) && (
-        <div className="mt-3 border-b-2 border-gray-400" />
-      )}
-      {onPageBreakToggle && (
-        <div className="absolute -bottom-2 z-10" style={{ right: '-2cm' }}>
-          <PageBreakButton
-            sectionId={sectionId}
-            isActive={pageBreaks.includes(sectionId)}
-            onClick={() => onPageBreakToggle(sectionId)}
-            type={type}
-          />
-        </div>
-      )}
-    </>
+    <CVPageBreak
+      sectionId={sectionId}
+      type={type}
+      isActive={pageBreaks.includes(sectionId)}
+      onToggle={onPageBreakToggle}
+    />
   );
 
   // Helper: Render section header
-  const renderSectionHeader = (title: string) => (
-    <div className="mb-2">
-      <h2 className="text-xs font-bold uppercase tracking-wide pb-1 border-b border-gray-200" style={{ color: accentColor }}>
-        {title}
-      </h2>
-    </div>
-  );
+  const renderSectionHeader = (title: string) => <CVSectionHeader title={title} accentColor={accentColor} />;
 
   // Build sections array
   const sections: SectionDefinition[] = [headerSection];
@@ -208,41 +197,14 @@ export function CVPreviewMultiPage({
     selectedWorkExperiences.forEach((exp, index) => {
       const isLast = index === selectedWorkExperiences.length - 1;
       const displayMode = exp.selection.display_mode || 'custom';
-
-      // Determine content based on display mode
-      const description = displayMode === 'simple' ? null : exp.selection.description_override ?? exp.description;
-      const bullets = displayMode === 'custom'
-        ? (exp.selection.selected_bullet_indices === null
-            ? exp.bullets
-            : exp.bullets?.filter((_, i) => exp.selection.selected_bullet_indices!.includes(i)))
-        : null;
+      const { description, bullets } = getDisplayModeContent(exp, displayMode);
 
       sections.push({
         id: isLast ? 'workExperience' : `workExperience-${exp.id}`,
         canBreak: true,
         content: (
           <div className={`relative ${isLast ? 'mb-5' : 'mb-3'}`}>
-            <div className="text-sm">
-              <div className="flex justify-between items-baseline">
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold">{exp.title}</span>
-                  {exp.selection.is_favorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
-                </div>
-                <span className="text-xs text-gray-500">
-                  {formatDateRange(exp.start_date, exp.end_date, exp.current)}
-                </span>
-              </div>
-              <p className="text-gray-600">
-                {exp.company}
-                {exp.location && `, ${exp.location}`}
-              </p>
-              {description && <p className="text-gray-700 mt-1">{description}</p>}
-              {bullets && bullets.length > 0 && (
-                <ul className="list-disc list-inside mt-1 space-y-0.5 text-gray-700">
-                  {bullets.map((bullet, i) => <li key={i}>{bullet}</li>)}
-                </ul>
-              )}
-            </div>
+            <CVWorkExperienceItem experience={exp} description={description} bullets={bullets} />
             {renderPageBreak(isLast ? 'workExperience' : `workExperience-${exp.id}`, isLast ? 'section' : 'item')}
           </div>
         ),
@@ -269,23 +231,7 @@ export function CVPreviewMultiPage({
         canBreak: true,
         content: (
           <div className={`relative ${isLast ? 'mb-5' : 'mb-3'}`}>
-            <div className="text-sm">
-              <div className="flex justify-between items-baseline">
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold">{edu.degree}</span>
-                  {edu.selection.is_favorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
-                </div>
-                <span className="text-xs text-gray-500">
-                  {formatDateRange(edu.start_date, edu.end_date)}
-                </span>
-              </div>
-              <p className="text-gray-600">
-                {edu.institution}
-                {edu.field && ` • ${edu.field}`}
-              </p>
-              {edu.grade && <p className="text-gray-500 text-xs">{edu.grade}</p>}
-              {description && <p className="text-gray-700 mt-1">{description}</p>}
-            </div>
+            <CVEducationItem education={edu} description={description} />
             {renderPageBreak(isLast ? 'education' : `education-${edu.id}`, isLast ? 'section' : 'item')}
           </div>
         ),
