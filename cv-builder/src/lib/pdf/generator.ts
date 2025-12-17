@@ -73,13 +73,22 @@ export async function generatePDFFromHTML(
   try {
     const page = await browser.newPage();
 
-    // Set viewport
-    await page.setViewport({ width: 1200, height: 800 });
+    // Set viewport to match A4 at 96 DPI (same as preview)
+    await page.setViewport({ width: 794, height: 1123 });
+
+    // Emulate print media for consistent rendering
+    await page.emulateMediaType('print');
 
     // Set content
     await page.setContent(html, {
       waitUntil: 'networkidle0',
     });
+
+    // Wait for fonts to load
+    await page.evaluate(() => document.fonts.ready);
+
+    // Small delay to ensure rendering is complete
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Generate PDF
     const pdf = await page.pdf({

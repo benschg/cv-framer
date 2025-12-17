@@ -98,6 +98,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       --cv-page-width: ${format === 'A4' ? '210mm' : '216mm'} !important;
       --cv-page-height: ${format === 'A4' ? '297mm' : '279mm'} !important;
       --cv-page-padding: 15mm !important;
+      --cv-sidebar-width: 55mm !important;
+      --cv-content-height: ${format === 'A4' ? 'calc(297mm - 30mm - 8mm)' : 'calc(279mm - 30mm - 8mm)'} !important;
       --cv-bg-page: ${themeColors.bgPage} !important;
       --cv-bg-sidebar: ${themeColors.bgSidebar} !important;
       --cv-text-primary: ${themeColors.textPrimary} !important;
@@ -143,6 +145,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     /* Hide no-print elements */
     .cv-no-print {
       display: none !important;
+    }
+
+    /* Ensure consistent content heights */
+    .cv-two-column {
+      height: calc(${format === 'A4' ? '297mm' : '279mm'} - 8mm) !important;
+      max-height: calc(${format === 'A4' ? '297mm' : '279mm'} - 8mm) !important;
+    }
+
+    .cv-main-content.cv-full-width {
+      height: calc(${format === 'A4' ? '297mm' : '279mm'} - 8mm) !important;
+      max-height: calc(${format === 'A4' ? '297mm' : '279mm'} - 8mm) !important;
     }
   </style>
 </head>
