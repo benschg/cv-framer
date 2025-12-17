@@ -135,6 +135,20 @@
   overflow: hidden;
 }
 
+/* Right sidebar variant */
+.cv-two-column.cv-sidebar-right {
+  flex-direction: row-reverse;
+}
+
+.cv-two-column.cv-sidebar-right .cv-sidebar {
+  border-right: none;
+  border-left: 3px solid var(--cv-accent);
+}
+
+.cv-two-column.cv-sidebar-right .cv-main-content {
+  padding: 12mm 12mm 8mm 15mm;
+}
+
 .cv-main-content {
   flex: 1;
   padding: 12mm 15mm 8mm 12mm;

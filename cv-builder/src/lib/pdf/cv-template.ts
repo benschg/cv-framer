@@ -51,9 +51,17 @@ export function generateCVHTML(data: CVTemplateData): string {
   const privacyLevel = settings.privacyLevel || 'personal';
   const accentColor = settings.accentColor || '#2563eb';
   const fontFamily = settings.fontFamily || 'Inter';
+  const pageLayouts = settings.pageLayouts || [];
 
-  // Use provided layout or default
-  const layout = layoutConfig || getDefaultLayout(layoutMode);
+  // Use provided layout or default, then apply page layout overrides
+  const baseLayout = layoutConfig || getDefaultLayout(layoutMode);
+  const layout = {
+    ...baseLayout,
+    pages: baseLayout.pages.map((page, index) => ({
+      ...page,
+      sidebarPosition: pageLayouts[index]?.sidebarPosition ?? page.sidebarPosition,
+    })),
+  };
 
   // Labels
   const labels = {
@@ -226,6 +234,20 @@ function generateStyles(settings: DisplaySettings): string {
       flex-direction: column;
       gap: 1rem;
       overflow: hidden;
+    }
+
+    /* Right sidebar variant */
+    .cv-two-column.cv-sidebar-right {
+      flex-direction: row-reverse;
+    }
+
+    .cv-two-column.cv-sidebar-right .cv-sidebar {
+      border-right: none;
+      border-left: 3px solid var(--cv-accent);
+    }
+
+    .cv-two-column.cv-sidebar-right .cv-main-content {
+      padding: 12mm 12mm 8mm 15mm;
     }
 
     .cv-main-content {
@@ -609,12 +631,17 @@ function generatePages(
     )
     .map((pageLayout, index) => {
       pageNumber++;
-      const hasSidebar = pageLayout.sidebar.length > 0 && layout.mode === 'two-column';
       const isFirstPage = index === 0;
+
+      // Determine sidebar position (default to 'left' if sidebar has content and mode is two-column)
+      const sidebarPosition = pageLayout.sidebarPosition ??
+        (pageLayout.sidebar.length > 0 && layout.mode === 'two-column' ? 'left' : 'none');
+      const hasSidebar = sidebarPosition !== 'none' && pageLayout.sidebar.length > 0;
+      const sidebarClass = sidebarPosition === 'right' ? 'cv-two-column cv-sidebar-right' : 'cv-two-column';
 
       const pageContent = hasSidebar
         ? `
-          <div class="cv-two-column">
+          <div class="${sidebarClass}">
             ${generateSidebar(pageLayout.sidebar, userProfile, content, photoUrl, skillCategories, educations, isFirstPage && showPhoto, privacyLevel !== 'none', labels, language)}
             <div class="cv-main-content">
               ${pageLayout.main.map(section => generateMainSection(section, content, userProfile, workExperiences, educations, skillCategories, keyCompetences, labels, language)).join('')}

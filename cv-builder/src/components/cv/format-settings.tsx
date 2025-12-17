@@ -6,12 +6,14 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { ChevronDown } from 'lucide-react';
-import type { DisplaySettings } from '@/types/cv.types';
+import { PageLayoutConfigurator } from './page-layout-configurator';
+import type { DisplaySettings, PageLayoutOverride } from '@/types/cv.types';
 
 interface FormatSettingsProps {
   displaySettings?: Partial<DisplaySettings> | null;
-  onUpdateSettings: (key: keyof DisplaySettings, value: string) => void;
+  onUpdateSettings: (key: keyof DisplaySettings, value: unknown) => void;
 }
 
 export function FormatSettings({ displaySettings, onUpdateSettings }: FormatSettingsProps) {
@@ -130,6 +132,31 @@ export function FormatSettings({ displaySettings, onUpdateSettings }: FormatSett
           </div>
         </div>
 
+        {/* Preview Example */}
+        <div className="p-4 rounded-lg border bg-white">
+          <div className="space-y-2">
+            <h3
+              className="text-sm font-bold uppercase tracking-wide"
+              style={{
+                color: displaySettings?.accentColor || '#2563eb',
+                fontFamily: displaySettings?.fontFamily || 'sans-serif'
+              }}
+            >
+              Preview Example
+            </h3>
+            <p
+              className="text-xs"
+              style={{
+                color: displaySettings?.textColor || '#111827',
+                fontFamily: displaySettings?.fontFamily || 'sans-serif'
+              }}
+            >
+              This is how your CV text will appear with the selected font and colors.
+              The heading above uses the accent color, while this paragraph uses the text color.
+            </p>
+          </div>
+        </div>
+
         {/* Page Format & Layout */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -170,30 +197,18 @@ export function FormatSettings({ displaySettings, onUpdateSettings }: FormatSett
             : 'Modern two-column layout with sidebar for skills, contact, and languages'}
         </p>
 
-        {/* Preview Example */}
-        <div className="p-4 rounded-lg border bg-white">
-          <div className="space-y-2">
-            <h3
-              className="text-sm font-bold uppercase tracking-wide"
-              style={{
-                color: displaySettings?.accentColor || '#2563eb',
-                fontFamily: displaySettings?.fontFamily || 'sans-serif'
-              }}
-            >
-              Preview Example
-            </h3>
-            <p
-              className="text-xs"
-              style={{
-                color: displaySettings?.textColor || '#111827',
-                fontFamily: displaySettings?.fontFamily || 'sans-serif'
-              }}
-            >
-              This is how your CV text will appear with the selected font and colors.
-              The heading above uses the accent color, while this paragraph uses the text color.
-            </p>
-          </div>
-        </div>
+        {/* Per-Page Sidebar Position */}
+        {(displaySettings?.layoutMode || 'two-column') === 'two-column' && (
+          <>
+            <Separator className="my-4" />
+            <PageLayoutConfigurator
+              pageLayouts={displaySettings?.pageLayouts || []}
+              pageCount={2}
+              isTwoColumn={(displaySettings?.layoutMode || 'two-column') === 'two-column'}
+              onChange={(pageLayouts) => onUpdateSettings('pageLayouts', pageLayouts)}
+            />
+          </>
+        )}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

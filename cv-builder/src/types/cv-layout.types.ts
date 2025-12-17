@@ -25,12 +25,17 @@ export type CVMainSection =
   | 'projects'
   | 'references';
 
+/** Sidebar position on a page */
+export type CVSidebarPosition = 'left' | 'right' | 'none';
+
 /** Layout for a single CV page */
 export interface CVPageLayout {
   /** Sidebar sections - if empty, page uses full-width layout */
   sidebar: CVSidebarSection[];
   /** Main content sections */
   main: CVMainSection[];
+  /** Sidebar position: left, right, or none (default: left if sidebar has content) */
+  sidebarPosition?: CVSidebarPosition;
 }
 
 /** Complete layout configuration for a CV */

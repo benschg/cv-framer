@@ -130,6 +130,11 @@ export interface AIMetadata {
   sectionsGenerated?: string[];
 }
 
+export interface PageLayoutOverride {
+  /** Sidebar position for this page: left, right, or none */
+  sidebarPosition?: 'left' | 'right' | 'none';
+}
+
 export interface DisplaySettings {
   theme: 'light' | 'dark';
   format: 'A4' | 'Letter';
@@ -146,6 +151,8 @@ export interface DisplaySettings {
   fontFamily?: string;
   textColor?: string;
   pageBreaks?: string[]; // Section IDs that should start a new page
+  /** Per-page layout overrides (indexed by page number starting from 0) */
+  pageLayouts?: PageLayoutOverride[];
 }
 
 export interface WerbeflaechenSnapshot {

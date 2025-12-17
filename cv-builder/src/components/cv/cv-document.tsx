@@ -74,9 +74,17 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
     const accentColor = settings?.accentColor || '#2563eb';
     const fontFamily = settings?.fontFamily || 'Inter';
     const pageBreaks = settings?.pageBreaks || [];
+    const pageLayouts = settings?.pageLayouts || [];
 
-    // Use provided layout or default
-    const layout = layoutConfig || getDefaultLayout(layoutMode);
+    // Use provided layout or default, then apply page layout overrides
+    const baseLayout = layoutConfig || getDefaultLayout(layoutMode);
+    const layout = {
+      ...baseLayout,
+      pages: baseLayout.pages.map((page, index) => ({
+        ...page,
+        sidebarPosition: pageLayouts[index]?.sidebarPosition ?? page.sidebarPosition,
+      })),
+    };
 
     // Labels based on language
     const labels = {
@@ -266,8 +274,13 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
           if (!pageHasContent(pageIndex)) return null;
 
           visiblePageNumber++;
-          const hasSidebar = pageLayout.sidebar.length > 0 && layout.mode === 'two-column';
           const isFirstPage = pageIndex === 0;
+
+          // Determine sidebar position (default to 'left' if sidebar has content and mode is two-column)
+          const sidebarPosition = pageLayout.sidebarPosition ??
+            (pageLayout.sidebar.length > 0 && layout.mode === 'two-column' ? 'left' : 'none');
+          const hasSidebar = sidebarPosition !== 'none' && pageLayout.sidebar.length > 0;
+          const sidebarClass = sidebarPosition === 'right' ? 'cv-two-column cv-sidebar-right' : 'cv-two-column';
 
           return (
             <CVPage
@@ -282,7 +295,7 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
               zoom={zoom}
             >
               {hasSidebar ? (
-                <div className="cv-two-column">
+                <div className={sidebarClass}>
                   <CVSidebar
                     sections={pageLayout.sidebar}
                     userProfile={userProfile}
