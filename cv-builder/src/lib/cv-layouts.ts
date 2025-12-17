@@ -34,11 +34,11 @@ export const defaultTwoColumnLayout: CVLayoutConfig = {
   pages: [
     {
       sidebar: ['photo', 'contact', 'skills', 'languages'],
-      main: ['header', 'profile', 'keyCompetences'],
+      main: ['header', 'profile', 'experience'],
     },
     {
       sidebar: ['education', 'certifications'],
-      main: ['experience'],
+      main: ['keyCompetences'],
     },
   ],
 };
