@@ -11,6 +11,7 @@ import { CVPagePropertiesDialog } from './cv-page-properties-dialog';
 import type { CVContent, DisplaySettings, UserProfile } from '@/types/cv.types';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 import type { CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
+import type { PhotoOption } from './cv-sidebar-section-context-menu';
 
 interface CVPreviewSectionProps {
   content: CVContent;
@@ -27,6 +28,14 @@ interface CVPreviewSectionProps {
   skillCategories?: CVSkillCategoryWithSelection[];
   keyCompetences?: CVKeyCompetenceWithSelection[];
   userProfile?: UserProfile;
+  /** Photo options for the context menu submenu */
+  photoOptions?: PhotoOption[];
+  /** Currently selected photo ID */
+  selectedPhotoId?: string | null;
+  /** Callback when a photo is selected */
+  onPhotoSelect?: (photoId: string | null) => void;
+  /** User initials for avatar fallback */
+  userInitials?: string;
 }
 
 export interface CVPreviewSectionHandle {
@@ -48,6 +57,10 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
   skillCategories,
   keyCompetences,
   userProfile,
+  photoOptions,
+  selectedPhotoId,
+  onPhotoSelect,
+  userInitials,
 }, ref) {
   const [zoomMode, setZoomMode] = useState<'auto' | number>('auto');
   const [calculatedZoom, setCalculatedZoom] = useState(100);
@@ -280,6 +293,10 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
               onPageProperties={handlePageProperties}
               onSidebarSectionMove={handleSidebarSectionMove}
               onSidebarSectionToggleVisibility={handleSidebarSectionToggleVisibility}
+              photoOptions={photoOptions}
+              selectedPhotoId={selectedPhotoId}
+              onPhotoSelect={onPhotoSelect}
+              userInitials={userInitials}
             />
           </div>
         </div>

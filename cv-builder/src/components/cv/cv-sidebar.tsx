@@ -21,6 +21,7 @@ import { filterSelectedSkills } from '@/lib/cv-skill-filter';
 import { formatDateRange } from '@/lib/utils';
 import { CVSidebarSectionWrapper } from './cv-sidebar-section-wrapper';
 import { CVSortableSidebarSection } from './cv-sortable-sidebar-section';
+import type { PhotoOption } from './cv-sidebar-section-context-menu';
 
 interface CVSidebarProps {
   /** Sections to render in order */
@@ -51,6 +52,14 @@ interface CVSidebarProps {
   onSectionToggleVisibility?: (sectionType: CVSidebarSection) => void;
   /** Callback when sections are reordered via drag-and-drop */
   onSectionReorder?: (fromIndex: number, toIndex: number) => void;
+  /** Photo options for the context menu submenu */
+  photoOptions?: PhotoOption[];
+  /** Currently selected photo ID */
+  selectedPhotoId?: string | null;
+  /** Callback when a photo is selected */
+  onPhotoSelect?: (photoId: string | null) => void;
+  /** User initials for avatar fallback */
+  userInitials?: string;
 }
 
 export function CVSidebar({
@@ -68,6 +77,10 @@ export function CVSidebar({
   onSectionMoveDown,
   onSectionToggleVisibility,
   onSectionReorder,
+  photoOptions,
+  selectedPhotoId,
+  onPhotoSelect,
+  userInitials,
 }: CVSidebarProps) {
   // Setup drag sensors
   const sensors = useSensors(
@@ -267,6 +280,10 @@ export function CVSidebar({
             onMoveUp={onSectionMoveUp}
             onMoveDown={onSectionMoveDown}
             onToggleVisibility={onSectionToggleVisibility}
+            photoOptions={sectionType === 'photo' ? photoOptions : undefined}
+            selectedPhotoId={sectionType === 'photo' ? selectedPhotoId : undefined}
+            onPhotoSelect={sectionType === 'photo' ? onPhotoSelect : undefined}
+            userInitials={userInitials}
             isInteractive={isInteractive}
             language={language}
           >

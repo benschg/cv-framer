@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +33,7 @@ import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { PhotoSelector } from '@/components/cv/photo-selector';
 import { FormatSettings } from '@/components/cv/format-settings';
 import { CVPreviewSection, CVPreviewSectionHandle } from '@/components/cv/cv-preview-section';
+import type { PhotoOption } from '@/components/cv/cv-sidebar-section-context-menu';
 import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-section';
 import { CVEducationSection } from '@/components/cv/cv-education-section';
 import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
@@ -224,6 +225,34 @@ export default function CVEditorPage() {
 
     updatePhotoUrl();
   }, [content.selected_photo_id, photos, primaryPhoto, user]);
+
+  // Build photo options for context menu
+  const photoOptions = useMemo((): PhotoOption[] => {
+    const options: PhotoOption[] = [];
+
+    // Add primary photo first
+    if (primaryPhoto) {
+      options.push({
+        id: primaryPhoto.id,
+        label: 'Primary Photo (Default)',
+        sublabel: primaryPhoto.filename,
+        imageUrl: getPhotoPublicUrl(primaryPhoto.storage_path),
+        isPrimary: true,
+      });
+    }
+
+    // Add other photos
+    photos.filter(p => !p.is_primary).forEach((photo) => {
+      options.push({
+        id: photo.id,
+        label: photo.filename,
+        sublabel: `${(photo.file_size / 1024).toFixed(0)} KB`,
+        imageUrl: getPhotoPublicUrl(photo.storage_path),
+      });
+    });
+
+    return options;
+  }, [photos, primaryPhoto]);
 
   const handleSave = async () => {
     if (!cv) return;
@@ -869,6 +898,10 @@ export default function CVEditorPage() {
               onDisplaySettingsChange={updateDisplaySettings}
               onSectionOrderChange={handleSectionOrderChange}
               onSidebarOrderChange={handleSidebarOrderChange}
+              photoOptions={photoOptions}
+              selectedPhotoId={content.selected_photo_id}
+              onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
+              userInitials={getUserInitials(user)}
               workExperiences={workExperiences}
               educations={educations}
               skillCategories={skillCategories}

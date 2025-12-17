@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { CVSidebarSectionContextMenu } from './cv-sidebar-section-context-menu';
+import { CVSidebarSectionContextMenu, type PhotoOption } from './cv-sidebar-section-context-menu';
 import { getSidebarLabel } from './constants';
 import type { CVSidebarSection } from '@/types/cv-layout.types';
 
@@ -13,6 +13,14 @@ interface CVSidebarSectionWrapperProps {
   onMoveUp?: (sectionIndex: number) => void;
   onMoveDown?: (sectionIndex: number) => void;
   onToggleVisibility?: (sectionType: CVSidebarSection) => void;
+  /** Photo options for the submenu */
+  photoOptions?: PhotoOption[];
+  /** Currently selected photo ID */
+  selectedPhotoId?: string | null;
+  /** Callback when a photo is selected */
+  onPhotoSelect?: (photoId: string | null) => void;
+  /** User initials for avatar fallback */
+  userInitials?: string;
   isHidden?: boolean;
   isInteractive?: boolean;
   language?: 'en' | 'de';
@@ -26,6 +34,10 @@ export function CVSidebarSectionWrapper({
   onMoveUp,
   onMoveDown,
   onToggleVisibility,
+  photoOptions,
+  selectedPhotoId,
+  onPhotoSelect,
+  userInitials,
   isHidden = false,
   isInteractive = true,
   language = 'en',
@@ -41,6 +53,10 @@ export function CVSidebarSectionWrapper({
       onMoveUp={onMoveUp}
       onMoveDown={onMoveDown}
       onToggleVisibility={onToggleVisibility}
+      photoOptions={photoOptions}
+      selectedPhotoId={selectedPhotoId}
+      onPhotoSelect={onPhotoSelect}
+      userInitials={userInitials}
       isHidden={isHidden}
       disabled={!isInteractive}
     >

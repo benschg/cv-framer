@@ -36,6 +36,7 @@ import {
   CVKeyCompetencesSection,
 } from './sections';
 import { getDefaultLayout } from '@/lib/cv-layouts';
+import type { PhotoOption } from './cv-sidebar-section-context-menu';
 
 interface CVDocumentProps {
   content: CVContent;
@@ -69,6 +70,14 @@ interface CVDocumentProps {
   onSidebarSectionMove?: (pageIndex: number, fromIndex: number, toIndex: number) => void;
   /** Callback when sidebar section visibility is toggled */
   onSidebarSectionToggleVisibility?: (sectionType: CVSidebarSection) => void;
+  /** Photo options for the context menu submenu */
+  photoOptions?: PhotoOption[];
+  /** Currently selected photo ID */
+  selectedPhotoId?: string | null;
+  /** Callback when a photo is selected */
+  onPhotoSelect?: (photoId: string | null) => void;
+  /** User initials for avatar fallback */
+  userInitials?: string;
 }
 
 export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
@@ -92,6 +101,10 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
       onPageProperties,
       onSidebarSectionMove,
       onSidebarSectionToggleVisibility,
+      photoOptions,
+      selectedPhotoId,
+      onPhotoSelect,
+      userInitials,
     },
     ref
   ) => {
@@ -441,6 +454,10 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
                           onSidebarSectionMove(pageIndex, fromIndex, toIndex);
                         }
                       }}
+                      photoOptions={photoOptions}
+                      selectedPhotoId={selectedPhotoId}
+                      onPhotoSelect={onPhotoSelect}
+                      userInitials={userInitials}
                     />
                     <DndContext
                       sensors={sensors}
