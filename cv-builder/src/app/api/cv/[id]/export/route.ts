@@ -88,6 +88,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       box-sizing: border-box !important;
     }
 
+    /* Force consistent font rendering in Puppeteer */
+    .cv-document-wrapper,
+    .cv-document-wrapper * {
+      text-rendering: geometricPrecision !important;
+      -webkit-font-smoothing: antialiased !important;
+      font-synthesis: none !important;
+      -webkit-text-size-adjust: 100% !important;
+      text-size-adjust: 100% !important;
+      /* Explicit font feature settings for consistency */
+      font-feature-settings: 'kern' 1, 'liga' 1;
+      font-kerning: normal;
+    }
+
     html, body {
       margin: 0 !important;
       padding: 0 !important;

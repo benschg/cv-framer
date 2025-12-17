@@ -39,6 +39,26 @@
 }
 
 /* ============================================ */
+/* FONT RENDERING NORMALIZATION                 */
+/* ============================================ */
+
+.cv-document-wrapper,
+.cv-document-wrapper * {
+  /* Force consistent text rendering across browsers and Puppeteer */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
+  /* Prevent browser-specific text size adjustments */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Explicit font feature settings for consistency */
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  font-kerning: normal;
+}
+
+/* ============================================ */
 /* DOCUMENT WRAPPER                             */
 /* ============================================ */
 
