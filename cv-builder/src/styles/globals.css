@@ -105,49 +105,67 @@
 }
 
 @layer utilities {
-  /* Custom animations for landing page */
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
+  /* CV Page Animations */
+  @keyframes cv-page-enter-back {
+    0% {
+      transform: translateY(50px) rotate(0deg);
+      opacity: 0;
     }
-    50% {
-      transform: translateY(-10px);
+    60% {
+      transform: translateY(0px) rotate(0deg);
+      opacity: 1;
     }
-  }
-
-  @keyframes gentle-rotate {
-    0%, 100% {
-      transform: rotate(0deg);
-    }
-    50% {
-      transform: rotate(3deg);
-    }
-  }
-
-  /* Force SVG animation restart */
-  @keyframes trigger-svg {
-    from {
-      opacity: 0.99;
-    }
-    to {
+    100% {
+      transform: translateY(0px) rotate(8deg);
       opacity: 1;
     }
   }
 
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
+  @keyframes cv-page-enter-front {
+    0% {
+      transform: translateY(50px) rotate(0deg);
+      opacity: 0;
+    }
+    60% {
+      transform: translateY(0px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0px) rotate(-8deg);
+      opacity: 1;
+    }
   }
 
-  .animate-gentle-rotate {
-    animation: gentle-rotate 6s ease-in-out infinite;
+  @keyframes sparkle-pop {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    70% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    85% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 
-  .animate-svg-on-load {
-    animation: trigger-svg 0.01s;
+  .cv-page-back {
+    animation: cv-page-enter-back 1.2s ease-out forwards;
   }
 
-  /* Target SVG elements inside to restart animation */
-  .animate-svg-on-load img {
-    animation: trigger-svg 0.01s;
+  .cv-page-front {
+    animation: cv-page-enter-front 1.2s ease-out forwards;
+    animation-delay: 0.1s;
+    opacity: 0;
+  }
+
+  .ai-sparkle {
+    animation: sparkle-pop 1.2s ease-out forwards;
   }
 }

@@ -59,6 +59,9 @@ function FadeInSection({ children, delay = 0 }: { children: React.ReactNode; del
 }
 
 export default function LandingPage() {
+  // Generate unique key on each page load to force animation replay
+  const [animKey] = useState(() => Date.now());
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       {/* Header */}
@@ -89,15 +92,22 @@ export default function LandingPage() {
       <section className="container mx-auto px-4 py-24 text-center">
         <div className="mb-8 flex justify-center">
           <div className="rounded-full bg-blue-500 p-6 sm:p-8 animate-in fade-in zoom-in duration-700 relative group">
-            {/* Animated hero icon with hover animation */}
-            <div className="relative transition-transform duration-500 group-hover:scale-110 animate-svg-on-load">
-              <img
-                src="/hero-icon.svg?v=1"
-                alt="CV Builder - Customize your CV for every job"
-                width={160}
-                height={160}
-                className="h-32 w-32 sm:h-40 sm:w-40"
-              />
+            {/* Animated CV pages with hover animation */}
+            <div className="relative w-40 h-40 sm:w-48 sm:h-48 transition-transform duration-500 group-hover:scale-110" key={animKey}>
+              {/* Back CV page */}
+              <div className="absolute top-1/2 left-1/2 w-28 h-40 sm:w-32 sm:h-48 -ml-14 -mt-20 sm:-ml-16 sm:-mt-24 cv-page-back origin-bottom-left">
+                <img src="/cv-page-back.svg" alt="" className="w-full h-full" />
+              </div>
+
+              {/* Front CV page */}
+              <div className="absolute top-1/2 left-1/2 w-28 h-40 sm:w-32 sm:h-48 -ml-14 -mt-20 sm:-ml-16 sm:-mt-24 cv-page-front origin-bottom-right">
+                <img src="/cv-page-front.svg" alt="" className="w-full h-full" />
+              </div>
+
+              {/* AI Sparkle */}
+              <div className="absolute bottom-0 right-0 w-14 h-14 sm:w-16 sm:h-16 ai-sparkle">
+                <img src="/ai-sparkle.svg" alt="" className="w-full h-full" />
+              </div>
             </div>
           </div>
         </div>

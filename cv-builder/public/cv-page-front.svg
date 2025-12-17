@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 400">
+  <defs>
+    <linearGradient id="paper1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#f1f5f9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shadow -->
+  <rect x="8" y="8" width="280" height="400" rx="16" fill="#1e40af" opacity="0.3"/>
+
+  <!-- Paper background -->
+  <rect x="0" y="0" width="280" height="400" rx="16" fill="url(#paper1)" stroke="#3b82f6" stroke-width="3"/>
+
+  <!-- Folded corner -->
+  <path d="M280 0 L280 50 Q280 60 270 60 L220 60 L280 0" fill="#e2e8f0"/>
+  <path d="M220 0 L280 0 L280 50 Q280 60 270 60 L220 60 L220 10 Q220 0 230 0" fill="#cbd5e1"/>
+
+  <!-- Profile circle -->
+  <circle cx="140" cy="80" r="40" fill="#3b82f6"/>
+  <circle cx="140" cy="72" r="16" fill="#bfdbfe"/>
+  <ellipse cx="140" cy="100" rx="24" ry="16" fill="#bfdbfe"/>
+
+  <!-- Name line -->
+  <rect x="60" y="140" width="160" height="14" rx="7" fill="#1e40af"/>
+
+  <!-- Subtitle -->
+  <rect x="80" y="162" width="120" height="8" rx="4" fill="#60a5fa"/>
+
+  <!-- Section header -->
+  <rect x="30" y="195" width="70" height="10" rx="5" fill="#3b82f6"/>
+
+  <!-- Content lines -->
+  <rect x="30" y="215" width="220" height="8" rx="4" fill="#cbd5e1"/>
+  <rect x="30" y="233" width="200" height="8" rx="4" fill="#cbd5e1"/>
+  <rect x="30" y="251" width="180" height="8" rx="4" fill="#cbd5e1"/>
+
+  <!-- Section header 2 -->
+  <rect x="30" y="285" width="90" height="10" rx="5" fill="#3b82f6"/>
+
+  <!-- More content lines -->
+  <rect x="30" y="305" width="220" height="8" rx="4" fill="#cbd5e1"/>
+  <rect x="30" y="323" width="160" height="8" rx="4" fill="#cbd5e1"/>
+  <rect x="30" y="341" width="190" height="8" rx="4" fill="#cbd5e1"/>
+</svg>
