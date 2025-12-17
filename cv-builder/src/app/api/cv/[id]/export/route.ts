@@ -99,8 +99,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       /* Explicit font feature settings for consistency */
       font-feature-settings: 'kern' 1, 'liga' 1;
       font-kerning: normal;
-      /* Slight letter-spacing adjustment to compensate for Puppeteer font metrics */
-      letter-spacing: -0.01em !important;
     }
 
     html {
