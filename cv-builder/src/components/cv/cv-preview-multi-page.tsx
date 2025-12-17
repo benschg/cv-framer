@@ -149,6 +149,34 @@ export function CVPreviewMultiPage({
     ),
   };
 
+  // Helper: Render page break line and button
+  const renderPageBreak = (sectionId: string, type: 'section' | 'item') => (
+    <>
+      {pageBreaks.includes(sectionId) && (
+        <div className="mt-3 border-b-2 border-gray-400" />
+      )}
+      {onPageBreakToggle && (
+        <div className="absolute -bottom-2 z-10" style={{ right: '-2cm' }}>
+          <PageBreakButton
+            sectionId={sectionId}
+            isActive={pageBreaks.includes(sectionId)}
+            onClick={() => onPageBreakToggle(sectionId)}
+            type={type}
+          />
+        </div>
+      )}
+    </>
+  );
+
+  // Helper: Render section header
+  const renderSectionHeader = (title: string) => (
+    <div className="mb-2">
+      <h2 className="text-xs font-bold uppercase tracking-wide pb-1 border-b border-gray-200" style={{ color: accentColor }}>
+        {title}
+      </h2>
+    </div>
+  );
+
   // Build sections array
   const sections: SectionDefinition[] = [headerSection];
 
@@ -158,105 +186,47 @@ export function CVPreviewMultiPage({
       id: 'profile',
       canBreak: true,
       content: (
-        <section className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h2
-              className="text-xs font-bold uppercase tracking-wide pb-1 border-b border-gray-200 flex-1"
-              style={{ color: accentColor }}
-            >
-              {labels.profile}
-            </h2>
-            {onPageBreakToggle && (
-              <PageBreakButton
-                sectionId="profile"
-                isActive={pageBreaks.includes('profile')}
-                onClick={() => onPageBreakToggle('profile')}
-                type="section"
-              />
-            )}
-          </div>
+        <section className="mb-5 relative">
+          {renderSectionHeader(labels.profile)}
           <p className="text-gray-700 text-justify">{content.profile}</p>
+          {renderPageBreak('profile', 'section')}
         </section>
       ),
     });
   }
 
-  // Work Experience section - with header
+  // Work Experience section
   if (selectedWorkExperiences.length > 0) {
-    // First, add the section header with page break control
+    // Section header (non-breakable)
     sections.push({
-      id: 'workExperience',
-      canBreak: true,
-      content: (
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h2
-              className="text-xs font-bold uppercase tracking-wide pb-1 border-b border-gray-200 flex-1"
-              style={{ color: accentColor }}
-            >
-              {labels.workExperience}
-            </h2>
-            {onPageBreakToggle && (
-              <PageBreakButton
-                sectionId="workExperience"
-                isActive={pageBreaks.includes('workExperience')}
-                onClick={() => onPageBreakToggle('workExperience')}
-                type="section"
-              />
-            )}
-          </div>
-        </div>
-      ),
+      id: 'workExperienceHeader',
+      canBreak: false,
+      content: renderSectionHeader(labels.workExperience),
     });
 
-    // Then add each work experience as a separate section with its own page break control
+    // Each work experience item
     selectedWorkExperiences.forEach((exp, index) => {
-      const displayMode = exp.selection.display_mode || 'custom'; // Default to custom for backwards compatibility
+      const isLast = index === selectedWorkExperiences.length - 1;
+      const displayMode = exp.selection.display_mode || 'custom';
 
-      // Determine what to show based on display mode
-      let description: string | null = null;
-      let bullets: string[] | null = null;
-
-      if (displayMode === 'simple') {
-        // Simple mode: no description, no bullets
-        description = null;
-        bullets = null;
-      } else if (displayMode === 'with_description') {
-        // With description mode: show description (or override), but no bullets
-        description = exp.selection.description_override ?? exp.description;
-        bullets = null;
-      } else if (displayMode === 'custom') {
-        // Custom mode: respect override and bullet selection
-        description = exp.selection.description_override ?? exp.description;
-        bullets = exp.selection.selected_bullet_indices === null
-          ? exp.bullets
-          : (exp.bullets || []).filter((_, i) =>
-              exp.selection.selected_bullet_indices!.includes(i)
-            );
-      }
+      // Determine content based on display mode
+      const description = displayMode === 'simple' ? null : exp.selection.description_override ?? exp.description;
+      const bullets = displayMode === 'custom'
+        ? (exp.selection.selected_bullet_indices === null
+            ? exp.bullets
+            : exp.bullets?.filter((_, i) => exp.selection.selected_bullet_indices!.includes(i)))
+        : null;
 
       sections.push({
-        id: `workExperience-${exp.id}`,
+        id: isLast ? 'workExperience' : `workExperience-${exp.id}`,
         canBreak: true,
         content: (
-          <div className={`relative ${index === selectedWorkExperiences.length - 1 ? 'mb-5' : 'mb-3'}`}>
-            {onPageBreakToggle && index > 0 && (
-              <div className="absolute -top-2 z-10" style={{ right: '-2cm' }}>
-                <PageBreakButton
-                  sectionId={`workExperience-${exp.id}`}
-                  isActive={pageBreaks.includes(`workExperience-${exp.id}`)}
-                  onClick={() => onPageBreakToggle(`workExperience-${exp.id}`)}
-                  type="item"
-                />
-              </div>
-            )}
+          <div className={`relative ${isLast ? 'mb-5' : 'mb-3'}`}>
             <div className="text-sm">
               <div className="flex justify-between items-baseline">
                 <div className="flex items-center gap-1">
                   <span className="font-semibold">{exp.title}</span>
-                  {exp.selection.is_favorite && (
-                    <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                  )}
+                  {exp.selection.is_favorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
                 </div>
                 <span className="text-xs text-gray-500">
                   {formatDateRange(exp.start_date, exp.end_date, exp.current)}
@@ -266,77 +236,44 @@ export function CVPreviewMultiPage({
                 {exp.company}
                 {exp.location && `, ${exp.location}`}
               </p>
-              {description && (
-                <p className="text-gray-700 mt-1">{description}</p>
-              )}
+              {description && <p className="text-gray-700 mt-1">{description}</p>}
               {bullets && bullets.length > 0 && (
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-gray-700">
-                  {bullets.map((bullet, i) => (
-                    <li key={i}>{bullet}</li>
-                  ))}
+                  {bullets.map((bullet, i) => <li key={i}>{bullet}</li>)}
                 </ul>
               )}
             </div>
+            {renderPageBreak(isLast ? 'workExperience' : `workExperience-${exp.id}`, isLast ? 'section' : 'item')}
           </div>
         ),
       });
     });
   }
 
-  // Education section - with header
+  // Education section
   if (selectedEducations.length > 0) {
-    // First, add the section header with page break control
+    // Section header (non-breakable)
     sections.push({
-      id: 'education',
-      canBreak: true,
-      content: (
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h2
-              className="text-xs font-bold uppercase tracking-wide pb-1 border-b border-gray-200 flex-1"
-              style={{ color: accentColor }}
-            >
-              {labels.education}
-            </h2>
-            {onPageBreakToggle && (
-              <PageBreakButton
-                sectionId="education"
-                isActive={pageBreaks.includes('education')}
-                onClick={() => onPageBreakToggle('education')}
-                type="section"
-              />
-            )}
-          </div>
-        </div>
-      ),
+      id: 'educationHeader',
+      canBreak: false,
+      content: renderSectionHeader(labels.education),
     });
 
-    // Then add each education as a separate section with its own page break control
+    // Each education item
     selectedEducations.forEach((edu, index) => {
+      const isLast = index === selectedEducations.length - 1;
       const description = edu.selection.description_override ?? edu.description;
 
       sections.push({
-        id: `education-${edu.id}`,
+        id: isLast ? 'education' : `education-${edu.id}`,
         canBreak: true,
         content: (
-          <div className={`relative ${index === selectedEducations.length - 1 ? 'mb-5' : 'mb-3'}`}>
-            {onPageBreakToggle && index > 0 && (
-              <div className="absolute -top-2 z-10" style={{ right: '-2cm' }}>
-                <PageBreakButton
-                  sectionId={`education-${edu.id}`}
-                  isActive={pageBreaks.includes(`education-${edu.id}`)}
-                  onClick={() => onPageBreakToggle(`education-${edu.id}`)}
-                  type="item"
-                />
-              </div>
-            )}
+          <div className={`relative ${isLast ? 'mb-5' : 'mb-3'}`}>
             <div className="text-sm">
               <div className="flex justify-between items-baseline">
                 <div className="flex items-center gap-1">
                   <span className="font-semibold">{edu.degree}</span>
-                  {edu.selection.is_favorite && (
-                    <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                  )}
+                  {edu.selection.is_favorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
                 </div>
                 <span className="text-xs text-gray-500">
                   {formatDateRange(edu.start_date, edu.end_date)}
@@ -346,13 +283,10 @@ export function CVPreviewMultiPage({
                 {edu.institution}
                 {edu.field && ` • ${edu.field}`}
               </p>
-              {edu.grade && (
-                <p className="text-gray-500 text-xs">{edu.grade}</p>
-              )}
-              {description && (
-                <p className="text-gray-700 mt-1">{description}</p>
-              )}
+              {edu.grade && <p className="text-gray-500 text-xs">{edu.grade}</p>}
+              {description && <p className="text-gray-700 mt-1">{description}</p>}
             </div>
+            {renderPageBreak(isLast ? 'education' : `education-${edu.id}`, isLast ? 'section' : 'item')}
           </div>
         ),
       });
@@ -365,46 +299,26 @@ export function CVPreviewMultiPage({
       id: 'skills',
       canBreak: true,
       content: (
-        <section className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h2
-              className="text-xs font-bold uppercase tracking-wide pb-1 border-b border-gray-200 flex-1"
-              style={{ color: accentColor }}
-            >
-              {labels.skills}
-            </h2>
-            {onPageBreakToggle && (
-              <PageBreakButton
-                sectionId="skills"
-                isActive={pageBreaks.includes('skills')}
-                onClick={() => onPageBreakToggle('skills')}
-                type="section"
-              />
-            )}
-          </div>
+        <section className="mb-5 relative">
+          {renderSectionHeader(labels.skills)}
           <div className="space-y-2">
             {selectedSkillCategories.map((cat) => {
               const skills = cat.selection.selected_skill_indices === null
                 ? cat.skills
-                : cat.skills.filter((_, i) =>
-                    cat.selection.selected_skill_indices!.includes(i)
-                  );
+                : cat.skills.filter((_, i) => cat.selection.selected_skill_indices!.includes(i));
 
               return (
                 <div key={cat.id} className="text-sm">
                   <div className="flex items-center gap-1">
                     <span className="font-semibold">{cat.category}:</span>
-                    {cat.selection.is_favorite && (
-                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                    )}
+                    {cat.selection.is_favorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
                   </div>
-                  <p className="text-gray-700">
-                    {skills.join(', ')}
-                  </p>
+                  <p className="text-gray-700">{skills.join(', ')}</p>
                 </div>
               );
             })}
           </div>
+          {renderPageBreak('skills', 'section')}
         </section>
       ),
     });
@@ -416,42 +330,23 @@ export function CVPreviewMultiPage({
       id: 'keyCompetences',
       canBreak: true,
       content: (
-        <section className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h2
-              className="text-xs font-bold uppercase tracking-wide pb-1 border-b border-gray-200 flex-1"
-              style={{ color: accentColor }}
-            >
-              {labels.keyCompetences}
-            </h2>
-            {onPageBreakToggle && (
-              <PageBreakButton
-                sectionId="keyCompetences"
-                isActive={pageBreaks.includes('keyCompetences')}
-                onClick={() => onPageBreakToggle('keyCompetences')}
-                type="section"
-              />
-            )}
-          </div>
+        <section className="mb-5 relative">
+          {renderSectionHeader(labels.keyCompetences)}
           <div className="space-y-2">
             {selectedKeyCompetences.map((comp) => {
               const description = comp.selection.description_override ?? comp.description;
-
               return (
                 <div key={comp.id} className="text-sm">
                   <div className="flex items-center gap-1">
                     <span className="font-semibold">{comp.title}</span>
-                    {comp.selection.is_favorite && (
-                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                    )}
+                    {comp.selection.is_favorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
                   </div>
-                  {description && (
-                    <p className="text-gray-700">{description}</p>
-                  )}
+                  {description && <p className="text-gray-700">{description}</p>}
                 </div>
               );
             })}
           </div>
+          {renderPageBreak('keyCompetences', 'section')}
         </section>
       ),
     });
@@ -461,13 +356,14 @@ export function CVPreviewMultiPage({
   const pages: SectionDefinition[][] = [[]];
   let currentPageIndex = 0;
 
-  sections.forEach((section) => {
-    // Start a new page if this section has a page break
-    if (section.canBreak && pageBreaks.includes(section.id) && pages[currentPageIndex].length > 0) {
+  sections.forEach((section, index) => {
+    pages[currentPageIndex].push(section);
+
+    // Start a new page after this section if it has a page break
+    if (section.canBreak && pageBreaks.includes(section.id) && index < sections.length - 1) {
       currentPageIndex++;
       pages[currentPageIndex] = [];
     }
-    pages[currentPageIndex].push(section);
   });
 
   // Empty state
