@@ -82,6 +82,9 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
       ...baseLayout,
       pages: baseLayout.pages.map((page, index) => ({
         ...page,
+        // Apply custom section configurations if provided
+        sidebar: (pageLayouts[index]?.sidebar as CVSidebarSection[] | undefined) ?? page.sidebar,
+        main: (pageLayouts[index]?.main as CVMainSection[] | undefined) ?? page.main,
         sidebarPosition: pageLayouts[index]?.sidebarPosition ?? page.sidebarPosition,
       })),
     };

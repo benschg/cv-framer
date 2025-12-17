@@ -57,10 +57,19 @@ export function generateCVHTML(data: CVTemplateData): string {
   const baseLayout = layoutConfig || getDefaultLayout(layoutMode);
   const layout = {
     ...baseLayout,
-    pages: baseLayout.pages.map((page, index) => ({
-      ...page,
-      sidebarPosition: pageLayouts[index]?.sidebarPosition ?? page.sidebarPosition,
-    })),
+    pages: baseLayout.pages.map((page, index) => {
+      const override = pageLayouts[index];
+      // Only apply custom sections if they exist and have length > 0
+      // Empty arrays mean "show nothing", undefined means "use default"
+      const customSidebar = override?.sidebar;
+      const customMain = override?.main;
+      return {
+        ...page,
+        sidebar: customSidebar !== undefined ? (customSidebar as CVSidebarSection[]) : page.sidebar,
+        main: customMain !== undefined ? (customMain as CVMainSection[]) : page.main,
+        sidebarPosition: override?.sidebarPosition ?? page.sidebarPosition,
+      };
+    }),
   };
 
   // Labels

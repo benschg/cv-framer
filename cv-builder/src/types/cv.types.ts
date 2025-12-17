@@ -133,6 +133,10 @@ export interface AIMetadata {
 export interface PageLayoutOverride {
   /** Sidebar position for this page: left, right, or none */
   sidebarPosition?: 'left' | 'right' | 'none';
+  /** Custom sidebar sections (overrides default) */
+  sidebar?: ('photo' | 'contact' | 'skills' | 'languages' | 'education' | 'certifications')[];
+  /** Custom main content sections (overrides default) */
+  main?: ('header' | 'profile' | 'experience' | 'education' | 'skills' | 'keyCompetences' | 'projects' | 'references')[];
 }
 
 export interface DisplaySettings {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,7 +32,7 @@ import { fetchCV, updateCV } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { PhotoSelector } from '@/components/cv/photo-selector';
 import { FormatSettings } from '@/components/cv/format-settings';
-import { CVPreviewSection } from '@/components/cv/cv-preview-section';
+import { CVPreviewSection, CVPreviewSectionHandle } from '@/components/cv/cv-preview-section';
 import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-section';
 import { CVEducationSection } from '@/components/cv/cv-education-section';
 import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
@@ -54,6 +54,12 @@ export default function CVEditorPage() {
   const params = useParams();
   const cvId = params.id as string;
   const { user } = useAuth();
+
+  // Ref for CV preview to get rendered HTML
+  const previewRef = useRef<CVPreviewSectionHandle>(null);
+
+  // CV styles for PDF export
+  const [cvStyles, setCvStyles] = useState<string>('');
 
   const [cv, setCv] = useState<CVDocument | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,6 +175,22 @@ export default function CVEditorPage() {
     };
     loadProjects();
   }, [cvId]);
+
+  // Load CV styles for PDF export
+  useEffect(() => {
+    const loadCvStyles = async () => {
+      try {
+        const response = await fetch('/api/cv-styles');
+        if (response.ok) {
+          const css = await response.text();
+          setCvStyles(css);
+        }
+      } catch (err) {
+        console.error('Failed to load CV styles:', err);
+      }
+    };
+    loadCvStyles();
+  }, []);
 
   // Update photo URL when selected photo or primary photo changes
   useEffect(() => {
@@ -304,14 +326,38 @@ export default function CVEditorPage() {
     setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
   };
 
-  // Export PDF
+  // Export PDF using client-rendered HTML
   const handleExport = async () => {
     if (!cv) return;
     setExporting(true);
+    setError(null);
 
     try {
+      // Get the rendered HTML from the preview component
+      const html = previewRef.current?.getPreviewHTML();
+      if (!html) {
+        setError('Failed to capture CV preview');
+        return;
+      }
+
       const format = cv.display_settings?.format || 'A4';
-      const response = await fetch(`/api/cv/${cvId}/export?format=${format}`);
+      const theme = cv.display_settings?.theme || 'light';
+      const filename = `${cv.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+
+      // Send HTML and CSS to the server for PDF generation
+      const response = await fetch(`/api/cv/${cvId}/export`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          html,
+          css: cvStyles,
+          theme,
+          format,
+          filename,
+        }),
+      });
 
       if (!response.ok) {
         const json = await response.json();
@@ -324,7 +370,7 @@ export default function CVEditorPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${cv.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -763,29 +809,30 @@ export default function CVEditorPage() {
         <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
           <div className="h-full overflow-y-auto p-4">
             <CVPreviewSection
-            content={content}
-            language={cv.language}
-            displaySettings={cv.display_settings}
-            photoUrl={photoUrl}
-            onFormatChange={(format) => updateDisplaySettings('format', format)}
-            onPageBreakToggle={handlePageBreakToggle}
-            workExperiences={workExperiences}
-            educations={educations}
-            skillCategories={skillCategories}
-            keyCompetences={keyCompetences}
-            userProfile={user ? {
-              id: user.id,
-              user_id: user.id,
-              first_name: getUserName(user).firstName,
-              last_name: getUserName(user).lastName,
-              email: user.email,
-              phone: getUserPhone(user),
-              location: getUserLocation(user),
-              preferred_language: cv.language,
-              created_at: user.created_at,
-              updated_at: user.updated_at || user.created_at,
-            } : undefined}
-          />
+              ref={previewRef}
+              content={content}
+              language={cv.language}
+              displaySettings={cv.display_settings}
+              photoUrl={photoUrl}
+              onFormatChange={(format) => updateDisplaySettings('format', format)}
+              onPageBreakToggle={handlePageBreakToggle}
+              workExperiences={workExperiences}
+              educations={educations}
+              skillCategories={skillCategories}
+              keyCompetences={keyCompetences}
+              userProfile={user ? {
+                id: user.id,
+                user_id: user.id,
+                first_name: getUserName(user).firstName,
+                last_name: getUserName(user).lastName,
+                email: user.email,
+                phone: getUserPhone(user),
+                location: getUserLocation(user),
+                preferred_language: cv.language,
+                created_at: user.created_at,
+                updated_at: user.updated_at || user.created_at,
+              } : undefined}
+            />
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>

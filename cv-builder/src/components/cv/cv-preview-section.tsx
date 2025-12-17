@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,11 @@ interface CVPreviewSectionProps {
   userProfile?: UserProfile;
 }
 
-export function CVPreviewSection({
+export interface CVPreviewSectionHandle {
+  getPreviewHTML: () => string | null;
+}
+
+export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSectionProps>(function CVPreviewSection({
   content,
   language,
   displaySettings,
@@ -36,11 +40,16 @@ export function CVPreviewSection({
   skillCategories,
   keyCompetences,
   userProfile,
-}: CVPreviewSectionProps) {
+}, ref) {
   const [zoomMode, setZoomMode] = useState<'auto' | number>('auto');
   const [calculatedZoom, setCalculatedZoom] = useState(100);
   const containerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // Expose getPreviewHTML to parent
+  useImperativeHandle(ref, () => ({
+    getPreviewHTML: () => previewRef.current?.outerHTML ?? null,
+  }));
 
   // Calculate auto zoom based on container width
   useEffect(() => {
@@ -177,4 +186,4 @@ export function CVPreviewSection({
       </CardContent>
     </Card>
   );
-}
+});

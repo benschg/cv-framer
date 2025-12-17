@@ -1,5 +1,4 @@
-import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import type { Browser } from 'puppeteer-core';
 
 export interface PDFGenerationOptions {
   format?: 'A4' | 'Letter';
@@ -23,6 +22,43 @@ const defaultOptions: PDFGenerationOptions = {
   printBackground: true,
 };
 
+// Check if running in production/Vercel environment
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+
+// Chromium binary from official @sparticuz/chromium GitHub releases
+const CHROMIUM_URL =
+  'https://github.com/Sparticuz/chromium/releases/download/v141.0.0/chromium-v141.0.0-pack.x64.tar';
+
+async function launchBrowser(): Promise<Browser> {
+  if (isProduction) {
+    // Production: Use puppeteer-core with remote chromium for serverless
+    const puppeteer = await import('puppeteer-core');
+    const chromium = await import('@sparticuz/chromium-min');
+
+    return puppeteer.default.launch({
+      args: chromium.default.args,
+      defaultViewport: { width: 794, height: 1123 }, // A4 at 96 DPI
+      executablePath: await chromium.default.executablePath(CHROMIUM_URL),
+      headless: true,
+    });
+  } else {
+    // Development: Use full puppeteer with bundled Chromium
+    const puppeteer = await import('puppeteer');
+
+    return puppeteer.default.launch({
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+      ],
+      defaultViewport: { width: 794, height: 1123 }, // A4 at 96 DPI
+      headless: true,
+    });
+  }
+}
+
 /**
  * Generate PDF from HTML content
  */
@@ -32,14 +68,7 @@ export async function generatePDFFromHTML(
 ): Promise<Buffer> {
   const mergedOptions = { ...defaultOptions, ...options };
 
-  // Configure browser launch options
-  const executablePath = await chromium.executablePath();
-
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath,
-    headless: true,
-  });
+  const browser = await launchBrowser();
 
   try {
     const page = await browser.newPage();
@@ -74,13 +103,7 @@ export async function generatePDFFromURL(
 ): Promise<Buffer> {
   const mergedOptions = { ...defaultOptions, ...options };
 
-  const executablePath = await chromium.executablePath();
-
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath,
-    headless: true,
-  });
+  const browser = await launchBrowser();
 
   try {
     const page = await browser.newPage();

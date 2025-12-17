@@ -3,7 +3,19 @@
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { PanelLeft, PanelRight, Square } from 'lucide-react';
+import { SectionConfigurator } from './section-configurator';
 import type { PageLayoutOverride } from '@/types/cv.types';
+
+// Default sections for each page in two-column mode
+const DEFAULT_SIDEBAR_SECTIONS = {
+  0: ['photo', 'contact', 'skills', 'languages'] as const,
+  1: ['education', 'certifications'] as const,
+};
+
+const DEFAULT_MAIN_SECTIONS = {
+  0: ['header', 'profile', 'experience'] as const,
+  1: ['keyCompetences'] as const,
+};
 
 interface PageLayoutConfiguratorProps {
   /** Current page layout overrides */
@@ -14,6 +26,8 @@ interface PageLayoutConfiguratorProps {
   isTwoColumn: boolean;
   /** Callback when page layouts change */
   onChange: (pageLayouts: PageLayoutOverride[]) => void;
+  /** Language for labels */
+  language?: 'en' | 'de';
 }
 
 export function PageLayoutConfigurator({
@@ -21,6 +35,7 @@ export function PageLayoutConfigurator({
   pageCount,
   isTwoColumn,
   onChange,
+  language = 'en',
 }: PageLayoutConfiguratorProps) {
   if (!isTwoColumn) {
     return (
@@ -43,8 +58,30 @@ export function PageLayoutConfigurator({
     onChange(newLayouts);
   };
 
+  const handlePageLayoutChange = (pageIndex: number, layout: PageLayoutOverride) => {
+    const newLayouts = [...pageLayouts];
+    // Ensure array is long enough
+    while (newLayouts.length <= pageIndex) {
+      newLayouts.push({});
+    }
+    newLayouts[pageIndex] = layout;
+    onChange(newLayouts);
+  };
+
   const getPosition = (pageIndex: number): string => {
     return pageLayouts[pageIndex]?.sidebarPosition || 'left';
+  };
+
+  const getPageLayout = (pageIndex: number): PageLayoutOverride => {
+    return pageLayouts[pageIndex] || {};
+  };
+
+  const getDefaultSidebar = (pageIndex: number) => {
+    return DEFAULT_SIDEBAR_SECTIONS[pageIndex as keyof typeof DEFAULT_SIDEBAR_SECTIONS] || [];
+  };
+
+  const getDefaultMain = (pageIndex: number) => {
+    return DEFAULT_MAIN_SECTIONS[pageIndex as keyof typeof DEFAULT_MAIN_SECTIONS] || [];
   };
 
   // Generate page entries (minimum 2 pages for configuration)
@@ -52,10 +89,10 @@ export function PageLayoutConfigurator({
 
   return (
     <div className="space-y-3">
-      <Label className="text-xs">Sidebar Position per Page</Label>
-      <div className="space-y-2">
+      <Label className="text-xs">Page Layout Configuration</Label>
+      <div className="space-y-3">
         {pages.map((pageIndex) => (
-          <div key={pageIndex} className="flex items-center gap-3">
+          <div key={pageIndex} className="flex items-center gap-3 flex-wrap">
             <span className="text-sm text-muted-foreground w-16">
               Page {pageIndex + 1}
             </span>
@@ -95,11 +132,20 @@ export function PageLayoutConfigurator({
                 <span className="text-xs">None</span>
               </ToggleGroupItem>
             </ToggleGroup>
+            <SectionConfigurator
+              pageIndex={pageIndex}
+              pageLayout={getPageLayout(pageIndex)}
+              isTwoColumn={isTwoColumn}
+              defaultSidebar={getDefaultSidebar(pageIndex) as any}
+              defaultMain={getDefaultMain(pageIndex) as any}
+              onChange={(layout) => handlePageLayoutChange(pageIndex, layout)}
+              language={language}
+            />
           </div>
         ))}
       </div>
       <p className="text-xs text-muted-foreground">
-        Choose where to place the sidebar on each page, or hide it for full-width content.
+        Choose where to place the sidebar on each page, and configure which sections appear.
       </p>
     </div>
   );
