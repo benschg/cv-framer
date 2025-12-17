@@ -91,21 +91,21 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-24 text-center">
         <div className="mb-8 flex justify-center">
-          <div className="rounded-full bg-blue-500 p-6 sm:p-8 animate-in fade-in zoom-in duration-700 relative group">
+          <div className="rounded-full bg-primary p-6 sm:p-8 animate-in fade-in zoom-in duration-700 relative group" style={{ clipPath: 'inset(-100% 0 0 0 round 9999px)' }}>
             {/* Animated CV pages with hover animation */}
             <div className="relative w-40 h-40 sm:w-48 sm:h-48 transition-transform duration-500 group-hover:scale-110" key={animKey}>
               {/* Back CV page */}
-              <div className="absolute top-1/2 left-1/2 w-28 h-40 sm:w-32 sm:h-48 -ml-14 -mt-20 sm:-ml-16 sm:-mt-24 cv-page-back origin-bottom-left">
+              <div className="absolute top-1/2 left-1/2 w-36 h-52 sm:w-40 sm:h-60 -ml-18 -mt-36 sm:-ml-20 sm:-mt-42 cv-page-back origin-bottom-left">
                 <img src="/cv-page-back.svg" alt="" className="w-full h-full" />
               </div>
 
               {/* Front CV page */}
-              <div className="absolute top-1/2 left-1/2 w-28 h-40 sm:w-32 sm:h-48 -ml-14 -mt-20 sm:-ml-16 sm:-mt-24 cv-page-front origin-bottom-right">
+              <div className="absolute top-1/2 left-1/2 w-36 h-52 sm:w-40 sm:h-60 -ml-18 -mt-36 sm:-ml-20 sm:-mt-42 cv-page-front origin-bottom-right">
                 <img src="/cv-page-front.svg" alt="" className="w-full h-full" />
               </div>
 
               {/* AI Sparkle */}
-              <div className="absolute bottom-0 right-0 w-14 h-14 sm:w-16 sm:h-16 ai-sparkle">
+              <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 w-14 h-14 sm:w-16 sm:h-16 ai-sparkle">
                 <img src="/ai-sparkle.svg" alt="" className="w-full h-full" />
               </div>
             </div>
