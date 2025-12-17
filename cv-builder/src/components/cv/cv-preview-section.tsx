@@ -10,7 +10,7 @@ import { CVDocument } from './cv-document';
 import { CVPagePropertiesDialog } from './cv-page-properties-dialog';
 import type { CVContent, DisplaySettings, UserProfile } from '@/types/cv.types';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
-import type { CVMainSection } from '@/types/cv-layout.types';
+import type { CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
 
 interface CVPreviewSectionProps {
   content: CVContent;
@@ -21,6 +21,7 @@ interface CVPreviewSectionProps {
   onPageBreakToggle: (sectionId: string) => void;
   onDisplaySettingsChange?: (key: keyof DisplaySettings, value: unknown) => void;
   onSectionOrderChange?: (pageIndex: number, newOrder: CVMainSection[]) => void;
+  onSidebarOrderChange?: (pageIndex: number, newOrder: CVSidebarSection[]) => void;
   workExperiences?: CVWorkExperienceWithSelection[];
   educations?: CVEducationWithSelection[];
   skillCategories?: CVSkillCategoryWithSelection[];
@@ -41,6 +42,7 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
   onPageBreakToggle,
   onDisplaySettingsChange,
   onSectionOrderChange,
+  onSidebarOrderChange,
   workExperiences,
   educations,
   skillCategories,
@@ -55,7 +57,7 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
   const previewRef = useRef<HTMLDivElement>(null);
 
   // Check if interactive mode is enabled (when callbacks are provided)
-  const isInteractive = !!(onDisplaySettingsChange || onSectionOrderChange);
+  const isInteractive = !!(onDisplaySettingsChange || onSectionOrderChange || onSidebarOrderChange);
 
   // Expose getPreviewHTML to parent
   useImperativeHandle(ref, () => ({
@@ -78,6 +80,43 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
     newOrder.splice(toIndex, 0, movedSection);
 
     onSectionOrderChange(pageIndex, newOrder);
+  };
+
+  // Handle sidebar section move
+  const handleSidebarSectionMove = (pageIndex: number, fromIndex: number, toIndex: number) => {
+    if (!onSidebarOrderChange) return;
+
+    const pageLayouts = displaySettings?.pageLayouts || [];
+    const currentPageLayout = pageLayouts[pageIndex];
+
+    // Get the current sidebar section order (from layout or default)
+    const defaultSidebar: CVSidebarSection[] = ['photo', 'contact', 'skills', 'languages', 'education', 'certifications'];
+    const currentOrder = currentPageLayout?.sidebar || defaultSidebar;
+
+    // Create new order by swapping
+    const newOrder = [...currentOrder];
+    const [movedSection] = newOrder.splice(fromIndex, 1);
+    newOrder.splice(toIndex, 0, movedSection);
+
+    onSidebarOrderChange(pageIndex, newOrder);
+  };
+
+  // Handle sidebar section visibility toggle
+  const handleSidebarSectionToggleVisibility = (sectionType: CVSidebarSection) => {
+    if (!onDisplaySettingsChange) return;
+
+    // Map sidebar section types to display settings keys
+    const settingsMap: Partial<Record<CVSidebarSection, keyof DisplaySettings>> = {
+      photo: 'showPhoto',
+      skills: 'showSkills',
+      education: 'showEducation',
+    };
+
+    const settingKey = settingsMap[sectionType];
+    if (settingKey) {
+      const currentValue = displaySettings?.[settingKey] !== false;
+      onDisplaySettingsChange(settingKey, !currentValue);
+    }
   };
 
   // Handle section visibility toggle
@@ -239,6 +278,8 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
               onSectionMove={handleSectionMove}
               onSectionToggleVisibility={handleSectionToggleVisibility}
               onPageProperties={handlePageProperties}
+              onSidebarSectionMove={handleSidebarSectionMove}
+              onSidebarSectionToggleVisibility={handleSidebarSectionToggleVisibility}
             />
           </div>
         </div>

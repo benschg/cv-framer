@@ -9,11 +9,24 @@ import type {
   CVSkillCategoryWithSelection,
   CVKeyCompetenceWithSelection,
 } from '@/types/profile-career.types';
-import type { CVLayoutConfig, CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
+import type { CVLayoutConfig, CVMainSection, CVSidebarSection, CVPageLayout } from '@/types/cv-layout.types';
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { CVPage } from './cv-page';
 import { CVSidebar } from './cv-sidebar';
 import { CVSectionWrapper } from './cv-section-wrapper';
 import { CVPageContextMenu } from './cv-page-context-menu';
+import { CVSortableSection } from './cv-sortable-section';
 import {
   CVHeaderSection,
   CVProfileSection,
@@ -52,6 +65,10 @@ interface CVDocumentProps {
   onSectionToggleVisibility?: (sectionType: CVMainSection) => void;
   /** Callback when page properties is requested (via context menu) */
   onPageProperties?: (pageIndex: number) => void;
+  /** Callback when a sidebar section is moved */
+  onSidebarSectionMove?: (pageIndex: number, fromIndex: number, toIndex: number) => void;
+  /** Callback when sidebar section visibility is toggled */
+  onSidebarSectionToggleVisibility?: (sectionType: CVSidebarSection) => void;
 }
 
 export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
@@ -73,6 +90,8 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
       onSectionMove,
       onSectionToggleVisibility,
       onPageProperties,
+      onSidebarSectionMove,
+      onSidebarSectionToggleVisibility,
     },
     ref
   ) => {
@@ -89,6 +108,28 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
     const fontFamily = settings?.fontFamily || 'Inter';
     const pageBreaks = settings?.pageBreaks || [];
     const pageLayouts = settings?.pageLayouts || [];
+
+    // Setup drag sensors
+    const sensors = useSensors(
+      useSensor(PointerSensor, {
+        activationConstraint: {
+          distance: 8,
+        },
+      })
+    );
+
+    // Handle main section drag end
+    const handleMainDragEnd = (pageIndex: number, visibleSections: CVMainSection[]) => (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id || !onSectionMove) return;
+
+      const oldIndex = visibleSections.indexOf(active.id as CVMainSection);
+      const newIndex = visibleSections.indexOf(over.id as CVMainSection);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onSectionMove(pageIndex, oldIndex, newIndex);
+      }
+    };
 
     // Use provided layout or default, then apply page layout overrides
     const baseLayout = layoutConfig || getDefaultLayout(layoutMode);
@@ -137,6 +178,20 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
     const handleMoveDown = (pageIndex: number, sectionIndex: number) => {
       if (onSectionMove) {
         onSectionMove(pageIndex, sectionIndex, sectionIndex + 1);
+      }
+    };
+
+    // Handle sidebar section move up
+    const handleSidebarMoveUp = (pageIndex: number) => (sectionIndex: number) => {
+      if (sectionIndex > 0 && onSidebarSectionMove) {
+        onSidebarSectionMove(pageIndex, sectionIndex, sectionIndex - 1);
+      }
+    };
+
+    // Handle sidebar section move down
+    const handleSidebarMoveDown = (pageIndex: number) => (sectionIndex: number) => {
+      if (onSidebarSectionMove) {
+        onSidebarSectionMove(pageIndex, sectionIndex, sectionIndex + 1);
       }
     };
 
@@ -319,27 +374,32 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
             return rendered !== null;
           });
 
-          const renderWrappedSection = (sectionType: CVMainSection, indexInPage: number) => {
+          const renderWrappedSection = (sectionType: CVMainSection) => {
             const sectionContent = renderMainSection(sectionType);
             if (!sectionContent) return null;
 
             const visibleIndex = visibleSections.indexOf(sectionType);
 
             return (
-              <CVSectionWrapper
+              <CVSortableSection
                 key={sectionType}
-                sectionType={sectionType}
-                sectionIndex={visibleIndex}
-                totalSections={visibleSections.length}
-                pageIndex={pageIndex}
-                onMoveUp={handleMoveUp}
-                onMoveDown={handleMoveDown}
-                onToggleVisibility={onSectionToggleVisibility}
-                onPageProperties={onPageProperties}
-                isInteractive={isInteractive}
+                id={sectionType}
+                disabled={!isInteractive}
               >
-                {sectionContent}
-              </CVSectionWrapper>
+                <CVSectionWrapper
+                  sectionType={sectionType}
+                  sectionIndex={visibleIndex}
+                  totalSections={visibleSections.length}
+                  pageIndex={pageIndex}
+                  onMoveUp={handleMoveUp}
+                  onMoveDown={handleMoveDown}
+                  onToggleVisibility={onSectionToggleVisibility}
+                  onPageProperties={onPageProperties}
+                  isInteractive={isInteractive}
+                >
+                  {sectionContent}
+                </CVSectionWrapper>
+              </CVSortableSection>
             );
           };
 
@@ -372,15 +432,46 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
                       showPhoto={isFirstPage && showPhoto}
                       showPrivateInfo={privacyLevel !== 'none'}
                       language={language}
+                      isInteractive={isInteractive}
+                      onSectionMoveUp={handleSidebarMoveUp(pageIndex)}
+                      onSectionMoveDown={handleSidebarMoveDown(pageIndex)}
+                      onSectionToggleVisibility={onSidebarSectionToggleVisibility}
+                      onSectionReorder={(fromIndex, toIndex) => {
+                        if (onSidebarSectionMove) {
+                          onSidebarSectionMove(pageIndex, fromIndex, toIndex);
+                        }
+                      }}
                     />
-                    <div className="cv-main-content">
-                      {pageLayout.main.map((sectionType, index) => renderWrappedSection(sectionType, index))}
-                    </div>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleMainDragEnd(pageIndex, visibleSections)}
+                    >
+                      <SortableContext
+                        items={visibleSections}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="cv-main-content">
+                          {pageLayout.main.map((sectionType) => renderWrappedSection(sectionType))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
                   </div>
                 ) : (
-                  <div className="cv-main-content cv-full-width">
-                    {pageLayout.main.map((sectionType, index) => renderWrappedSection(sectionType, index))}
-                  </div>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleMainDragEnd(pageIndex, visibleSections)}
+                  >
+                    <SortableContext
+                      items={visibleSections}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="cv-main-content cv-full-width">
+                        {pageLayout.main.map((sectionType) => renderWrappedSection(sectionType))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
                 )}
               </CVPageContextMenu>
             </CVPage>

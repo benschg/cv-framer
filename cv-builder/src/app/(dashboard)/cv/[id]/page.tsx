@@ -351,6 +351,31 @@ export default function CVEditorPage() {
     setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
   };
 
+  // Handle sidebar section order change from the preview
+  const handleSidebarOrderChange = (pageIndex: number, newOrder: string[]) => {
+    if (!cv) return;
+
+    const currentPageLayouts = cv.display_settings?.pageLayouts || [];
+
+    // Ensure we have enough page layout entries
+    const updatedPageLayouts = [...currentPageLayouts];
+    while (updatedPageLayouts.length <= pageIndex) {
+      updatedPageLayouts.push({});
+    }
+
+    // Update the sidebar sections for this page
+    updatedPageLayouts[pageIndex] = {
+      ...updatedPageLayouts[pageIndex],
+      sidebar: newOrder as ('photo' | 'contact' | 'skills' | 'languages' | 'education' | 'certifications')[],
+    };
+
+    const updatedSettings = {
+      ...cv.display_settings,
+      pageLayouts: updatedPageLayouts,
+    } as DisplaySettings;
+    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+  };
+
   // Export PDF using client-rendered HTML
   const handleExport = async () => {
     if (!cv) return;
@@ -843,6 +868,7 @@ export default function CVEditorPage() {
               onPageBreakToggle={handlePageBreakToggle}
               onDisplaySettingsChange={updateDisplaySettings}
               onSectionOrderChange={handleSectionOrderChange}
+              onSidebarOrderChange={handleSidebarOrderChange}
               workExperiences={workExperiences}
               educations={educations}
               skillCategories={skillCategories}

@@ -4,9 +4,23 @@ import type { ReactNode } from 'react';
 import type { UserProfile, CVContent, LanguageSkill } from '@/types/cv.types';
 import type { CVSkillCategoryWithSelection, CVEducationWithSelection } from '@/types/profile-career.types';
 import type { CVSidebarSection } from '@/types/cv-layout.types';
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
 import { filterSelectedSkills } from '@/lib/cv-skill-filter';
 import { formatDateRange } from '@/lib/utils';
+import { CVSidebarSectionWrapper } from './cv-sidebar-section-wrapper';
+import { CVSortableSidebarSection } from './cv-sortable-sidebar-section';
 
 interface CVSidebarProps {
   /** Sections to render in order */
@@ -27,6 +41,16 @@ interface CVSidebarProps {
   showPrivateInfo?: boolean;
   /** Language for labels */
   language?: 'en' | 'de';
+  /** Whether interactive mode is enabled (context menus) */
+  isInteractive?: boolean;
+  /** Callback when a section is moved up */
+  onSectionMoveUp?: (sectionIndex: number) => void;
+  /** Callback when a section is moved down */
+  onSectionMoveDown?: (sectionIndex: number) => void;
+  /** Callback when a section visibility is toggled */
+  onSectionToggleVisibility?: (sectionType: CVSidebarSection) => void;
+  /** Callback when sections are reordered via drag-and-drop */
+  onSectionReorder?: (fromIndex: number, toIndex: number) => void;
 }
 
 export function CVSidebar({
@@ -39,7 +63,33 @@ export function CVSidebar({
   showPhoto = true,
   showPrivateInfo = true,
   language = 'en',
+  isInteractive = false,
+  onSectionMoveUp,
+  onSectionMoveDown,
+  onSectionToggleVisibility,
+  onSectionReorder,
 }: CVSidebarProps) {
+  // Setup drag sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !onSectionReorder) return;
+
+    const oldIndex = sections.indexOf(active.id as CVSidebarSection);
+    const newIndex = sections.indexOf(over.id as CVSidebarSection);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      onSectionReorder(oldIndex, newIndex);
+    }
+  };
   const labels = {
     contact: language === 'de' ? 'Kontakt' : 'Contact',
     skills: language === 'de' ? 'Fähigkeiten' : 'Skills',
@@ -195,9 +245,65 @@ export function CVSidebar({
     }
   };
 
+  // Wrap each section in the context menu wrapper if interactive
+  const wrapSection = (
+    sectionType: CVSidebarSection,
+    sectionIndex: number,
+    sectionContent: ReactNode
+  ): ReactNode => {
+    if (!sectionContent) return null;
+
+    if (isInteractive) {
+      return (
+        <CVSortableSidebarSection
+          key={sectionType}
+          id={sectionType}
+          disabled={!isInteractive}
+        >
+          <CVSidebarSectionWrapper
+            sectionType={sectionType}
+            sectionIndex={sectionIndex}
+            totalSections={sections.length}
+            onMoveUp={onSectionMoveUp}
+            onMoveDown={onSectionMoveDown}
+            onToggleVisibility={onSectionToggleVisibility}
+            isInteractive={isInteractive}
+            language={language}
+          >
+            {sectionContent}
+          </CVSidebarSectionWrapper>
+        </CVSortableSidebarSection>
+      );
+    }
+
+    return sectionContent;
+  };
+
+  // Filter out sections without content for sortable context
+  const visibleSections = sections.filter(section => renderSection(section) !== null);
+
+  if (isInteractive) {
+    return (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={visibleSections}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="cv-sidebar">
+            {sections.map((sectionType, index) => wrapSection(sectionType, index, renderSection(sectionType)))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    );
+  }
+
   return (
     <div className="cv-sidebar">
-      {sections.map((sectionType) => renderSection(sectionType))}
+      {sections.map((sectionType, index) => wrapSection(sectionType, index, renderSection(sectionType)))}
     </div>
   );
 }

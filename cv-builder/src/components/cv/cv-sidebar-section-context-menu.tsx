@@ -9,40 +9,34 @@ import {
   ContextMenuLabel,
 } from '@/components/ui/context-menu';
 import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
-import { ArrowUp, ArrowDown, Eye, EyeOff, Settings } from 'lucide-react';
-import type { CVMainSection } from '@/types/cv-layout.types';
+import { ArrowUp, ArrowDown, Eye, EyeOff } from 'lucide-react';
+import type { CVSidebarSection } from '@/types/cv-layout.types';
 
-interface CVSectionContextMenuProps {
+interface CVSidebarSectionContextMenuProps {
   children: ReactNode;
-  sectionType: CVMainSection;
+  sectionType: CVSidebarSection;
   sectionLabel: string;
   sectionIndex: number;
   totalSections: number;
-  pageIndex: number;
-  onMoveUp?: (pageIndex: number, sectionIndex: number) => void;
-  onMoveDown?: (pageIndex: number, sectionIndex: number) => void;
-  onToggleVisibility?: (sectionType: CVMainSection) => void;
-  onConfigureSection?: (sectionType: CVMainSection) => void;
-  onPageProperties?: (pageIndex: number) => void;
+  onMoveUp?: (sectionIndex: number) => void;
+  onMoveDown?: (sectionIndex: number) => void;
+  onToggleVisibility?: (sectionType: CVSidebarSection) => void;
   isHidden?: boolean;
   disabled?: boolean;
 }
 
-export function CVSectionContextMenu({
+export function CVSidebarSectionContextMenu({
   children,
   sectionType,
   sectionLabel,
   sectionIndex,
   totalSections,
-  pageIndex,
   onMoveUp,
   onMoveDown,
   onToggleVisibility,
-  onConfigureSection,
-  onPageProperties,
   isHidden = false,
   disabled = false,
-}: CVSectionContextMenuProps) {
+}: CVSidebarSectionContextMenuProps) {
   const canMoveUp = sectionIndex > 0;
   const canMoveDown = sectionIndex < totalSections - 1;
 
@@ -55,23 +49,23 @@ export function CVSectionContextMenu({
     <ContextMenu>
       <ContextMenuTrigger asChild>
         <div
-          className="cv-section-wrapper"
-          data-section-type={sectionType}
-          data-section-index={sectionIndex}
+          className="cv-sidebar-section-wrapper"
+          data-sidebar-section-type={sectionType}
+          data-sidebar-section-index={sectionIndex}
         >
           {children}
         </div>
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-56">
+      <ContextMenuContent className="w-48">
         <ContextMenuLabel className="flex items-center gap-2">
           <span className="font-medium">{sectionLabel}</span>
-          <span className="text-xs text-muted-foreground">Section</span>
+          <span className="text-xs text-muted-foreground">Sidebar</span>
         </ContextMenuLabel>
         <ContextMenuSeparator />
 
         {/* Move options */}
         <ContextMenuItem
-          onClick={() => onMoveUp?.(pageIndex, sectionIndex)}
+          onClick={() => onMoveUp?.(sectionIndex)}
           disabled={!canMoveUp}
           className="gap-2"
         >
@@ -79,7 +73,7 @@ export function CVSectionContextMenu({
           Move Up
         </ContextMenuItem>
         <ContextMenuItem
-          onClick={() => onMoveDown?.(pageIndex, sectionIndex)}
+          onClick={() => onMoveDown?.(sectionIndex)}
           disabled={!canMoveDown}
           className="gap-2"
         >
@@ -106,31 +100,6 @@ export function CVSectionContextMenu({
             </>
           )}
         </ContextMenuItem>
-
-        {/* Configure section (for future expansion) */}
-        {onConfigureSection && (
-          <ContextMenuItem
-            onClick={() => onConfigureSection(sectionType)}
-            className="gap-2"
-          >
-            <Settings className="h-4 w-4" />
-            Configure...
-          </ContextMenuItem>
-        )}
-
-        {/* Page Properties */}
-        {onPageProperties && (
-          <>
-            <ContextMenuSeparator />
-            <ContextMenuItem
-              onClick={() => onPageProperties(pageIndex)}
-              className="gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              Page Properties...
-            </ContextMenuItem>
-          </>
-        )}
       </ContextMenuContent>
     </ContextMenu>
   );
