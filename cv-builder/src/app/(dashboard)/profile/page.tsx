@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { AllSectionsView } from '@/components/profile/all-sections-view';
 import { BasicInfoForm } from '@/components/profile/basic-info-form';
-import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
 import { DefaultCvSettingsForm } from '@/components/profile/default-cv-settings-form';
 import { ProfessionalLinksForm } from '@/components/profile/professional-links-form';
 import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
@@ -148,7 +148,7 @@ export default function ProfilePage() {
           onChange={handleFieldChange}
         />
 
-        <CareerInfoNavigation />
+        <AllSectionsView />
 
         <ProfessionalLinksForm formData={formData} onChange={handleFieldChange} />
       </div>

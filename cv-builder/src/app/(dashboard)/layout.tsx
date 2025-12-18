@@ -8,13 +8,7 @@ import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
-export default function DashboardLayout({
-  children,
-  modal,
-}: {
-  children: React.ReactNode;
-  modal: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   // Hide the dashboard header on CV editor pages since they have their own custom header
@@ -49,8 +43,6 @@ export default function DashboardLayout({
           </main>
         </SidebarInset>
       </SidebarProvider>
-      {/* Parallel route for intercepted modals */}
-      {modal}
     </ProfileModalProvider>
   );
 }

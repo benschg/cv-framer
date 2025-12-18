@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import { ProfileModalTrigger } from '@/components/profile/modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -116,29 +114,6 @@ export default function TestModalPage() {
             >
               <Button variant="secondary">Work Experience (Declarative)</Button>
             </ProfileModalTrigger>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>URL-Based (Intercepting Routes)</CardTitle>
-            <CardDescription>
-              Links that open as modals via Next.js intercepting routes. Back button closes modal.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button asChild variant="outline">
-              <Link href="/profile/education">Education (URL)</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/profile/experience">Work Experience (URL)</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/profile/skills">Skills (URL)</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/profile/references">References (URL)</Link>
-            </Button>
           </CardContent>
         </Card>
       </div>
