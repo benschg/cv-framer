@@ -26,7 +26,9 @@
       "Bash(git rev-parse:*)",
       "Bash(xargs -r git branch -d)",
       "Bash(git branch:*)",
-      "Bash(xargs -I {} git push origin --delete {})"
+      "Bash(xargs -I {} git push origin --delete {})",
+      "Bash(rm:*)",
+      "Bash(bun run lint)"
     ]
   }
 }
