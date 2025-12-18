@@ -130,10 +130,22 @@ export interface AIMetadata {
   sectionsGenerated?: string[];
 }
 
+export interface PageLayoutOverride {
+  /** Sidebar position for this page: left, right, or none */
+  sidebarPosition?: 'left' | 'right' | 'none';
+  /** Custom sidebar sections (overrides default) */
+  sidebar?: ('photo' | 'contact' | 'skills' | 'languages' | 'education' | 'certifications')[];
+  /** Custom main content sections (overrides default) */
+  main?: ('header' | 'profile' | 'experience' | 'education' | 'skills' | 'keyCompetences' | 'projects' | 'references')[];
+}
+
 export interface DisplaySettings {
   theme: 'light' | 'dark';
   format: 'A4' | 'Letter';
+  layoutMode?: 'single-column' | 'two-column';
   showPhoto: boolean;
+  /** Photo size: 'small' | 'medium' | 'large' */
+  photoSize?: 'small' | 'medium' | 'large';
   showAttachments: boolean;
   showWorkExperience?: boolean;
   showEducation?: boolean;
@@ -145,6 +157,8 @@ export interface DisplaySettings {
   fontFamily?: string;
   textColor?: string;
   pageBreaks?: string[]; // Section IDs that should start a new page
+  /** Per-page layout overrides (indexed by page number starting from 0) */
+  pageLayouts?: PageLayoutOverride[];
 }
 
 export interface WerbeflaechenSnapshot {

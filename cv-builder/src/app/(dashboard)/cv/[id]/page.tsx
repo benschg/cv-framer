@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,11 +23,17 @@ import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { EditableBreadcrumb } from '@/components/shared/editable-breadcrumb';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
 import { fetchCV, updateCV } from '@/services/cv.service';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { PhotoSelector } from '@/components/cv/photo-selector';
 import { FormatSettings } from '@/components/cv/format-settings';
-import { CVPreviewSection } from '@/components/cv/cv-preview-section';
+import { CVPreviewSection, CVPreviewSectionHandle } from '@/components/cv/cv-preview-section';
+import type { PhotoOption } from '@/components/cv/cv-sidebar-section-wrapper';
 import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-section';
 import { CVEducationSection } from '@/components/cv/cv-education-section';
 import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
@@ -49,6 +55,12 @@ export default function CVEditorPage() {
   const params = useParams();
   const cvId = params.id as string;
   const { user } = useAuth();
+
+  // Ref for CV preview to get rendered HTML
+  const previewRef = useRef<CVPreviewSectionHandle>(null);
+
+  // CV styles for PDF export
+  const [cvStyles, setCvStyles] = useState<string>('');
 
   const [cv, setCv] = useState<CVDocument | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,6 +177,22 @@ export default function CVEditorPage() {
     loadProjects();
   }, [cvId]);
 
+  // Load CV styles for PDF export
+  useEffect(() => {
+    const loadCvStyles = async () => {
+      try {
+        const response = await fetch('/api/cv-styles');
+        if (response.ok) {
+          const css = await response.text();
+          setCvStyles(css);
+        }
+      } catch (err) {
+        console.error('Failed to load CV styles:', err);
+      }
+    };
+    loadCvStyles();
+  }, []);
+
   // Update photo URL when selected photo or primary photo changes
   useEffect(() => {
     const updatePhotoUrl = async () => {
@@ -197,6 +225,34 @@ export default function CVEditorPage() {
 
     updatePhotoUrl();
   }, [content.selected_photo_id, photos, primaryPhoto, user]);
+
+  // Build photo options for context menu
+  const photoOptions = useMemo((): PhotoOption[] => {
+    const options: PhotoOption[] = [];
+
+    // Add primary photo first
+    if (primaryPhoto) {
+      options.push({
+        id: primaryPhoto.id,
+        label: 'Primary Photo (Default)',
+        sublabel: primaryPhoto.filename,
+        imageUrl: getPhotoPublicUrl(primaryPhoto.storage_path),
+        isPrimary: true,
+      });
+    }
+
+    // Add other photos
+    photos.filter(p => !p.is_primary).forEach((photo) => {
+      options.push({
+        id: photo.id,
+        label: photo.filename,
+        sublabel: `${(photo.file_size / 1024).toFixed(0)} KB`,
+        imageUrl: getPhotoPublicUrl(photo.storage_path),
+      });
+    });
+
+    return options;
+  }, [photos, primaryPhoto]);
 
   const handleSave = async () => {
     if (!cv) return;
@@ -299,14 +355,88 @@ export default function CVEditorPage() {
     setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
   };
 
-  // Export PDF
+  // Handle section order change from the preview
+  const handleSectionOrderChange = (pageIndex: number, newOrder: string[]) => {
+    if (!cv) return;
+
+    const currentPageLayouts = cv.display_settings?.pageLayouts || [];
+
+    // Ensure we have enough page layout entries
+    const updatedPageLayouts = [...currentPageLayouts];
+    while (updatedPageLayouts.length <= pageIndex) {
+      updatedPageLayouts.push({});
+    }
+
+    // Update the main sections for this page
+    updatedPageLayouts[pageIndex] = {
+      ...updatedPageLayouts[pageIndex],
+      main: newOrder as ('header' | 'profile' | 'experience' | 'education' | 'skills' | 'keyCompetences' | 'projects' | 'references')[],
+    };
+
+    const updatedSettings = {
+      ...cv.display_settings,
+      pageLayouts: updatedPageLayouts,
+    } as DisplaySettings;
+    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+  };
+
+  // Handle sidebar section order change from the preview
+  const handleSidebarOrderChange = (pageIndex: number, newOrder: string[]) => {
+    if (!cv) return;
+
+    const currentPageLayouts = cv.display_settings?.pageLayouts || [];
+
+    // Ensure we have enough page layout entries
+    const updatedPageLayouts = [...currentPageLayouts];
+    while (updatedPageLayouts.length <= pageIndex) {
+      updatedPageLayouts.push({});
+    }
+
+    // Update the sidebar sections for this page
+    updatedPageLayouts[pageIndex] = {
+      ...updatedPageLayouts[pageIndex],
+      sidebar: newOrder as ('photo' | 'contact' | 'skills' | 'languages' | 'education' | 'certifications')[],
+    };
+
+    const updatedSettings = {
+      ...cv.display_settings,
+      pageLayouts: updatedPageLayouts,
+    } as DisplaySettings;
+    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+  };
+
+  // Export PDF using client-rendered HTML
   const handleExport = async () => {
     if (!cv) return;
     setExporting(true);
+    setError(null);
 
     try {
+      // Get the rendered HTML from the preview component
+      const html = previewRef.current?.getPreviewHTML();
+      if (!html) {
+        setError('Failed to capture CV preview');
+        return;
+      }
+
       const format = cv.display_settings?.format || 'A4';
-      const response = await fetch(`/api/cv/${cvId}/export?format=${format}`);
+      const theme = cv.display_settings?.theme || 'light';
+      const filename = `${cv.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+
+      // Send HTML and CSS to the server for PDF generation
+      const response = await fetch(`/api/cv/${cvId}/export`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          html,
+          css: cvStyles,
+          theme,
+          format,
+          filename,
+        }),
+      });
 
       if (!response.ok) {
         const json = await response.json();
@@ -319,7 +449,7 @@ export default function CVEditorPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${cv.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -571,11 +701,15 @@ export default function CVEditorPage() {
         </div>
       </header>
 
-      {/* Content - Split Layout */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 overflow-hidden">
+      {/* Content - Resizable Split Layout */}
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="flex-1 min-h-0"
+      >
         {/* Left Side - Configuration (scrollable) */}
-        <div className="flex-1 lg:w-1/2 overflow-y-auto">
-          <div className="max-w-3xl mx-auto space-y-6 pb-6">
+        <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+          <div className="h-full overflow-y-auto p-4">
+            <div className="max-w-3xl mx-auto space-y-6 pb-6">
             {/* Photo Selection */}
             <Card>
               <CardHeader>
@@ -744,41 +878,52 @@ export default function CVEditorPage() {
               displaySettings={cv.display_settings}
               onUpdateSettings={updateDisplaySettings}
             />
+            </div>
           </div>
-        </div>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
 
         {/* Right Side - Preview (scrollable) */}
-        <div className="flex-1 lg:w-1/2 overflow-y-auto">
-          <CVPreviewSection
-            content={content}
-            language={cv.language}
-            displaySettings={cv.display_settings}
-            photoUrl={photoUrl}
-            userInitials={getUserInitials(user)}
-            photos={photos}
-            primaryPhoto={primaryPhoto}
-            onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
-            onFormatChange={(format) => updateDisplaySettings('format', format)}
-            onPageBreakToggle={handlePageBreakToggle}
-            workExperiences={workExperiences}
-            educations={educations}
-            skillCategories={skillCategories}
-            keyCompetences={keyCompetences}
-            userProfile={user ? {
-              id: user.id,
-              user_id: user.id,
-              first_name: getUserName(user).firstName,
-              last_name: getUserName(user).lastName,
-              email: user.email,
-              phone: getUserPhone(user),
-              location: getUserLocation(user),
-              preferred_language: cv.language,
-              created_at: user.created_at,
-              updated_at: user.updated_at || user.created_at,
-            } : undefined}
-          />
-        </div>
-      </div>
+        <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+          <div className="h-full overflow-y-auto p-4">
+            <CVPreviewSection
+              ref={previewRef}
+              content={content}
+              language={cv.language}
+              displaySettings={cv.display_settings}
+              photoUrl={photoUrl}
+              onFormatChange={(format) => updateDisplaySettings('format', format)}
+              onPageBreakToggle={handlePageBreakToggle}
+              onDisplaySettingsChange={updateDisplaySettings}
+              onSectionOrderChange={handleSectionOrderChange}
+              onSidebarOrderChange={handleSidebarOrderChange}
+              photoOptions={photoOptions}
+              selectedPhotoId={content.selected_photo_id}
+              onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
+              userInitials={getUserInitials(user)}
+              photoSize={(cv.display_settings as DisplaySettings)?.photoSize || 'medium'}
+              onPhotoSizeChange={(size) => updateDisplaySettings('photoSize', size)}
+              workExperiences={workExperiences}
+              educations={educations}
+              skillCategories={skillCategories}
+              keyCompetences={keyCompetences}
+              userProfile={user ? {
+                id: user.id,
+                user_id: user.id,
+                first_name: getUserName(user).firstName,
+                last_name: getUserName(user).lastName,
+                email: user.email,
+                phone: getUserPhone(user),
+                location: getUserLocation(user),
+                preferred_language: cv.language,
+                created_at: user.created_at,
+                updated_at: user.updated_at || user.created_at,
+              } : undefined}
+            />
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

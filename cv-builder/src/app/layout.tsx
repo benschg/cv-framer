@@ -12,6 +12,7 @@ import {
   PT_Serif
 } from "next/font/google";
 import "@/styles/globals.css";
+import "@/styles/cv.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 
