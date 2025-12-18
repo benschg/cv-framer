@@ -4,28 +4,45 @@
     "src/app/**/page.tsx",
     "src/app/**/layout.tsx",
     "src/app/**/route.ts",
-    "src/app/global-error.tsx",
-    "src/middleware.ts",
-    "src/scripts/**/*.ts",
-    "scripts/**/*.{js,cjs,ts}",
+    "src/app/**/error.tsx",
     "src/components/ui/**/*.tsx"
   ],
-  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{js,cjs,ts}"],
+  "project": ["src/**/*.{ts,tsx}"],
   "ignore": [
     "src/**/*.test.{ts,tsx}",
     "src/**/*.spec.{ts,tsx}",
     "src/test/**",
     "**/*.d.ts",
     "src/types/generated/**",
-    "src/libs/supabase/types.ts"
+    "src/libs/supabase/types.ts",
+    "src/types/api.schemas.ts",
+    "src/types/cv.types.ts",
+    "src/types/database.types.ts",
+    "src/services/share.service.ts",
+    "src/lib/pdf/cv-template.ts",
+    "src/lib/pdf/generator.ts",
+    "src/lib/ai/gemini.ts",
+    "src/i18n/index.ts",
+    "src/config/legal.ts",
+    "src/components/cv/cv-*-item.tsx",
+    "src/components/cv/cv-page-break.tsx",
+    "src/components/cv/cv-section-header.tsx",
+    "src/components/cv/page-break-button.tsx",
+    "src/components/shared/error-boundary.tsx"
   ],
   "ignoreDependencies": [
     "eslint-*",
-    "prettier-plugin-*",
     "@testing-library/*",
     "@vitejs/*",
     "@vitest/*",
     "husky",
-    "postcss-load-config"
-  ]
+    "postcss-load-config",
+    "@sparticuz/chromium",
+    "pdf2json",
+    "@types/pdf-parse"
+  ],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  }
 }
