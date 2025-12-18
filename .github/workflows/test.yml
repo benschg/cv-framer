@@ -1,0 +1,51 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Checkout LFS objects
+        run: git lfs pull
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: ./cv-builder
+        run: bun install --frozen-lockfile
+
+      - name: Run type check
+        working-directory: ./cv-builder
+        run: bun run type-check
+
+      - name: Run linter
+        working-directory: ./cv-builder
+        run: bun run lint
+
+      - name: Run tests
+        working-directory: ./cv-builder
+        run: bun run test --run
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: cv-builder/coverage/
+          retention-days: 7
