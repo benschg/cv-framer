@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { useAuth } from '@/contexts/auth-context';
 import { debounce } from '@/services/profile-career.service';
 
 export interface ProfileManagerConfig<T extends { id: string }> {
@@ -25,6 +26,8 @@ export function useProfileManager<T extends { id: string; display_order?: number
     onSaveSuccessChange,
   } = config;
 
+  const { user } = useAuth();
+
   const [items, setItems] = useState<T[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [formDataMap, setFormDataMap] = useState<Map<string, Partial<T>>>(new Map());
@@ -32,11 +35,13 @@ export function useProfileManager<T extends { id: string; display_order?: number
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  // Load items on mount
+  // Load items when user is available (wait for auth to be ready)
   useEffect(() => {
-    loadItems();
+    if (user) {
+      loadItems();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   const loadItems = async () => {
     setLoading(true);

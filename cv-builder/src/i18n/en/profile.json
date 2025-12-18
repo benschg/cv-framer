@@ -7,6 +7,12 @@
   "saveButton": "Save Changes",
   "savedMessage": "Changes saved successfully!",
 
+  "careerInfo": {
+    "title": "Career Information",
+    "subtitle": "Manage your professional background that will be used across all your CVs",
+    "importButton": "Import using AI"
+  },
+
   "basicInfo": {
     "title": "Basic Information",
     "subtitle": "Your name and contact details",

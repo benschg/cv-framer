@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { AllSectionsView } from '@/components/profile/all-sections-view';
 import { BasicInfoForm } from '@/components/profile/basic-info-form';
+import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
 import { DefaultCvSettingsForm } from '@/components/profile/default-cv-settings-form';
 import { ProfessionalLinksForm } from '@/components/profile/professional-links-form';
 import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
@@ -70,11 +70,14 @@ export default function ProfilePage() {
     setLoadingPhotos(false);
   };
 
+  // Load photos when user is available (wait for auth to be ready)
   useEffect(() => {
-    // Valid pattern: data fetching on mount
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadPhotos();
-  }, []);
+    if (user) {
+      // Valid pattern: data fetching on user change
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadPhotos();
+    }
+  }, [user]);
 
   // Auto-save handler with debouncing
   const handleFieldChange = useCallback(
@@ -148,7 +151,7 @@ export default function ProfilePage() {
           onChange={handleFieldChange}
         />
 
-        <AllSectionsView />
+        <CareerInfoNavigation />
 
         <ProfessionalLinksForm formData={formData} onChange={handleFieldChange} />
       </div>

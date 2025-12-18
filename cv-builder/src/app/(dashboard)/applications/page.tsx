@@ -58,6 +58,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useAuth } from '@/contexts/auth-context';
 import {
   createApplication,
   deleteApplication,
@@ -165,6 +166,7 @@ function generateFakeApplication() {
 }
 
 export default function ApplicationsPage() {
+  const { user } = useAuth();
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -193,10 +195,14 @@ export default function ApplicationsPage() {
     setLoading(false);
   };
 
+  // Load applications when user is available (wait for auth to be ready)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadApplications();
-  }, []);
+    if (user) {
+      // Valid pattern: data fetching on user change
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadApplications();
+    }
+  }, [user]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this application?')) return;

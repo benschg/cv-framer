@@ -402,7 +402,7 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UploadIcon className="h-5 w-5" />
-            Upload Your CV
+            Upload Your Current CV
           </CardTitle>
           <CardDescription>
             Upload a PDF version of your CV. AI will extract your work experience, education,

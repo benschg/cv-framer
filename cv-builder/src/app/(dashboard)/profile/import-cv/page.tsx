@@ -15,7 +15,7 @@ export default function ImportCVPage() {
 
   return (
     <ProfilePageLayout
-      title="Import from CV"
+      title="Upload Your Current CV"
       description="Upload your CV and let AI extract your career information"
     >
       <CVImportWorkflow onImportComplete={handleImportComplete} />
