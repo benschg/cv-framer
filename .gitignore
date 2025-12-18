@@ -37,3 +37,6 @@ yarn-error.log*
 next-env.d.ts
 *.pdf
 .claude/settings.local.json
+
+# turbo
+.turbo/
