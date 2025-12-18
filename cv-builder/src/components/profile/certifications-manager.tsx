@@ -14,7 +14,6 @@ import { useProfileManager } from '@/hooks/use-profile-manager';
 import { formatMonthYear } from '@/lib/utils';
 import {
   createCertification,
-  createCertificationDocument,
   deleteCertification,
   fetchCertifications,
   type ProfileCertification,
@@ -92,8 +91,17 @@ export const CertificationsManager = forwardRef<
       if (file && certificationId) {
         toast.loading(t('profile.certifications.uploadingDocument'), { id: 'cert-upload' });
 
-        const uploadResult = await createCertificationDocument(certificationId, file);
-        if (uploadResult.error) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+        uploadFormData.append('certification_id', certificationId);
+
+        const uploadResponse = await fetch('/api/certification-documents/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
           console.error('Error uploading document:', uploadResult.error);
           toast.error(t('profile.certifications.uploadFailed'), {
             id: 'cert-upload',

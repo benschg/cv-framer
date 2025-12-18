@@ -207,6 +207,7 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
             <SortableCard id={reference.id} disabled={false} showDragHandle={!expanded}>
               {expanded ? (
                 <ReferenceEditForm
+                  referenceId={reference.id}
                   formData={formData}
                   onFieldChange={(field, value) => handleFieldChange(reference.id, field, value)}
                   onMultiFieldChange={(updates) => handleMultiFieldChange(reference.id, updates)}
@@ -243,6 +244,7 @@ ReferencesManager.displayName = 'ReferencesManager';
 
 // Edit Form Component
 interface ReferenceEditFormProps {
+  referenceId: string;
   formData: Partial<ProfileReference>;
   onFieldChange: (field: keyof ProfileReference, value: string) => void;
   onMultiFieldChange: (updates: Partial<ProfileReference>) => void;
@@ -251,6 +253,7 @@ interface ReferenceEditFormProps {
 }
 
 function ReferenceEditForm({
+  referenceId,
   formData,
   onFieldChange,
   onMultiFieldChange,
@@ -280,13 +283,24 @@ function ReferenceEditForm({
     setUploadingFile(true);
 
     try {
-      // TODO: Upload to storage when API is ready
-      // For now, create a local object URL for preview
-      const objectUrl = URL.createObjectURL(file);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('reference_id', referenceId);
+
+      const response = await fetch('/api/reference-documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed');
+      }
 
       onMultiFieldChange({
-        document_url: objectUrl,
-        document_name: file.name,
+        document_url: result.document_url,
+        document_name: result.document_name,
       });
     } catch (error) {
       console.error('File upload error:', error);
@@ -300,11 +314,25 @@ function ReferenceEditForm({
     }
   };
 
-  const handleRemoveDocument = () => {
-    onMultiFieldChange({
-      document_url: '',
-      document_name: '',
-    });
+  const handleRemoveDocument = async () => {
+    try {
+      const response = await fetch(`/api/reference-documents/${referenceId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || 'Delete failed');
+      }
+
+      onMultiFieldChange({
+        document_url: '',
+        document_name: '',
+      });
+    } catch (error) {
+      console.error('Document delete error:', error);
+      alert(t('profile.references.deleteError'));
+    }
   };
 
   return (
