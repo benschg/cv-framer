@@ -19,9 +19,9 @@ import {
 import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
 import { filterSelectedSkills } from '@/lib/cv-skill-filter';
 import { formatDateRange } from '@/lib/utils';
-import { CVSidebarSectionWrapper } from './cv-sidebar-section-wrapper';
+import { CVSidebarSectionWrapper, type PhotoOption, type PhotoSize } from './cv-sidebar-section-wrapper';
 import { CVSortableSidebarSection } from './cv-sortable-sidebar-section';
-import type { PhotoOption, PhotoSize } from './cv-sidebar-section-context-menu';
+import { CVSidebarPhoto } from './cv-sidebar-photo';
 
 interface CVSidebarProps {
   /** Sections to render in order */
@@ -123,9 +123,12 @@ export function CVSidebar({
       case 'photo':
         if (!showPhoto || !photoUrl) return null;
         return (
-          <div key="photo" className="cv-sidebar-photo" data-photo-size={photoSize || 'medium'}>
-            <img src={photoUrl} alt={userProfile?.first_name || 'Profile'} />
-          </div>
+          <CVSidebarPhoto
+            key="photo"
+            photoUrl={photoUrl}
+            alt={userProfile?.first_name || 'Profile'}
+            size={photoSize}
+          />
         );
 
       case 'contact':

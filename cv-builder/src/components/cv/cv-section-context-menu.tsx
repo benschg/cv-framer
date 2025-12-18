@@ -2,14 +2,11 @@
 
 import type { ReactNode } from 'react';
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
   ContextMenuSeparator,
-  ContextMenuLabel,
+  ContextMenuItem,
 } from '@/components/ui/context-menu';
-import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
-import { ArrowUp, ArrowDown, Eye, EyeOff, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
+import { CVBaseSectionContextMenu } from './cv-base-section-context-menu';
 import type { CVMainSection } from '@/types/cv-layout.types';
 
 interface CVSectionContextMenuProps {
@@ -43,95 +40,55 @@ export function CVSectionContextMenu({
   isHidden = false,
   disabled = false,
 }: CVSectionContextMenuProps) {
-  const canMoveUp = sectionIndex > 0;
-  const canMoveDown = sectionIndex < totalSections - 1;
-
-  // If disabled, just render children without context menu
-  if (disabled) {
-    return <>{children}</>;
-  }
-
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger asChild>
-        <div
-          className="cv-section-wrapper"
-          data-section-type={sectionType}
-          data-section-index={sectionIndex}
-        >
-          {children}
-        </div>
-      </ContextMenuTrigger>
-      <ContextMenuContent className="w-56">
-        <ContextMenuLabel className="flex items-center gap-2">
-          <span className="font-medium">{sectionLabel}</span>
-          <span className="text-xs text-muted-foreground">Section</span>
-        </ContextMenuLabel>
-        <ContextMenuSeparator />
-
-        {/* Move options */}
+  // Build additional menu items for main section-specific options
+  const additionalItems = (
+    <>
+      {/* Configure section (for future expansion) */}
+      {onConfigureSection && (
         <ContextMenuItem
-          onClick={() => onMoveUp?.(pageIndex, sectionIndex)}
-          disabled={!canMoveUp}
+          onClick={() => onConfigureSection(sectionType)}
           className="gap-2"
         >
-          <ArrowUp className="h-4 w-4" />
-          Move Up
+          <Settings className="h-4 w-4" />
+          Configure...
         </ContextMenuItem>
-        <ContextMenuItem
-          onClick={() => onMoveDown?.(pageIndex, sectionIndex)}
-          disabled={!canMoveDown}
-          className="gap-2"
-        >
-          <ArrowDown className="h-4 w-4" />
-          Move Down
-        </ContextMenuItem>
+      )}
 
-        <ContextMenuSeparator />
-
-        {/* Visibility toggle */}
-        <ContextMenuItem
-          onClick={() => onToggleVisibility?.(sectionType)}
-          className="gap-2"
-        >
-          {isHidden ? (
-            <>
-              <Eye className="h-4 w-4" />
-              Show Section
-            </>
-          ) : (
-            <>
-              <EyeOff className="h-4 w-4" />
-              Hide Section
-            </>
-          )}
-        </ContextMenuItem>
-
-        {/* Configure section (for future expansion) */}
-        {onConfigureSection && (
+      {/* Page Properties */}
+      {onPageProperties && (
+        <>
+          <ContextMenuSeparator />
           <ContextMenuItem
-            onClick={() => onConfigureSection(sectionType)}
+            onClick={() => onPageProperties(pageIndex)}
             className="gap-2"
           >
             <Settings className="h-4 w-4" />
-            Configure...
+            Page Properties...
           </ContextMenuItem>
-        )}
+        </>
+      )}
+    </>
+  );
 
-        {/* Page Properties */}
-        {onPageProperties && (
-          <>
-            <ContextMenuSeparator />
-            <ContextMenuItem
-              onClick={() => onPageProperties(pageIndex)}
-              className="gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              Page Properties...
-            </ContextMenuItem>
-          </>
-        )}
-      </ContextMenuContent>
-    </ContextMenu>
+  return (
+    <CVBaseSectionContextMenu
+      sectionLabel={sectionLabel}
+      locationLabel="Section"
+      sectionIndex={sectionIndex}
+      totalSections={totalSections}
+      onMoveUp={onMoveUp ? (idx) => onMoveUp(pageIndex, idx) : undefined}
+      onMoveDown={onMoveDown ? (idx) => onMoveDown(pageIndex, idx) : undefined}
+      onToggleVisibility={onToggleVisibility ? () => onToggleVisibility(sectionType) : undefined}
+      isHidden={isHidden}
+      disabled={disabled}
+      additionalItems={additionalItems}
+      className="cv-section-wrapper"
+      dataAttributes={{
+        'data-section-type': sectionType,
+        'data-section-index': String(sectionIndex),
+      }}
+    >
+      {children}
+    </CVBaseSectionContextMenu>
   );
 }

@@ -1,9 +1,13 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { CVSidebarSectionContextMenu, type PhotoOption, type PhotoSize } from './cv-sidebar-section-context-menu';
+import { CVBaseSectionContextMenu } from './cv-base-section-context-menu';
+import { CVPhotoContextMenu, type PhotoOption, type PhotoSize } from './cv-photo-context-menu';
 import { getSidebarLabel } from './constants';
 import type { CVSidebarSection } from '@/types/cv-layout.types';
+
+// Re-export types for convenience
+export type { PhotoOption, PhotoSize } from './cv-photo-context-menu';
 
 interface CVSidebarSectionWrapperProps {
   children: ReactNode;
@@ -50,25 +54,49 @@ export function CVSidebarSectionWrapper({
 }: CVSidebarSectionWrapperProps) {
   const sectionLabel = getSidebarLabel(sectionType, language);
 
+  // Common props for context menus
+  const baseProps = {
+    sectionIndex,
+    totalSections,
+    onMoveUp,
+    onMoveDown,
+    onToggleVisibility: onToggleVisibility ? () => onToggleVisibility(sectionType) : undefined,
+    isHidden,
+    disabled: !isInteractive,
+    className: 'cv-sidebar-section-wrapper',
+    dataAttributes: {
+      'data-sidebar-section-type': sectionType,
+      'data-sidebar-section-index': String(sectionIndex),
+    },
+  };
+
+  // Use photo-specific context menu for photo section
+  if (sectionType === 'photo') {
+    return (
+      <CVPhotoContextMenu
+        {...baseProps}
+        sectionLabel={sectionLabel}
+        locationLabel="Sidebar"
+        photoOptions={photoOptions}
+        selectedPhotoId={selectedPhotoId}
+        onPhotoSelect={onPhotoSelect}
+        userInitials={userInitials}
+        photoSize={photoSize}
+        onPhotoSizeChange={onPhotoSizeChange}
+      >
+        {children}
+      </CVPhotoContextMenu>
+    );
+  }
+
+  // Use base context menu for all other sections
   return (
-    <CVSidebarSectionContextMenu
-      sectionType={sectionType}
+    <CVBaseSectionContextMenu
+      {...baseProps}
       sectionLabel={sectionLabel}
-      sectionIndex={sectionIndex}
-      totalSections={totalSections}
-      onMoveUp={onMoveUp}
-      onMoveDown={onMoveDown}
-      onToggleVisibility={onToggleVisibility}
-      photoOptions={photoOptions}
-      selectedPhotoId={selectedPhotoId}
-      onPhotoSelect={onPhotoSelect}
-      userInitials={userInitials}
-      photoSize={photoSize}
-      onPhotoSizeChange={onPhotoSizeChange}
-      isHidden={isHidden}
-      disabled={!isInteractive}
+      locationLabel="Sidebar"
     >
       {children}
-    </CVSidebarSectionContextMenu>
+    </CVBaseSectionContextMenu>
   );
 }

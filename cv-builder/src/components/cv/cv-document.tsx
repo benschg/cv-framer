@@ -36,7 +36,7 @@ import {
   CVKeyCompetencesSection,
 } from './sections';
 import { getDefaultLayout } from '@/lib/cv-layouts';
-import type { PhotoOption, PhotoSize } from './cv-sidebar-section-context-menu';
+import type { PhotoOption, PhotoSize } from './cv-sidebar-section-wrapper';
 
 interface CVDocumentProps {
   content: CVContent;

@@ -11,7 +11,7 @@ import { CVPagePropertiesDialog } from './cv-page-properties-dialog';
 import type { CVContent, DisplaySettings, UserProfile } from '@/types/cv.types';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 import type { CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
-import type { PhotoOption, PhotoSize } from './cv-sidebar-section-context-menu';
+import type { PhotoOption, PhotoSize } from './cv-sidebar-section-wrapper';
 
 interface CVPreviewSectionProps {
   content: CVContent;

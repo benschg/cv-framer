@@ -33,7 +33,7 @@ import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { PhotoSelector } from '@/components/cv/photo-selector';
 import { FormatSettings } from '@/components/cv/format-settings';
 import { CVPreviewSection, CVPreviewSectionHandle } from '@/components/cv/cv-preview-section';
-import type { PhotoOption } from '@/components/cv/cv-sidebar-section-context-menu';
+import type { PhotoOption } from '@/components/cv/cv-sidebar-section-wrapper';
 import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-section';
 import { CVEducationSection } from '@/components/cv/cv-education-section';
 import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
