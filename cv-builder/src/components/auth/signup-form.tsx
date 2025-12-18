@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/auth-context';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export function SignupForm() {
   const [email, setEmail] = useState('');
@@ -23,7 +23,7 @@ export function SignupForm() {
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
 
   const { signInWithOTP, verifyOTP } = useAuth();
-  const { t } = useTranslations('en'); // TODO: Get language from context when auth pages support language switching
+  const { t } = useAppTranslation();
   const router = useRouter();
 
   const handleEmailSubmit = async (e: React.FormEvent) => {

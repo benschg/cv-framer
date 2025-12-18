@@ -2,11 +2,11 @@
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export function GoogleOAuthButton() {
   const { signInWithGoogle, loading } = useAuth();
-  const { t } = useTranslations('en'); // TODO: Get language from context when auth pages support language switching
+  const { t } = useAppTranslation();
 
   return (
     <Button

@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 
-import { GoogleOAuthButton,SignupForm } from '@/components/auth';
+import { GoogleOAuthButton, SignupForm } from '@/components/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function SignupPage() {
-  const { t } = useTranslations('en'); // TODO: Get language from context when auth pages support language switching
+  const { t } = useAppTranslation();
 
   return (
     <Card className="w-full max-w-md">

@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { GoogleOAuthButton,LoginForm } from '@/components/auth';
+import { GoogleOAuthButton, LoginForm } from '@/components/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 function LoginContent() {
-  const { t } = useTranslations('en'); // TODO: Get language from context when auth pages support language switching
+  const { t } = useAppTranslation();
 
   return (
     <Card className="w-full max-w-md">
@@ -45,7 +45,7 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-  const { t } = useTranslations('en');
+  const { t } = useAppTranslation();
 
   return (
     <Suspense fallback={<div>{t('auth.loginPage.loading')}</div>}>
