@@ -1,0 +1,10 @@
+.next
+node_modules
+dist
+build
+*.config.js
+*.config.ts
+public
+AUTOMATE_COMMIT_CHECK
+package-lock.json
+bun.lockb

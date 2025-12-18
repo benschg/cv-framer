@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# Git commit-msg hook to validate conventional commit format
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Get the first non-comment line
+FIRST_LINE=$(echo "$COMMIT_MSG" | grep -v "^#" | head -n 1)
+
+# Skip if empty
+[ -z "$FIRST_LINE" ] && exit 0
+
+# Allow merge commits
+if echo "$FIRST_LINE" | grep -iq "^merge "; then
+  exit 0
+fi
+
+# Check for conventional commit format
+# Pattern: type(optional-scope): description
+if echo "$FIRST_LINE" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|security)(\(.+\))?: .+"; then
+  exit 0
+fi
+
+# Print error message
+echo ""
+echo "Current message: '$FIRST_LINE'"
+echo ""
+echo "Required format: <type>[optional scope]: <description>"
+echo ""
+echo "Valid types:"
+echo "  - feat:     A new feature"
+echo "  - fix:      A bug fix"
+echo "  - docs:     Documentation changes"
+echo "  - style:    Code style changes (formatting, etc)"
+echo "  - refactor: Code refactoring"
+echo "  - perf:     Performance improvements"
+echo "  - test:     Adding or updating tests"
+echo "  - build:    Build system changes"
+echo "  - ci:       CI/CD changes"
+echo "  - chore:    Maintenance tasks"
+echo "  - security: Security-related changes"
+echo ""
+echo "Note: Merge commits starting with 'Merge' are allowed"
+echo ""
+echo "Examples:"
+echo "  feat: add dark mode toggle"
+echo "  fix: resolve form validation bug"
+echo "  docs: update API documentation"
+echo "  refactor(auth): simplify login flow"
+echo ""
+echo "WARNING: Commit message does not follow conventional commit format"
+echo ""
+
+# Exit with warning only (don't block commit)
+exit 0
