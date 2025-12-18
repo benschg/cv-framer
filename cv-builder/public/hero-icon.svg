@@ -8,10 +8,70 @@
       <stop offset="0%" style="stop-color:#fefefe"/>
       <stop offset="100%" style="stop-color:#e2e8f0"/>
     </linearGradient>
+
+    <style>
+      @keyframes page-enter-back {
+        0% {
+          transform: translate(256px, 256px) rotate(0deg) translate(-100px, -250px);
+          opacity: 0;
+        }
+        60% {
+          transform: translate(256px, 256px) rotate(0deg) translate(-100px, -200px);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(256px, 256px) rotate(8deg) translate(-100px, -200px);
+          opacity: 1;
+        }
+      }
+      @keyframes page-enter-front {
+        0% {
+          transform: translate(256px, 256px) rotate(0deg) translate(-180px, -250px);
+          opacity: 0;
+        }
+        60% {
+          transform: translate(256px, 256px) rotate(0deg) translate(-180px, -200px);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(256px, 256px) rotate(-8deg) translate(-180px, -200px);
+          opacity: 1;
+        }
+      }
+      @keyframes sparkle-enter {
+        0% {
+          transform: translate(360px, 360px) scale(0) rotate(0deg);
+          opacity: 0;
+        }
+        70% {
+          transform: translate(360px, 360px) scale(0) rotate(0deg);
+          opacity: 0;
+        }
+        100% {
+          transform: translate(360px, 360px) scale(1) rotate(0deg);
+          opacity: 1;
+        }
+      }
+
+      .page-back {
+        animation: page-enter-back 1.2s ease-out forwards;
+        transform-origin: center;
+      }
+      .page-front {
+        animation: page-enter-front 1.2s ease-out forwards;
+        animation-delay: 0.1s;
+        transform-origin: center;
+        opacity: 0;
+      }
+      .sparkle {
+        animation: sparkle-enter 1.2s ease-out forwards;
+        transform-origin: 50px 50px;
+      }
+    </style>
   </defs>
 
   <!-- Back page (rotated clockwise) -->
-  <g transform="translate(256, 256) rotate(8) translate(-100, -200)">
+  <g class="page-back">
     <!-- Shadow -->
     <rect x="8" y="8" width="280" height="400" rx="16" fill="#94a3b8" opacity="0.25"/>
 
@@ -33,7 +93,7 @@
   </g>
 
   <!-- Front page (rotated counterclockwise) -->
-  <g transform="translate(256, 256) rotate(-8) translate(-180, -200)">
+  <g class="page-front">
     <!-- Shadow -->
     <rect x="8" y="8" width="280" height="400" rx="16" fill="#1e40af" opacity="0.3"/>
 
@@ -73,7 +133,7 @@
   </g>
 
   <!-- AI sparkle accent -->
-  <g transform="translate(360, 360)">
+  <g class="sparkle">
     <circle cx="50" cy="50" r="55" fill="#fbbf24"/>
     <!-- 5-point star -->
     <polygon points="50,5 61,35 95,35 68,55 79,90 50,70 21,90 32,55 5,35 39,35" fill="white"/>
