@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { errorResponse,validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
 import { CreateCoverLetterSchema } from '@/types/api.schemas';
-import { validateBody, errorResponse } from '@/lib/api-utils';
 
 // GET /api/cover-letter - Get all cover letters for the current user
 export async function GET() {
@@ -9,7 +10,10 @@ export async function GET() {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,7 +44,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -48,13 +55,7 @@ export async function POST(request: NextRequest) {
     // Validate request body
     const validatedData = await validateBody(request, CreateCoverLetterSchema);
 
-    const {
-      name,
-      language = 'en',
-      cv_id,
-      content = {},
-      job_context,
-    } = validatedData;
+    const { name, language = 'en', cv_id, content = {}, job_context } = validatedData;
 
     // Create the cover letter
     const { data: coverLetter, error } = await supabase

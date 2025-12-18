@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { SkillsManager, SkillsManagerRef } from '@/components/profile/skills-manager';
+import { useRef,useState } from 'react';
+
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { SkillsManager, SkillsManagerRef } from '@/components/profile/skills-manager';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function SkillsPage() {

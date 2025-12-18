@@ -3,8 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useTranslations } from '@/hooks/use-translations';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface DefaultCvSettingsFormProps {
   defaultTagline: string;
@@ -12,7 +12,11 @@ interface DefaultCvSettingsFormProps {
   onChange: (name: string, value: string) => void;
 }
 
-export function DefaultCvSettingsForm({ defaultTagline, personalMotto, onChange }: DefaultCvSettingsFormProps) {
+export function DefaultCvSettingsForm({
+  defaultTagline,
+  personalMotto,
+  onChange,
+}: DefaultCvSettingsFormProps) {
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
 
@@ -24,9 +28,7 @@ export function DefaultCvSettingsForm({ defaultTagline, personalMotto, onChange 
     <Card>
       <CardHeader>
         <CardTitle>{t('profile.defaultCvSettings.title')}</CardTitle>
-        <CardDescription>
-          {t('profile.defaultCvSettings.subtitle')}
-        </CardDescription>
+        <CardDescription>{t('profile.defaultCvSettings.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

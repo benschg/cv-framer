@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { Pencil,Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save, Pencil } from 'lucide-react';
 
 interface EditableBreadcrumbProps {
   /** Label for the parent segment */
@@ -81,17 +82,17 @@ export function EditableBreadcrumb({
     <div className={`flex items-center gap-1.5 text-sm font-semibold ${className}`}>
       <button
         onClick={handleParentClick}
-        className="text-foreground hover:text-primary hover:underline transition-colors"
+        className="text-foreground transition-colors hover:text-primary hover:underline"
       >
         {parentLabel}
       </button>
       <span className="text-muted-foreground">/</span>
       <button
         onClick={handleEdit}
-        className="group flex items-center gap-1 text-foreground hover:text-primary transition-colors"
+        className="group flex items-center gap-1 text-foreground transition-colors hover:text-primary"
       >
         {currentLabel}
-        <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Pencil className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
       </button>
     </div>
   );

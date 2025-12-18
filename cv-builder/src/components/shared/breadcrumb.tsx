@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { Skeleton } from '@/components/ui/skeleton';
 import {
+  type BreadcrumbSegment,
   buildBreadcrumbPath,
   extractDynamicId,
   getRouteConfig,
-  type BreadcrumbSegment,
 } from '@/lib/breadcrumb-config';
 import { fetchCV } from '@/services/cv.service';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface BreadcrumbProps {
   /**
@@ -31,7 +32,12 @@ interface BreadcrumbProps {
   className?: string;
 }
 
-export function Breadcrumb({ pathname: overridePath, currentLabel, data: prefetchedData, className = '' }: BreadcrumbProps) {
+export function Breadcrumb({
+  pathname: overridePath,
+  currentLabel,
+  data: prefetchedData,
+  className = '',
+}: BreadcrumbProps) {
   const currentPathname = usePathname();
   const router = useRouter();
   const pathname = overridePath || currentPathname;
@@ -106,7 +112,7 @@ export function Breadcrumb({ pathname: overridePath, currentLabel, data: prefetc
   // Don't render anything while loading on initial mount
   if (loading && segments.length === 0) {
     return (
-      <div className={`hidden sm:flex items-center gap-2 ${className}`}>
+      <div className={`hidden items-center gap-2 sm:flex ${className}`}>
         <Skeleton className="h-4 w-24" />
       </div>
     );
@@ -120,14 +126,17 @@ export function Breadcrumb({ pathname: overridePath, currentLabel, data: prefetc
   // For root pages (single segment), render without chevron
   if (segments.length === 1) {
     return (
-      <div className={`hidden sm:flex items-center text-sm text-foreground ${className}`}>
+      <div className={`hidden items-center text-sm text-foreground sm:flex ${className}`}>
         {segments[0].label}
       </div>
     );
   }
 
   return (
-    <nav aria-label="Breadcrumb" className={`hidden sm:flex items-center gap-2 text-sm ${className}`}>
+    <nav
+      aria-label="Breadcrumb"
+      className={`hidden items-center gap-2 text-sm sm:flex ${className}`}
+    >
       {segments.map((segment, index) => {
         const isLast = index === segments.length - 1;
 
@@ -136,23 +145,22 @@ export function Breadcrumb({ pathname: overridePath, currentLabel, data: prefetc
             {segment.isClickable ? (
               <button
                 onClick={() => handleClick(segment.href)}
-                className="text-muted-foreground hover:text-foreground hover:underline transition-colors"
+                className="text-muted-foreground transition-colors hover:text-foreground hover:underline"
                 type="button"
               >
                 {segment.label}
               </button>
             ) : (
               <span className="text-foreground">
-                {loading && isLast ? (
-                  <Skeleton className="h-4 w-32 inline-block" />
-                ) : (
-                  segment.label
-                )}
+                {loading && isLast ? <Skeleton className="inline-block h-4 w-32" /> : segment.label}
               </span>
             )}
 
             {!isLast && (
-              <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+              <ChevronRight
+                className="h-4 w-4 flex-shrink-0 text-muted-foreground"
+                aria-hidden="true"
+              />
             )}
           </div>
         );

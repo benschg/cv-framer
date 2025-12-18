@@ -1,28 +1,35 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
-  FileText,
-  Target,
-  Mail,
-  Briefcase,
-  Settings,
-  User,
-  LogOut,
-  Home,
-  GraduationCap,
   Award,
+  BookOpen,
+  Briefcase,
   Code,
-  Wrench,
+  FileText,
+  FolderKanban,
+  GraduationCap,
+  Home,
+  LogOut,
+  Mail,
+  Settings,
+  Star,
+  Target,
+  User,
   UserCheck,
   Zap,
-  BookOpen,
-  Star,
-  FolderKanban,
 } from 'lucide-react';
-import { CVBuilderLogo } from './cv-builder-logo';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -35,21 +42,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
-import { ThemeToggle } from './theme-toggle';
-import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import { getUserInitials, getDisplayName } from '@/lib/user-utils';
 import { useTranslations } from '@/hooks/use-translations';
+import { getDisplayName, getUserInitials } from '@/lib/user-utils';
+import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import type { ProfilePhoto } from '@/types/api.schemas';
+
+import { CVBuilderLogo } from './cv-builder-logo';
+import { ThemeToggle } from './theme-toggle';
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -62,32 +63,63 @@ export function AppSidebar() {
   const navigation = [
     {
       label: t('nav.groups.overview'),
-      items: [
-        { title: t('nav.items.dashboard'), href: '/cv', icon: Home },
-      ],
+      items: [{ title: t('nav.items.dashboard'), href: '/cv', icon: Home }],
     },
     {
       label: t('nav.groups.build'),
       items: [
         { title: t('nav.items.profile'), href: '/profile', icon: User },
-        { title: t('nav.items.motivationVision'), href: '/profile/motivation-vision', icon: Target, indent: true },
+        {
+          title: t('nav.items.motivationVision'),
+          href: '/profile/motivation-vision',
+          icon: Target,
+          indent: true,
+        },
         { title: t('nav.items.highlights'), href: '/profile/highlights', icon: Star, indent: true },
-        { title: t('nav.items.projects'), href: '/profile/projects', icon: FolderKanban, indent: true },
-        { title: t('nav.items.workExperience'), href: '/profile/experience', icon: Briefcase, indent: true },
-        { title: t('nav.items.education'), href: '/profile/education', icon: GraduationCap, indent: true },
+        {
+          title: t('nav.items.projects'),
+          href: '/profile/projects',
+          icon: FolderKanban,
+          indent: true,
+        },
+        {
+          title: t('nav.items.workExperience'),
+          href: '/profile/experience',
+          icon: Briefcase,
+          indent: true,
+        },
+        {
+          title: t('nav.items.education'),
+          href: '/profile/education',
+          icon: GraduationCap,
+          indent: true,
+        },
         { title: t('nav.items.skills'), href: '/profile/skills', icon: Code, indent: true },
-        { title: t('nav.items.keyCompetences'), href: '/profile/key-competences', icon: Zap, indent: true },
-        { title: t('nav.items.certifications'), href: '/profile/certifications', icon: Award, indent: true },
-        { title: t('nav.items.references'), href: '/profile/references', icon: UserCheck, indent: true },
+        {
+          title: t('nav.items.keyCompetences'),
+          href: '/profile/key-competences',
+          icon: Zap,
+          indent: true,
+        },
+        {
+          title: t('nav.items.certifications'),
+          href: '/profile/certifications',
+          icon: Award,
+          indent: true,
+        },
+        {
+          title: t('nav.items.references'),
+          href: '/profile/references',
+          icon: UserCheck,
+          indent: true,
+        },
         { title: t('nav.items.myCVs'), href: '/cv', icon: FileText },
         { title: t('nav.items.coverLetters'), href: '/cover-letter', icon: Mail },
       ],
     },
     {
       label: t('nav.groups.track'),
-      items: [
-        { title: t('nav.items.applications'), href: '/applications', icon: Briefcase },
-      ],
+      items: [{ title: t('nav.items.applications'), href: '/applications', icon: Briefcase }],
     },
     {
       label: t('nav.groups.guides'),
@@ -116,21 +148,14 @@ export function AppSidebar() {
 
   // Memoize computed values to ensure they update when user changes
   const avatarUrl = useMemo(
-    () => primaryPhoto
-      ? getPhotoPublicUrl(primaryPhoto.storage_path)
-      : user?.user_metadata?.avatar_url,
+    () =>
+      primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : user?.user_metadata?.avatar_url,
     [primaryPhoto, user?.user_metadata?.avatar_url]
   );
 
-  const userInitials = useMemo(
-    () => getUserInitials(user),
-    [user]
-  );
+  const userInitials = useMemo(() => getUserInitials(user), [user]);
 
-  const displayName = useMemo(
-    () => getDisplayName(user),
-    [user]
-  );
+  const displayName = useMemo(() => getDisplayName(user), [user]);
 
   return (
     <Sidebar>
@@ -180,12 +205,8 @@ export function AppSidebar() {
                 <AvatarFallback>{userInitials}</AvatarFallback>
               </Avatar>
               <div className="flex-1 text-left text-sm">
-                <p className="font-medium truncate">
-                  {displayName}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user?.email}
-                </p>
+                <p className="truncate font-medium">{displayName}</p>
+                <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">

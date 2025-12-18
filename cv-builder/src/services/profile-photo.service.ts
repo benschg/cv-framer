@@ -1,4 +1,4 @@
-import type { ProfilePhoto, GetProfilePhotosResponse } from '@/types/api.schemas';
+import type { GetProfilePhotosResponse, ProfilePhoto } from '@/types/api.schemas';
 
 export async function fetchProfilePhotos(): Promise<{
   data?: GetProfilePhotosResponse;
@@ -13,7 +13,7 @@ export async function fetchProfilePhotos(): Promise<{
     }
 
     return { data };
-  } catch (error) {
+  } catch {
     return { error: 'Network error' };
   }
 }
@@ -48,7 +48,7 @@ export async function uploadProfilePhoto(
     }
 
     return { data };
-  } catch (error) {
+  } catch {
     return { error: 'Network error' };
   }
 }
@@ -69,7 +69,7 @@ export async function setPrimaryPhoto(photoId: string): Promise<{
     }
 
     return { data };
-  } catch (error) {
+  } catch {
     return { error: 'Network error' };
   }
 }
@@ -90,7 +90,7 @@ export async function deleteProfilePhoto(photoId: string): Promise<{
     }
 
     return { data };
-  } catch (error) {
+  } catch {
     return { error: 'Network error' };
   }
 }

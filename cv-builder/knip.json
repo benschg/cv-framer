@@ -1,0 +1,41 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/app/**/page.tsx",
+    "src/app/**/layout.tsx",
+    "src/app/**/route.ts",
+    "src/app/**/error.tsx",
+    "src/components/ui/**/*.tsx"
+  ],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src/**/*.test.{ts,tsx}",
+    "src/**/*.spec.{ts,tsx}",
+    "src/test/**",
+    "**/*.d.ts",
+    "src/types/generated/**",
+    "src/libs/supabase/types.ts",
+    "src/types/api.schemas.ts",
+    "src/types/cv.types.ts",
+    "src/types/database.types.ts",
+    "src/lib/pdf/generator.ts",
+    "src/lib/ai/gemini.ts",
+    "src/i18n/index.ts",
+    "src/config/legal.ts"
+  ],
+  "ignoreDependencies": [
+    "eslint-*",
+    "@testing-library/*",
+    "@vitejs/*",
+    "@vitest/*",
+    "husky",
+    "postcss-load-config",
+    "@sparticuz/chromium",
+    "pdf2json",
+    "@types/pdf-parse"
+  ],
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  }
+}

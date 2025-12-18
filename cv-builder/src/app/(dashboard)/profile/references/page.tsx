@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { ReferencesManager, ReferencesManagerRef } from '@/components/profile/references-manager';
-import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
-import { AIReferenceUploadDialog } from '@/components/profile/ai-reference-upload-dialog';
-import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
+import { useRef,useState } from 'react';
+
+import { AIReferenceUploadDialog } from '@/components/profile/ai-reference-upload-dialog';
+import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { ReferencesManager, ReferencesManagerRef } from '@/components/profile/references-manager';
+import { Button } from '@/components/ui/button';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function ReferencesPage() {
@@ -25,16 +26,13 @@ export default function ReferencesPage() {
         isSaving={isSaving}
         saveSuccess={saveSuccess}
         headerActions={
-          <Button
-            variant="outline"
-            onClick={() => setAiDialogOpen(true)}
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
+          <Button variant="outline" onClick={() => setAiDialogOpen(true)}>
+            <Sparkles className="mr-2 h-4 w-4" />
             {t('profile.references.addUsingAI')}
           </Button>
         }
       >
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           <ReferencesManager
             ref={managerRef}
             onSavingChange={setIsSaving}

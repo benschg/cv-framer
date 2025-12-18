@@ -1,10 +1,14 @@
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { GenerativeModel,GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize the Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 // Available models
-export type GeminiModel = 'gemini-2.0-flash' | 'gemini-2.0-flash-thinking-exp' | 'gemini-1.5-flash' | 'gemini-1.5-pro';
+export type GeminiModel =
+  | 'gemini-2.0-flash'
+  | 'gemini-2.0-flash-thinking-exp'
+  | 'gemini-1.5-flash'
+  | 'gemini-1.5-pro';
 
 // Get a model instance
 export function getModel(modelName: GeminiModel = 'gemini-2.0-flash'): GenerativeModel {
@@ -135,9 +139,10 @@ export async function generateCVContent(
   language: 'en' | 'de' = 'en',
   sections?: string[]
 ): Promise<GeneratedCVContent> {
-  const languageInstructions = language === 'de'
-    ? 'Generate all content in German (Deutsch).'
-    : 'Generate all content in English.';
+  const languageInstructions =
+    language === 'de'
+      ? 'Generate all content in German (Deutsch).'
+      : 'Generate all content in English.';
 
   const sectionsToGenerate = sections || ['tagline', 'profile'];
 
@@ -148,19 +153,27 @@ ${languageInstructions}
 Self-Marketing Data (Werbeflaechen):
 ${JSON.stringify(werbeflaechenData, null, 2)}
 
-${jobContext ? `
+${
+  jobContext
+    ? `
 Target Job Context:
 - Company: ${jobContext.company || 'Not specified'}
 - Position: ${jobContext.position || 'Not specified'}
 ${jobContext.jobPosting ? `- Job Description: ${jobContext.jobPosting.slice(0, 2000)}...` : ''}
-${jobContext.companyResearch ? `
+${
+  jobContext.companyResearch
+    ? `
 - Company Research:
   - Industry: ${jobContext.companyResearch.company.industry || 'Unknown'}
   - What they value: ${jobContext.companyResearch.insights?.whatTheyValue || 'Unknown'}
   - Key skills needed: ${jobContext.companyResearch.role.requiredSkills?.join(', ') || 'Unknown'}
   - Tone guidance: ${jobContext.companyResearch.insights?.toneGuidance || 'Professional'}
-` : ''}
-` : ''}
+`
+    : ''
+}
+`
+    : ''
+}
 
 Generate content for these sections: ${sectionsToGenerate.join(', ')}
 
@@ -195,9 +208,8 @@ export async function regenerateSection(
   customInstructions?: string,
   language: 'en' | 'de' = 'en'
 ): Promise<string> {
-  const languageInstructions = language === 'de'
-    ? 'Generate content in German (Deutsch).'
-    : 'Generate content in English.';
+  const languageInstructions =
+    language === 'de' ? 'Generate content in German (Deutsch).' : 'Generate content in English.';
 
   const prompt = `You are an expert CV writer. Regenerate this CV section with a fresh perspective.
 
@@ -211,17 +223,25 @@ ${currentContent}
 Self-Marketing Data:
 ${JSON.stringify(werbeflaechenData, null, 2)}
 
-${jobContext ? `
+${
+  jobContext
+    ? `
 Target Job:
 - Company: ${jobContext.company || 'Not specified'}
 - Position: ${jobContext.position || 'Not specified'}
 ${jobContext.companyResearch?.insights?.whatTheyValue ? `- What they value: ${jobContext.companyResearch.insights.whatTheyValue}` : ''}
-` : ''}
+`
+    : ''
+}
 
-${customInstructions ? `
+${
+  customInstructions
+    ? `
 Additional Instructions:
 ${customInstructions}
-` : ''}
+`
+    : ''
+}
 
 Generate a new version of this section that:
 1. Takes a different angle or emphasis than the current content
@@ -541,35 +561,52 @@ export async function generateCoverLetter(
   },
   language: 'en' | 'de' = 'en'
 ): Promise<GeneratedCoverLetterContent> {
-  const languageInstructions = language === 'de'
-    ? 'Generate the cover letter in German (Deutsch). Use formal German business letter conventions.'
-    : 'Generate the cover letter in English. Use professional business letter conventions.';
+  const languageInstructions =
+    language === 'de'
+      ? 'Generate the cover letter in German (Deutsch). Use formal German business letter conventions.'
+      : 'Generate the cover letter in English. Use professional business letter conventions.';
 
   const prompt = `You are an expert cover letter writer. Generate a compelling, personalized cover letter.
 
 ${languageInstructions}
 
-${userProfile ? `
+${
+  userProfile
+    ? `
 Applicant Information:
 - Name: ${userProfile.firstName || ''} ${userProfile.lastName || ''}
 - Email: ${userProfile.email || ''}
 - Phone: ${userProfile.phone || ''}
-` : ''}
+`
+    : ''
+}
 
-${jobContext?.company ? `
+${
+  jobContext?.company
+    ? `
 Target Company: ${jobContext.company}
 Target Position: ${jobContext.position || 'Not specified'}
-` : ''}
+`
+    : ''
+}
 
-${jobContext?.companyResearch ? `
+${
+  jobContext?.companyResearch
+    ? `
 Company Research:
 ${JSON.stringify(jobContext.companyResearch, null, 2)}
-` : ''}
+`
+    : ''
+}
 
-${cvContent ? `
+${
+  cvContent
+    ? `
 CV/Resume Content:
 ${JSON.stringify(cvContent, null, 2)}
-` : ''}
+`
+    : ''
+}
 
 Self-Marketing Data (Werbeflaechen):
 ${JSON.stringify(werbeflaechenData, null, 2)}
@@ -606,7 +643,7 @@ export interface ExtractedCVData {
     company: string | null;
     title: string | null;
     location: string | null;
-    start_date: string | null;  // YYYY-MM
+    start_date: string | null; // YYYY-MM
     end_date: string | null;
     current: boolean;
     description: string | null;

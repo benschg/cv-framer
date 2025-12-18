@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { errorResponse,validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
-import { validateBody, errorResponse } from '@/lib/api-utils';
-import { UpdateApplicationSchema, type UpdateApplicationInput } from '@/types/api.schemas';
+import { type UpdateApplicationInput,UpdateApplicationSchema } from '@/types/api.schemas';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -14,7 +15,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -49,7 +53,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -65,7 +72,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (validated.company_name !== undefined) updateData.company_name = validated.company_name;
     if (validated.job_title !== undefined) updateData.job_title = validated.job_title;
     if (validated.job_url !== undefined) updateData.job_url = validated.job_url || null;
-    if (validated.job_description !== undefined) updateData.job_description = validated.job_description;
+    if (validated.job_description !== undefined)
+      updateData.job_description = validated.job_description;
     if (validated.location !== undefined) updateData.location = validated.location;
     if (validated.salary_range !== undefined) updateData.salary_range = validated.salary_range;
     if (validated.status !== undefined) updateData.status = validated.status;
@@ -73,9 +81,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (validated.deadline !== undefined) updateData.deadline = validated.deadline;
     if (validated.notes !== undefined) updateData.notes = validated.notes;
     if (validated.contact_name !== undefined) updateData.contact_name = validated.contact_name;
-    if (validated.contact_email !== undefined) updateData.contact_email = validated.contact_email || null;
+    if (validated.contact_email !== undefined)
+      updateData.contact_email = validated.contact_email || null;
     if (validated.cv_id !== undefined) updateData.cv_id = validated.cv_id;
-    if (validated.cover_letter_id !== undefined) updateData.cover_letter_id = validated.cover_letter_id;
+    if (validated.cover_letter_id !== undefined)
+      updateData.cover_letter_id = validated.cover_letter_id;
     if (validated.is_archived !== undefined) updateData.is_archived = validated.is_archived;
     if (validated.is_favorite !== undefined) updateData.is_favorite = validated.is_favorite;
 
@@ -110,7 +120,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

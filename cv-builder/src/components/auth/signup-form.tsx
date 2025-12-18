@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { Loader2, Mail } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { PrivacyPolicyDialog } from '@/components/legal/privacy-policy-dialog';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/auth-context';
 import { useTranslations } from '@/hooks/use-translations';
-import { Loader2, Mail } from 'lucide-react';
-import { PrivacyPolicyDialog } from '@/components/legal/privacy-policy-dialog';
-import Link from 'next/link';
 
 export function SignupForm() {
   const [email, setEmail] = useState('');
@@ -94,9 +95,7 @@ export function SignupForm() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
 
           <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
@@ -140,9 +139,7 @@ export function SignupForm() {
       </div>
 
       {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
 
       {/* Privacy Policy Acceptance */}
@@ -154,17 +151,21 @@ export function SignupForm() {
             onCheckedChange={(checked) => setAcceptedPrivacy(checked as boolean)}
             required
           />
-          <label htmlFor="privacy-accept" className="text-sm leading-tight cursor-pointer">
+          <label htmlFor="privacy-accept" className="cursor-pointer text-sm leading-tight">
             {t('auth.privacy.agreeText')}{' '}
             <button
               type="button"
               onClick={() => setShowPrivacyDialog(true)}
-              className="text-primary hover:underline font-medium"
+              className="font-medium text-primary hover:underline"
             >
               {t('auth.privacy.privacyPolicy')}
-            </button>
-            {' '}{t('auth.privacy.and')}{' '}
-            <Link href="/terms" target="_blank" className="text-primary hover:underline font-medium">
+            </button>{' '}
+            {t('auth.privacy.and')}{' '}
+            <Link
+              href="/terms"
+              target="_blank"
+              className="font-medium text-primary hover:underline"
+            >
               {t('auth.privacy.termsOfService')}
             </Link>
           </label>
@@ -182,9 +183,7 @@ export function SignupForm() {
         )}
       </Button>
 
-      <p className="text-xs text-center text-muted-foreground">
-        {t('auth.form.signupMessage')}
-      </p>
+      <p className="text-center text-xs text-muted-foreground">{t('auth.form.signupMessage')}</p>
 
       {/* Privacy Policy Dialog */}
       <PrivacyPolicyDialog

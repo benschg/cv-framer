@@ -83,5 +83,5 @@ export function hasPlaceholders(): boolean {
     LEGAL_CONFIG.dataLocation,
   ];
 
-  return values.some(value => value.includes('[') && value.includes(']'));
+  return values.some((value) => value.includes('[') && value.includes(']'));
 }

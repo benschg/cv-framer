@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { useCallback,useEffect, useState } from 'react';
+
 import { MotivationVisionForm } from '@/components/profile/motivation-vision-form';
+import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 import { fetchMotivationVision, upsertMotivationVision } from '@/services/profile-career.service';
-import type { ProfileMotivationVision } from '@/types/profile-career.types';
 import { debounce } from '@/services/profile-career.service';
+import type { ProfileMotivationVision } from '@/types/profile-career.types';
 
 export default function MotivationVisionPage() {
   const { t } = useAppTranslation();
@@ -50,40 +51,43 @@ export default function MotivationVisionPage() {
   }, []);
 
   // Auto-save handler with debouncing
-  const handleFieldChange = useCallback((field: string, value: string | string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleFieldChange = useCallback(
+    (field: string, value: string | string[]) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
 
-    // Trigger auto-save
-    setIsSaving(true);
-    setSaveSuccess(false);
+      // Trigger auto-save
+      setIsSaving(true);
+      setSaveSuccess(false);
 
-    const debouncedSave = debounce(
-      `motivation-vision-${field}`,
-      async () => {
-        const { error } = await upsertMotivationVision({
-          ...formData,
-          [field]: value,
-        });
+      const debouncedSave = debounce(
+        `motivation-vision-${field}`,
+        async () => {
+          const { error } = await upsertMotivationVision({
+            ...formData,
+            [field]: value,
+          });
 
-        setIsSaving(false);
+          setIsSaving(false);
 
-        if (!error) {
-          setSaveSuccess(true);
-          setTimeout(() => {
-            setSaveSuccess(false);
-          }, 2000);
-        } else {
-          console.error('Auto-save failed:', error);
-        }
-      },
-      1000
-    );
+          if (!error) {
+            setSaveSuccess(true);
+            setTimeout(() => {
+              setSaveSuccess(false);
+            }, 2000);
+          } else {
+            console.error('Auto-save failed:', error);
+          }
+        },
+        1000
+      );
 
-    debouncedSave();
-  }, [formData]);
+      debouncedSave();
+    },
+    [formData]
+  );
 
   if (loading) {
     return (
@@ -107,10 +111,7 @@ export default function MotivationVisionPage() {
       isSaving={isSaving}
       saveSuccess={saveSuccess}
     >
-      <MotivationVisionForm
-        formData={formData}
-        onChange={handleFieldChange}
-      />
+      <MotivationVisionForm formData={formData} onChange={handleFieldChange} />
     </ProfilePageLayout>
   );
 }

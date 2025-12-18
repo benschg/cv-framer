@@ -1,15 +1,12 @@
 'use client';
 
-import * as React from 'react';
 import { AlertTriangle, CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import * as React from 'react';
+
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { MONTHS_FULL,MONTHS_SHORT } from '@/lib/date-constants';
 import { cn } from '@/lib/utils';
-import { MONTHS_SHORT, MONTHS_FULL } from '@/lib/date-constants';
 
 interface MonthYearPickerProps {
   value?: string; // Format: "YYYY-MM" or ""
@@ -136,77 +133,77 @@ export function MonthYearPicker({
             {displayValue || placeholder}
           </Button>
         </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-3" align="start">
-        {view === 'month' ? (
-          <div className="space-y-3">
-            {/* Year selector header */}
-            <Button
-              variant="ghost"
-              className="w-full justify-center font-semibold"
-              onClick={() => setView('year')}
-            >
-              {selectedYear || new Date().getFullYear()}
-            </Button>
-
-            {/* Month grid - 4 columns x 3 rows */}
-            <div className="grid grid-cols-4 gap-2">
-              {MONTHS_SHORT.map((month) => (
-                <Button
-                  key={month.value}
-                  variant={selectedMonth === month.value ? 'default' : 'ghost'}
-                  size="sm"
-                  className="h-9"
-                  onClick={() => handleMonthSelect(month.value)}
-                >
-                  {month.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {/* Decade navigation header */}
-            <div className="flex items-center justify-between">
+        <PopoverContent className="w-[280px] p-3" align="start">
+          {view === 'month' ? (
+            <div className="space-y-3">
+              {/* Year selector header */}
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={goToPrevDecade}
-                disabled={decadeStart - 10 < minYear}
+                className="w-full justify-center font-semibold"
+                onClick={() => setView('year')}
               >
-                <ChevronLeft className="h-4 w-4" />
+                {selectedYear || new Date().getFullYear()}
               </Button>
-              <span className="font-semibold">
-                {decadeStart} - {decadeStart + 9}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={goToNextDecade}
-                disabled={decadeStart + 10 > maxYear}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
 
-            {/* Year grid - 5 columns x 2 rows */}
-            <div className="grid grid-cols-5 gap-2">
-              {decadeYears.map((year) => (
-                <Button
-                  key={year}
-                  variant={selectedYear === year ? 'default' : 'ghost'}
-                  size="sm"
-                  className="h-9"
-                  onClick={() => handleYearSelect(year)}
-                >
-                  {year}
-                </Button>
-              ))}
+              {/* Month grid - 4 columns x 3 rows */}
+              <div className="grid grid-cols-4 gap-2">
+                {MONTHS_SHORT.map((month) => (
+                  <Button
+                    key={month.value}
+                    variant={selectedMonth === month.value ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-9"
+                    onClick={() => handleMonthSelect(month.value)}
+                  >
+                    {month.label}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-      </PopoverContent>
+          ) : (
+            <div className="space-y-3">
+              {/* Decade navigation header */}
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={goToPrevDecade}
+                  disabled={decadeStart - 10 < minYear}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="font-semibold">
+                  {decadeStart} - {decadeStart + 9}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={goToNextDecade}
+                  disabled={decadeStart + 10 > maxYear}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Year grid - 5 columns x 2 rows */}
+              <div className="grid grid-cols-5 gap-2">
+                {decadeYears.map((year) => (
+                  <Button
+                    key={year}
+                    variant={selectedYear === year ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-9"
+                    onClick={() => handleYearSelect(year)}
+                  >
+                    {year}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+        </PopoverContent>
       </Popover>
       {isFutureDate && (
         <p className="flex items-center gap-1 text-xs text-amber-600">

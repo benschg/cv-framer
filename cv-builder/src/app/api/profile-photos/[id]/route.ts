@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
 import { errorResponse } from '@/lib/api-utils';
+import { createClient } from '@/lib/supabase/server';
 
 export async function DELETE(
   request: NextRequest,
@@ -10,7 +11,10 @@ export async function DELETE(
     const supabase = await createClient();
     const { id: photoId } = await params;
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,10 +44,7 @@ export async function DELETE(
     }
 
     // Delete from database
-    const { error: deleteError } = await supabase
-      .from('profile_photos')
-      .delete()
-      .eq('id', photoId);
+    const { error: deleteError } = await supabase.from('profile_photos').delete().eq('id', photoId);
 
     if (deleteError) {
       console.error('DB delete error:', deleteError);
@@ -61,10 +62,7 @@ export async function DELETE(
 
       if (remainingPhotos && remainingPhotos.length > 0) {
         const newPrimaryId = remainingPhotos[0].id;
-        await supabase
-          .from('profile_photos')
-          .update({ is_primary: true })
-          .eq('id', newPrimaryId);
+        await supabase.from('profile_photos').update({ is_primary: true }).eq('id', newPrimaryId);
 
         await supabase
           .from('user_profiles')

@@ -1,13 +1,14 @@
 'use client';
 
+import { Settings } from 'lucide-react';
 import type { ReactNode } from 'react';
+
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import { Settings } from 'lucide-react';
 
 interface CVPageContextMenuProps {
   children: ReactNode;
@@ -30,15 +31,10 @@ export function CVPageContextMenu({
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <div className="cv-page-interactive-wrapper">
-          {children}
-        </div>
+        <div className="cv-page-interactive-wrapper">{children}</div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-48">
-        <ContextMenuItem
-          onClick={() => onPageProperties(pageIndex)}
-          className="gap-2"
-        >
+        <ContextMenuItem onClick={() => onPageProperties(pageIndex)} className="gap-2">
           <Settings className="h-4 w-4" />
           Page Properties...
         </ContextMenuItem>

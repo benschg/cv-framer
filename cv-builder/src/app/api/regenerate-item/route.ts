@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { CompanyResearchResult,regenerateSection } from '@/lib/ai/gemini';
+import { errorResponse,validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
-import { validateBody, errorResponse } from '@/lib/api-utils';
 import { RegenerateItemSchema } from '@/types/api.schemas';
-import { regenerateSection, CompanyResearchResult } from '@/lib/ai/gemini';
 
 // POST /api/regenerate-item - Regenerate a single CV section or item
 export async function POST(request: NextRequest) {
@@ -10,20 +11,17 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Validate request body
     const data = await validateBody(request, RegenerateItemSchema);
-    const {
-      cv_id,
-      section,
-      current_content,
-      custom_instructions,
-      language = 'en',
-    } = data;
+    const { cv_id, section, current_content, custom_instructions, language = 'en' } = data;
 
     // Fetch werbeflaechen data for the user
     const { data: werbeflaechenEntries, error: wfError } = await supabase
@@ -43,11 +41,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch CV job context if cv_id provided
-    let jobContext: {
-      company?: string;
-      position?: string;
-      companyResearch?: CompanyResearchResult;
-    } | undefined;
+    let jobContext:
+      | {
+          company?: string;
+          position?: string;
+          companyResearch?: CompanyResearchResult;
+        }
+      | undefined;
 
     if (cv_id) {
       const { data: cv } = await supabase

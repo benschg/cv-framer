@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
 import { extractCVData } from '@/lib/ai/gemini';
+import { createClient } from '@/lib/supabase/server';
 
 // POST /api/cv-upload/analyze - Analyze CV document and extract comprehensive career data
 export async function POST(request: NextRequest) {
@@ -8,7 +9,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -73,23 +77,23 @@ export async function POST(request: NextRequest) {
             educations: [],
             skillCategories: [],
             keyCompetences: [],
-            certifications: []
+            certifications: [],
           },
           confidence: {
             workExperiences: 0,
             educations: 0,
             skillCategories: 0,
             keyCompetences: 0,
-            certifications: 0
+            certifications: 0,
           },
           sectionCounts: {
             workExperiences: 0,
             educations: 0,
             skillCategories: 0,
             keyCompetences: 0,
-            certifications: 0
+            certifications: 0,
           },
-          reasoning: 'Extraction failed'
+          reasoning: 'Extraction failed',
         },
         { status: 200 } // Not an error - return empty data for manual entry
       );
@@ -98,14 +102,10 @@ export async function POST(request: NextRequest) {
     // Return extracted data with success flag
     return NextResponse.json({
       success: true,
-      ...extractionResult
+      ...extractionResult,
     });
-
   } catch (error) {
     console.error('CV upload endpoint error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

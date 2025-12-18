@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { Image as ImageIcon, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, Image as ImageIcon } from 'lucide-react';
-import { ImageCropper } from './image-cropper';
-import { uploadProfilePhoto } from '@/services/profile-photo.service';
-import { toast } from 'sonner';
-import { useTranslations } from '@/hooks/use-translations';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
+import { useTranslations } from '@/hooks/use-translations';
+import { uploadProfilePhoto } from '@/services/profile-photo.service';
+
+import { ImageCropper } from './image-cropper';
 
 interface PhotoUploadProps {
   onUploadComplete: () => void;
@@ -16,7 +18,11 @@ interface PhotoUploadProps {
   compact?: boolean;
 }
 
-export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = false }: PhotoUploadProps) {
+export function PhotoUpload({
+  onUploadComplete,
+  isPrimary = false,
+  compact = false,
+}: PhotoUploadProps) {
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
   const [isDragging, setIsDragging] = useState(false);
@@ -95,7 +101,7 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
         toast.success(t('profile.photoUpload.uploadSuccess'));
         onUploadComplete();
       }
-    } catch (error) {
+    } catch {
       toast.error(t('profile.photoUpload.uploadFailed'));
     } finally {
       setUploading(false);
@@ -106,7 +112,7 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
     return (
       <>
         <div
-          className={`flex-1 border-2 border-dashed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 px-4 py-2 ${
+          className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-2 transition-colors ${
             isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
           }`}
           onDrop={handleDrop}
@@ -115,11 +121,13 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
           onClick={handleClick}
         >
           {uploading ? (
-            <Upload className="h-4 w-4 text-muted-foreground animate-pulse" />
+            <Upload className="h-4 w-4 animate-pulse text-muted-foreground" />
           ) : (
             <>
               <Upload className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{t('profile.photoUpload.dropOrClick')}</span>
+              <span className="text-sm text-muted-foreground">
+                {t('profile.photoUpload.dropOrClick')}
+              </span>
             </>
           )}
         </div>
@@ -148,7 +156,7 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
   return (
     <>
       <Card
-        className={`border-2 border-dashed transition-colors cursor-pointer ${
+        className={`cursor-pointer border-2 border-dashed transition-colors ${
           isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
         }`}
         onDrop={handleDrop}
@@ -159,23 +167,21 @@ export function PhotoUpload({ onUploadComplete, isPrimary = false, compact = fal
         <CardContent className="flex flex-col items-center justify-center py-8 text-center">
           {uploading ? (
             <>
-              <Upload className="h-12 w-12 text-muted-foreground mb-4 animate-pulse" />
+              <Upload className="mb-4 h-12 w-12 animate-pulse text-muted-foreground" />
               <p className="text-sm text-muted-foreground">{t('profile.photoUpload.uploading')}</p>
             </>
           ) : (
             <>
-              <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-sm font-medium mb-1">
-                {t('profile.photoUpload.dragDrop')}
-              </p>
-              <p className="text-xs text-muted-foreground mb-4">
+              <ImageIcon className="mb-4 h-12 w-12 text-muted-foreground" />
+              <p className="mb-1 text-sm font-medium">{t('profile.photoUpload.dragDrop')}</p>
+              <p className="mb-4 text-xs text-muted-foreground">
                 {t('profile.photoUpload.orClick')}
               </p>
               <Button type="button" variant="outline" size="sm">
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="mr-2 h-4 w-4" />
                 {t('profile.photoUpload.chooseFile')}
               </Button>
-              <p className="text-xs text-muted-foreground mt-4">
+              <p className="mt-4 text-xs text-muted-foreground">
                 {t('profile.photoUpload.helpText')}
               </p>
             </>

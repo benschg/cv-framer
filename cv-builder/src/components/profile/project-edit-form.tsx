@@ -1,30 +1,26 @@
 'use client';
 
+import { X } from 'lucide-react';
 import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
+import { Textarea } from '@/components/ui/textarea';
 import type { ProfileProject } from '@/types/profile-career.types';
 
 interface ProjectEditFormProps {
   formData: Partial<ProfileProject>;
-  onFieldChange: (field: keyof ProfileProject, value: any) => void;
+  onFieldChange: (field: keyof ProfileProject, value: string | string[] | boolean) => void;
   onDone: () => void;
   t: (key: string) => string;
 }
 
-export function ProjectEditForm({
-  formData,
-  onFieldChange,
-  onDone,
-  t,
-}: ProjectEditFormProps) {
+export function ProjectEditForm({ formData, onFieldChange, onDone, t }: ProjectEditFormProps) {
   const [techInput, setTechInput] = useState('');
 
   const handleAddTechnology = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -40,7 +36,10 @@ export function ProjectEditForm({
 
   const handleRemoveTechnology = (techToRemove: string) => {
     const currentTech = formData.technologies || [];
-    onFieldChange('technologies', currentTech.filter(t => t !== techToRemove));
+    onFieldChange(
+      'technologies',
+      currentTech.filter((t) => t !== techToRemove)
+    );
   };
 
   return (
@@ -107,7 +106,7 @@ export function ProjectEditForm({
             placeholder={t('profile.projects.technologiesPlaceholder')}
           />
           {formData.technologies && formData.technologies.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               {formData.technologies.map((tech) => (
                 <Badge key={tech} variant="secondary" className="gap-1">
                   {tech}

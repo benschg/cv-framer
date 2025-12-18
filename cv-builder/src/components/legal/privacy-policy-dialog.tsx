@@ -1,11 +1,20 @@
 'use client';
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { PrivacyPolicyContent } from './privacy-policy-content';
 import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+import { PrivacyPolicyContent } from './privacy-policy-content';
 
 interface PrivacyPolicyDialogProps {
   open: boolean;
@@ -23,14 +32,14 @@ export function PrivacyPolicyDialog({ open, onOpenChange, onAccept }: PrivacyPol
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
+      <DialogContent className="flex max-h-[85vh] max-w-4xl flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             Privacy Policy
             <Link
               href="/privacy"
               target="_blank"
-              className="text-sm font-normal text-primary hover:underline flex items-center gap-1"
+              className="flex items-center gap-1 text-sm font-normal text-primary hover:underline"
             >
               Open in new tab
               <ExternalLink className="h-3 w-3" />
@@ -45,15 +54,11 @@ export function PrivacyPolicyDialog({ open, onOpenChange, onAccept }: PrivacyPol
           <PrivacyPolicyContent compact />
         </ScrollArea>
 
-        <DialogFooter className="flex-row justify-between sm:justify-between gap-2">
+        <DialogFooter className="flex-row justify-between gap-2 sm:justify-between">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          {onAccept && (
-            <Button onClick={handleAccept}>
-              I Accept
-            </Button>
-          )}
+          {onAccept && <Button onClick={handleAccept}>I Accept</Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

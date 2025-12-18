@@ -52,7 +52,10 @@ export function getUserInitials(user: User | null | undefined, fallback: string 
  * Get first and last name from user
  * Priority: first_name/last_name -> parse full_name -> parse name -> empty
  */
-export function getUserName(user: User | null | undefined): { firstName: string; lastName: string } {
+export function getUserName(user: User | null | undefined): {
+  firstName: string;
+  lastName: string;
+} {
   if (!user?.user_metadata) {
     return { firstName: '', lastName: '' };
   }

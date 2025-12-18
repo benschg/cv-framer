@@ -1,6 +1,10 @@
 'use client';
 
-import { useState, useRef, DragEvent } from 'react';
+import { AlertTriangle, Loader2, Sparkles } from 'lucide-react';
+import { DragEvent, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,19 +13,29 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
-import { toast } from 'sonner';
 import type { ProfileCertification } from '@/services/profile-career.service';
-import { UploadArea, AnalyzingState, DocumentPreview, ConfidenceWarning, validateFile } from './ai-upload-shared';
+
+import {
+  AnalyzingState,
+  ConfidenceWarning,
+  DocumentPreview,
+  UploadArea,
+  validateFile,
+} from './ai-upload-shared';
 
 interface AICertificationUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (certification: Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>, file?: File) => Promise<void>;
+  onAdd: (
+    certification: Omit<
+      ProfileCertification,
+      'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'
+    >,
+    file?: File
+  ) => Promise<void>;
 }
 
 export function AICertificationUploadDialog({
@@ -32,7 +46,7 @@ export function AICertificationUploadDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [extractedData, setExtractedData] = useState<Record<string, string | null> | null>(null);
   const [confidence, setConfidence] = useState<Record<string, number>>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
@@ -123,10 +137,11 @@ export function AICertificationUploadDialog({
       });
 
       // Success feedback
-      const extractedCount = Object.values(data.extractedData).filter(v => v !== null).length;
+      const extractedCount = Object.values(data.extractedData).filter((v) => v !== null).length;
       if (extractedCount === 0) {
         toast.warning('No data extracted', {
-          description: 'AI could not read the certificate. Please enter the details manually below.',
+          description:
+            'AI could not read the certificate. Please enter the details manually below.',
         });
       } else if (extractedCount < 3) {
         toast.info(`Partial extraction: ${extractedCount} field(s) found`, {
@@ -137,15 +152,15 @@ export function AICertificationUploadDialog({
           description: 'Please review the information below before adding.',
         });
       }
-
     } catch (error) {
       console.error('Analysis error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
       toast.error('Analysis failed', {
-        description: errorMessage === 'Analysis failed'
-          ? 'Unable to analyze the certificate. The document may be unclear or in an unsupported format. Please enter details manually.'
-          : errorMessage,
+        description:
+          errorMessage === 'Analysis failed'
+            ? 'Unable to analyze the certificate. The document may be unclear or in an unsupported format. Please enter details manually.'
+            : errorMessage,
       });
 
       // Fall back to manual entry with document preview
@@ -184,8 +199,8 @@ export function AICertificationUploadDialog({
     }
   };
 
-  const handleFieldChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAdd = async () => {
@@ -245,18 +260,20 @@ export function AICertificationUploadDialog({
   };
 
   // Check if expiry date is before issue date
-  const isExpiryBeforeIssue = formData.date && formData.expiry_date && formData.expiry_date < formData.date;
+  const isExpiryBeforeIssue =
+    formData.date && formData.expiry_date && formData.expiry_date < formData.date;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
             Add Certification using AI
           </DialogTitle>
           <DialogDescription>
-            Upload a certificate image or PDF. AI will extract the details for you to review and edit.
+            Upload a certificate image or PDF. AI will extract the details for you to review and
+            edit.
           </DialogDescription>
         </DialogHeader>
 
@@ -280,7 +297,7 @@ export function AICertificationUploadDialog({
             {selectedFile && extractedData && (
               <DocumentPreview
                 file={selectedFile}
-                extractedFieldCount={Object.values(extractedData).filter(v => v !== null).length}
+                extractedFieldCount={Object.values(extractedData).filter((v) => v !== null).length}
                 documentType="certification"
               />
             )}
@@ -305,7 +322,10 @@ export function AICertificationUploadDialog({
                   onChange={(e) => handleFieldChange('issuer', e.target.value)}
                   placeholder="Amazon Web Services"
                 />
-                <ConfidenceWarning confidence={confidence.issuer || 0} hasValue={!!formData.issuer} />
+                <ConfidenceWarning
+                  confidence={confidence.issuer || 0}
+                  hasValue={!!formData.issuer}
+                />
               </div>
             </div>
 
@@ -327,7 +347,7 @@ export function AICertificationUploadDialog({
                   placeholder="Select expiry date"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Leave empty if it doesn't expire
+                  Leave empty if it doesn&apos;t expire
                 </p>
               </div>
             </div>
@@ -347,7 +367,10 @@ export function AICertificationUploadDialog({
                 onChange={(e) => handleFieldChange('credential_id', e.target.value)}
                 placeholder="ABC123XYZ"
               />
-              <ConfidenceWarning confidence={confidence.credential_id || 0} hasValue={!!formData.credential_id} />
+              <ConfidenceWarning
+                confidence={confidence.credential_id || 0}
+                hasValue={!!formData.credential_id}
+              />
             </div>
 
             <div className="space-y-2">
@@ -372,7 +395,7 @@ export function AICertificationUploadDialog({
             <Button onClick={handleAdd} disabled={adding}>
               {adding ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Adding...
                 </>
               ) : (

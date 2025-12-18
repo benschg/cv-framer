@@ -1,11 +1,11 @@
 // Import and re-export main entity types from api.schemas (these match DB schema with nullable fields)
 import type {
-  CVDocument as CVDocumentType,
-  CoverLetter as CoverLetterType,
-  JobApplication as JobApplicationType,
-  ShareLink as ShareLinkType,
   ApplicationStatus as ApplicationStatusType,
+  CoverLetter as CoverLetterType,
+  CVDocument as CVDocumentType,
+  JobApplication as JobApplicationType,
   Language as LanguageType,
+  ShareLink as ShareLinkType,
 } from './api.schemas';
 
 export type CVDocument = CVDocumentType;
@@ -136,7 +136,16 @@ export interface PageLayoutOverride {
   /** Custom sidebar sections (overrides default) */
   sidebar?: ('photo' | 'contact' | 'skills' | 'languages' | 'education' | 'certifications')[];
   /** Custom main content sections (overrides default) */
-  main?: ('header' | 'profile' | 'experience' | 'education' | 'skills' | 'keyCompetences' | 'projects' | 'references')[];
+  main?: (
+    | 'header'
+    | 'profile'
+    | 'experience'
+    | 'education'
+    | 'skills'
+    | 'keyCompetences'
+    | 'projects'
+    | 'references'
+  )[];
 }
 
 export interface DisplaySettings {
@@ -279,14 +288,17 @@ export interface ApplicationNote {
 }
 
 // Application status metadata for UI
-export const APPLICATION_STATUS_CONFIG: Record<ApplicationStatus, {
-  label: string;
-  labelDe: string;
-  color: string;
-  bgColor: string;
-  order: number;
-  icon: 'FileEdit' | 'Send' | 'Search' | 'Users' | 'Gift' | 'CheckCircle' | 'XCircle' | 'Undo2';
-}> = {
+export const APPLICATION_STATUS_CONFIG: Record<
+  ApplicationStatus,
+  {
+    label: string;
+    labelDe: string;
+    color: string;
+    bgColor: string;
+    order: number;
+    icon: 'FileEdit' | 'Send' | 'Search' | 'Users' | 'Gift' | 'CheckCircle' | 'XCircle' | 'Undo2';
+  }
+> = {
   draft: {
     label: 'Draft',
     labelDe: 'Entwurf',

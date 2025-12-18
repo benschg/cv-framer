@@ -1,5 +1,6 @@
-import { useTranslations } from './use-translations';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
+
+import { useTranslations } from './use-translations';
 
 /**
  * Hook that provides translation function with user's language preference.

@@ -1,29 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Calendar,ExternalLink, FileText, Mail, MoreVertical, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
-import {
-  Mail,
-  Plus,
-  FileText,
-  MoreVertical,
-  Trash2,
-  ExternalLink,
-  Calendar,
-} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { fetchCoverLetters, deleteCoverLetter } from '@/services/cover-letter.service';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from '@/hooks/use-translations';
+import { deleteCoverLetter,fetchCoverLetters } from '@/services/cover-letter.service';
 import type { CoverLetter, CoverLetterContent } from '@/types/cv.types';
 
 export default function CoverLetterListPage() {
@@ -77,7 +70,7 @@ export default function CoverLetterListPage() {
   const getCompletenessScore = (coverLetter: CoverLetter): number => {
     const content = coverLetter.content as CoverLetterContent;
     const sections = ['subject', 'greeting', 'opening', 'body', 'closing', 'signature'];
-    const filledSections = sections.filter(s => content?.[s as keyof CoverLetterContent]?.trim());
+    const filledSections = sections.filter((s) => content?.[s as keyof CoverLetterContent]?.trim());
     const hasJobContext = !!(coverLetter.job_context?.company || coverLetter.job_context?.position);
     const hasAIGenerated = !!coverLetter.ai_metadata;
 
@@ -95,7 +88,7 @@ export default function CoverLetterListPage() {
         <div className="flex items-center justify-between">
           <div>
             <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-72 mt-2" />
+            <Skeleton className="mt-2 h-4 w-72" />
           </div>
           <Skeleton className="h-10 w-36" />
         </div>
@@ -114,9 +107,7 @@ export default function CoverLetterListPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{translations.coverLetter.title}</h1>
-          <p className="text-muted-foreground">
-            {translations.coverLetter.subtitle}
-          </p>
+          <p className="text-muted-foreground">{translations.coverLetter.subtitle}</p>
         </div>
         <Link href="/cover-letter/new">
           <Button className="gap-2">
@@ -127,20 +118,18 @@ export default function CoverLetterListPage() {
       </div>
 
       {error && (
-        <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
-          {error}
-        </div>
+        <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">{error}</div>
       )}
 
       {/* Cover Letter List */}
       {coverLetters.length === 0 ? (
         <Card className="border-dashed">
           <CardHeader className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Mail className="h-8 w-8 text-primary" />
             </div>
             <CardTitle>{translations.coverLetter.noCoverLettersYet}</CardTitle>
-            <CardDescription className="max-w-md mx-auto">
+            <CardDescription className="mx-auto max-w-md">
               {translations.coverLetter.noCoverLettersDescription}
             </CardDescription>
           </CardHeader>
@@ -158,7 +147,10 @@ export default function CoverLetterListPage() {
           {coverLetters.map((coverLetter) => {
             const completeness = getCompletenessScore(coverLetter);
             return (
-              <Card key={coverLetter.id} className="group relative hover:shadow-md transition-shadow">
+              <Card
+                key={coverLetter.id}
+                className="group relative transition-shadow hover:shadow-md"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
@@ -176,14 +168,14 @@ export default function CoverLetterListPage() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 relative z-10">
+                        <Button variant="ghost" size="icon" className="relative z-10 h-8 w-8">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                           <Link href={`/cover-letter/${coverLetter.id}`}>
-                            <ExternalLink className="h-4 w-4 mr-2" />
+                            <ExternalLink className="mr-2 h-4 w-4" />
                             {translations.coverLetter.open}
                           </Link>
                         </DropdownMenuItem>
@@ -191,7 +183,7 @@ export default function CoverLetterListPage() {
                           className="text-destructive"
                           onClick={() => handleDelete(coverLetter.id)}
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="mr-2 h-4 w-4" />
                           {translations.common.delete}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -201,7 +193,7 @@ export default function CoverLetterListPage() {
                 <CardContent>
                   <div className="space-y-3">
                     {(coverLetter.content as CoverLetterContent)?.subject && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="line-clamp-2 text-sm text-muted-foreground">
                         {(coverLetter.content as CoverLetterContent).subject}
                       </p>
                     )}
@@ -209,19 +201,27 @@ export default function CoverLetterListPage() {
                     {/* Completeness indicator */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">
-                          {completeness}%
-                        </span>
-                        <span className={completeness >= 80 ? 'text-green-600' : completeness >= 50 ? 'text-amber-600' : 'text-muted-foreground'}>
+                        <span className="text-muted-foreground">{completeness}%</span>
+                        <span
+                          className={
+                            completeness >= 80
+                              ? 'text-green-600'
+                              : completeness >= 50
+                                ? 'text-amber-600'
+                                : 'text-muted-foreground'
+                          }
+                        >
                           {completeness >= 80 ? '✓' : ''}
                         </span>
                       </div>
                       <Progress value={completeness} className="h-1.5" />
                     </div>
 
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className="text-xs">
-                        {coverLetter.language === 'de' ? translations.coverLetter.german : translations.coverLetter.english}
+                        {coverLetter.language === 'de'
+                          ? translations.coverLetter.german
+                          : translations.coverLetter.english}
                       </Badge>
                       {coverLetter.ai_metadata && (
                         <Badge variant="secondary" className="text-xs">
@@ -243,7 +243,9 @@ export default function CoverLetterListPage() {
                   className="absolute inset-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   style={{ zIndex: 0 }}
                 >
-                  <span className="sr-only">{translations.coverLetter.open} {coverLetter.name}</span>
+                  <span className="sr-only">
+                    {translations.coverLetter.open} {coverLetter.name}
+                  </span>
                 </Link>
               </Card>
             );

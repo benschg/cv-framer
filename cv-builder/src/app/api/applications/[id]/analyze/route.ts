@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { errorResponse } from '@/lib/api-utils';
+
 import { generateJSON } from '@/lib/ai/gemini';
+import { errorResponse } from '@/lib/api-utils';
+import { createClient } from '@/lib/supabase/server';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -22,7 +23,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -44,7 +48,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     if (!application.job_description) {
-      return NextResponse.json({ error: 'No job description available to analyze' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'No job description available to analyze' },
+        { status: 400 }
+      );
     }
 
     // Fetch user's werbeflaechen data for context
@@ -74,15 +81,30 @@ Job Details:
 ${application.location ? `- Location: ${application.location}` : ''}
 
 Candidate Profile Data:
-${werbeflaechenData ? JSON.stringify(werbeflaechenData.reduce((acc, entry) => {
-  acc[entry.category_key] = entry.content;
-  return acc;
-}, {} as Record<string, unknown>), null, 2) : 'No profile data available'}
+${
+  werbeflaechenData
+    ? JSON.stringify(
+        werbeflaechenData.reduce(
+          (acc, entry) => {
+            acc[entry.category_key] = entry.content;
+            return acc;
+          },
+          {} as Record<string, unknown>
+        ),
+        null,
+        2
+      )
+    : 'No profile data available'
+}
 
-${cvContent ? `
+${
+  cvContent
+    ? `
 Candidate CV Content:
 ${JSON.stringify(cvContent, null, 2)}
-` : ''}
+`
+    : ''
+}
 
 Analyze the fit between this candidate and the job. Return a JSON object with:
 {
@@ -105,18 +127,21 @@ Guidelines:
     // Upsert the analysis into job_fit_analyses table
     const { data: fitAnalysis, error: upsertError } = await supabase
       .from('job_fit_analyses')
-      .upsert({
-        application_id: id,
-        overall_score: analysisResult.overall_score,
-        strengths: analysisResult.strengths,
-        gaps: analysisResult.gaps,
-        recommendations: analysisResult.recommendations,
-        summary: analysisResult.summary,
-        raw_analysis: analysisResult,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'application_id',
-      })
+      .upsert(
+        {
+          application_id: id,
+          overall_score: analysisResult.overall_score,
+          strengths: analysisResult.strengths,
+          gaps: analysisResult.gaps,
+          recommendations: analysisResult.recommendations,
+          summary: analysisResult.summary,
+          raw_analysis: analysisResult,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'application_id',
+        }
+      )
       .select()
       .single();
 
@@ -139,7 +164,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

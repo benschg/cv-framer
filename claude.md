@@ -94,3 +94,42 @@ interface ChildProps {
 3. Follow existing naming patterns (camelCase for keys)
 4. Include both labels and placeholders where applicable
 5. Test language switching works correctly
+
+## TypeScript & Code Quality
+
+### No `any` Types
+**Never use `any` type.** Always use proper types:
+- Use `unknown` when type is truly unknown, then narrow with type guards
+- Use specific types from database types, API schemas, or create new interfaces
+- Use generics when working with flexible data structures
+- For catch blocks: use `catch (error: unknown)` and narrow with `error instanceof Error`
+
+```typescript
+// BAD
+function processData(data: any) { ... }
+
+// GOOD
+function processData(data: UserProfile) { ... }
+function processData<T extends Record<string, unknown>>(data: T) { ... }
+```
+
+### Unused Variables
+- Prefix unused parameters with underscore: `_unusedParam`
+- Remove truly unused imports and variables
+- ESLint will catch these with `@typescript-eslint/no-unused-vars`
+
+### Pre-commit Hooks
+The following checks run on commit:
+1. **Prettier** - Auto-formats code
+2. **ESLint** - Lints and blocks on errors
+3. **TypeScript** - Type-checks and blocks on errors
+4. **Knip** - Dead code detection (warning only)
+
+### Available Scripts
+```bash
+bun run lint        # Check for ESLint errors
+bun run lint:fix    # Auto-fix ESLint errors
+bun run format      # Format with Prettier
+bun run type-check  # TypeScript type check
+bun run knip        # Find unused code/dependencies
+```

@@ -1,7 +1,8 @@
-import Link from 'next/link';
 import { FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+
 import { Footer } from '@/components/shared/footer';
+import { Button } from '@/components/ui/button';
 
 interface PublicPageLayoutProps {
   children: React.ReactNode;
@@ -9,11 +10,11 @@ interface PublicPageLayoutProps {
 
 export function PublicPageLayout({ children }: PublicPageLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       {/* Simple header */}
-      <header className="border-b bg-background sticky top-0 z-50">
+      <header className="sticky top-0 z-50 border-b bg-background">
         <div className="container mx-auto flex h-16 items-center px-4">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
             <FileText className="h-6 w-6" />
             <span className="text-xl font-bold">CV Builder</span>
           </Link>
@@ -29,9 +30,7 @@ export function PublicPageLayout({ children }: PublicPageLayoutProps) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 container mx-auto px-4 py-8">
-        {children}
-      </main>
+      <main className="container mx-auto flex-1 px-4 py-8">{children}</main>
 
       {/* Footer */}
       <Footer />

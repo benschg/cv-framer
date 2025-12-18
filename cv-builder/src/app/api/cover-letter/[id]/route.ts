@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { errorResponse,validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
 import { UpdateCoverLetterSchema } from '@/types/api.schemas';
-import { validateBody, errorResponse } from '@/lib/api-utils';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -14,7 +15,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -49,7 +53,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -57,13 +64,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Validate request body
     const validatedData = await validateBody(request, UpdateCoverLetterSchema);
 
-    const {
-      name,
-      content,
-      job_context,
-      cv_id,
-      is_archived,
-    } = validatedData;
+    const { name, content, job_context, cv_id, is_archived } = validatedData;
 
     // Build update object
     const updateData: Record<string, unknown> = {
@@ -107,7 +108,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

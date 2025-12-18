@@ -1,4 +1,7 @@
-import type { CVWorkExperienceWithSelection, WorkExperienceDisplayMode } from '@/types/profile-career.types';
+import type {
+  CVWorkExperienceWithSelection,
+  WorkExperienceDisplayMode,
+} from '@/types/profile-career.types';
 
 interface DisplayModeContent {
   description: string | null;
@@ -31,7 +34,8 @@ export function getDisplayModeContent(
         bullets:
           exp.selection.selected_bullet_indices === null
             ? exp.bullets
-            : exp.bullets?.filter((_, i) => exp.selection.selected_bullet_indices!.includes(i)) || null,
+            : exp.bullets?.filter((_, i) => exp.selection.selected_bullet_indices!.includes(i)) ||
+              null,
       };
 
     default:

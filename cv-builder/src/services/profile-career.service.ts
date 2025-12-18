@@ -8,17 +8,21 @@
 
 import { createClient } from '@/lib/supabase/client';
 import type { Certification, Reference } from '@/types/cv.types';
+import type { Database } from '@/types/database.types';
 import type {
-  ProfileWorkExperience,
-  ProfileEducation,
-  ProfileSkillCategory,
   ProfileCertification,
-  ProfileReference,
+  ProfileEducation,
+  ProfileHighlight,
   ProfileKeyCompetence,
   ProfileMotivationVision,
-  ProfileHighlight,
   ProfileProject,
+  ProfileReference,
+  ProfileSkillCategory,
+  ProfileWorkExperience,
 } from '@/types/profile-career.types';
+
+// Extract table types from generated Database type
+type Tables = Database['public']['Tables'];
 
 const supabase = createClient();
 
@@ -29,8 +33,11 @@ const supabase = createClient();
 /**
  * Get the current authenticated user ID
  */
-async function getCurrentUserId(): Promise<{ userId: string | null; error: any }> {
-  const { data: { user }, error } = await supabase.auth.getUser();
+async function getCurrentUserId(): Promise<{ userId: string | null; error: unknown }> {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
   if (error) {
     return { userId: null, error };
@@ -49,7 +56,7 @@ async function getCurrentUserId(): Promise<{ userId: string | null; error: any }
 async function fetchProfileData<T>(
   table: string,
   orderBy: { column: string; ascending: boolean }[]
-): Promise<{ data: T[] | null; error: any }> {
+): Promise<{ data: T[] | null; error: unknown }> {
   let query = supabase.from(table).select('*');
 
   // Apply ordering
@@ -67,7 +74,7 @@ async function fetchProfileData<T>(
 async function createProfileData<T>(
   table: string,
   data: Omit<T, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: T | null; error: any }> {
+): Promise<{ data: T | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
 
   if (authError || !userId) {
@@ -90,13 +97,8 @@ async function updateProfileData<T>(
   table: string,
   id: string,
   updates: Partial<Omit<T, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: T | null; error: any }> {
-  const { data, error } = await supabase
-    .from(table)
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
+): Promise<{ data: T | null; error: unknown }> {
+  const { data, error } = await supabase.from(table).update(updates).eq('id', id).select().single();
 
   return { data, error };
 }
@@ -104,14 +106,8 @@ async function updateProfileData<T>(
 /**
  * Generic delete function for profile data
  */
-async function deleteProfileData(
-  table: string,
-  id: string
-): Promise<{ error: any }> {
-  const { error } = await supabase
-    .from(table)
-    .delete()
-    .eq('id', id);
+async function deleteProfileData(table: string, id: string): Promise<{ error: unknown }> {
+  const { error } = await supabase.from(table).delete().eq('id', id);
 
   return { error };
 }
@@ -120,7 +116,7 @@ async function deleteProfileData(
  * Generic auto-save wrapper with debouncing
  */
 function createAutoSave<T>(
-  updateFn: (id: string, updates: Partial<T>) => Promise<{ data: T | null; error: any }>,
+  updateFn: (id: string, updates: Partial<T>) => Promise<{ data: T | null; error: unknown }>,
   resourceType: string,
   delay: number = 1000
 ) {
@@ -146,22 +142,22 @@ function createAutoSave<T>(
 
 // Re-export types for convenience
 export type {
-  ProfileWorkExperience,
-  ProfileEducation,
-  ProfileSkillCategory,
+  HighlightType,
   ProfileCertification,
-  ProfileReference,
+  ProfileEducation,
+  ProfileHighlight,
   ProfileKeyCompetence,
   ProfileMotivationVision,
-  ProfileHighlight,
   ProfileProject,
-  HighlightType,
+  ProfileReference,
+  ProfileSkillCategory,
+  ProfileWorkExperience,
 } from '@/types/profile-career.types';
 
 // Debounce utility for auto-save
 const debounceTimers = new Map<string, NodeJS.Timeout>();
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   key: string,
   fn: T,
   delay: number = 1000
@@ -185,7 +181,10 @@ export function debounce<T extends (...args: any[]) => any>(
 // WORK EXPERIENCE
 // ============================================
 
-export async function fetchWorkExperiences(): Promise<{ data: ProfileWorkExperience[] | null; error: any }> {
+export async function fetchWorkExperiences(): Promise<{
+  data: ProfileWorkExperience[] | null;
+  error: unknown;
+}> {
   return fetchProfileData<ProfileWorkExperience>('profile_work_experiences', [
     { column: 'display_order', ascending: true },
     { column: 'start_date', ascending: false },
@@ -194,18 +193,18 @@ export async function fetchWorkExperiences(): Promise<{ data: ProfileWorkExperie
 
 export async function createWorkExperience(
   experience: Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: ProfileWorkExperience | null; error: any }> {
+): Promise<{ data: ProfileWorkExperience | null; error: unknown }> {
   return createProfileData<ProfileWorkExperience>('profile_work_experiences', experience);
 }
 
 export async function updateWorkExperience(
   id: string,
   updates: Partial<Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileWorkExperience | null; error: any }> {
+): Promise<{ data: ProfileWorkExperience | null; error: unknown }> {
   return updateProfileData<ProfileWorkExperience>('profile_work_experiences', id, updates);
 }
 
-export async function deleteWorkExperience(id: string): Promise<{ error: any }> {
+export async function deleteWorkExperience(id: string): Promise<{ error: unknown }> {
   return deleteProfileData('profile_work_experiences', id);
 }
 
@@ -218,7 +217,10 @@ export const autoSaveWorkExperience = createAutoSave<ProfileWorkExperience>(
 // EDUCATION
 // ============================================
 
-export async function fetchEducations(): Promise<{ data: ProfileEducation[] | null; error: any }> {
+export async function fetchEducations(): Promise<{
+  data: ProfileEducation[] | null;
+  error: unknown;
+}> {
   return fetchProfileData<ProfileEducation>('profile_educations', [
     { column: 'display_order', ascending: true },
     { column: 'start_date', ascending: false },
@@ -227,31 +229,31 @@ export async function fetchEducations(): Promise<{ data: ProfileEducation[] | nu
 
 export async function createEducation(
   education: Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: ProfileEducation | null; error: any }> {
+): Promise<{ data: ProfileEducation | null; error: unknown }> {
   return createProfileData<ProfileEducation>('profile_educations', education);
 }
 
 export async function updateEducation(
   id: string,
   updates: Partial<Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileEducation | null; error: any }> {
+): Promise<{ data: ProfileEducation | null; error: unknown }> {
   return updateProfileData<ProfileEducation>('profile_educations', id, updates);
 }
 
-export async function deleteEducation(id: string): Promise<{ error: any }> {
+export async function deleteEducation(id: string): Promise<{ error: unknown }> {
   return deleteProfileData('profile_educations', id);
 }
 
-export const autoSaveEducation = createAutoSave<ProfileEducation>(
-  updateEducation,
-  'education'
-);
+export const autoSaveEducation = createAutoSave<ProfileEducation>(updateEducation, 'education');
 
 // ============================================
 // SKILL CATEGORIES
 // ============================================
 
-export async function fetchSkillCategories(): Promise<{ data: ProfileSkillCategory[] | null; error: any }> {
+export async function fetchSkillCategories(): Promise<{
+  data: ProfileSkillCategory[] | null;
+  error: unknown;
+}> {
   return fetchProfileData<ProfileSkillCategory>('profile_skill_categories', [
     { column: 'display_order', ascending: true },
   ]);
@@ -259,18 +261,18 @@ export async function fetchSkillCategories(): Promise<{ data: ProfileSkillCatego
 
 export async function createSkillCategory(
   category: Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: ProfileSkillCategory | null; error: any }> {
+): Promise<{ data: ProfileSkillCategory | null; error: unknown }> {
   return createProfileData<ProfileSkillCategory>('profile_skill_categories', category);
 }
 
 export async function updateSkillCategory(
   id: string,
   updates: Partial<Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileSkillCategory | null; error: any }> {
+): Promise<{ data: ProfileSkillCategory | null; error: unknown }> {
   return updateProfileData<ProfileSkillCategory>('profile_skill_categories', id, updates);
 }
 
-export async function deleteSkillCategory(id: string): Promise<{ error: any }> {
+export async function deleteSkillCategory(id: string): Promise<{ error: unknown }> {
   return deleteProfileData('profile_skill_categories', id);
 }
 
@@ -283,7 +285,10 @@ export const autoSaveSkillCategory = createAutoSave<ProfileSkillCategory>(
 // KEY COMPETENCES
 // ============================================
 
-export async function fetchKeyCompetences(): Promise<{ data: ProfileKeyCompetence[] | null; error: any }> {
+export async function fetchKeyCompetences(): Promise<{
+  data: ProfileKeyCompetence[] | null;
+  error: unknown;
+}> {
   return fetchProfileData<ProfileKeyCompetence>('profile_key_competences', [
     { column: 'display_order', ascending: true },
   ]);
@@ -291,18 +296,18 @@ export async function fetchKeyCompetences(): Promise<{ data: ProfileKeyCompetenc
 
 export async function createKeyCompetence(
   competence: Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: ProfileKeyCompetence | null; error: any }> {
+): Promise<{ data: ProfileKeyCompetence | null; error: unknown }> {
   return createProfileData<ProfileKeyCompetence>('profile_key_competences', competence);
 }
 
 export async function updateKeyCompetence(
   id: string,
   updates: Partial<Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileKeyCompetence | null; error: any }> {
+): Promise<{ data: ProfileKeyCompetence | null; error: unknown }> {
   return updateProfileData<ProfileKeyCompetence>('profile_key_competences', id, updates);
 }
 
-export async function deleteKeyCompetence(id: string): Promise<{ error: any }> {
+export async function deleteKeyCompetence(id: string): Promise<{ error: unknown }> {
   return deleteProfileData('profile_key_competences', id);
 }
 
@@ -315,7 +320,10 @@ export const autoSaveKeyCompetence = createAutoSave<ProfileKeyCompetence>(
 // CERTIFICATIONS
 // ============================================
 
-export async function fetchCertifications(): Promise<{ data: ProfileCertification[] | null; error: any }> {
+export async function fetchCertifications(): Promise<{
+  data: ProfileCertification[] | null;
+  error: unknown;
+}> {
   return fetchProfileData<ProfileCertification>('profile_certifications', [
     { column: 'display_order', ascending: true },
     { column: 'date', ascending: false },
@@ -324,18 +332,18 @@ export async function fetchCertifications(): Promise<{ data: ProfileCertificatio
 
 export async function createCertification(
   certification: Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: ProfileCertification | null; error: any }> {
+): Promise<{ data: ProfileCertification | null; error: unknown }> {
   return createProfileData<ProfileCertification>('profile_certifications', certification);
 }
 
 export async function updateCertification(
   id: string,
   updates: Partial<Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileCertification | null; error: any }> {
+): Promise<{ data: ProfileCertification | null; error: unknown }> {
   return updateProfileData<ProfileCertification>('profile_certifications', id, updates);
 }
 
-export async function deleteCertification(id: string): Promise<{ error: any }> {
+export async function deleteCertification(id: string): Promise<{ error: unknown }> {
   // Delete associated document if exists
   const { data: cert } = await supabase
     .from('profile_certifications')
@@ -344,9 +352,7 @@ export async function deleteCertification(id: string): Promise<{ error: any }> {
     .single();
 
   if (cert?.storage_path) {
-    await supabase.storage
-      .from('certification-documents')
-      .remove([cert.storage_path]);
+    await supabase.storage.from('certification-documents').remove([cert.storage_path]);
   }
 
   return deleteProfileData('profile_certifications', id);
@@ -362,7 +368,7 @@ export async function uploadCertificationDocument(
   userId: string,
   certificationId: string,
   file: File
-): Promise<{ data: { url: string; path: string } | null; error: any }> {
+): Promise<{ data: { url: string; path: string } | null; error: unknown }> {
   const fileExt = file.name.split('.').pop();
   const fileName = `${certificationId}.${fileExt}`;
   const filePath = `${userId}/${fileName}`;
@@ -375,9 +381,9 @@ export async function uploadCertificationDocument(
     return { data: null, error: uploadError };
   }
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('certification-documents')
-    .getPublicUrl(filePath);
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from('certification-documents').getPublicUrl(filePath);
 
   return {
     data: { url: publicUrl, path: filePath },
@@ -386,10 +392,10 @@ export async function uploadCertificationDocument(
 }
 
 // Delete certification document
-export async function deleteCertificationDocument(storagePath: string): Promise<{ error: any }> {
-  const { error } = await supabase.storage
-    .from('certification-documents')
-    .remove([storagePath]);
+export async function deleteCertificationDocument(
+  storagePath: string
+): Promise<{ error: unknown }> {
+  const { error } = await supabase.storage.from('certification-documents').remove([storagePath]);
 
   return { error };
 }
@@ -401,7 +407,7 @@ export async function deleteCertificationDocument(storagePath: string): Promise<
 // Fetch all documents for a certification
 export async function fetchCertificationDocuments(
   certificationId: string
-): Promise<{ data: any[] | null; error: any }> {
+): Promise<{ data: Tables['certification_documents']['Row'][] | null; error: unknown }> {
   const { data, error } = await supabase
     .from('certification_documents')
     .select('*')
@@ -433,7 +439,7 @@ export async function fetchCertificationDocuments(
 export async function createCertificationDocument(
   certificationId: string,
   file: File
-): Promise<{ data: any | null; error: any }> {
+): Promise<{ data: Tables['certification_documents']['Row'] | null; error: unknown }> {
   const { userId, error: userError } = await getCurrentUserId();
   if (userError || !userId) {
     return { data: null, error: userError || { message: 'User not authenticated' } };
@@ -479,7 +485,7 @@ export async function createCertificationDocument(
 export async function deleteCertificationDocumentRecord(
   documentId: string,
   storagePath: string
-): Promise<{ error: any }> {
+): Promise<{ error: unknown }> {
   // Delete from storage
   const { error: storageError } = await supabase.storage
     .from('certification-documents')
@@ -490,10 +496,7 @@ export async function deleteCertificationDocumentRecord(
   }
 
   // Delete database record
-  const { error } = await supabase
-    .from('certification_documents')
-    .delete()
-    .eq('id', documentId);
+  const { error } = await supabase.from('certification_documents').delete().eq('id', documentId);
 
   return { error };
 }
@@ -502,7 +505,10 @@ export async function deleteCertificationDocumentRecord(
 // REFERENCES
 // ============================================
 
-export async function fetchReferences(): Promise<{ data: ProfileReference[] | null; error: any }> {
+export async function fetchReferences(): Promise<{
+  data: ProfileReference[] | null;
+  error: unknown;
+}> {
   const result = await fetchProfileData<ProfileReference>('profile_references', [
     { column: 'display_order', ascending: true },
   ]);
@@ -533,18 +539,18 @@ export async function fetchReferences(): Promise<{ data: ProfileReference[] | nu
 
 export async function createReference(
   reference: Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: ProfileReference | null; error: any }> {
+): Promise<{ data: ProfileReference | null; error: unknown }> {
   return createProfileData<ProfileReference>('profile_references', reference);
 }
 
 export async function updateReference(
   id: string,
   updates: Partial<Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileReference | null; error: any }> {
+): Promise<{ data: ProfileReference | null; error: unknown }> {
   return updateProfileData<ProfileReference>('profile_references', id, updates);
 }
 
-export async function deleteReference(id: string): Promise<{ error: any }> {
+export async function deleteReference(id: string): Promise<{ error: unknown }> {
   // Delete associated document if exists
   const { data: ref } = await supabase
     .from('profile_references')
@@ -553,25 +559,20 @@ export async function deleteReference(id: string): Promise<{ error: any }> {
     .single();
 
   if (ref?.storage_path) {
-    await supabase.storage
-      .from('reference-letters')
-      .remove([ref.storage_path]);
+    await supabase.storage.from('reference-letters').remove([ref.storage_path]);
   }
 
   return deleteProfileData('profile_references', id);
 }
 
-export const autoSaveReference = createAutoSave<ProfileReference>(
-  updateReference,
-  'reference'
-);
+export const autoSaveReference = createAutoSave<ProfileReference>(updateReference, 'reference');
 
 // Upload reference letter
 export async function uploadReferenceLetter(
   userId: string,
   referenceId: string,
   file: File
-): Promise<{ data: { url: string; path: string } | null; error: any }> {
+): Promise<{ data: { url: string; path: string } | null; error: unknown }> {
   const fileExt = file.name.split('.').pop();
   const fileName = `${referenceId}.${fileExt}`;
   const filePath = `${userId}/${fileName}`;
@@ -596,10 +597,8 @@ export async function uploadReferenceLetter(
 }
 
 // Delete reference letter
-export async function deleteReferenceLetter(storagePath: string): Promise<{ error: any }> {
-  const { error } = await supabase.storage
-    .from('reference-letters')
-    .remove([storagePath]);
+export async function deleteReferenceLetter(storagePath: string): Promise<{ error: unknown }> {
+  const { error } = await supabase.storage.from('reference-letters').remove([storagePath]);
 
   return { error };
 }
@@ -655,8 +654,10 @@ export function convertToReference(profile: ProfileReference): Reference {
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateWorkExperiences(
-  experiences: Array<Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
-): Promise<{ data: ProfileWorkExperience[] | null; error: any }> {
+  experiences: Array<
+    Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>
+  >
+): Promise<{ data: ProfileWorkExperience[] | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
     return { data: null, error: authError };
@@ -686,8 +687,10 @@ export async function bulkCreateWorkExperiences(
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateEducations(
-  educations: Array<Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
-): Promise<{ data: ProfileEducation[] | null; error: any }> {
+  educations: Array<
+    Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>
+  >
+): Promise<{ data: ProfileEducation[] | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
     return { data: null, error: authError };
@@ -702,10 +705,7 @@ export async function bulkCreateEducations(
     display_order: startOrder + idx,
   }));
 
-  const { data, error } = await supabase
-    .from('profile_educations')
-    .insert(itemsToInsert)
-    .select();
+  const { data, error } = await supabase.from('profile_educations').insert(itemsToInsert).select();
 
   return { data, error };
 }
@@ -715,8 +715,10 @@ export async function bulkCreateEducations(
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateSkillCategories(
-  categories: Array<Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
-): Promise<{ data: ProfileSkillCategory[] | null; error: any }> {
+  categories: Array<
+    Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>
+  >
+): Promise<{ data: ProfileSkillCategory[] | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
     return { data: null, error: authError };
@@ -744,8 +746,10 @@ export async function bulkCreateSkillCategories(
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateKeyCompetences(
-  competences: Array<Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
-): Promise<{ data: ProfileKeyCompetence[] | null; error: any }> {
+  competences: Array<
+    Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>
+  >
+): Promise<{ data: ProfileKeyCompetence[] | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
     return { data: null, error: authError };
@@ -773,8 +777,20 @@ export async function bulkCreateKeyCompetences(
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateCertifications(
-  certifications: Array<Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order' | 'document_url' | 'document_name' | 'storage_path'>>
-): Promise<{ data: ProfileCertification[] | null; error: any }> {
+  certifications: Array<
+    Omit<
+      ProfileCertification,
+      | 'id'
+      | 'user_id'
+      | 'created_at'
+      | 'updated_at'
+      | 'display_order'
+      | 'document_url'
+      | 'document_name'
+      | 'storage_path'
+    >
+  >
+): Promise<{ data: ProfileCertification[] | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
     return { data: null, error: authError };
@@ -810,12 +826,9 @@ export async function bulkCreateCertifications(
  */
 export async function fetchMotivationVision(): Promise<{
   data: ProfileMotivationVision | null;
-  error: any;
+  error: unknown;
 }> {
-  const { data, error } = await supabase
-    .from('profile_motivation_vision')
-    .select('*')
-    .single();
+  const { data, error } = await supabase.from('profile_motivation_vision').select('*').single();
 
   return { data, error };
 }
@@ -826,7 +839,7 @@ export async function fetchMotivationVision(): Promise<{
  */
 export async function upsertMotivationVision(
   updates: Partial<Omit<ProfileMotivationVision, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileMotivationVision | null; error: any }> {
+): Promise<{ data: ProfileMotivationVision | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
 
   if (authError || !userId) {
@@ -835,10 +848,7 @@ export async function upsertMotivationVision(
 
   const { data, error } = await supabase
     .from('profile_motivation_vision')
-    .upsert(
-      { ...updates, user_id: userId },
-      { onConflict: 'user_id' }
-    )
+    .upsert({ ...updates, user_id: userId }, { onConflict: 'user_id' })
     .select()
     .single();
 
@@ -854,12 +864,11 @@ export async function upsertMotivationVision(
  */
 export async function fetchHighlights(): Promise<{
   data: ProfileHighlight[] | null;
-  error: any;
+  error: unknown;
 }> {
-  return fetchProfileData<ProfileHighlight>(
-    'profile_highlights',
-    [{ column: 'display_order', ascending: true }]
-  );
+  return fetchProfileData<ProfileHighlight>('profile_highlights', [
+    { column: 'display_order', ascending: true },
+  ]);
 }
 
 /**
@@ -867,7 +876,7 @@ export async function fetchHighlights(): Promise<{
  */
 export async function createHighlight(
   highlight: Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: ProfileHighlight | null; error: any }> {
+): Promise<{ data: ProfileHighlight | null; error: unknown }> {
   return createProfileData<ProfileHighlight>('profile_highlights', highlight);
 }
 
@@ -877,14 +886,14 @@ export async function createHighlight(
 export async function updateHighlight(
   id: string,
   updates: Partial<Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileHighlight | null; error: any }> {
+): Promise<{ data: ProfileHighlight | null; error: unknown }> {
   return updateProfileData<ProfileHighlight>('profile_highlights', id, updates);
 }
 
 /**
  * Delete a highlight
  */
-export async function deleteHighlight(id: string): Promise<{ error: any }> {
+export async function deleteHighlight(id: string): Promise<{ error: unknown }> {
   return deleteProfileData('profile_highlights', id);
 }
 
@@ -893,7 +902,7 @@ export async function deleteHighlight(id: string): Promise<{ error: any }> {
  */
 export async function bulkCreateHighlights(
   highlights: Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>[]
-): Promise<{ data: ProfileHighlight[] | null; error: any }> {
+): Promise<{ data: ProfileHighlight[] | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
     return { data: null, error: authError };
@@ -908,10 +917,7 @@ export async function bulkCreateHighlights(
     display_order: startOrder + idx,
   }));
 
-  const { data, error } = await supabase
-    .from('profile_highlights')
-    .insert(itemsToInsert)
-    .select();
+  const { data, error } = await supabase.from('profile_highlights').insert(itemsToInsert).select();
 
   return { data, error };
 }
@@ -925,12 +931,11 @@ export async function bulkCreateHighlights(
  */
 export async function fetchProjects(): Promise<{
   data: ProfileProject[] | null;
-  error: any;
+  error: unknown;
 }> {
-  return fetchProfileData<ProfileProject>(
-    'profile_projects',
-    [{ column: 'display_order', ascending: true }]
-  );
+  return fetchProfileData<ProfileProject>('profile_projects', [
+    { column: 'display_order', ascending: true },
+  ]);
 }
 
 /**
@@ -938,7 +943,7 @@ export async function fetchProjects(): Promise<{
  */
 export async function createProject(
   project: Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>
-): Promise<{ data: ProfileProject | null; error: any }> {
+): Promise<{ data: ProfileProject | null; error: unknown }> {
   return createProfileData<ProfileProject>('profile_projects', project);
 }
 
@@ -948,14 +953,14 @@ export async function createProject(
 export async function updateProject(
   id: string,
   updates: Partial<Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProfileProject | null; error: any }> {
+): Promise<{ data: ProfileProject | null; error: unknown }> {
   return updateProfileData<ProfileProject>('profile_projects', id, updates);
 }
 
 /**
  * Delete a project
  */
-export async function deleteProject(id: string): Promise<{ error: any }> {
+export async function deleteProject(id: string): Promise<{ error: unknown }> {
   return deleteProfileData('profile_projects', id);
 }
 
@@ -964,7 +969,7 @@ export async function deleteProject(id: string): Promise<{ error: any }> {
  */
 export async function bulkCreateProjects(
   projects: Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>[]
-): Promise<{ data: ProfileProject[] | null; error: any }> {
+): Promise<{ data: ProfileProject[] | null; error: unknown }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
     return { data: null, error: authError };
@@ -979,10 +984,7 @@ export async function bulkCreateProjects(
     display_order: startOrder + idx,
   }));
 
-  const { data, error } = await supabase
-    .from('profile_projects')
-    .insert(itemsToInsert)
-    .select();
+  const { data, error } = await supabase.from('profile_projects').insert(itemsToInsert).select();
 
   return { data, error };
 }

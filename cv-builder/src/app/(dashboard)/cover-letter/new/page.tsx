@@ -1,13 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Link as LinkIcon,
+  Loader2,
+  Mail,
+  Sparkles,
+  Wand2,
+} from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect,useState } from 'react';
+
+import { AutoFillDialog } from '@/components/auto-fill-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -15,12 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, ArrowRight, Loader2, Mail, Sparkles, Link as LinkIcon, Wand2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { useTranslations } from '@/hooks/use-translations';
 import { createCoverLetter, getDefaultCoverLetterContent } from '@/services/cover-letter.service';
 import { fetchAllCVs } from '@/services/cv.service';
-import { parseJobPostingUrl, type ParsedJobPosting } from '@/services/job-parser.service';
-import { AutoFillDialog } from '@/components/auto-fill-dialog';
-import { useTranslations } from '@/hooks/use-translations';
+import { type ParsedJobPosting,parseJobPostingUrl } from '@/services/job-parser.service';
 import type { CVDocument } from '@/types/cv.types';
 
 type Step = 'basic' | 'job';
@@ -110,12 +119,14 @@ export default function NewCoverLetterPage() {
       language,
       cv_id: linkedCvId || undefined,
       content: getDefaultCoverLetterContent(),
-      job_context: skipJobContext ? undefined : {
-        company: company.trim() || undefined,
-        position: position.trim() || undefined,
-        jobPosting: jobPosting.trim() || undefined,
-        jobPostingUrl: jobPostingUrl.trim() || undefined,
-      },
+      job_context: skipJobContext
+        ? undefined
+        : {
+            company: company.trim() || undefined,
+            position: position.trim() || undefined,
+            jobPosting: jobPosting.trim() || undefined,
+            jobPostingUrl: jobPostingUrl.trim() || undefined,
+          },
     });
 
     if (result.error) {
@@ -131,7 +142,7 @@ export default function NewCoverLetterPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6">
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <Link href="/cover-letter">
@@ -154,7 +165,7 @@ export default function NewCoverLetterPage() {
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight">{translations.coverLetter.new.title}</h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="mt-2 text-muted-foreground">
           {step === 'basic'
             ? translations.coverLetter.new.basicInfoSubtitle
             : translations.coverLetter.new.jobContextSubtitle}
@@ -169,9 +180,7 @@ export default function NewCoverLetterPage() {
               <Mail className="h-5 w-5" />
               {translations.coverLetter.new.basicInformation}
             </CardTitle>
-            <CardDescription>
-              {translations.coverLetter.new.basicInfoDescription}
-            </CardDescription>
+            <CardDescription>{translations.coverLetter.new.basicInfoDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -235,14 +244,12 @@ export default function NewCoverLetterPage() {
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => handleCreate(true)} disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {translations.coverLetter.new.skipAndCreate}
               </Button>
               <Button onClick={() => setStep('job')} disabled={!name.trim()}>
                 {translations.coverLetter.new.continue}
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </CardContent>
@@ -257,9 +264,7 @@ export default function NewCoverLetterPage() {
               <Sparkles className="h-5 w-5" />
               {translations.coverLetter.new.jobContextOptional}
             </CardTitle>
-            <CardDescription>
-              {translations.coverLetter.new.jobContextDescription}
-            </CardDescription>
+            <CardDescription>{translations.coverLetter.new.jobContextDescription}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -338,18 +343,18 @@ export default function NewCoverLetterPage() {
 
             <div className="flex justify-between pt-4">
               <Button variant="outline" onClick={() => setStep('basic')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 {translations.common.back}
               </Button>
               <Button onClick={() => handleCreate(false)} disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     {translations.coverLetter.creating}
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4 mr-2" />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     {translations.coverLetter.createCoverLetter}
                   </>
                 )}

@@ -1,42 +1,55 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  pointerWithin,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 import {
   Briefcase,
-  Plus,
-  LayoutGrid,
-  Table as TableIcon,
-  Search,
-  MoreVertical,
-  Trash2,
-  ExternalLink,
-  Calendar,
   Building2,
-  MapPin,
-  Clock,
-  FileEdit,
-  Send,
-  Users,
-  Gift,
+  Calendar,
   CheckCircle,
-  XCircle,
-  Undo2,
-  Wand2,
+  Clock,
+  ExternalLink,
+  FileEdit,
+  Gift,
+  LayoutGrid,
+  MapPin,
+  MoreVertical,
+  Plus,
+  Search,
+  Send,
   Star,
+  Table as TableIcon,
+  Trash2,
+  Undo2,
+  Users,
+  Wand2,
+  XCircle,
 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+
+import { StatusChangeAnimation } from '@/components/animations/status-change-animation';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -46,20 +59,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  pointerWithin,
-} from '@dnd-kit/core';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { fetchApplications, deleteApplication, updateApplicationStatus, createApplication, toggleApplicationFavorite } from '@/services/application.service';
-import type { JobApplication, ApplicationStatus } from '@/types/cv.types';
+  createApplication,
+  deleteApplication,
+  fetchApplications,
+  toggleApplicationFavorite,
+  updateApplicationStatus,
+} from '@/services/application.service';
+import type { ApplicationStatus, JobApplication } from '@/types/cv.types';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
-import { StatusChangeAnimation } from '@/components/animations/status-change-animation';
 
 type ViewMode = 'kanban' | 'table';
 
@@ -101,19 +108,45 @@ const STATUS_ICONS = {
 
 // Fake data for auto-generating applications (dev only)
 const FAKE_COMPANIES = [
-  'Acme Corp', 'TechStart Inc', 'DataFlow Systems', 'CloudNine Solutions',
-  'InnovateTech', 'PixelPerfect', 'CodeCraft Labs', 'DigitalDreams',
-  'FutureWorks', 'ByteSize Co', 'Quantum Dynamics', 'NexGen Software',
-  'BlueSky Analytics', 'GreenLeaf Tech', 'RedRocket Media', 'SilverStream',
+  'Acme Corp',
+  'TechStart Inc',
+  'DataFlow Systems',
+  'CloudNine Solutions',
+  'InnovateTech',
+  'PixelPerfect',
+  'CodeCraft Labs',
+  'DigitalDreams',
+  'FutureWorks',
+  'ByteSize Co',
+  'Quantum Dynamics',
+  'NexGen Software',
+  'BlueSky Analytics',
+  'GreenLeaf Tech',
+  'RedRocket Media',
+  'SilverStream',
 ];
 const FAKE_TITLES = [
-  'Senior Frontend Developer', 'Full Stack Engineer', 'React Developer',
-  'Software Engineer', 'Lead Developer', 'UI/UX Developer', 'Tech Lead',
-  'Junior Developer', 'Backend Engineer', 'DevOps Engineer', 'Platform Engineer',
+  'Senior Frontend Developer',
+  'Full Stack Engineer',
+  'React Developer',
+  'Software Engineer',
+  'Lead Developer',
+  'UI/UX Developer',
+  'Tech Lead',
+  'Junior Developer',
+  'Backend Engineer',
+  'DevOps Engineer',
+  'Platform Engineer',
 ];
 const FAKE_LOCATIONS = [
-  'Berlin, Germany', 'Munich, Germany', 'Hamburg, Germany', 'Remote',
-  'Frankfurt, Germany', 'Cologne, Germany', 'Vienna, Austria', 'Zurich, Switzerland',
+  'Berlin, Germany',
+  'Munich, Germany',
+  'Hamburg, Germany',
+  'Remote',
+  'Frankfurt, Germany',
+  'Cologne, Germany',
+  'Vienna, Austria',
+  'Zurich, Switzerland',
 ];
 
 function generateFakeApplication() {
@@ -183,9 +216,7 @@ export default function ApplicationsPage() {
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
-      setApplications(applications.map((app) =>
-        app.id === id ? result.data! : app
-      ));
+      setApplications(applications.map((app) => (app.id === id ? result.data! : app)));
     }
   };
 
@@ -204,18 +235,14 @@ export default function ApplicationsPage() {
   const handleToggleFavorite = async (id: string, currentFavorite: boolean) => {
     // Optimistically update the UI
     setApplications((prev) =>
-      prev.map((app) =>
-        app.id === id ? { ...app, is_favorite: !currentFavorite } : app
-      )
+      prev.map((app) => (app.id === id ? { ...app, is_favorite: !currentFavorite } : app))
     );
 
     const result = await toggleApplicationFavorite(id, !currentFavorite);
     if (result.error) {
       // Revert on error
       setApplications((prev) =>
-        prev.map((app) =>
-          app.id === id ? { ...app, is_favorite: currentFavorite } : app
-        )
+        prev.map((app) => (app.id === id ? { ...app, is_favorite: currentFavorite } : app))
       );
       setError(result.error);
     }
@@ -248,9 +275,7 @@ export default function ApplicationsPage() {
     return filteredApplications.filter((app) => app.status === status);
   };
 
-  const activeApplication = activeId
-    ? applications.find((app) => app.id === activeId)
-    : null;
+  const activeApplication = activeId ? applications.find((app) => app.id === activeId) : null;
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -271,9 +296,7 @@ export default function ApplicationsPage() {
 
     // Optimistically update the UI
     setApplications((prev) =>
-      prev.map((app) =>
-        app.id === applicationId ? { ...app, status: newStatus } : app
-      )
+      prev.map((app) => (app.id === applicationId ? { ...app, status: newStatus } : app))
     );
 
     // Update on the server
@@ -286,7 +309,7 @@ export default function ApplicationsPage() {
         <div className="flex items-center justify-between">
           <div>
             <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-72 mt-2" />
+            <Skeleton className="mt-2 h-4 w-72" />
           </div>
           <Skeleton className="h-10 w-36" />
         </div>
@@ -300,20 +323,15 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Status change animation */}
-      <StatusChangeAnimation
-        status={animatingStatus}
-        onComplete={() => setAnimatingStatus(null)}
-      />
+      <StatusChangeAnimation status={animatingStatus} onComplete={() => setAnimatingStatus(null)} />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
-          <p className="text-muted-foreground">
-            Track and manage your job applications
-          </p>
+          <p className="text-muted-foreground">Track and manage your job applications</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="gap-2" onClick={handleAutoGenerate}>
@@ -330,10 +348,10 @@ export default function ApplicationsPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-2 flex-1">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="flex flex-1 items-center gap-2">
           <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search applications..."
               value={searchQuery}
@@ -374,7 +392,7 @@ export default function ApplicationsPage() {
       </div>
 
       {error && (
-        <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive mb-6">
+        <div className="mb-6 rounded-md bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -383,13 +401,13 @@ export default function ApplicationsPage() {
       {applications.length === 0 ? (
         <Card className="border-dashed">
           <CardHeader className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Briefcase className="h-8 w-8 text-primary" />
             </div>
             <CardTitle>No applications yet</CardTitle>
-            <CardDescription className="max-w-md mx-auto">
-              Start tracking your job applications. Add positions you&apos;re interested in
-              and track your progress through the hiring process.
+            <CardDescription className="mx-auto max-w-md">
+              Start tracking your job applications. Add positions you&apos;re interested in and
+              track your progress through the hiring process.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
@@ -411,60 +429,58 @@ export default function ApplicationsPage() {
         >
           <div className="flex-1 overflow-x-auto">
             <div className="flex gap-4 pb-4">
-            {KANBAN_LAYOUT.map((column, colIndex) => (
-              <div
-                key={colIndex}
-                className="flex-shrink-0 w-72 flex flex-col gap-4 border-r border-border/50 pr-4 last:border-r-0 last:pr-0"
-              >
-                {column.statuses.map((status) => {
-                  const statusConfig = APPLICATION_STATUS_CONFIG[status];
-                  const statusApplications = getApplicationsByStatus(status);
-                  const StatusIcon = STATUS_ICONS[statusConfig.icon];
+              {KANBAN_LAYOUT.map((column, colIndex) => (
+                <div
+                  key={colIndex}
+                  className="flex w-72 flex-shrink-0 flex-col gap-4 border-r border-border/50 pr-4 last:border-r-0 last:pr-0"
+                >
+                  {column.statuses.map((status) => {
+                    const statusConfig = APPLICATION_STATUS_CONFIG[status];
+                    const statusApplications = getApplicationsByStatus(status);
+                    const StatusIcon = STATUS_ICONS[statusConfig.icon];
 
-                  // Get explicit color class for icons
-                  const iconColorClass =
-                    status === 'accepted' ? 'text-emerald-600' :
-                    status === 'rejected' ? 'text-red-600' :
-                    statusConfig.color;
+                    // Get explicit color class for icons
+                    const iconColorClass =
+                      status === 'accepted'
+                        ? 'text-emerald-600'
+                        : status === 'rejected'
+                          ? 'text-red-600'
+                          : statusConfig.color;
 
-                  return (
-                    <DroppableColumn
-                      key={status}
-                      status={status}
-                      stacked={column.stacked}
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <StatusIcon className={`h-4 w-4 ${iconColorClass}`} />
-                        <h3 className="font-medium">{statusConfig.label}</h3>
-                        <Badge variant="secondary" className="text-xs">
-                          {statusApplications.length}
-                        </Badge>
-                      </div>
-                      <div className={`rounded-lg p-2 ${column.stacked ? 'min-h-[180px]' : 'min-h-[400px]'} ${statusConfig.bgColor}/30`}>
-                        <div className="space-y-2">
-                          {statusApplications.map((app) => (
-                            <DraggableApplicationCard
-                              key={app.id}
-                              application={app}
-                              onDelete={handleDelete}
-                              onStatusChange={handleStatusChange}
-                              onToggleFavorite={handleToggleFavorite}
-                              isDragging={activeId === app.id}
-                            />
-                          ))}
+                    return (
+                      <DroppableColumn key={status} status={status} stacked={column.stacked}>
+                        <div className="mb-3 flex items-center gap-2">
+                          <StatusIcon className={`h-4 w-4 ${iconColorClass}`} />
+                          <h3 className="font-medium">{statusConfig.label}</h3>
+                          <Badge variant="secondary" className="text-xs">
+                            {statusApplications.length}
+                          </Badge>
                         </div>
-                      </div>
-                    </DroppableColumn>
-                  );
-                })}
-              </div>
-            ))}
+                        <div
+                          className={`rounded-lg p-2 ${column.stacked ? 'min-h-[180px]' : 'min-h-[400px]'} ${statusConfig.bgColor}/30`}
+                        >
+                          <div className="space-y-2">
+                            {statusApplications.map((app) => (
+                              <DraggableApplicationCard
+                                key={app.id}
+                                application={app}
+                                onDelete={handleDelete}
+                                onStatusChange={handleStatusChange}
+                                onToggleFavorite={handleToggleFavorite}
+                                isDragging={activeId === app.id}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </DroppableColumn>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
           <DragOverlay>
-            {activeApplication ? (
-              <ApplicationCardOverlay application={activeApplication} />
-            ) : null}
+            {activeApplication ? <ApplicationCardOverlay application={activeApplication} /> : null}
           </DragOverlay>
         </DndContext>
       ) : (
@@ -488,9 +504,11 @@ export default function ApplicationsPage() {
                 const StatusIcon = STATUS_ICONS[statusConfig.icon];
                 // Get explicit color class for icons
                 const iconColorClass =
-                  app.status === 'accepted' ? 'text-emerald-600' :
-                  app.status === 'rejected' ? 'text-red-600' :
-                  statusConfig.color;
+                  app.status === 'accepted'
+                    ? 'text-emerald-600'
+                    : app.status === 'rejected'
+                      ? 'text-red-600'
+                      : statusConfig.color;
                 return (
                   <TableRow key={app.id}>
                     <TableCell>
@@ -502,9 +520,7 @@ export default function ApplicationsPage() {
                       </Link>
                     </TableCell>
                     <TableCell>{app.job_title}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {app.location || '-'}
-                    </TableCell>
+                    <TableCell className="text-muted-foreground">{app.location || '-'}</TableCell>
                     <TableCell>
                       <Badge className={`${statusConfig.bgColor} ${iconColorClass} gap-1`}>
                         <StatusIcon className="h-3 w-3" />
@@ -527,14 +543,14 @@ export default function ApplicationsPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
                             <Link href={`/applications/${app.id}`}>
-                              <ExternalLink className="h-4 w-4 mr-2" />
+                              <ExternalLink className="mr-2 h-4 w-4" />
                               Open
                             </Link>
                           </DropdownMenuItem>
                           {app.job_url && (
                             <DropdownMenuItem asChild>
                               <a href={app.job_url} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="h-4 w-4 mr-2" />
+                                <ExternalLink className="mr-2 h-4 w-4" />
                                 View Job Posting
                               </a>
                             </DropdownMenuItem>
@@ -543,7 +559,7 @@ export default function ApplicationsPage() {
                             className="text-destructive"
                             onClick={() => handleDelete(app.id)}
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
+                            <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -560,8 +576,8 @@ export default function ApplicationsPage() {
   );
 }
 
-// Application Card Component for Kanban View
-function ApplicationCard({
+// Application Card Component for Kanban View (unused - using DraggableApplicationCard instead)
+function _ApplicationCard({
   application,
   onDelete,
   onStatusChange,
@@ -573,24 +589,22 @@ function ApplicationCard({
   const isOverdue = application.deadline && new Date(application.deadline) < new Date();
 
   return (
-    <Card className="group relative hover:shadow-md transition-shadow">
+    <Card className="group relative transition-shadow hover:shadow-md">
       <CardContent className="p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span className="font-medium truncate">{application.company_name}</span>
+              <Building2 className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+              <span className="truncate font-medium">{application.company_name}</span>
             </div>
-            <p className="text-sm text-muted-foreground truncate mt-1">
-              {application.job_title}
-            </p>
+            <p className="mt-1 truncate text-sm text-muted-foreground">{application.job_title}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity relative z-10"
+                className="relative z-10 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <MoreVertical className="h-4 w-4" />
               </Button>
@@ -598,7 +612,7 @@ function ApplicationCard({
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link href={`/applications/${application.id}`}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                  <ExternalLink className="mr-2 h-4 w-4" />
                   Open
                 </Link>
               </DropdownMenuItem>
@@ -610,7 +624,7 @@ function ApplicationCard({
                     key={status}
                     onClick={() => onStatusChange(application.id, status)}
                   >
-                    <StatusIcon className="h-4 w-4 mr-2" />
+                    <StatusIcon className="mr-2 h-4 w-4" />
                     Move to {config.label}
                   </DropdownMenuItem>
                 );
@@ -619,14 +633,14 @@ function ApplicationCard({
                 className="text-destructive"
                 onClick={() => onDelete(application.id)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-muted-foreground">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {application.location && (
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -678,7 +692,7 @@ function DroppableColumn({
     <div
       ref={setNodeRef}
       className={`${stacked ? 'flex-1' : ''} transition-all duration-200 ${
-        isOver ? 'bg-primary/10 rounded-lg' : ''
+        isOver ? 'rounded-lg bg-primary/10' : ''
       }`}
     >
       {children}
@@ -701,7 +715,12 @@ function DraggableApplicationCard({
   isDragging: boolean;
 }) {
   const router = useRouter();
-  const { attributes, listeners, setNodeRef, isDragging: isDragActive } = useDraggable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    isDragging: isDragActive,
+  } = useDraggable({
     id: application.id,
   });
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -738,26 +757,24 @@ function DraggableApplicationCard({
         listeners?.onPointerDown?.(e as unknown as PointerEvent);
       }}
       onPointerUp={handlePointerUp}
-      className={`group relative hover:shadow-md transition-all cursor-pointer touch-none ${
-        isDragging ? 'opacity-30 scale-95' : ''
+      className={`group relative cursor-pointer touch-none transition-all hover:shadow-md ${
+        isDragging ? 'scale-95 opacity-30' : ''
       }`}
     >
       <CardContent className="p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span className="font-medium truncate">{application.company_name}</span>
+              <Building2 className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+              <span className="truncate font-medium">{application.company_name}</span>
             </div>
-            <p className="text-sm text-muted-foreground truncate mt-1">
-              {application.job_title}
-            </p>
+            <p className="mt-1 truncate text-sm text-muted-foreground">{application.job_title}</p>
           </div>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className={`h-7 w-7 transition-opacity relative z-10 ${
+              className={`relative z-10 h-7 w-7 transition-opacity ${
                 application.is_favorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
               }`}
               onClick={(e) => {
@@ -772,48 +789,48 @@ function DraggableApplicationCard({
               />
             </Button>
             <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity relative z-10"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/applications/${application.id}`}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open
-                </Link>
-              </DropdownMenuItem>
-              {ALL_STATUSES.filter((s) => s !== application.status).map((status) => {
-                const config = APPLICATION_STATUS_CONFIG[status];
-                const StatusIcon = STATUS_ICONS[config.icon];
-                return (
-                  <DropdownMenuItem
-                    key={status}
-                    onClick={() => onStatusChange(application.id, status)}
-                  >
-                    <StatusIcon className="h-4 w-4 mr-2" />
-                    Move to {config.label}
-                  </DropdownMenuItem>
-                );
-              })}
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => onDelete(application.id)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative z-10 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href={`/applications/${application.id}`}>
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Open
+                  </Link>
+                </DropdownMenuItem>
+                {ALL_STATUSES.filter((s) => s !== application.status).map((status) => {
+                  const config = APPLICATION_STATUS_CONFIG[status];
+                  const StatusIcon = STATUS_ICONS[config.icon];
+                  return (
+                    <DropdownMenuItem
+                      key={status}
+                      onClick={() => onStatusChange(application.id, status)}
+                    >
+                      <StatusIcon className="mr-2 h-4 w-4" />
+                      Move to {config.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => onDelete(application.id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-muted-foreground">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {application.location && (
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -843,21 +860,19 @@ function ApplicationCardOverlay({ application }: { application: JobApplication }
   const isOverdue = application.deadline && new Date(application.deadline) < new Date();
 
   return (
-    <Card className="w-72 shadow-xl rotate-3 cursor-grabbing">
+    <Card className="w-72 rotate-3 cursor-grabbing shadow-xl">
       <CardContent className="p-3">
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span className="font-medium truncate">{application.company_name}</span>
+              <Building2 className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+              <span className="truncate font-medium">{application.company_name}</span>
             </div>
-            <p className="text-sm text-muted-foreground truncate mt-1">
-              {application.job_title}
-            </p>
+            <p className="mt-1 truncate text-sm text-muted-foreground">{application.job_title}</p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-muted-foreground">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {application.location && (
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />

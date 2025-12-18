@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
+import { createContext, useCallback,useContext, useEffect, useState } from 'react';
+
 import { createClient } from '@/lib/supabase/client';
 
 const AUTH_REDIRECT_KEY = 'auth_redirect_path';
@@ -48,18 +49,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (!existingProfile) {
-        await supabase
-          .from('user_profiles')
-          .insert({ user_id: userId });
+        await supabase.from('user_profiles').insert({ user_id: userId });
       }
     };
 
     // Get initial session
     const getSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
       if (error) {
-        setState(prev => ({ ...prev, loading: false, error: error.message }));
+        setState((prev) => ({ ...prev, loading: false, error: error.message }));
         return;
       }
 
@@ -77,19 +79,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (session?.user) {
-          await ensureUserProfile(session.user.id);
-        }
-
-        setState({
-          user: session?.user ?? null,
-          loading: false,
-          error: null,
-        });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await ensureUserProfile(session.user.id);
       }
-    );
+
+      setState({
+        user: session?.user ?? null,
+        loading: false,
+        error: null,
+      });
+    });
 
     return () => {
       subscription.unsubscribe();
@@ -97,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const signInWithGoogle = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
 
     // Store current path for redirect after OAuth
     const currentPath = window.location.pathname;
@@ -115,91 +117,102 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) {
       localStorage.removeItem(AUTH_REDIRECT_KEY);
-      setState(prev => ({ ...prev, loading: false, error: error.message }));
+      setState((prev) => ({ ...prev, loading: false, error: error.message }));
     }
   }, [supabase]);
 
-  const signInWithOTP = useCallback(async (email: string) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+  const signInWithOTP = useCallback(
+    async (email: string) => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: true,
-      },
-    });
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+        },
+      });
 
-    if (error) {
-      setState(prev => ({ ...prev, loading: false, error: error.message }));
-      return { error: error.message };
-    }
+      if (error) {
+        setState((prev) => ({ ...prev, loading: false, error: error.message }));
+        return { error: error.message };
+      }
 
-    setState(prev => ({ ...prev, loading: false }));
-    return { error: null };
-  }, [supabase]);
+      setState((prev) => ({ ...prev, loading: false }));
+      return { error: null };
+    },
+    [supabase]
+  );
 
-  const verifyOTP = useCallback(async (email: string, token: string) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+  const verifyOTP = useCallback(
+    async (email: string, token: string) => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
 
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: 'email',
-    });
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+      });
 
-    if (error) {
-      setState(prev => ({ ...prev, loading: false, error: error.message }));
-      return { error: error.message };
-    }
+      if (error) {
+        setState((prev) => ({ ...prev, loading: false, error: error.message }));
+        return { error: error.message };
+      }
 
-    setState(prev => ({ ...prev, loading: false }));
-    return { error: null };
-  }, [supabase]);
+      setState((prev) => ({ ...prev, loading: false }));
+      return { error: null };
+    },
+    [supabase]
+  );
 
   const signOut = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
 
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      setState(prev => ({ ...prev, loading: false, error: error.message }));
+      setState((prev) => ({ ...prev, loading: false, error: error.message }));
     }
   }, [supabase]);
 
-  const updateUserProfile = useCallback(async (data: UserProfileData) => {
-    const fullName = [data.firstName, data.lastName].filter(Boolean).join(' ');
+  const updateUserProfile = useCallback(
+    async (data: UserProfileData) => {
+      const fullName = [data.firstName, data.lastName].filter(Boolean).join(' ');
 
-    const { data: updatedUser, error } = await supabase.auth.updateUser({
-      data: {
-        full_name: fullName || undefined,
-        first_name: data.firstName || undefined,
-        last_name: data.lastName || undefined,
-        phone: data.phone || undefined,
-        location: data.location || undefined,
-      },
-    });
+      const { data: updatedUser, error } = await supabase.auth.updateUser({
+        data: {
+          full_name: fullName || undefined,
+          first_name: data.firstName || undefined,
+          last_name: data.lastName || undefined,
+          phone: data.phone || undefined,
+          location: data.location || undefined,
+        },
+      });
 
-    if (error) {
-      return { error: error.message };
-    }
+      if (error) {
+        return { error: error.message };
+      }
 
-    // Update local state with the new user data
-    if (updatedUser.user) {
-      setState(prev => ({ ...prev, user: updatedUser.user }));
-    }
+      // Update local state with the new user data
+      if (updatedUser.user) {
+        setState((prev) => ({ ...prev, user: updatedUser.user }));
+      }
 
-    return { error: null };
-  }, [supabase]);
+      return { error: null };
+    },
+    [supabase]
+  );
 
   return (
-    <AuthContext.Provider value={{
-      ...state,
-      signInWithGoogle,
-      signInWithOTP,
-      verifyOTP,
-      signOut,
-      updateUserProfile,
-    }}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        signInWithGoogle,
+        signInWithOTP,
+        verifyOTP,
+        signOut,
+        updateUserProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

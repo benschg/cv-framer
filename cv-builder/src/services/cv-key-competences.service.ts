@@ -41,25 +41,26 @@ export async function fetchCVKeyCompetences(
 
   // Create a map of selections by key_competence_id
   const selectionMap = new Map<string, CVKeyCompetenceSelection>();
-  selections?.forEach(sel => selectionMap.set(sel.key_competence_id, sel));
+  selections?.forEach((sel) => selectionMap.set(sel.key_competence_id, sel));
 
   // Merge competences with selections
-  const merged: CVKeyCompetenceWithSelection[] = (competences as ProfileKeyCompetence[])?.map((comp, index) => {
-    const sel = selectionMap.get(comp.id);
-    return {
-      id: comp.id,
-      title: comp.title,
-      description: comp.description,
-      display_order: comp.display_order,
-      selection: {
-        id: sel?.id,
-        is_selected: sel?.is_selected ?? true, // Default: selected
-        is_favorite: sel?.is_favorite ?? false,
-        display_order: sel?.display_order ?? index,
-        description_override: sel?.description_override ?? null,
-      },
-    };
-  }) || [];
+  const merged: CVKeyCompetenceWithSelection[] =
+    (competences as ProfileKeyCompetence[])?.map((comp, index) => {
+      const sel = selectionMap.get(comp.id);
+      return {
+        id: comp.id,
+        title: comp.title,
+        description: comp.description,
+        display_order: comp.display_order,
+        selection: {
+          id: sel?.id,
+          is_selected: sel?.is_selected ?? true, // Default: selected
+          is_favorite: sel?.is_favorite ?? false,
+          display_order: sel?.display_order ?? index,
+          description_override: sel?.description_override ?? null,
+        },
+      };
+    }) || [];
 
   // Sort by selection display_order
   merged.sort((a, b) => a.selection.display_order - b.selection.display_order);
@@ -85,7 +86,7 @@ export async function bulkUpsertCVKeyCompetenceSelections(
     return { data: [], error: null };
   }
 
-  const upsertData = selections.map(sel => ({
+  const upsertData = selections.map((sel) => ({
     cv_id: cvId,
     key_competence_id: sel.key_competence_id,
     is_selected: sel.is_selected,

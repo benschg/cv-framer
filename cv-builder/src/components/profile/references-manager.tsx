@@ -1,26 +1,44 @@
 'use client';
 
+import {
+  ExternalLink,
+  FileText,
+  Image as ImageIcon,
+  Loader2,
+  Mail,
+  Phone,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Loader2, ExternalLink, Upload, FileText, Image as ImageIcon, X, Mail, Phone } from 'lucide-react';
-import { toast } from 'sonner';
 import {
-  fetchReferences,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAppTranslation } from '@/hooks/use-app-translation';
+import { useProfileManager } from '@/hooks/use-profile-manager';
+import {
   createReference,
   deleteReference,
+  fetchReferences,
+  type ProfileReference,
   updateReference,
   uploadReferenceLetter,
-  type ProfileReference,
 } from '@/services/profile-career.service';
-import { useProfileManager } from '@/hooks/use-profile-manager';
+
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
-import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface ReferencesManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -34,193 +52,199 @@ export interface ReferencesManagerRef {
 
 export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
-  const { t } = useAppTranslation();
-  const {
-    items: references,
-    isExpanded,
-    getFormData,
-    loading,
-    saving,
-    handleAdd,
-    handleEdit,
-    handleDelete,
-    handleDone,
-    handleFieldChange,
-    handleMultiFieldChange,
-    handleDragEnd,
-  } = useProfileManager<ProfileReference>({
-    fetchItems: fetchReferences,
-    createItem: createReference,
-    updateItem: updateReference,
-    deleteItem: deleteReference,
-    defaultItem: {
-      name: '',
-      title: '',
-      company: '',
-      relationship: '',
-      email: '',
-      phone: '',
-      quote: '',
-      linked_position: '',
-      document_url: '',
-      document_name: '',
-      storage_path: '',
-    },
-    onSavingChange,
-    onSaveSuccessChange,
-  });
+    const { t } = useAppTranslation();
+    const {
+      items: references,
+      isExpanded,
+      getFormData,
+      loading,
+      saving,
+      handleAdd,
+      handleEdit,
+      handleDelete,
+      handleDone,
+      handleFieldChange,
+      handleMultiFieldChange,
+      handleDragEnd,
+    } = useProfileManager<ProfileReference>({
+      fetchItems: fetchReferences,
+      createItem: (item) =>
+        createReference(
+          item as Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+        ),
+      updateItem: updateReference,
+      deleteItem: deleteReference,
+      defaultItem: {
+        name: '',
+        title: '',
+        company: '',
+        relationship: '',
+        email: '',
+        phone: '',
+        quote: '',
+        linked_position: '',
+        document_url: '',
+        document_name: '',
+        storage_path: '',
+      },
+      onSavingChange,
+      onSaveSuccessChange,
+    });
 
-  const handleAddWithData = async (data: Partial<ProfileReference>, file?: File) => {
-    try {
-      let documentUrl = '';
-      let documentName = '';
-      let storagePath = '';
+    const handleAddWithData = async (data: Partial<ProfileReference>, file?: File) => {
+      try {
+        let documentUrl = '';
+        let documentName = '';
+        let storagePath = '';
 
-      // If a file was provided, upload it first and get the URL
-      if (file) {
-        toast.loading(t('profile.references.uploadingDocument'), { id: 'ref-upload' });
+        // If a file was provided, upload it first and get the URL
+        if (file) {
+          toast.loading(t('profile.references.uploadingDocument'), { id: 'ref-upload' });
 
-        // We need to create the reference first to get an ID, then upload the document
-        // For now, create without the document, then update with document info
-        const tempResult = await createReference(data as any);
-        if (tempResult.error) {
-          throw new Error(tempResult.error);
-        }
-
-        const referenceId = tempResult.data?.id;
-        const referenceName = tempResult.data?.name || 'Reference';
-
-        if (referenceId) {
-          // Get current user ID for upload
-          const { data: { user } } = await (await import('@/lib/supabase/client')).createClient().auth.getUser();
-          if (!user) {
-            throw new Error('User not authenticated');
+          // We need to create the reference first to get an ID, then upload the document
+          // For now, create without the document, then update with document info
+          const tempResult = await createReference(
+            data as Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+          );
+          if (tempResult.error) {
+            throw new Error(
+              typeof tempResult.error === 'string' ? tempResult.error : 'Creation failed'
+            );
           }
 
-          const uploadResult = await uploadReferenceLetter(user.id, referenceId, file);
-          if (uploadResult.error) {
-            console.error('Error uploading document:', uploadResult.error);
-            toast.error(t('profile.references.uploadFailed'), {
-              id: 'ref-upload',
-              description: t('profile.references.uploadFailedDescription'),
-            });
-          } else {
-            documentUrl = uploadResult.data?.url || '';
-            storagePath = uploadResult.data?.path || '';
-            documentName = file.name;
+          const referenceId = tempResult.data?.id;
+          const referenceName = tempResult.data?.name || 'Reference';
 
-            // Update the reference with document info
-            await updateReference(referenceId, {
-              document_url: documentUrl,
-              document_name: documentName,
-              storage_path: storagePath,
-            });
+          if (referenceId) {
+            // Get current user ID for upload
+            const {
+              data: { user },
+            } = await (await import('@/lib/supabase/client')).createClient().auth.getUser();
+            if (!user) {
+              throw new Error('User not authenticated');
+            }
 
-            toast.success(t('profile.references.addedSuccess'), {
-              id: 'ref-upload',
-              description: `${referenceName} with ${file.name}`,
-            });
+            const uploadResult = await uploadReferenceLetter(user.id, referenceId, file);
+            if (uploadResult.error) {
+              console.error('Error uploading document:', uploadResult.error);
+              toast.error(t('profile.references.uploadFailed'), {
+                id: 'ref-upload',
+                description: t('profile.references.uploadFailedDescription'),
+              });
+            } else {
+              documentUrl = uploadResult.data?.url || '';
+              storagePath = uploadResult.data?.path || '';
+              documentName = file.name;
+
+              // Update the reference with document info
+              await updateReference(referenceId, {
+                document_url: documentUrl,
+                document_name: documentName,
+                storage_path: storagePath,
+              });
+
+              toast.success(t('profile.references.addedSuccess'), {
+                id: 'ref-upload',
+                description: `${referenceName} with ${file.name}`,
+              });
+            }
+          }
+
+          // Manually refresh the list
+          const { data: refreshedData } = await fetchReferences();
+          if (refreshedData) {
+            // The useProfileManager hook doesn't expose a way to refresh,
+            // so we need to reload the page
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Show toast before reload
+            window.location.reload();
+          }
+        } else {
+          // No file, just create the reference
+          const result = await createReference(
+            data as Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+          );
+          if (result.error) {
+            throw new Error(typeof result.error === 'string' ? result.error : 'Creation failed');
+          }
+
+          toast.success(t('profile.references.addedSuccessOnly'));
+
+          // Manually refresh the list
+          const { data: refreshedData } = await fetchReferences();
+          if (refreshedData) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            window.location.reload();
           }
         }
-
-        // Manually refresh the list
-        const { data: refreshedData } = await fetchReferences();
-        if (refreshedData) {
-          // The useProfileManager hook doesn't expose a way to refresh,
-          // so we need to reload the page
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Show toast before reload
-          window.location.reload();
-        }
-      } else {
-        // No file, just create the reference
-        const result = await createReference(data as any);
-        if (result.error) {
-          throw new Error(result.error);
-        }
-
-        toast.success(t('profile.references.addedSuccessOnly'));
-
-        // Manually refresh the list
-        const { data: refreshedData } = await fetchReferences();
-        if (refreshedData) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          window.location.reload();
-        }
+      } catch (error) {
+        console.error('Error adding reference:', error);
+        throw error;
       }
-    } catch (error) {
-      console.error('Error adding reference:', error);
-      throw error;
+    };
+
+    // Expose methods to parent via ref
+    useImperativeHandle(ref, () => ({
+      handleAdd,
+      handleAddWithData,
+    }));
+
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      );
     }
-  };
 
-  // Expose methods to parent via ref
-  useImperativeHandle(ref, () => ({
-    handleAdd,
-    handleAddWithData,
-  }));
-
-  if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <ProfileCardManager
+        items={references}
+        onDragEnd={handleDragEnd}
+        renderCard={(reference) => {
+          const expanded = isExpanded(reference.id);
+          const formData = getFormData(reference.id);
+          return (
+            <SortableCard id={reference.id} disabled={false} showDragHandle={!expanded}>
+              {expanded ? (
+                <ReferenceEditForm
+                  formData={formData}
+                  onFieldChange={(field, value) => handleFieldChange(reference.id, field, value)}
+                  onMultiFieldChange={(updates) => handleMultiFieldChange(reference.id, updates)}
+                  onDone={() => handleDone(reference.id)}
+                  t={t}
+                />
+              ) : (
+                <ReferenceViewCard
+                  reference={reference}
+                  onEdit={() => handleEdit(reference)}
+                  onDelete={() => handleDelete(reference.id)}
+                  disabled={saving}
+                  t={t}
+                />
+              )}
+            </SortableCard>
+          );
+        }}
+        renderDragOverlay={(reference) => <ReferenceCardOverlay reference={reference} />}
+        emptyState={
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <p>{t('profile.references.empty')}</p>
+              <p className="mt-1 text-sm">{t('profile.references.emptyAction')}</p>
+            </CardContent>
+          </Card>
+        }
+      />
     );
   }
-
-  return (
-    <ProfileCardManager
-      items={references}
-      onDragEnd={handleDragEnd}
-      renderCard={(reference) => {
-        const expanded = isExpanded(reference.id);
-        const formData = getFormData(reference.id);
-        return (
-          <SortableCard
-            id={reference.id}
-            disabled={false}
-            showDragHandle={!expanded}
-          >
-            {expanded ? (
-              <ReferenceEditForm
-                formData={formData}
-                onFieldChange={(field, value) => handleFieldChange(reference.id, field, value)}
-                onMultiFieldChange={(updates) => handleMultiFieldChange(reference.id, updates)}
-                onDone={() => handleDone(reference.id)}
-                t={t}
-              />
-            ) : (
-              <ReferenceViewCard
-                reference={reference}
-                onEdit={() => handleEdit(reference)}
-                onDelete={() => handleDelete(reference.id)}
-                disabled={saving}
-                t={t}
-              />
-            )}
-          </SortableCard>
-        );
-      }}
-      renderDragOverlay={(reference) => (
-        <ReferenceCardOverlay reference={reference} />
-      )}
-      emptyState={
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <p>{t('profile.references.empty')}</p>
-            <p className="text-sm mt-1">{t('profile.references.emptyAction')}</p>
-          </CardContent>
-        </Card>
-      }
-    />
-  );
-});
+);
 
 ReferencesManager.displayName = 'ReferencesManager';
 
 // Edit Form Component
 interface ReferenceEditFormProps {
   formData: Partial<ProfileReference>;
-  onFieldChange: (field: keyof ProfileReference, value: any) => void;
+  onFieldChange: (field: keyof ProfileReference, value: string) => void;
   onMultiFieldChange: (updates: Partial<ProfileReference>) => void;
   onDone: () => void;
   t: (key: string) => string;
@@ -314,12 +338,24 @@ function ReferenceEditForm({
                 <SelectValue placeholder={t('profile.references.relationshipPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Manager">{t('profile.references.relationshipManager')}</SelectItem>
-                <SelectItem value="Supervisor">{t('profile.references.relationshipSupervisor')}</SelectItem>
-                <SelectItem value="Colleague">{t('profile.references.relationshipColleague')}</SelectItem>
-                <SelectItem value="Team Lead">{t('profile.references.relationshipTeamLead')}</SelectItem>
-                <SelectItem value="Professor">{t('profile.references.relationshipProfessor')}</SelectItem>
-                <SelectItem value="Academic Advisor">{t('profile.references.relationshipAdvisor')}</SelectItem>
+                <SelectItem value="Manager">
+                  {t('profile.references.relationshipManager')}
+                </SelectItem>
+                <SelectItem value="Supervisor">
+                  {t('profile.references.relationshipSupervisor')}
+                </SelectItem>
+                <SelectItem value="Colleague">
+                  {t('profile.references.relationshipColleague')}
+                </SelectItem>
+                <SelectItem value="Team Lead">
+                  {t('profile.references.relationshipTeamLead')}
+                </SelectItem>
+                <SelectItem value="Professor">
+                  {t('profile.references.relationshipProfessor')}
+                </SelectItem>
+                <SelectItem value="Academic Advisor">
+                  {t('profile.references.relationshipAdvisor')}
+                </SelectItem>
                 <SelectItem value="Client">{t('profile.references.relationshipClient')}</SelectItem>
                 <SelectItem value="Mentor">{t('profile.references.relationshipMentor')}</SelectItem>
                 <SelectItem value="Other">{t('profile.references.relationshipOther')}</SelectItem>
@@ -380,9 +416,7 @@ function ReferenceEditForm({
             onChange={(e) => onFieldChange('linked_position', e.target.value)}
             placeholder={t('profile.references.linkedWorkPlaceholder')}
           />
-          <p className="text-xs text-muted-foreground">
-            {t('profile.references.linkedWorkNote')}
-          </p>
+          <p className="text-xs text-muted-foreground">{t('profile.references.linkedWorkNote')}</p>
         </div>
 
         <div className="space-y-2">
@@ -400,7 +434,7 @@ function ReferenceEditForm({
         <div className="space-y-2">
           <Label>{t('profile.references.referenceLetter')}</Label>
           {formData.document_url ? (
-            <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/50 p-3">
               <div className="flex-shrink-0">
                 {formData.document_name?.toLowerCase().endsWith('.pdf') ? (
                   <FileText className="h-8 w-8 text-red-500" />
@@ -408,10 +442,12 @@ function ReferenceEditForm({
                   <ImageIcon className="h-8 w-8 text-blue-500" />
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{formData.document_name}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{formData.document_name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formData.document_name?.toLowerCase().endsWith('.pdf') ? t('profile.references.pdfDocument') : t('profile.references.image')}
+                  {formData.document_name?.toLowerCase().endsWith('.pdf')
+                    ? t('profile.references.pdfDocument')
+                    : t('profile.references.image')}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -423,12 +459,7 @@ function ReferenceEditForm({
                 >
                   <ExternalLink className="h-4 w-4" />
                 </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveDocument}
-                >
+                <Button type="button" variant="ghost" size="sm" onClick={handleRemoveDocument}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -449,10 +480,12 @@ function ReferenceEditForm({
                 disabled={uploadingFile}
                 className="w-full"
               >
-                <Upload className="h-4 w-4 mr-2" />
-                {uploadingFile ? t('profile.photoUpload.uploading') : t('profile.references.uploadButton')}
+                <Upload className="mr-2 h-4 w-4" />
+                {uploadingFile
+                  ? t('profile.photoUpload.uploading')
+                  : t('profile.references.uploadButton')}
               </Button>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {t('profile.references.uploadNote')}
               </p>
             </div>
@@ -472,13 +505,7 @@ interface ReferenceViewCardProps {
   t: (key: string) => string;
 }
 
-function ReferenceViewCard({
-  reference,
-  onEdit,
-  onDelete,
-  disabled,
-  t,
-}: ReferenceViewCardProps) {
+function ReferenceViewCard({ reference, onEdit, onDelete, disabled, t }: ReferenceViewCardProps) {
   return (
     <>
       <CardHeader>
@@ -489,7 +516,7 @@ function ReferenceViewCard({
               {reference.relationship && `${reference.relationship} • `}
               {reference.title} at {reference.company}
             </CardDescription>
-            <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
+            <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
               {reference.email && (
                 <a
                   href={`mailto:${reference.email}`}
@@ -516,8 +543,8 @@ function ReferenceViewCard({
               </div>
             )}
             {reference.quote && (
-              <blockquote className="mt-3 pl-4 border-l-2 border-muted text-sm italic text-muted-foreground">
-                "{reference.quote}"
+              <blockquote className="mt-3 border-l-2 border-muted pl-4 text-sm italic text-muted-foreground">
+                &quot;{reference.quote}&quot;
               </blockquote>
             )}
             {reference.document_url && (
@@ -539,20 +566,10 @@ function ReferenceViewCard({
             )}
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEdit}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onEdit} disabled={disabled}>
               {t('profile.references.editButton')}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onDelete}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onDelete} disabled={disabled}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -565,7 +582,7 @@ function ReferenceViewCard({
 // Overlay component shown while dragging
 function ReferenceCardOverlay({ reference }: { reference: ProfileReference }) {
   return (
-    <Card className="shadow-xl rotate-3 cursor-grabbing opacity-80">
+    <Card className="rotate-3 cursor-grabbing opacity-80 shadow-xl">
       <CardHeader>
         <div>
           <CardTitle>{reference.name}</CardTitle>

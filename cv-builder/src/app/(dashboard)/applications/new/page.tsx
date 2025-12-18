@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { ArrowLeft, Briefcase, Link as LinkIcon, Loader2, Wand2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect,useState } from 'react';
+
+import { AutoFillDialog } from '@/components/auto-fill-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -15,13 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Loader2, Briefcase, Link as LinkIcon, Wand2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { createApplication } from '@/services/application.service';
-import { fetchAllCVs } from '@/services/cv.service';
 import { fetchCoverLetters } from '@/services/cover-letter.service';
-import { parseJobPostingUrl, type ParsedJobPosting } from '@/services/job-parser.service';
-import { AutoFillDialog } from '@/components/auto-fill-dialog';
-import type { CVDocument, CoverLetter, ApplicationStatus } from '@/types/cv.types';
+import { fetchAllCVs } from '@/services/cv.service';
+import { type ParsedJobPosting,parseJobPostingUrl } from '@/services/job-parser.service';
+import type { ApplicationStatus,CoverLetter, CVDocument } from '@/types/cv.types';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
 
 export default function NewApplicationPage() {
@@ -51,10 +52,7 @@ export default function NewApplicationPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      const [cvResult, clResult] = await Promise.all([
-        fetchAllCVs(),
-        fetchCoverLetters(),
-      ]);
+      const [cvResult, clResult] = await Promise.all([fetchAllCVs(), fetchCoverLetters()]);
       if (cvResult.data) setCvList(cvResult.data);
       if (clResult.data) setCoverLetterList(clResult.data);
     };
@@ -132,7 +130,7 @@ export default function NewApplicationPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6">
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <Link href="/applications">
@@ -146,9 +144,7 @@ export default function NewApplicationPage() {
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight">Add Application</h1>
-        <p className="text-muted-foreground mt-2">
-          Track a new job application
-        </p>
+        <p className="mt-2 text-muted-foreground">Track a new job application</p>
       </div>
 
       <form onSubmit={handleCreate}>
@@ -254,7 +250,10 @@ export default function NewApplicationPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={status} onValueChange={(v: string) => setStatus(v as ApplicationStatus)}>
+                <Select
+                  value={status}
+                  onValueChange={(v: string) => setStatus(v as ApplicationStatus)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -303,7 +302,10 @@ export default function NewApplicationPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="linkedCv">Link to CV</Label>
-                <Select value={linkedCvId || '__none__'} onValueChange={(v) => setLinkedCvId(v === '__none__' ? '' : v)}>
+                <Select
+                  value={linkedCvId || '__none__'}
+                  onValueChange={(v) => setLinkedCvId(v === '__none__' ? '' : v)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a CV" />
                   </SelectTrigger>
@@ -319,7 +321,10 @@ export default function NewApplicationPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="linkedCoverLetter">Link to Cover Letter</Label>
-                <Select value={linkedCoverLetterId || '__none__'} onValueChange={(v) => setLinkedCoverLetterId(v === '__none__' ? '' : v)}>
+                <Select
+                  value={linkedCoverLetterId || '__none__'}
+                  onValueChange={(v) => setLinkedCoverLetterId(v === '__none__' ? '' : v)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a cover letter" />
                   </SelectTrigger>
@@ -353,17 +358,13 @@ export default function NewApplicationPage() {
             )}
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push('/applications')}
-              >
+              <Button type="button" variant="outline" onClick={() => router.push('/applications')}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating...
                   </>
                 ) : (

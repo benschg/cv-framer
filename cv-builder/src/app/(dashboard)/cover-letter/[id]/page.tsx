@@ -1,30 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft, Copy,Download, Eye, Loader2, Save, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  ArrowLeft,
-  Save,
-  Download,
-  Sparkles,
-  Loader2,
-  Eye,
-  Copy,
-} from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { useTranslations } from '@/hooks/use-translations';
 import {
   fetchCoverLetter,
-  updateCoverLetter,
   generateCoverLetterWithAI,
+  updateCoverLetter,
 } from '@/services/cover-letter.service';
-import { useTranslations } from '@/hooks/use-translations';
 import type { CoverLetter, CoverLetterContent } from '@/types/cv.types';
 
 export default function CoverLetterEditorPage() {
@@ -74,7 +67,9 @@ export default function CoverLetterEditorPage() {
   const handleSave = async () => {
     if (!coverLetter) return;
     setSaving(true);
-    const result = await updateCoverLetter(coverLetterId, { content: content as Record<string, unknown> });
+    const result = await updateCoverLetter(coverLetterId, {
+      content: content as Record<string, unknown>,
+    });
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
@@ -137,7 +132,7 @@ export default function CoverLetterEditorPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center gap-4">
           <Skeleton className="h-10 w-24" />
           <Skeleton className="h-8 w-64" />
@@ -149,7 +144,7 @@ export default function CoverLetterEditorPage() {
 
   if (error || !coverLetter) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <Link href="/cover-letter">
           <Button variant="ghost" size="sm" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
@@ -158,7 +153,9 @@ export default function CoverLetterEditorPage() {
         </Link>
         <Card className="border-destructive/50">
           <CardContent className="pt-6">
-            <p className="text-destructive">{error || translations.coverLetter.editor.coverLetterNotFound}</p>
+            <p className="text-destructive">
+              {error || translations.coverLetter.editor.coverLetterNotFound}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -166,7 +163,7 @@ export default function CoverLetterEditorPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -180,7 +177,8 @@ export default function CoverLetterEditorPage() {
             <h1 className="text-2xl font-bold">{coverLetter.name}</h1>
             {coverLetter.job_context?.company && (
               <p className="text-sm text-muted-foreground">
-                {coverLetter.job_context.position} {language === 'de' ? 'bei' : 'at'} {coverLetter.job_context.company}
+                {coverLetter.job_context.position} {language === 'de' ? 'bei' : 'at'}{' '}
+                {coverLetter.job_context.company}
               </p>
             )}
           </div>
@@ -194,21 +192,12 @@ export default function CoverLetterEditorPage() {
             <Download className="h-4 w-4" />
             {translations.coverLetter.editor.export}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={handleCopy}
-          >
+          <Button variant="outline" size="sm" className="gap-2" onClick={handleCopy}>
             <Copy className="h-4 w-4" />
             {copied ? translations.coverLetter.editor.copied : translations.coverLetter.editor.copy}
           </Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {translations.common.save}
           </Button>
         </div>
@@ -224,15 +213,12 @@ export default function CoverLetterEditorPage() {
                 <p className="font-medium">{translations.coverLetter.editor.aiPoweredGeneration}</p>
                 <p className="text-sm text-muted-foreground">
                   {translations.coverLetter.editor.generateFromProfile}
-                  {coverLetter.job_context?.company && ` ${language === 'de' ? 'zugeschnitten für' : 'tailored for'} ${coverLetter.job_context.company}`}
+                  {coverLetter.job_context?.company &&
+                    ` ${language === 'de' ? 'zugeschnitten für' : 'tailored for'} ${coverLetter.job_context.company}`}
                 </p>
               </div>
             </div>
-            <Button
-              onClick={handleGenerate}
-              disabled={generating}
-              className="gap-2"
-            >
+            <Button onClick={handleGenerate} disabled={generating} className="gap-2">
               {generating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -253,9 +239,7 @@ export default function CoverLetterEditorPage() {
       <Card>
         <CardHeader>
           <CardTitle>{translations.coverLetter.editor.coverLetterContent}</CardTitle>
-          <CardDescription>
-            {translations.coverLetter.editor.editSectionsBelow}
-          </CardDescription>
+          <CardDescription>{translations.coverLetter.editor.editSectionsBelow}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Subject Line */}
@@ -340,7 +324,9 @@ export default function CoverLetterEditorPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {translations.coverLetter.editor.preview}
-            <Badge variant="outline" className="font-normal">{translations.coverLetter.editor.previewLive}</Badge>
+            <Badge variant="outline" className="font-normal">
+              {translations.coverLetter.editor.previewLive}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -352,9 +338,7 @@ export default function CoverLetterEditorPage() {
             )}
             {content.greeting && <p>{content.greeting}</p>}
             {content.opening && <p>{content.opening}</p>}
-            {content.body && (
-              <div className="whitespace-pre-wrap">{content.body}</div>
-            )}
+            {content.body && <div className="whitespace-pre-wrap">{content.body}</div>}
             {content.closing && <p>{content.closing}</p>}
             {content.signature && <p>{content.signature}</p>}
           </div>
@@ -367,11 +351,7 @@ export default function CoverLetterEditorPage() {
           {translations.common.cancel}
         </Button>
         <Button onClick={handleSave} disabled={saving} className="gap-2">
-          {saving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {translations.coverLetter.editor.saveChanges}
         </Button>
       </div>

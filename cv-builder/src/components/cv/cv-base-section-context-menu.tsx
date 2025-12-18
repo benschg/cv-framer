@@ -1,15 +1,16 @@
 'use client';
 
+import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
+import { ArrowDown, ArrowUp, Eye, EyeOff } from 'lucide-react';
 import type { ReactNode } from 'react';
+
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
-  ContextMenuSeparator,
   ContextMenuLabel,
+  ContextMenuSeparator,
 } from '@/components/ui/context-menu';
-import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
-import { ArrowUp, ArrowDown, Eye, EyeOff } from 'lucide-react';
 
 export interface BaseSectionContextMenuProps {
   children: ReactNode;
@@ -101,10 +102,7 @@ export function CVBaseSectionContextMenu({
         <ContextMenuSeparator />
 
         {/* Visibility toggle */}
-        <ContextMenuItem
-          onClick={onToggleVisibility}
-          className="gap-2"
-        >
+        <ContextMenuItem onClick={onToggleVisibility} className="gap-2">
           {isHidden ? (
             <>
               <Eye className="h-4 w-4" />

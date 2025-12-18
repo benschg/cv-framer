@@ -1,21 +1,15 @@
 'use client';
 
+import { ThemeProvider } from 'next-themes';
+
 import { AuthProvider } from '@/contexts/auth-context';
 import { UserPreferencesProvider } from '@/contexts/user-preferences-context';
-import { ThemeProvider } from 'next-themes';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <AuthProvider>
-        <UserPreferencesProvider>
-          {children}
-        </UserPreferencesProvider>
+        <UserPreferencesProvider>{children}</UserPreferencesProvider>
       </AuthProvider>
     </ThemeProvider>
   );

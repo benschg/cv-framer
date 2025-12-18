@@ -1,18 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/auth-context';
-import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import { getUserInitials, getUserName, getUserPhone, getUserLocation } from '@/lib/user-utils';
-import type { ProfilePhoto } from '@/types/api.schemas';
+import { useCallback,useEffect, useState } from 'react';
+
 import { BasicInfoForm } from '@/components/profile/basic-info-form';
-import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
+import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
 import { DefaultCvSettingsForm } from '@/components/profile/default-cv-settings-form';
 import { ProfessionalLinksForm } from '@/components/profile/professional-links-form';
-import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
+import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
-import { debounce } from '@/services/profile-career.service';
+import { useAuth } from '@/contexts/auth-context';
 import { useAppTranslation } from '@/hooks/use-app-translation';
+import { getUserInitials, getUserLocation,getUserName, getUserPhone } from '@/lib/user-utils';
+import { debounce } from '@/services/profile-career.service';
+import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
+import type { ProfilePhoto } from '@/types/api.schemas';
 
 export default function ProfilePage() {
   const { user, updateUserProfile } = useAuth();
@@ -46,7 +47,7 @@ export default function ProfilePage() {
   // Update form when user data changes (e.g., after login)
   useEffect(() => {
     const { firstName, lastName } = getUserName(user);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       firstName: firstName || prev.firstName,
       lastName: lastName || prev.lastName,
@@ -72,43 +73,46 @@ export default function ProfilePage() {
   }, []);
 
   // Auto-save handler with debouncing
-  const handleFieldChange = useCallback((name: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleFieldChange = useCallback(
+    (name: string, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
 
-    // Trigger auto-save
-    setIsSaving(true);
-    setSaveSuccess(false);
+      // Trigger auto-save
+      setIsSaving(true);
+      setSaveSuccess(false);
 
-    const debouncedSave = debounce(
-      `profile-basic-info-${name}`,
-      async () => {
-        const { error } = await updateUserProfile({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phone: formData.phone,
-          location: formData.location,
-          [name]: value, // Include the latest value
-        });
+      const debouncedSave = debounce(
+        `profile-basic-info-${name}`,
+        async () => {
+          const { error } = await updateUserProfile({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            location: formData.location,
+            [name]: value, // Include the latest value
+          });
 
-        setIsSaving(false);
+          setIsSaving(false);
 
-        if (!error) {
-          setSaveSuccess(true);
-          setTimeout(() => {
-            setSaveSuccess(false);
-          }, 2000);
-        } else {
-          console.error('Auto-save failed:', error);
-        }
-      },
-      1000
-    );
+          if (!error) {
+            setSaveSuccess(true);
+            setTimeout(() => {
+              setSaveSuccess(false);
+            }, 2000);
+          } else {
+            console.error('Auto-save failed:', error);
+          }
+        },
+        1000
+      );
 
-    debouncedSave();
-  }, [formData, updateUserProfile]);
+      debouncedSave();
+    },
+    [formData, updateUserProfile]
+  );
 
   const userInitials = getUserInitials(user);
   const primaryPhotoUrl = primaryPhoto
@@ -123,10 +127,7 @@ export default function ProfilePage() {
       saveSuccess={saveSuccess}
     >
       <div className="space-y-6">
-        <BasicInfoForm
-          formData={formData}
-          onChange={handleFieldChange}
-        />
+        <BasicInfoForm formData={formData} onChange={handleFieldChange} />
 
         <ProfilePhotosCard
           photos={photos}
@@ -145,10 +146,7 @@ export default function ProfilePage() {
 
         <CareerInfoNavigation />
 
-        <ProfessionalLinksForm
-          formData={formData}
-          onChange={handleFieldChange}
-        />
+        <ProfessionalLinksForm formData={formData} onChange={handleFieldChange} />
       </div>
     </ProfilePageLayout>
   );

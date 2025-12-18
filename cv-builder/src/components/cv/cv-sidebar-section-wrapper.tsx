@@ -1,10 +1,12 @@
 'use client';
 
 import type { ReactNode } from 'react';
+
+import type { CVSidebarSection } from '@/types/cv-layout.types';
+
+import { getSidebarLabel } from './constants';
 import { CVBaseSectionContextMenu } from './cv-base-section-context-menu';
 import { CVPhotoContextMenu, type PhotoOption, type PhotoSize } from './cv-photo-context-menu';
-import { getSidebarLabel } from './constants';
-import type { CVSidebarSection } from '@/types/cv-layout.types';
 
 // Re-export types for convenience
 export type { PhotoOption, PhotoSize } from './cv-photo-context-menu';
@@ -91,11 +93,7 @@ export function CVSidebarSectionWrapper({
 
   // Use base context menu for all other sections
   return (
-    <CVBaseSectionContextMenu
-      {...baseProps}
-      sectionLabel={sectionLabel}
-      locationLabel="Sidebar"
-    >
+    <CVBaseSectionContextMenu {...baseProps} sectionLabel={sectionLabel} locationLabel="Sidebar">
       {children}
     </CVBaseSectionContextMenu>
   );

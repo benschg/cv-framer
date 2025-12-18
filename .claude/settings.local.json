@@ -22,7 +22,15 @@
       "Bash(npm run type-check:*)",
       "Bash(npx tsc:*)",
       "Bash(git checkout:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(xargs -r git branch -d)",
+      "Bash(git branch:*)",
+      "Bash(xargs -I {} git push origin --delete {})",
+      "Bash(rm:*)",
+      "Bash(bun run lint)",
+      "Bash(bun run format:*)",
+      "Bash(bun run lint:fix:*)"
     ]
   }
 }

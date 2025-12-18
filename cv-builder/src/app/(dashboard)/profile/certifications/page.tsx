@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { CertificationsManager, CertificationsManagerRef } from '@/components/profile/certifications-manager';
-import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
-import { AICertificationUploadDialog } from '@/components/profile/ai-certification-upload-dialog';
-import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
+import { useRef,useState } from 'react';
+
+import { AICertificationUploadDialog } from '@/components/profile/ai-certification-upload-dialog';
+import {
+  CertificationsManager,
+  CertificationsManagerRef,
+} from '@/components/profile/certifications-manager';
+import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { Button } from '@/components/ui/button';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function CertificationsPage() {
@@ -25,16 +29,13 @@ export default function CertificationsPage() {
         isSaving={isSaving}
         saveSuccess={saveSuccess}
         headerActions={
-          <Button
-            variant="outline"
-            onClick={() => setAiDialogOpen(true)}
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
+          <Button variant="outline" onClick={() => setAiDialogOpen(true)}>
+            <Sparkles className="mr-2 h-4 w-4" />
             {t('profile.certifications.addUsingAI')}
           </Button>
         }
       >
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           <CertificationsManager
             ref={managerRef}
             onSavingChange={setIsSaving}

@@ -1,6 +1,10 @@
 'use client';
 
-import { useState, useRef, DragEvent } from 'react';
+import { Loader2, Sparkles } from 'lucide-react';
+import { DragEvent, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,19 +13,29 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles } from 'lucide-react';
-import { toast } from 'sonner';
 import type { ProfileReference } from '@/services/profile-career.service';
-import { UploadArea, AnalyzingState, DocumentPreview, ConfidenceWarning, validateFile } from './ai-upload-shared';
+
+import {
+  AnalyzingState,
+  ConfidenceWarning,
+  DocumentPreview,
+  UploadArea,
+  validateFile,
+} from './ai-upload-shared';
 
 interface AIReferenceUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (reference: Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>, file?: File) => Promise<void>;
+  onAdd: (
+    reference: Omit<
+      ProfileReference,
+      'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'
+    >,
+    file?: File
+  ) => Promise<void>;
 }
 
 export function AIReferenceUploadDialog({
@@ -32,7 +46,7 @@ export function AIReferenceUploadDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [extractedData, setExtractedData] = useState<Record<string, string | null> | null>(null);
   const [confidence, setConfidence] = useState<Record<string, number>>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
@@ -127,10 +141,11 @@ export function AIReferenceUploadDialog({
       });
 
       // Success feedback
-      const extractedCount = Object.values(data.extractedData).filter(v => v !== null).length;
+      const extractedCount = Object.values(data.extractedData).filter((v) => v !== null).length;
       if (extractedCount === 0) {
         toast.warning('No data extracted', {
-          description: 'AI could not read the reference letter. Please enter the details manually below.',
+          description:
+            'AI could not read the reference letter. Please enter the details manually below.',
         });
       } else if (extractedCount < 3) {
         toast.info(`Partial extraction: ${extractedCount} field(s) found`, {
@@ -141,15 +156,15 @@ export function AIReferenceUploadDialog({
           description: 'Please review the information below before adding.',
         });
       }
-
     } catch (error) {
       console.error('Analysis error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
       toast.error('Analysis failed', {
-        description: errorMessage === 'Analysis failed'
-          ? 'Unable to analyze the reference letter. The document may be unclear or in an unsupported format. Please enter details manually.'
-          : errorMessage,
+        description:
+          errorMessage === 'Analysis failed'
+            ? 'Unable to analyze the reference letter. The document may be unclear or in an unsupported format. Please enter details manually.'
+            : errorMessage,
       });
 
       // Fall back to manual entry with document preview
@@ -192,8 +207,8 @@ export function AIReferenceUploadDialog({
     }
   };
 
-  const handleFieldChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAdd = async () => {
@@ -256,14 +271,15 @@ export function AIReferenceUploadDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
             Add Reference using AI
           </DialogTitle>
           <DialogDescription>
-            Upload a reference letter image or PDF. AI will extract the details for you to review and edit.
+            Upload a reference letter image or PDF. AI will extract the details for you to review
+            and edit.
           </DialogDescription>
         </DialogHeader>
 
@@ -287,7 +303,7 @@ export function AIReferenceUploadDialog({
             {selectedFile && extractedData && (
               <DocumentPreview
                 file={selectedFile}
-                extractedFieldCount={Object.values(extractedData).filter(v => v !== null).length}
+                extractedFieldCount={Object.values(extractedData).filter((v) => v !== null).length}
                 documentType="reference"
               />
             )}
@@ -325,7 +341,10 @@ export function AIReferenceUploadDialog({
                   onChange={(e) => handleFieldChange('company', e.target.value)}
                   placeholder="ACME Corporation"
                 />
-                <ConfidenceWarning confidence={confidence.company || 0} hasValue={!!formData.company} />
+                <ConfidenceWarning
+                  confidence={confidence.company || 0}
+                  hasValue={!!formData.company}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="ai-relationship">Relationship</Label>
@@ -335,7 +354,10 @@ export function AIReferenceUploadDialog({
                   onChange={(e) => handleFieldChange('relationship', e.target.value)}
                   placeholder="Former Manager"
                 />
-                <ConfidenceWarning confidence={confidence.relationship || 0} hasValue={!!formData.relationship} />
+                <ConfidenceWarning
+                  confidence={confidence.relationship || 0}
+                  hasValue={!!formData.relationship}
+                />
               </div>
             </div>
 
@@ -386,7 +408,7 @@ export function AIReferenceUploadDialog({
             <Button onClick={handleAdd} disabled={adding}>
               {adding ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Adding...
                 </>
               ) : (

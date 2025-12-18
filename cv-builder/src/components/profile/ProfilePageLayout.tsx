@@ -1,8 +1,10 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { ProfilePageHeader, ProfilePageHeaderProps } from './ProfilePageHeader';
+
 import { useHeaderSaveIndicator } from '@/hooks/use-header-save-indicator';
+
+import { ProfilePageHeader, ProfilePageHeaderProps } from './ProfilePageHeader';
 
 export interface ProfilePageLayoutProps extends ProfilePageHeaderProps {
   children?: ReactNode;
@@ -22,10 +24,8 @@ export function ProfilePageLayout({
   useHeaderSaveIndicator(isSaving, saveSuccess);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <ProfilePageHeader {...headerProps}>
-        {headerActions}
-      </ProfilePageHeader>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <ProfilePageHeader {...headerProps}>{headerActions}</ProfilePageHeader>
       {children}
     </div>
   );

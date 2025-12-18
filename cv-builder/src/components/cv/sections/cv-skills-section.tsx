@@ -1,8 +1,9 @@
 'use client';
 
-import type { CVSkillCategoryWithSelection } from '@/types/profile-career.types';
 import { Star } from 'lucide-react';
+
 import { filterSelectedSkills } from '@/lib/cv-skill-filter';
+import type { CVSkillCategoryWithSelection } from '@/types/profile-career.types';
 
 interface CVSkillsSectionProps {
   skillCategories: CVSkillCategoryWithSelection[];
@@ -14,7 +15,7 @@ interface CVSkillsSectionProps {
 export function CVSkillsSection({
   skillCategories,
   title = 'Skills',
-  displayMode = 'chips'
+  displayMode = 'chips',
 }: CVSkillsSectionProps) {
   if (!skillCategories || skillCategories.length === 0) return null;
 
@@ -30,13 +31,15 @@ export function CVSkillsSection({
               <div className="flex items-center gap-1">
                 <span className="cv-skills-category-name">{cat.category}:</span>
                 {cat.selection.is_favorite && (
-                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                  <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                 )}
               </div>
               {displayMode === 'chips' ? (
                 <div className="cv-skills-list">
                   {skills.map((skill, i) => (
-                    <span key={i} className="cv-skill-chip">{skill}</span>
+                    <span key={i} className="cv-skill-chip">
+                      {skill}
+                    </span>
                   ))}
                 </div>
               ) : (
@@ -69,7 +72,9 @@ export function CVSkillsSidebar({ skillCategories, title = 'Skills' }: CVSkillsS
       <h3 className="cv-sidebar-title">{title}</h3>
       <div className="cv-sidebar-skills">
         {allSkills.map((skill, i) => (
-          <span key={i} className="cv-sidebar-skill">{skill}</span>
+          <span key={i} className="cv-sidebar-skill">
+            {skill}
+          </span>
         ))}
       </div>
     </div>

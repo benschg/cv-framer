@@ -1,17 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  ArrowRight,
+  FileText,
+  Link as LinkIcon,
+  Loader2,
+  Sparkles,
+  Upload,
+  Wand2,
+} from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { AutoFillDialog } from '@/components/auto-fill-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, ArrowRight, Loader2, FileText, Sparkles, Upload, Link as LinkIcon, Wand2 } from 'lucide-react';
-import { createCV, getDefaultDisplaySettings, getDefaultCVContent } from '@/services/cv.service';
-import { parseJobPostingUrl, type ParsedJobPosting } from '@/services/job-parser.service';
-import { AutoFillDialog } from '@/components/auto-fill-dialog';
+import { createCV, getDefaultCVContent,getDefaultDisplaySettings } from '@/services/cv.service';
+import { type ParsedJobPosting,parseJobPostingUrl } from '@/services/job-parser.service';
 
 type Step = 'basic' | 'job' | 'create';
 
@@ -79,12 +89,14 @@ export default function NewCVPage() {
       description: description.trim() || undefined,
       language,
       content: getDefaultCVContent(),
-      job_context: skipJobContext ? undefined : {
-        company: company.trim() || undefined,
-        position: position.trim() || undefined,
-        jobPosting: jobPosting.trim() || undefined,
-        jobPostingUrl: jobPostingUrl.trim() || undefined,
-      },
+      job_context: skipJobContext
+        ? undefined
+        : {
+            company: company.trim() || undefined,
+            position: position.trim() || undefined,
+            jobPosting: jobPosting.trim() || undefined,
+            jobPostingUrl: jobPostingUrl.trim() || undefined,
+          },
       display_settings: getDefaultDisplaySettings(),
     });
 
@@ -101,7 +113,7 @@ export default function NewCVPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6">
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <Link href="/cv">
@@ -124,7 +136,7 @@ export default function NewCVPage() {
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight">Create New CV</h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="mt-2 text-muted-foreground">
           {step === 'basic'
             ? 'Start by naming your CV and choosing a language'
             : 'Optionally add job context for AI-powered customization'}
@@ -139,9 +151,7 @@ export default function NewCVPage() {
               <FileText className="h-5 w-5" />
               Basic Information
             </CardTitle>
-            <CardDescription>
-              Give your CV a name and choose the language
-            </CardDescription>
+            <CardDescription>Give your CV a name and choose the language</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -196,14 +206,12 @@ export default function NewCVPage() {
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => handleCreate(true)} disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Skip & Create
               </Button>
               <Button onClick={() => setStep('job')} disabled={!name.trim()}>
                 Continue
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </CardContent>
@@ -279,7 +287,8 @@ export default function NewCVPage() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Paste a job posting URL and click Auto-fill to extract company, position, and description
+                Paste a job posting URL and click Auto-fill to extract company, position, and
+                description
               </p>
             </div>
 
@@ -308,18 +317,18 @@ export default function NewCVPage() {
 
             <div className="flex justify-between pt-4">
               <Button variant="outline" onClick={() => setStep('basic')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
               <Button onClick={() => handleCreate(false)} disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4 mr-2" />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     Create CV
                   </>
                 )}

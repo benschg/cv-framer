@@ -12,18 +12,60 @@
 // Character mapping: English -> Kannada (simple 1:1 substitution for visual distinctiveness)
 const KANNADA_MAP: Record<string, string> = {
   // Lowercase letters
-  'a': 'ಅ', 'b': 'ಬ', 'c': 'ಚ', 'd': 'ದ', 'e': 'ಎ',
-  'f': 'ಫ', 'g': 'ಗ', 'h': 'ಹ', 'i': 'ಇ', 'j': 'ಜ',
-  'k': 'ಕ', 'l': 'ಲ', 'm': 'ಮ', 'n': 'ನ', 'o': 'ಒ',
-  'p': 'ಪ', 'q': 'ಕ್', 'r': 'ರ', 's': 'ಸ', 't': 'ತ',
-  'u': 'ಉ', 'v': 'ವ', 'w': 'ವ್', 'x': 'ಕ್ಸ', 'y': 'ಯ', 'z': 'ಜ಼',
+  a: 'ಅ',
+  b: 'ಬ',
+  c: 'ಚ',
+  d: 'ದ',
+  e: 'ಎ',
+  f: 'ಫ',
+  g: 'ಗ',
+  h: 'ಹ',
+  i: 'ಇ',
+  j: 'ಜ',
+  k: 'ಕ',
+  l: 'ಲ',
+  m: 'ಮ',
+  n: 'ನ',
+  o: 'ಒ',
+  p: 'ಪ',
+  q: 'ಕ್',
+  r: 'ರ',
+  s: 'ಸ',
+  t: 'ತ',
+  u: 'ಉ',
+  v: 'ವ',
+  w: 'ವ್',
+  x: 'ಕ್ಸ',
+  y: 'ಯ',
+  z: 'ಜ಼',
 
   // Uppercase letters
-  'A': 'ಆ', 'B': 'ಭ', 'C': 'ಛ', 'D': 'ಧ', 'E': 'ಏ',
-  'F': 'ಫ಼', 'G': 'ಘ', 'H': 'ಹ಼', 'I': 'ಈ', 'J': 'ಝ',
-  'K': 'ಖ', 'L': 'ಳ', 'M': 'ಮ಼', 'N': 'ಣ', 'O': 'ಓ',
-  'P': 'ಪ಼', 'Q': 'ಕ್ವ', 'R': 'ಱ', 'S': 'ಶ', 'T': 'ಥ',
-  'U': 'ಊ', 'V': 'ವ಼', 'W': 'ವ್ಯ', 'X': 'ಕ್ಷ', 'Y': 'ಯ಼', 'Z': 'ಝ಼',
+  A: 'ಆ',
+  B: 'ಭ',
+  C: 'ಛ',
+  D: 'ಧ',
+  E: 'ಏ',
+  F: 'ಫ಼',
+  G: 'ಘ',
+  H: 'ಹ಼',
+  I: 'ಈ',
+  J: 'ಝ',
+  K: 'ಖ',
+  L: 'ಳ',
+  M: 'ಮ಼',
+  N: 'ಣ',
+  O: 'ಓ',
+  P: 'ಪ಼',
+  Q: 'ಕ್ವ',
+  R: 'ಱ',
+  S: 'ಶ',
+  T: 'ಥ',
+  U: 'ಊ',
+  V: 'ವ಼',
+  W: 'ವ್ಯ',
+  X: 'ಕ್ಷ',
+  Y: 'ಯ಼',
+  Z: 'ಝ಼',
 
   // Numbers and common punctuation remain unchanged for readability
   // This makes it easier to identify values and understand context
@@ -42,7 +84,7 @@ const KANNADA_MAP: Record<string, string> = {
 export function toKannada(text: string): string {
   return text
     .split('')
-    .map(char => KANNADA_MAP[char] || char)
+    .map((char) => KANNADA_MAP[char] || char)
     .join('');
 }
 
@@ -68,7 +110,7 @@ export function pseudoLocalizeToKannada(obj: unknown): unknown {
 
   // Handle arrays
   if (Array.isArray(obj)) {
-    return obj.map(item => pseudoLocalizeToKannada(item));
+    return obj.map((item) => pseudoLocalizeToKannada(item));
   }
 
   // Handle objects (nested translations)

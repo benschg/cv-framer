@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { analyzeJobPosting, type CompanyResearchResult, generateCVContent } from '@/lib/ai/gemini';
+import { errorResponse, validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
-import { validateBody, errorResponse } from '@/lib/api-utils';
-import { GenerateCVSchema, type GenerateCVInput } from '@/types/api.schemas';
-import {
-  generateCVContent,
-  analyzeJobPosting,
-  type CompanyResearchResult,
-} from '@/lib/ai/gemini';
+import { GenerateCVSchema } from '@/types/api.schemas';
 
 // POST /api/generate-cv - Generate CV content using AI
 export async function POST(request: NextRequest) {
@@ -14,20 +11,17 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Validate request body
     const data = await validateBody(request, GenerateCVSchema);
-    const {
-      cv_id,
-      language = 'en',
-      sections,
-      job_context,
-      analyze_job_posting = true,
-    } = data;
+    const { cv_id, language = 'en', sections, job_context, analyze_job_posting = true } = data;
 
     // Fetch werbeflaechen data for the user
     const { data: werbeflaechenEntries, error: wfError } = await supabase
@@ -38,10 +32,7 @@ export async function POST(request: NextRequest) {
 
     if (wfError) {
       console.error('Error fetching werbeflaechen:', wfError);
-      return NextResponse.json(
-        { error: 'Failed to fetch werbeflaechen data' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to fetch werbeflaechen data' }, { status: 500 });
     }
 
     // Transform werbeflaechen entries into a structured object
@@ -125,10 +116,7 @@ export async function POST(request: NextRequest) {
 
       if (updateError) {
         console.error('Error updating CV:', updateError);
-        return NextResponse.json(
-          { error: 'Failed to update CV' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to update CV' }, { status: 500 });
       }
     }
 

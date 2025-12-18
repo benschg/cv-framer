@@ -1,9 +1,10 @@
 'use client';
 
+import { ExternalLink,Trash2 } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Trash2, ExternalLink } from 'lucide-react';
 import { formatDateRange } from '@/lib/utils';
 import type { ProfileProject } from '@/types/profile-career.types';
 
@@ -15,13 +16,7 @@ interface ProjectViewCardProps {
   t: (key: string) => string;
 }
 
-export function ProjectViewCard({
-  project,
-  onEdit,
-  onDelete,
-  disabled,
-  t,
-}: ProjectViewCardProps) {
+export function ProjectViewCard({ project, onEdit, onDelete, disabled, t }: ProjectViewCardProps) {
   const dateRange = formatDateRange(
     project.start_date || '',
     project.end_date || '',
@@ -29,11 +24,11 @@ export function ProjectViewCard({
   );
 
   return (
-    <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={onEdit}>
+    <Card className="cursor-pointer transition-colors hover:bg-accent/50" onClick={onEdit}>
       <CardContent className="pt-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-medium">{project.name}</h3>
               {project.url && (
                 <a
@@ -47,19 +42,13 @@ export function ProjectViewCard({
                 </a>
               )}
             </div>
-            {project.role && (
-              <p className="text-sm text-muted-foreground">{project.role}</p>
-            )}
-            {dateRange && (
-              <p className="text-sm text-muted-foreground">{dateRange}</p>
-            )}
+            {project.role && <p className="text-sm text-muted-foreground">{project.role}</p>}
+            {dateRange && <p className="text-sm text-muted-foreground">{dateRange}</p>}
             {project.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {project.description}
-              </p>
+              <p className="line-clamp-2 text-sm text-muted-foreground">{project.description}</p>
             )}
             {project.technologies && project.technologies.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
+              <div className="mt-2 flex flex-wrap gap-1">
                 {project.technologies.map((tech) => (
                   <Badge key={tech} variant="outline" className="text-xs">
                     {tech}

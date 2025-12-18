@@ -1,20 +1,15 @@
 'use client';
 
+import { ChevronDown, ChevronRight, GraduationCap, RotateCcw,Star } from 'lucide-react';
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import {
-  GraduationCap,
-  Star,
-  ChevronDown,
-  ChevronRight,
-  RotateCcw,
-} from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { formatDateRange } from '@/lib/utils';
 import type { CVEducationWithSelection } from '@/types/profile-career.types';
 
@@ -38,14 +33,16 @@ export function CVEducationSection({
 
   const labels = {
     title: language === 'de' ? 'Ausbildung' : 'Education',
-    description: language === 'de'
-      ? 'Wählen Sie aus, welche Ausbildungen in diesem CV angezeigt werden sollen'
-      : 'Select which education entries to include in this CV',
+    description:
+      language === 'de'
+        ? 'Wählen Sie aus, welche Ausbildungen in diesem CV angezeigt werden sollen'
+        : 'Select which education entries to include in this CV',
     descriptionOverride: language === 'de' ? 'Beschreibung anpassen' : 'Customize Description',
     resetToProfile: language === 'de' ? 'Auf Profil zurücksetzen' : 'Reset to Profile',
-    noEducations: language === 'de'
-      ? 'Keine Ausbildung im Profil gefunden. Fügen Sie Ausbildung in Ihrem Profil hinzu.'
-      : 'No education found in your profile. Add education in your profile.',
+    noEducations:
+      language === 'de'
+        ? 'Keine Ausbildung im Profil gefunden. Fügen Sie Ausbildung in Ihrem Profil hinzu.'
+        : 'No education found in your profile. Add education in your profile.',
     favorite: language === 'de' ? 'Favorit' : 'Favorite',
     removeFavorite: language === 'de' ? 'Favorit entfernen' : 'Remove from favorites',
     customize: language === 'de' ? 'Anpassen' : 'Customize',
@@ -53,7 +50,7 @@ export function CVEducationSection({
   };
 
   const toggleExpand = (id: string) => {
-    setExpandedIds(prev => {
+    setExpandedIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -65,27 +62,31 @@ export function CVEducationSection({
   };
 
   const handleSelectionChange = (id: string, isSelected: boolean) => {
-    onChange(educations.map(edu =>
-      edu.id === id
-        ? { ...edu, selection: { ...edu.selection, is_selected: isSelected } }
-        : edu
-    ));
+    onChange(
+      educations.map((edu) =>
+        edu.id === id ? { ...edu, selection: { ...edu.selection, is_selected: isSelected } } : edu
+      )
+    );
   };
 
   const handleFavoriteToggle = (id: string) => {
-    onChange(educations.map(edu =>
-      edu.id === id
-        ? { ...edu, selection: { ...edu.selection, is_favorite: !edu.selection.is_favorite } }
-        : edu
-    ));
+    onChange(
+      educations.map((edu) =>
+        edu.id === id
+          ? { ...edu, selection: { ...edu.selection, is_favorite: !edu.selection.is_favorite } }
+          : edu
+      )
+    );
   };
 
   const handleDescriptionOverrideChange = (id: string, description: string | null) => {
-    onChange(educations.map(edu =>
-      edu.id === id
-        ? { ...edu, selection: { ...edu.selection, description_override: description } }
-        : edu
-    ));
+    onChange(
+      educations.map((edu) =>
+        edu.id === id
+          ? { ...edu, selection: { ...edu.selection, description_override: description } }
+          : edu
+      )
+    );
   };
 
   if (educations.length === 0) {
@@ -136,127 +137,132 @@ export function CVEducationSection({
         <CardDescription>{labels.description}</CardDescription>
       </CardHeader>
       {showEducation && (
-      <CardContent className="space-y-3">
-        {educations.map((edu) => {
-          const isExpanded = expandedIds.has(edu.id);
+        <CardContent className="space-y-3">
+          {educations.map((edu) => {
+            const isExpanded = expandedIds.has(edu.id);
 
-          return (
-            <div
-              key={edu.id}
-              className={`border rounded-lg transition-colors ${
-                edu.selection.is_selected ? 'bg-background' : 'bg-muted/50 opacity-60'
-              }`}
-            >
-              <div className="flex items-start gap-3 p-3">
-                {/* Selection Checkbox */}
-                <Checkbox
-                  checked={edu.selection.is_selected}
-                  onCheckedChange={(checked) => handleSelectionChange(edu.id, !!checked)}
-                  className="mt-1"
-                />
+            return (
+              <div
+                key={edu.id}
+                className={`rounded-lg border transition-colors ${
+                  edu.selection.is_selected ? 'bg-background' : 'bg-muted/50 opacity-60'
+                }`}
+              >
+                <div className="flex items-start gap-3 p-3">
+                  {/* Selection Checkbox */}
+                  <Checkbox
+                    checked={edu.selection.is_selected}
+                    onCheckedChange={(checked) => handleSelectionChange(edu.id, !!checked)}
+                    className="mt-1"
+                  />
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium truncate">{edu.degree}</h4>
-                    {edu.selection.is_favorite && (
-                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {edu.institution}
-                    {edu.field && ` \u2022 ${edu.field}`}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDateRange(edu.start_date, edu.end_date)}
-                    {edu.grade && ` \u2022 ${edu.grade}`}
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleFavoriteToggle(edu.id)}
-                    title={edu.selection.is_favorite ? labels.removeFavorite : labels.favorite}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Star
-                      className={`h-4 w-4 ${
-                        edu.selection.is_favorite
-                          ? 'text-yellow-500 fill-yellow-500'
-                          : 'text-muted-foreground'
-                      }`}
-                    />
-                  </Button>
-                  <Collapsible open={isExpanded}>
-                    <CollapsibleTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleExpand(edu.id)}
-                        title={labels.customize}
-                        className="h-8 w-8 p-0"
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </CollapsibleTrigger>
-                  </Collapsible>
-                </div>
-              </div>
-
-              {/* Expanded Content */}
-              <Collapsible open={isExpanded}>
-                <CollapsibleContent className="px-3 pb-3">
-                  <div className="pt-3 border-t ml-7 space-y-4">
-                    {/* Description Override */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm">{labels.descriptionOverride}</Label>
-                        {edu.selection.description_override !== null && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDescriptionOverrideChange(edu.id, null)}
-                            className="h-7 text-xs gap-1"
-                          >
-                            <RotateCcw className="h-3 w-3" />
-                            {labels.resetToProfile}
-                          </Button>
-                        )}
-                      </div>
-                      <Textarea
-                        value={edu.selection.description_override ?? edu.description ?? ''}
-                        onChange={(e) => {
-                          const newValue = e.target.value;
-                          // Set to null if it matches the original profile description
-                          handleDescriptionOverrideChange(
-                            edu.id,
-                            newValue === (edu.description ?? '') ? null : newValue
-                          );
-                        }}
-                        placeholder={edu.description || 'No description in profile'}
-                        rows={3}
-                        className={edu.selection.description_override !== null ? 'border-primary' : ''}
-                      />
-                      {edu.selection.description_override !== null && (
-                        <p className="text-xs text-muted-foreground">
-                          * {language === 'de' ? 'Angepasste Beschreibung für diesen CV' : 'Custom description for this CV'}
-                        </p>
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="truncate font-medium">{edu.degree}</h4>
+                      {edu.selection.is_favorite && (
+                        <Star className="h-4 w-4 flex-shrink-0 fill-yellow-500 text-yellow-500" />
                       )}
                     </div>
+                    <p className="truncate text-sm text-muted-foreground">
+                      {edu.institution}
+                      {edu.field && ` \u2022 ${edu.field}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDateRange(edu.start_date, edu.end_date)}
+                      {edu.grade && ` \u2022 ${edu.grade}`}
+                    </p>
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          );
-        })}
-      </CardContent>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFavoriteToggle(edu.id)}
+                      title={edu.selection.is_favorite ? labels.removeFavorite : labels.favorite}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Star
+                        className={`h-4 w-4 ${
+                          edu.selection.is_favorite
+                            ? 'fill-yellow-500 text-yellow-500'
+                            : 'text-muted-foreground'
+                        }`}
+                      />
+                    </Button>
+                    <Collapsible open={isExpanded}>
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleExpand(edu.id)}
+                          title={labels.customize}
+                          className="h-8 w-8 p-0"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </CollapsibleTrigger>
+                    </Collapsible>
+                  </div>
+                </div>
+
+                {/* Expanded Content */}
+                <Collapsible open={isExpanded}>
+                  <CollapsibleContent className="px-3 pb-3">
+                    <div className="ml-7 space-y-4 border-t pt-3">
+                      {/* Description Override */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">{labels.descriptionOverride}</Label>
+                          {edu.selection.description_override !== null && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDescriptionOverrideChange(edu.id, null)}
+                              className="h-7 gap-1 text-xs"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                              {labels.resetToProfile}
+                            </Button>
+                          )}
+                        </div>
+                        <Textarea
+                          value={edu.selection.description_override ?? edu.description ?? ''}
+                          onChange={(e) => {
+                            const newValue = e.target.value;
+                            // Set to null if it matches the original profile description
+                            handleDescriptionOverrideChange(
+                              edu.id,
+                              newValue === (edu.description ?? '') ? null : newValue
+                            );
+                          }}
+                          placeholder={edu.description || 'No description in profile'}
+                          rows={3}
+                          className={
+                            edu.selection.description_override !== null ? 'border-primary' : ''
+                          }
+                        />
+                        {edu.selection.description_override !== null && (
+                          <p className="text-xs text-muted-foreground">
+                            *{' '}
+                            {language === 'de'
+                              ? 'Angepasste Beschreibung für diesen CV'
+                              : 'Custom description for this CV'}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            );
+          })}
+        </CardContent>
       )}
     </Card>
   );

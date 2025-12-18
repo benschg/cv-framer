@@ -4,23 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ProfileHighlight, HighlightType } from '@/types/profile-career.types';
+import type { HighlightType, ProfileHighlight } from '@/types/profile-career.types';
 
 interface HighlightEditFormProps {
   formData: Partial<ProfileHighlight>;
-  onFieldChange: (field: keyof ProfileHighlight, value: any) => void;
+  onFieldChange: (field: keyof ProfileHighlight, value: string | HighlightType) => void;
   onDone: () => void;
   t: (key: string) => string;
 }
 
-export function HighlightEditForm({
-  formData,
-  onFieldChange,
-  onDone,
-  t,
-}: HighlightEditFormProps) {
+export function HighlightEditForm({ formData, onFieldChange, onDone, t }: HighlightEditFormProps) {
   return (
     <Card>
       <CardHeader>
@@ -44,7 +45,9 @@ export function HighlightEditForm({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="highlight">{t('profile.highlights.types.highlight')}</SelectItem>
-              <SelectItem value="achievement">{t('profile.highlights.types.achievement')}</SelectItem>
+              <SelectItem value="achievement">
+                {t('profile.highlights.types.achievement')}
+              </SelectItem>
               <SelectItem value="mehrwert">{t('profile.highlights.types.mehrwert')}</SelectItem>
               <SelectItem value="usp">{t('profile.highlights.types.usp')}</SelectItem>
             </SelectContent>

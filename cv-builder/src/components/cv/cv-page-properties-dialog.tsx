@@ -1,8 +1,7 @@
 'use client';
 
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Settings } from 'lucide-react';
+
 import {
   Dialog,
   DialogContent,
@@ -10,7 +9,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Settings } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { DisplaySettings } from '@/types/cv.types';
 
 interface CVPagePropertiesDialogProps {
@@ -36,9 +43,7 @@ export function CVPagePropertiesDialog({
             <Settings className="h-5 w-5" />
             Page {pageIndex + 1} Properties
           </DialogTitle>
-          <DialogDescription>
-            Configure the layout and appearance for this page
-          </DialogDescription>
+          <DialogDescription>Configure the layout and appearance for this page</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -84,7 +89,7 @@ export function CVPagePropertiesDialog({
                 type="color"
                 value={displaySettings?.accentColor || '#2563eb'}
                 onChange={(e) => onSettingChange?.('accentColor', e.target.value)}
-                className="w-12 h-9 p-1 cursor-pointer"
+                className="h-9 w-12 cursor-pointer p-1"
               />
               <Input
                 type="text"

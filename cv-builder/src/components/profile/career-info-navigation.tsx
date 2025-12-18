@@ -1,9 +1,23 @@
 'use client';
 
+import {
+  Award,
+  Briefcase,
+  ChevronRight,
+  Code,
+  FolderKanban,
+  GraduationCap,
+  LucideIcon,
+  Star,
+  Target,
+  Upload,
+  UserCheck,
+  Zap,
+} from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
-import { Briefcase, GraduationCap, Code, Award, ChevronRight, UserCheck, Zap, Upload, LucideIcon, Sparkles, Target, Star, FolderKanban } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ProfileSection {
   title: string;
@@ -27,7 +41,7 @@ const profileSections: ProfileSection[] = [
   },
   {
     title: 'Projects',
-    description: 'Key projects you\'ve worked on',
+    description: "Key projects you've worked on",
     href: '/profile/projects',
     icon: FolderKanban,
   },
@@ -94,18 +108,16 @@ export function CareerInfoNavigation() {
             <Link
               key={section.href}
               href={section.href}
-              className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors group"
+              className="group flex items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent"
             >
-              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <section.icon className="h-5 w-5" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{section.title}</p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {section.description}
-                </p>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">{section.title}</p>
+                <p className="truncate text-xs text-muted-foreground">{section.description}</p>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+              <ChevronRight className="h-4 w-4 flex-shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
             </Link>
           ))}
         </div>

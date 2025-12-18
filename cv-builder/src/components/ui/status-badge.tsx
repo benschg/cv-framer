@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from 'class-variance-authority';
+
 import { cn } from '@/lib/utils';
-import { ApplicationStatus, APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
+import { APPLICATION_STATUS_CONFIG,ApplicationStatus } from '@/types/cv.types';
 
 const statusBadgeVariants = cva(
   'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
@@ -19,17 +20,11 @@ const statusBadgeVariants = cva(
 );
 
 export interface StatusBadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof statusBadgeVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof statusBadgeVariants> {
   status: ApplicationStatus;
 }
 
-export function StatusBadge({
-  status,
-  variant,
-  className,
-  ...props
-}: StatusBadgeProps) {
+export function StatusBadge({ status, variant, className, ...props }: StatusBadgeProps) {
   const config = APPLICATION_STATUS_CONFIG[status];
 
   return (
