@@ -1,11 +1,8 @@
-import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
+import nextTypescript from 'eslint-config-next/typescript';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
-
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-});
 
 const eslintConfig = [
   // Ignore files
@@ -24,11 +21,12 @@ const eslintConfig = [
     ],
   },
 
-  // Next.js configuration using FlatCompat
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
-
   // Base JS recommended
   js.configs.recommended,
+
+  // Next.js configuration
+  ...nextCoreWebVitals,
+  ...nextTypescript,
 
   // Import sorting configuration
   {
