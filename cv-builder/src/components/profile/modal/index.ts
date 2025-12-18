@@ -11,3 +11,4 @@ export {
   type ProfileSection,
 } from './ProfileManagerModal';
 export { ProfileModalProvider } from './ProfileModalProvider';
+export { ProfileModalTrigger } from './ProfileModalTrigger';

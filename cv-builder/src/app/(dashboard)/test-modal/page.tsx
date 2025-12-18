@@ -1,5 +1,6 @@
 'use client';
 
+import { ProfileModalTrigger } from '@/components/profile/modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProfileModal } from '@/hooks/use-profile-modal';
@@ -95,6 +96,24 @@ export default function TestModalPage() {
             >
               Open Education with Callback
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Declarative Triggers</CardTitle>
+            <CardDescription>Using ProfileModalTrigger component for cleaner JSX</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <ProfileModalTrigger section="education">
+              <Button variant="secondary">Education (Declarative)</Button>
+            </ProfileModalTrigger>
+            <ProfileModalTrigger
+              section="work-experience"
+              onClose={() => console.log('Work experience closed')}
+            >
+              <Button variant="secondary">Work Experience (Declarative)</Button>
+            </ProfileModalTrigger>
           </CardContent>
         </Card>
       </div>
