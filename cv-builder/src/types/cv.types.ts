@@ -144,6 +144,8 @@ export interface DisplaySettings {
   format: 'A4' | 'Letter';
   layoutMode?: 'single-column' | 'two-column';
   showPhoto: boolean;
+  /** Photo size: 'small' | 'medium' | 'large' */
+  photoSize?: 'small' | 'medium' | 'large';
   showAttachments: boolean;
   showWorkExperience?: boolean;
   showEducation?: boolean;

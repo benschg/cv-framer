@@ -12,7 +12,7 @@ import {
   ContextMenuSubContent,
 } from '@/components/ui/context-menu';
 import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
-import { ArrowUp, ArrowDown, Eye, EyeOff, ImageIcon, Check, UserX } from 'lucide-react';
+import { ArrowUp, ArrowDown, Eye, EyeOff, ImageIcon, Check, UserX, Maximize2 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import type { CVSidebarSection } from '@/types/cv-layout.types';
 
@@ -24,6 +24,15 @@ export interface PhotoOption {
   imageUrl?: string;
   isPrimary?: boolean;
 }
+
+/** Photo size options */
+export type PhotoSize = 'small' | 'medium' | 'large';
+
+const PHOTO_SIZE_OPTIONS: { value: PhotoSize; label: string }[] = [
+  { value: 'small', label: 'Small' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'large', label: 'Large' },
+];
 
 interface CVSidebarSectionContextMenuProps {
   children: ReactNode;
@@ -42,6 +51,10 @@ interface CVSidebarSectionContextMenuProps {
   onPhotoSelect?: (photoId: string | null) => void;
   /** User initials for avatar fallback */
   userInitials?: string;
+  /** Current photo size */
+  photoSize?: PhotoSize;
+  /** Callback when photo size is changed */
+  onPhotoSizeChange?: (size: PhotoSize) => void;
   isHidden?: boolean;
   disabled?: boolean;
 }
@@ -59,6 +72,8 @@ export function CVSidebarSectionContextMenu({
   selectedPhotoId,
   onPhotoSelect,
   userInitials = '?',
+  photoSize = 'medium',
+  onPhotoSizeChange,
   isHidden = false,
   disabled = false,
 }: CVSidebarSectionContextMenuProps) {
@@ -193,6 +208,30 @@ export function CVSidebarSectionContextMenu({
                 ))}
               </ContextMenuSubContent>
             </ContextMenuSub>
+
+            {/* Photo Size submenu */}
+            {onPhotoSizeChange && (
+              <ContextMenuSub>
+                <ContextMenuSubTrigger className="gap-2">
+                  <Maximize2 className="h-4 w-4" />
+                  Photo Size
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent className="w-32">
+                  {PHOTO_SIZE_OPTIONS.map((option) => (
+                    <ContextMenuItem
+                      key={option.value}
+                      onClick={() => onPhotoSizeChange(option.value)}
+                      className="gap-2"
+                    >
+                      <span className="flex-1">{option.label}</span>
+                      {photoSize === option.value && (
+                        <Check className="h-4 w-4 text-primary" />
+                      )}
+                    </ContextMenuItem>
+                  ))}
+                </ContextMenuSubContent>
+              </ContextMenuSub>
+            )}
           </>
         )}
       </ContextMenuContent>

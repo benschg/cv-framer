@@ -21,7 +21,7 @@ import { filterSelectedSkills } from '@/lib/cv-skill-filter';
 import { formatDateRange } from '@/lib/utils';
 import { CVSidebarSectionWrapper } from './cv-sidebar-section-wrapper';
 import { CVSortableSidebarSection } from './cv-sortable-sidebar-section';
-import type { PhotoOption } from './cv-sidebar-section-context-menu';
+import type { PhotoOption, PhotoSize } from './cv-sidebar-section-context-menu';
 
 interface CVSidebarProps {
   /** Sections to render in order */
@@ -60,6 +60,10 @@ interface CVSidebarProps {
   onPhotoSelect?: (photoId: string | null) => void;
   /** User initials for avatar fallback */
   userInitials?: string;
+  /** Current photo size */
+  photoSize?: PhotoSize;
+  /** Callback when photo size is changed */
+  onPhotoSizeChange?: (size: PhotoSize) => void;
 }
 
 export function CVSidebar({
@@ -81,6 +85,8 @@ export function CVSidebar({
   selectedPhotoId,
   onPhotoSelect,
   userInitials,
+  photoSize,
+  onPhotoSizeChange,
 }: CVSidebarProps) {
   // Setup drag sensors
   const sensors = useSensors(
@@ -117,7 +123,7 @@ export function CVSidebar({
       case 'photo':
         if (!showPhoto || !photoUrl) return null;
         return (
-          <div key="photo" className="cv-sidebar-photo">
+          <div key="photo" className="cv-sidebar-photo" data-photo-size={photoSize || 'medium'}>
             <img src={photoUrl} alt={userProfile?.first_name || 'Profile'} />
           </div>
         );
@@ -284,6 +290,8 @@ export function CVSidebar({
             selectedPhotoId={sectionType === 'photo' ? selectedPhotoId : undefined}
             onPhotoSelect={sectionType === 'photo' ? onPhotoSelect : undefined}
             userInitials={userInitials}
+            photoSize={sectionType === 'photo' ? photoSize : undefined}
+            onPhotoSizeChange={sectionType === 'photo' ? onPhotoSizeChange : undefined}
             isInteractive={isInteractive}
             language={language}
           >

@@ -36,7 +36,7 @@ import {
   CVKeyCompetencesSection,
 } from './sections';
 import { getDefaultLayout } from '@/lib/cv-layouts';
-import type { PhotoOption } from './cv-sidebar-section-context-menu';
+import type { PhotoOption, PhotoSize } from './cv-sidebar-section-context-menu';
 
 interface CVDocumentProps {
   content: CVContent;
@@ -78,6 +78,10 @@ interface CVDocumentProps {
   onPhotoSelect?: (photoId: string | null) => void;
   /** User initials for avatar fallback */
   userInitials?: string;
+  /** Current photo size */
+  photoSize?: PhotoSize;
+  /** Callback when photo size is changed */
+  onPhotoSizeChange?: (size: PhotoSize) => void;
 }
 
 export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
@@ -105,6 +109,8 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
       selectedPhotoId,
       onPhotoSelect,
       userInitials,
+      photoSize,
+      onPhotoSizeChange,
     },
     ref
   ) => {
@@ -458,6 +464,8 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
                       selectedPhotoId={selectedPhotoId}
                       onPhotoSelect={onPhotoSelect}
                       userInitials={userInitials}
+                      photoSize={photoSize}
+                      onPhotoSizeChange={onPhotoSizeChange}
                     />
                     <DndContext
                       sensors={sensors}

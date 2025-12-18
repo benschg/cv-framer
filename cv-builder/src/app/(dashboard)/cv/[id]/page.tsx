@@ -902,6 +902,8 @@ export default function CVEditorPage() {
               selectedPhotoId={content.selected_photo_id}
               onPhotoSelect={(photoId) => updateField('selected_photo_id', photoId)}
               userInitials={getUserInitials(user)}
+              photoSize={(cv.display_settings as DisplaySettings)?.photoSize || 'medium'}
+              onPhotoSizeChange={(size) => updateDisplaySettings('photoSize', size)}
               workExperiences={workExperiences}
               educations={educations}
               skillCategories={skillCategories}

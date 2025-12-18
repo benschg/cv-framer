@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { CVSidebarSectionContextMenu, type PhotoOption } from './cv-sidebar-section-context-menu';
+import { CVSidebarSectionContextMenu, type PhotoOption, type PhotoSize } from './cv-sidebar-section-context-menu';
 import { getSidebarLabel } from './constants';
 import type { CVSidebarSection } from '@/types/cv-layout.types';
 
@@ -21,6 +21,10 @@ interface CVSidebarSectionWrapperProps {
   onPhotoSelect?: (photoId: string | null) => void;
   /** User initials for avatar fallback */
   userInitials?: string;
+  /** Current photo size */
+  photoSize?: PhotoSize;
+  /** Callback when photo size is changed */
+  onPhotoSizeChange?: (size: PhotoSize) => void;
   isHidden?: boolean;
   isInteractive?: boolean;
   language?: 'en' | 'de';
@@ -38,6 +42,8 @@ export function CVSidebarSectionWrapper({
   selectedPhotoId,
   onPhotoSelect,
   userInitials,
+  photoSize,
+  onPhotoSizeChange,
   isHidden = false,
   isInteractive = true,
   language = 'en',
@@ -57,6 +63,8 @@ export function CVSidebarSectionWrapper({
       selectedPhotoId={selectedPhotoId}
       onPhotoSelect={onPhotoSelect}
       userInitials={userInitials}
+      photoSize={photoSize}
+      onPhotoSizeChange={onPhotoSizeChange}
       isHidden={isHidden}
       disabled={!isInteractive}
     >

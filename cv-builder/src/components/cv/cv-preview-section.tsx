@@ -11,7 +11,7 @@ import { CVPagePropertiesDialog } from './cv-page-properties-dialog';
 import type { CVContent, DisplaySettings, UserProfile } from '@/types/cv.types';
 import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection } from '@/types/profile-career.types';
 import type { CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
-import type { PhotoOption } from './cv-sidebar-section-context-menu';
+import type { PhotoOption, PhotoSize } from './cv-sidebar-section-context-menu';
 
 interface CVPreviewSectionProps {
   content: CVContent;
@@ -36,6 +36,10 @@ interface CVPreviewSectionProps {
   onPhotoSelect?: (photoId: string | null) => void;
   /** User initials for avatar fallback */
   userInitials?: string;
+  /** Current photo size */
+  photoSize?: PhotoSize;
+  /** Callback when photo size is changed */
+  onPhotoSizeChange?: (size: PhotoSize) => void;
 }
 
 export interface CVPreviewSectionHandle {
@@ -61,6 +65,8 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
   selectedPhotoId,
   onPhotoSelect,
   userInitials,
+  photoSize,
+  onPhotoSizeChange,
 }, ref) {
   const [zoomMode, setZoomMode] = useState<'auto' | number>('auto');
   const [calculatedZoom, setCalculatedZoom] = useState(100);
@@ -297,6 +303,8 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
               selectedPhotoId={selectedPhotoId}
               onPhotoSelect={onPhotoSelect}
               userInitials={userInitials}
+              photoSize={photoSize}
+              onPhotoSizeChange={onPhotoSizeChange}
             />
           </div>
         </div>
