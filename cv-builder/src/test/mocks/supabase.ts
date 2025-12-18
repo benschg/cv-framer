@@ -26,6 +26,13 @@ export function createMockSupabaseClient(options?: {
           publicUrl: 'https://example.supabase.co/storage/v1/object/public/bucket/path/to/file.pdf',
         },
       }),
+      createSignedUrl: vi.fn().mockResolvedValue({
+        data: {
+          signedUrl:
+            'https://example.supabase.co/storage/v1/object/sign/bucket/path/to/file.jpg?token=abc123',
+        },
+        error: null,
+      }),
     }),
   };
 
