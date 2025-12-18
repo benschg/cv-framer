@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
 import { extractCertificationData } from '@/lib/ai/gemini';
+import { createClient } from '@/lib/supabase/server';
 import { createCertificationDocument } from '@/services/profile-career.service';
 
 // POST /api/certifications/analyze - Analyze certification document and extract data
@@ -9,7 +10,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -23,13 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp',
-      'application/pdf'
-    ];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
 
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
@@ -41,10 +39,7 @@ export async function POST(request: NextRequest) {
     // Validate file size (max 10MB)
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File too large. Maximum size is 10MB.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File too large. Maximum size is 10MB.' }, { status: 400 });
     }
 
     // Convert file to buffer
@@ -118,12 +113,8 @@ export async function POST(request: NextRequest) {
       documentUploaded: !!documentData,
       document: documentData,
     });
-
   } catch (error) {
     console.error('Analysis endpoint error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

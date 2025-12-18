@@ -1,9 +1,10 @@
 'use client';
 
+import { Plus, X } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, X } from 'lucide-react';
 
 interface BulletListEditorProps {
   label?: string;
@@ -46,18 +47,13 @@ export function BulletListEditor({
             onChange={(e) => handleBulletChange(index, e.target.value)}
             placeholder={placeholder}
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => handleRemoveBullet(index)}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveBullet(index)}>
             <X className="h-4 w-4" />
           </Button>
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={handleAddBullet}>
-        <Plus className="h-3 w-3 mr-1" />
+        <Plus className="mr-1 h-3 w-3" />
         {addButtonLabel}
       </Button>
     </div>

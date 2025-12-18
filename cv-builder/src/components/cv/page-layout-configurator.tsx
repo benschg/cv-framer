@@ -1,10 +1,12 @@
 'use client';
 
+import { PanelLeft, PanelRight, Square } from 'lucide-react';
+
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { PanelLeft, PanelRight, Square } from 'lucide-react';
-import { SectionConfigurator } from './section-configurator';
 import type { PageLayoutOverride } from '@/types/cv.types';
+
+import { SectionConfigurator } from './section-configurator';
 
 // Default sections for each page in two-column mode
 const DEFAULT_SIDEBAR_SECTIONS = {
@@ -92,10 +94,8 @@ export function PageLayoutConfigurator({
       <Label className="text-xs">Page Layout Configuration</Label>
       <div className="space-y-3">
         {pages.map((pageIndex) => (
-          <div key={pageIndex} className="flex items-center gap-3 flex-wrap">
-            <span className="text-sm text-muted-foreground w-16">
-              Page {pageIndex + 1}
-            </span>
+          <div key={pageIndex} className="flex flex-wrap items-center gap-3">
+            <span className="w-16 text-sm text-muted-foreground">Page {pageIndex + 1}</span>
             <ToggleGroup
               type="single"
               value={getPosition(pageIndex)}

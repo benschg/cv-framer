@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect,useState } from 'react';
+
 import { debounce } from '@/services/profile-career.service';
 
 export interface ProfileManagerConfig<T extends { id: string }> {
@@ -161,9 +162,7 @@ export function useProfileManager<T extends { id: string; display_order?: number
 
           if (!error && data) {
             onSaveSuccessChange?.(true);
-            setItems((prevItems) =>
-              prevItems.map((item) => (item.id === id ? data : item))
-            );
+            setItems((prevItems) => prevItems.map((item) => (item.id === id ? data : item)));
             setTimeout(() => {
               onSaveSuccessChange?.(false);
             }, 2000);
@@ -198,9 +197,7 @@ export function useProfileManager<T extends { id: string; display_order?: number
 
           if (!error && data) {
             onSaveSuccessChange?.(true);
-            setItems((prevItems) =>
-              prevItems.map((item) => (item.id === id ? data : item))
-            );
+            setItems((prevItems) => prevItems.map((item) => (item.id === id ? data : item)));
             setTimeout(() => {
               onSaveSuccessChange?.(false);
             }, 2000);
@@ -232,9 +229,7 @@ export function useProfileManager<T extends { id: string; display_order?: number
 
     try {
       await Promise.all(
-        newItems.map((item, idx) =>
-          updateItem(item.id, { display_order: idx } as Partial<T>)
-        )
+        newItems.map((item, idx) => updateItem(item.id, { display_order: idx } as Partial<T>))
       );
 
       onSavingChange?.(false);

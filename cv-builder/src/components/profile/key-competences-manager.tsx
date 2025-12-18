@@ -1,23 +1,25 @@
 'use client';
 
+import { Loader2,Trash2 } from 'lucide-react';
 import { forwardRef, useImperativeHandle } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2, Loader2 } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/use-app-translation';
+import { useProfileManager } from '@/hooks/use-profile-manager';
 import {
-  fetchKeyCompetences,
   createKeyCompetence,
   deleteKeyCompetence,
-  updateKeyCompetence,
+  fetchKeyCompetences,
   type ProfileKeyCompetence,
+  updateKeyCompetence,
 } from '@/services/profile-career.service';
-import { useProfileManager } from '@/hooks/use-profile-manager';
+
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
-import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface KeyCompetencesManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -28,8 +30,10 @@ export interface KeyCompetencesManagerRef {
   handleAdd: () => void;
 }
 
-export const KeyCompetencesManager = forwardRef<KeyCompetencesManagerRef, KeyCompetencesManagerProps>(
-  ({ onSavingChange, onSaveSuccessChange }, ref) => {
+export const KeyCompetencesManager = forwardRef<
+  KeyCompetencesManagerRef,
+  KeyCompetencesManagerProps
+>(({ onSavingChange, onSaveSuccessChange }, ref) => {
   const { t } = useAppTranslation();
   const {
     items: keyCompetences,
@@ -77,11 +81,7 @@ export const KeyCompetencesManager = forwardRef<KeyCompetencesManagerRef, KeyCom
         const expanded = isExpanded(competence.id);
         const formData = getFormData(competence.id);
         return (
-          <SortableCard
-            id={competence.id}
-            disabled={false}
-            showDragHandle={!expanded}
-          >
+          <SortableCard id={competence.id} disabled={false} showDragHandle={!expanded}>
             {expanded ? (
               <KeyCompetenceEditForm
                 formData={formData}
@@ -101,14 +101,12 @@ export const KeyCompetencesManager = forwardRef<KeyCompetencesManagerRef, KeyCom
           </SortableCard>
         );
       }}
-      renderDragOverlay={(competence) => (
-        <KeyCompetenceCardOverlay competence={competence} />
-      )}
+      renderDragOverlay={(competence) => <KeyCompetenceCardOverlay competence={competence} />}
       emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             <p>{t('profile.keyCompetences.empty')}</p>
-            <p className="text-sm mt-1">{t('profile.keyCompetences.emptyAction')}</p>
+            <p className="mt-1 text-sm">{t('profile.keyCompetences.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -126,12 +124,7 @@ interface KeyCompetenceEditFormProps {
   t: (key: string) => string;
 }
 
-function KeyCompetenceEditForm({
-  formData,
-  onFieldChange,
-  onDone,
-  t,
-}: KeyCompetenceEditFormProps) {
+function KeyCompetenceEditForm({ formData, onFieldChange, onDone, t }: KeyCompetenceEditFormProps) {
   return (
     <>
       <CardHeader className="pb-3">
@@ -195,20 +188,10 @@ function KeyCompetenceViewCard({
             )}
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEdit}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onEdit} disabled={disabled}>
               {t('profile.keyCompetences.editButton')}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onDelete}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onDelete} disabled={disabled}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -221,12 +204,14 @@ function KeyCompetenceViewCard({
 // Overlay component shown while dragging
 function KeyCompetenceCardOverlay({ competence }: { competence: ProfileKeyCompetence }) {
   return (
-    <Card className="shadow-xl rotate-3 cursor-grabbing opacity-80">
+    <Card className="rotate-3 cursor-grabbing opacity-80 shadow-xl">
       <CardHeader>
         <div>
           <CardTitle>{competence.title}</CardTitle>
           {competence.description && (
-            <CardDescription className="mt-1 line-clamp-2">{competence.description}</CardDescription>
+            <CardDescription className="mt-1 line-clamp-2">
+              {competence.description}
+            </CardDescription>
           )}
         </div>
       </CardHeader>

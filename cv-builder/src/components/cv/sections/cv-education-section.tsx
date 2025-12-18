@@ -1,8 +1,9 @@
 'use client';
 
-import type { CVEducationWithSelection } from '@/types/profile-career.types';
 import { Star } from 'lucide-react';
+
 import { formatDateRange } from '@/lib/utils';
+import type { CVEducationWithSelection } from '@/types/profile-career.types';
 
 interface CVEducationSectionProps {
   educations: CVEducationWithSelection[];
@@ -13,7 +14,7 @@ interface CVEducationSectionProps {
 export function CVEducationSection({
   educations,
   title = 'Education',
-  showTitle = true
+  showTitle = true,
 }: CVEducationSectionProps) {
   if (!educations || educations.length === 0) return null;
 
@@ -30,7 +31,7 @@ export function CVEducationSection({
                 <div className="flex items-center gap-1">
                   <h3>{edu.degree}</h3>
                   {edu.selection.is_favorite && (
-                    <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500 cv-favorite-indicator" />
+                    <Star className="cv-favorite-indicator h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
                   )}
                 </div>
                 <span className="cv-education-period">
@@ -41,12 +42,8 @@ export function CVEducationSection({
                 {edu.institution}
                 {edu.field && ` \u2022 ${edu.field}`}
               </p>
-              {edu.grade && (
-                <p className="cv-education-grade">{edu.grade}</p>
-              )}
-              {description && (
-                <p className="cv-experience-description">{description}</p>
-              )}
+              {edu.grade && <p className="cv-education-grade">{edu.grade}</p>}
+              {description && <p className="cv-experience-description">{description}</p>}
             </div>
           );
         })}

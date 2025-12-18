@@ -1,8 +1,8 @@
 import type {
   CoverLetter,
   CreateCoverLetterInput,
-  UpdateCoverLetterInput,
   GenerateCoverLetterInput,
+  UpdateCoverLetterInput,
 } from '@/types/api.schemas';
 
 const API_BASE = '/api';
@@ -34,7 +34,9 @@ export async function fetchCoverLetters(): Promise<CoverLetterServiceResponse<Co
 /**
  * Fetch a single cover letter by ID
  */
-export async function fetchCoverLetter(id: string): Promise<CoverLetterServiceResponse<CoverLetter>> {
+export async function fetchCoverLetter(
+  id: string
+): Promise<CoverLetterServiceResponse<CoverLetter>> {
   try {
     const response = await fetch(`${API_BASE}/cover-letter/${id}`);
     const json = await response.json();
@@ -53,7 +55,9 @@ export async function fetchCoverLetter(id: string): Promise<CoverLetterServiceRe
 /**
  * Create a new cover letter
  */
-export async function createCoverLetter(data: CreateCoverLetterInput): Promise<CoverLetterServiceResponse<CoverLetter>> {
+export async function createCoverLetter(
+  data: CreateCoverLetterInput
+): Promise<CoverLetterServiceResponse<CoverLetter>> {
   try {
     const response = await fetch(`${API_BASE}/cover-letter`, {
       method: 'POST',
@@ -109,7 +113,9 @@ export async function deleteCoverLetter(
   hard: boolean = false
 ): Promise<CoverLetterServiceResponse<boolean>> {
   try {
-    const url = hard ? `${API_BASE}/cover-letter/${id}?hard=true` : `${API_BASE}/cover-letter/${id}`;
+    const url = hard
+      ? `${API_BASE}/cover-letter/${id}?hard=true`
+      : `${API_BASE}/cover-letter/${id}`;
     const response = await fetch(url, { method: 'DELETE' });
 
     if (!response.ok) {
@@ -127,7 +133,9 @@ export async function deleteCoverLetter(
 /**
  * Generate cover letter content using AI
  */
-export async function generateCoverLetterWithAI(data: GenerateCoverLetterInput): Promise<CoverLetterServiceResponse<{ content: Record<string, unknown> }>> {
+export async function generateCoverLetterWithAI(
+  data: GenerateCoverLetterInput
+): Promise<CoverLetterServiceResponse<{ content: Record<string, unknown> }>> {
   try {
     const response = await fetch(`${API_BASE}/generate-cover-letter`, {
       method: 'POST',

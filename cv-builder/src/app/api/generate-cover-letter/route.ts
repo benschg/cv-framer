@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { analyzeJobPosting,generateCoverLetter } from '@/lib/ai/gemini';
+import { errorResponse,validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
-import { validateBody, errorResponse } from '@/lib/api-utils';
-import { GenerateCoverLetterSchema, type GenerateCoverLetterInput } from '@/types/api.schemas';
-import { generateCoverLetter, analyzeJobPosting } from '@/lib/ai/gemini';
+import { type GenerateCoverLetterInput,GenerateCoverLetterSchema } from '@/types/api.schemas';
 
 // POST /api/generate-cover-letter - Generate cover letter content using AI
 export async function POST(request: NextRequest) {
@@ -10,19 +11,17 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Validate request body
     const data = await validateBody(request, GenerateCoverLetterSchema);
-    const {
-      cover_letter_id,
-      cv_id,
-      language = 'en',
-      job_context,
-    } = data;
+    const { cover_letter_id, cv_id, language = 'en', job_context } = data;
 
     // Fetch werbeflaechen data for the user
     const { data: werbeflaechenEntries, error: wfError } = await supabase
@@ -86,12 +85,14 @@ export async function POST(request: NextRequest) {
         position: job_context?.position,
         companyResearch,
       },
-      profile ? {
-        firstName: profile.first_name,
-        lastName: profile.last_name,
-        email: profile.email,
-        phone: profile.phone,
-      } : undefined,
+      profile
+        ? {
+            firstName: profile.first_name,
+            lastName: profile.last_name,
+            email: profile.email,
+            phone: profile.phone,
+          }
+        : undefined,
       language as 'en' | 'de'
     );
 

@@ -1,27 +1,33 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import type { UserProfile, CVContent, LanguageSkill } from '@/types/cv.types';
-import type { CVSkillCategoryWithSelection, CVEducationWithSelection } from '@/types/profile-career.types';
-import type { CVSidebarSection } from '@/types/cv-layout.types';
 import {
+  closestCenter,
   DndContext,
   DragEndEvent,
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { Globe, Linkedin,Mail, MapPin, Phone } from 'lucide-react';
+import type { ReactNode } from 'react';
+
 import { filterSelectedSkills } from '@/lib/cv-skill-filter';
 import { formatDateRange } from '@/lib/utils';
-import { CVSidebarSectionWrapper, type PhotoOption, type PhotoSize } from './cv-sidebar-section-wrapper';
-import { CVSortableSidebarSection } from './cv-sortable-sidebar-section';
+import type { CVContent, LanguageSkill,UserProfile } from '@/types/cv.types';
+import type { CVSidebarSection } from '@/types/cv-layout.types';
+import type {
+  CVEducationWithSelection,
+  CVSkillCategoryWithSelection,
+} from '@/types/profile-career.types';
+
 import { CVSidebarPhoto } from './cv-sidebar-photo';
+import {
+  CVSidebarSectionWrapper,
+  type PhotoOption,
+  type PhotoSize,
+} from './cv-sidebar-section-wrapper';
+import { CVSortableSidebarSection } from './cv-sortable-sidebar-section';
 
 interface CVSidebarProps {
   /** Sections to render in order */
@@ -115,7 +121,10 @@ export function CVSidebar({
     languages: language === 'de' ? 'Sprachen' : 'Languages',
     education: language === 'de' ? 'Ausbildung' : 'Education',
     certifications: language === 'de' ? 'Zertifikate' : 'Certifications',
-    availableOnRequest: language === 'de' ? 'Vollständige Kontaktdaten auf Anfrage' : 'Full contact details available on request',
+    availableOnRequest:
+      language === 'de'
+        ? 'Vollständige Kontaktdaten auf Anfrage'
+        : 'Full contact details available on request',
   };
 
   const renderSection = (sectionType: CVSidebarSection): ReactNode => {
@@ -177,7 +186,7 @@ export function CVSidebar({
                       <span>{userProfile.website_url}</span>
                     </div>
                   )}
-                  <p className="text-xs text-[var(--cv-text-muted)] italic">
+                  <p className="text-xs italic text-[var(--cv-text-muted)]">
                     {labels.availableOnRequest}
                   </p>
                 </>
@@ -188,7 +197,7 @@ export function CVSidebar({
 
       case 'skills':
         if (!skillCategories || skillCategories.length === 0) return null;
-        const selectedCategories = skillCategories.filter(cat => cat.selection.is_selected);
+        const selectedCategories = skillCategories.filter((cat) => cat.selection.is_selected);
         if (selectedCategories.length === 0) return null;
 
         // Flatten all skills for compact sidebar display
@@ -201,7 +210,9 @@ export function CVSidebar({
             <h3 className="cv-sidebar-title">{labels.skills}</h3>
             <div className="cv-sidebar-skills">
               {allSkills.map((skill, i) => (
-                <span key={i} className="cv-sidebar-skill">{skill}</span>
+                <span key={i} className="cv-sidebar-skill">
+                  {skill}
+                </span>
               ))}
             </div>
           </div>
@@ -216,7 +227,9 @@ export function CVSidebar({
               {content.languages.map((lang) => (
                 <div key={lang.id} className="cv-sidebar-language">
                   <span className="cv-sidebar-language-name">{lang.name}</span>
-                  <span className="cv-sidebar-language-level">{formatLanguageLevel(lang.level, language)}</span>
+                  <span className="cv-sidebar-language-level">
+                    {formatLanguageLevel(lang.level, language)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -225,7 +238,7 @@ export function CVSidebar({
 
       case 'education':
         if (!educations || educations.length === 0) return null;
-        const selectedEducations = educations.filter(edu => edu.selection.is_selected);
+        const selectedEducations = educations.filter((edu) => edu.selection.is_selected);
         if (selectedEducations.length === 0) return null;
 
         return (
@@ -277,11 +290,7 @@ export function CVSidebar({
 
     if (isInteractive) {
       return (
-        <CVSortableSidebarSection
-          key={sectionType}
-          id={sectionType}
-          disabled={!isInteractive}
-        >
+        <CVSortableSidebarSection key={sectionType} id={sectionType} disabled={!isInteractive}>
           <CVSidebarSectionWrapper
             sectionType={sectionType}
             sectionIndex={sectionIndex}
@@ -308,21 +317,16 @@ export function CVSidebar({
   };
 
   // Filter out sections without content for sortable context
-  const visibleSections = sections.filter(section => renderSection(section) !== null);
+  const visibleSections = sections.filter((section) => renderSection(section) !== null);
 
   if (isInteractive) {
     return (
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={visibleSections}
-          strategy={verticalListSortingStrategy}
-        >
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={visibleSections} strategy={verticalListSortingStrategy}>
           <div className="cv-sidebar">
-            {sections.map((sectionType, index) => wrapSection(sectionType, index, renderSection(sectionType)))}
+            {sections.map((sectionType, index) =>
+              wrapSection(sectionType, index, renderSection(sectionType))
+            )}
           </div>
         </SortableContext>
       </DndContext>
@@ -331,7 +335,9 @@ export function CVSidebar({
 
   return (
     <div className="cv-sidebar">
-      {sections.map((sectionType, index) => wrapSection(sectionType, index, renderSection(sectionType)))}
+      {sections.map((sectionType, index) =>
+        wrapSection(sectionType, index, renderSection(sectionType))
+      )}
     </div>
   );
 }

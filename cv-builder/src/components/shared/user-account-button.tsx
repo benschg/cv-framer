@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { LogOut,Settings } from 'lucide-react';
 import Link from 'next/link';
-import { Settings, LogOut } from 'lucide-react';
+import { useEffect, useMemo,useState } from 'react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,12 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
-import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import { getUserInitials, getDisplayName } from '@/lib/user-utils';
 import { useTranslations } from '@/hooks/use-translations';
+import { getDisplayName,getUserInitials } from '@/lib/user-utils';
+import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import type { ProfilePhoto } from '@/types/api.schemas';
 
 export function UserAccountButton() {
@@ -43,21 +44,14 @@ export function UserAccountButton() {
   }, [user]);
 
   const avatarUrl = useMemo(
-    () => primaryPhoto
-      ? getPhotoPublicUrl(primaryPhoto.storage_path)
-      : user?.user_metadata?.avatar_url,
+    () =>
+      primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : user?.user_metadata?.avatar_url,
     [primaryPhoto, user?.user_metadata?.avatar_url]
   );
 
-  const userInitials = useMemo(
-    () => getUserInitials(user),
-    [user]
-  );
+  const userInitials = useMemo(() => getUserInitials(user), [user]);
 
-  const displayName = useMemo(
-    () => getDisplayName(user),
-    [user]
-  );
+  const displayName = useMemo(() => getDisplayName(user), [user]);
 
   if (!mounted || !user) {
     return null;
@@ -65,15 +59,13 @@ export function UserAccountButton() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg p-2 hover:bg-accent transition-colors">
+      <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-accent">
         <Avatar className="h-8 w-8">
           <AvatarImage src={avatarUrl} />
           <AvatarFallback>{userInitials}</AvatarFallback>
         </Avatar>
-        <div className="hidden sm:block text-left text-sm">
-          <p className="font-medium truncate max-w-[120px]">
-            {displayName}
-          </p>
+        <div className="hidden text-left text-sm sm:block">
+          <p className="max-w-[120px] truncate font-medium">{displayName}</p>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
@@ -83,12 +75,8 @@ export function UserAccountButton() {
             <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
           <div className="flex-1 text-sm">
-            <p className="font-medium truncate">
-              {displayName}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">
-              {user?.email}
-            </p>
+            <p className="truncate font-medium">{displayName}</p>
+            <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
           </div>
         </div>
         <DropdownMenuSeparator />

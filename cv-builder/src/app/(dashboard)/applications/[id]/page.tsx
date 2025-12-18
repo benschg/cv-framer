@@ -1,15 +1,35 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Building2,
+  Calendar,
+  Check,
+  Clock,
+  DollarSign,
+  ExternalLink,
+  FileText,
+  Lightbulb,
+  Loader2,
+  Mail,
+  MapPin,
+  Sparkles,
+  Star,
+  Trash2,
+  TrendingUp,
+  User,
+} from 'lucide-react';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useCallback,useEffect, useRef, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 import {
   Select,
   SelectContent,
@@ -17,39 +37,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import {
-  ArrowLeft,
-  Loader2,
-  ExternalLink,
-  Building2,
-  MapPin,
-  Calendar,
-  DollarSign,
-  User,
-  Mail,
-  FileText,
-  Clock,
-  Trash2,
-  Star,
-  Check,
-  Sparkles,
-  TrendingUp,
-  AlertCircle,
-  Lightbulb,
-} from 'lucide-react';
-import {
-  fetchApplication,
-  updateApplication,
-  deleteApplication,
   analyzeJobFit,
+  deleteApplication,
+  fetchApplication,
   getFitAnalysis,
+  updateApplication,
 } from '@/services/application.service';
-import { fetchAllCVs } from '@/services/cv.service';
 import { fetchCoverLetters } from '@/services/cover-letter.service';
-import type { JobApplication, CVDocument, CoverLetter, ApplicationStatus } from '@/types/cv.types';
+import { fetchAllCVs } from '@/services/cv.service';
 import type { JobFitAnalysis } from '@/types/api.schemas';
+import type { ApplicationStatus,CoverLetter, CVDocument, JobApplication } from '@/types/cv.types';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
-import { Progress } from '@/components/ui/progress';
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -187,9 +188,22 @@ export default function ApplicationDetailPage() {
 
     setSaving(false);
   }, [
-    applicationId, companyName, jobTitle, jobUrl, jobDescription, location,
-    salaryRange, status, appliedAt, deadline, notes, contactName, contactEmail,
-    linkedCvId, linkedCoverLetterId, isFavorite
+    applicationId,
+    companyName,
+    jobTitle,
+    jobUrl,
+    jobDescription,
+    location,
+    salaryRange,
+    status,
+    appliedAt,
+    deadline,
+    notes,
+    contactName,
+    contactEmail,
+    linkedCvId,
+    linkedCoverLetterId,
+    isFavorite,
   ]);
 
   // Debounced auto-save effect
@@ -212,9 +226,23 @@ export default function ApplicationDetailPage() {
       }
     };
   }, [
-    isInitialized, companyName, jobTitle, jobUrl, jobDescription, location,
-    salaryRange, status, appliedAt, deadline, notes, contactName, contactEmail,
-    linkedCvId, linkedCoverLetterId, isFavorite, performSave
+    isInitialized,
+    companyName,
+    jobTitle,
+    jobUrl,
+    jobDescription,
+    location,
+    salaryRange,
+    status,
+    appliedAt,
+    deadline,
+    notes,
+    contactName,
+    contactEmail,
+    linkedCvId,
+    linkedCoverLetterId,
+    isFavorite,
+    performSave,
   ]);
 
   // Cleanup timeouts on unmount
@@ -255,7 +283,7 @@ export default function ApplicationDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center gap-4">
           <Skeleton className="h-10 w-24" />
           <Skeleton className="h-8 w-64" />
@@ -267,7 +295,7 @@ export default function ApplicationDetailPage() {
 
   if (error && !application) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <Link href="/applications">
           <Button variant="ghost" size="sm" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
@@ -287,7 +315,7 @@ export default function ApplicationDetailPage() {
   const isOverdue = deadline && new Date(deadline) < new Date();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -320,7 +348,7 @@ export default function ApplicationDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-[80px]">
+          <div className="flex min-w-[80px] items-center gap-2 text-sm text-muted-foreground">
             {saveStatus === 'saving' && (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -333,9 +361,7 @@ export default function ApplicationDetailPage() {
                 <span className="text-green-500">Saved</span>
               </>
             )}
-            {saveStatus === 'error' && (
-              <span className="text-destructive">Error</span>
-            )}
+            {saveStatus === 'error' && <span className="text-destructive">Error</span>}
           </div>
           {jobUrl && (
             <Button variant="outline" size="sm" asChild>
@@ -380,13 +406,18 @@ export default function ApplicationDetailPage() {
                 </div>
               )}
               {deadline && (
-                <div className={`flex items-center gap-2 text-sm ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`}>
+                <div
+                  className={`flex items-center gap-2 text-sm ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`}
+                >
                   <Clock className="h-4 w-4" />
                   Deadline {formatDate(deadline)}
                 </div>
               )}
             </div>
-            <Select value={status} onValueChange={(v: string) => handleStatusChange(v as ApplicationStatus)}>
+            <Select
+              value={status}
+              onValueChange={(v: string) => handleStatusChange(v as ApplicationStatus)}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>
@@ -404,7 +435,7 @@ export default function ApplicationDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           {/* Job Details */}
           <Card>
             <CardHeader>
@@ -511,25 +542,23 @@ export default function ApplicationDetailPage() {
                 >
                   {analyzing ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Analyzing...
                     </>
                   ) : fitAnalysis ? (
                     <>
-                      <Sparkles className="h-4 w-4 mr-2" />
+                      <Sparkles className="mr-2 h-4 w-4" />
                       Re-analyze
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 mr-2" />
+                      <Sparkles className="mr-2 h-4 w-4" />
                       Analyze Fit
                     </>
                   )}
                 </Button>
               </div>
-              <CardDescription>
-                AI-powered analysis of how well you match this role
-              </CardDescription>
+              <CardDescription>AI-powered analysis of how well you match this role</CardDescription>
             </CardHeader>
             <CardContent>
               {!jobDescription.trim() ? (
@@ -567,8 +596,8 @@ export default function ApplicationDetailPage() {
                       </div>
                       <ul className="space-y-1">
                         {fitAnalysis.strengths.map((strength, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <span className="text-green-500 mt-1">•</span>
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <span className="mt-1 text-green-500">•</span>
                             {strength}
                           </li>
                         ))}
@@ -585,8 +614,8 @@ export default function ApplicationDetailPage() {
                       </div>
                       <ul className="space-y-1">
                         {fitAnalysis.gaps.map((gap, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <span className="text-amber-500 mt-1">•</span>
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <span className="mt-1 text-amber-500">•</span>
                             {gap}
                           </li>
                         ))}
@@ -603,8 +632,8 @@ export default function ApplicationDetailPage() {
                       </div>
                       <ul className="space-y-1">
                         {fitAnalysis.recommendations.map((rec, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <span className="text-blue-500 mt-1">•</span>
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <span className="mt-1 text-blue-500">•</span>
                             {rec}
                           </li>
                         ))}
@@ -699,7 +728,10 @@ export default function ApplicationDetailPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>CV</Label>
-                <Select value={linkedCvId || '__none__'} onValueChange={(v) => setLinkedCvId(v === '__none__' ? '' : v)}>
+                <Select
+                  value={linkedCvId || '__none__'}
+                  onValueChange={(v) => setLinkedCvId(v === '__none__' ? '' : v)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a CV" />
                   </SelectTrigger>
@@ -722,7 +754,10 @@ export default function ApplicationDetailPage() {
               </div>
               <div className="space-y-2">
                 <Label>Cover Letter</Label>
-                <Select value={linkedCoverLetterId || '__none__'} onValueChange={(v) => setLinkedCoverLetterId(v === '__none__' ? '' : v)}>
+                <Select
+                  value={linkedCoverLetterId || '__none__'}
+                  onValueChange={(v) => setLinkedCoverLetterId(v === '__none__' ? '' : v)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a cover letter" />
                   </SelectTrigger>
@@ -750,7 +785,7 @@ export default function ApplicationDetailPage() {
           {application && (
             <Card>
               <CardContent className="pt-6">
-                <div className="text-xs text-muted-foreground space-y-1">
+                <div className="space-y-1 text-xs text-muted-foreground">
                   <p>Created: {formatDate(application.created_at)}</p>
                   <p>Updated: {formatDate(application.updated_at)}</p>
                 </div>
@@ -761,9 +796,7 @@ export default function ApplicationDetailPage() {
       </div>
 
       {error && (
-        <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
-          {error}
-        </div>
+        <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">{error}</div>
       )}
     </div>
   );

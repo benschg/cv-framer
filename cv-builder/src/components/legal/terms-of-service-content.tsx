@@ -1,6 +1,6 @@
+import { DocumentLayoutWithToc } from '@/components/shared/document-layout-with-toc';
 import { Card, CardContent } from '@/components/ui/card';
 import { LEGAL_CONFIG } from '@/config/legal';
-import { DocumentLayoutWithToc } from '@/components/shared/document-layout-with-toc';
 
 interface TermsOfServiceContentProps {
   compact?: boolean;
@@ -40,14 +40,15 @@ export function TermsOfServiceContent({ compact = false }: TermsOfServiceContent
 // Terms of Service Content Component
 function EnglishTerms() {
   return (
-    <div className="prose prose-sm max-w-none dark:prose-invert space-y-6">
+    <div className="prose prose-sm dark:prose-invert max-w-none space-y-6">
       <section id="intro">
-        <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
+        <h1 className="mb-4 text-3xl font-bold">Terms of Service</h1>
 
-        <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900 mb-6">
+        <Card className="mb-6 border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/20">
           <CardContent className="p-4">
-            <p className="text-sm text-blue-900 dark:text-blue-100 mb-0">
-              <strong>Welcome to CV Builder.</strong> These Terms of Service govern your use of our CV building platform. By using our service, you agree to these terms.
+            <p className="mb-0 text-sm text-blue-900 dark:text-blue-100">
+              <strong>Welcome to CV Builder.</strong> These Terms of Service govern your use of our
+              CV building platform. By using our service, you agree to these terms.
             </p>
           </CardContent>
         </Card>
@@ -60,40 +61,51 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       <section id="section-1" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
+        <h2 className="mb-4 text-2xl font-semibold">1. Acceptance of Terms</h2>
         <p>
-          By accessing or using CV Builder, you agree to be bound by these Terms of Service and our Privacy Policy.
-          If you do not agree to these terms, please do not use our service.
+          By accessing or using CV Builder, you agree to be bound by these Terms of Service and our
+          Privacy Policy. If you do not agree to these terms, please do not use our service.
         </p>
-        <p>
-          You must be at least {LEGAL_CONFIG.minimumAge} years old to use this service.
-        </p>
+        <p>You must be at least {LEGAL_CONFIG.minimumAge} years old to use this service.</p>
       </section>
 
       <hr className="my-8 border-border" />
 
       <section id="section-2" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">2. Description of Service</h2>
+        <h2 className="mb-4 text-2xl font-semibold">2. Description of Service</h2>
         <p>CV Builder provides:</p>
-        <ul className="list-disc list-inside space-y-1 ml-4">
-          <li><strong>CV Creation:</strong> Tools to build and customize professional CVs</li>
-          <li><strong>Cover Letter Generation:</strong> AI-powered cover letter creation</li>
-          <li><strong>Job Application Tracking:</strong> Organize and track your job search</li>
-          <li><strong>AI-Powered Features:</strong> Content generation using Google Gemini AI (optional)</li>
-          <li><strong>File Storage:</strong> Secure storage for your career documents</li>
-          <li><strong>Public Sharing:</strong> Share your CV via public links</li>
+        <ul className="ml-4 list-inside list-disc space-y-1">
+          <li>
+            <strong>CV Creation:</strong> Tools to build and customize professional CVs
+          </li>
+          <li>
+            <strong>Cover Letter Generation:</strong> AI-powered cover letter creation
+          </li>
+          <li>
+            <strong>Job Application Tracking:</strong> Organize and track your job search
+          </li>
+          <li>
+            <strong>AI-Powered Features:</strong> Content generation using Google Gemini AI
+            (optional)
+          </li>
+          <li>
+            <strong>File Storage:</strong> Secure storage for your career documents
+          </li>
+          <li>
+            <strong>Public Sharing:</strong> Share your CV via public links
+          </li>
         </ul>
       </section>
 
       <hr className="my-8 border-border" />
 
       <section id="section-3" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">3. User Accounts</h2>
+        <h2 className="mb-4 text-2xl font-semibold">3. User Accounts</h2>
 
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-medium mb-2">3.1 Account Creation</h3>
-            <ul className="list-disc list-inside space-y-1 ml-4">
+            <h3 className="mb-2 text-lg font-medium">3.1 Account Creation</h3>
+            <ul className="ml-4 list-inside list-disc space-y-1">
               <li>You must provide accurate and complete information</li>
               <li>You are responsible for maintaining the security of your account</li>
               <li>You must not share your account credentials</li>
@@ -102,10 +114,14 @@ function EnglishTerms() {
           </div>
 
           <div>
-            <h3 className="text-lg font-medium mb-2">3.2 Account Security</h3>
+            <h3 className="mb-2 text-lg font-medium">3.2 Account Security</h3>
             <p>
-              You are responsible for all activities that occur under your account. Notify us immediately at{' '}
-              <a href={`mailto:${LEGAL_CONFIG.supportEmail}`} className="text-primary hover:underline">
+              You are responsible for all activities that occur under your account. Notify us
+              immediately at{' '}
+              <a
+                href={`mailto:${LEGAL_CONFIG.supportEmail}`}
+                className="text-primary hover:underline"
+              >
                 {LEGAL_CONFIG.supportEmail}
               </a>{' '}
               if you suspect unauthorized access.
@@ -113,10 +129,10 @@ function EnglishTerms() {
           </div>
 
           <div>
-            <h3 className="text-lg font-medium mb-2">3.3 Account Deletion</h3>
+            <h3 className="mb-2 text-lg font-medium">3.3 Account Deletion</h3>
             <p>
-              You may delete your account at any time from Settings. All your data will be permanently deleted within{' '}
-              {LEGAL_CONFIG.dataRetention.backupDeletionDays} days.
+              You may delete your account at any time from Settings. All your data will be
+              permanently deleted within {LEGAL_CONFIG.dataRetention.backupDeletionDays} days.
             </p>
           </div>
         </div>
@@ -125,16 +141,16 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       <section id="section-4" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">4. User Content</h2>
+        <h2 className="mb-4 text-2xl font-semibold">4. User Content</h2>
 
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-medium mb-2">4.1 Your Content</h3>
+            <h3 className="mb-2 text-lg font-medium">4.1 Your Content</h3>
             <p>
-              You retain all rights to the content you create (CVs, cover letters, profile data, documents).
-              By using our service, you grant us a limited license to:
+              You retain all rights to the content you create (CVs, cover letters, profile data,
+              documents). By using our service, you grant us a limited license to:
             </p>
-            <ul className="list-disc list-inside space-y-1 ml-4">
+            <ul className="ml-4 list-inside list-disc space-y-1">
               <li>Store and process your content to provide the service</li>
               <li>Send your content to Google Gemini AI when you use AI features</li>
               <li>Display your content when you create public share links</li>
@@ -142,9 +158,9 @@ function EnglishTerms() {
           </div>
 
           <div>
-            <h3 className="text-lg font-medium mb-2">4.2 Content Standards</h3>
+            <h3 className="mb-2 text-lg font-medium">4.2 Content Standards</h3>
             <p>You agree that your content will not:</p>
-            <ul className="list-disc list-inside space-y-1 ml-4">
+            <ul className="ml-4 list-inside list-disc space-y-1">
               <li>Violate any laws or regulations</li>
               <li>Infringe on intellectual property rights</li>
               <li>Contain false or misleading information</li>
@@ -154,10 +170,10 @@ function EnglishTerms() {
           </div>
 
           <div>
-            <h3 className="text-lg font-medium mb-2">4.3 Data Accuracy</h3>
+            <h3 className="mb-2 text-lg font-medium">4.3 Data Accuracy</h3>
             <p>
-              You are responsible for the accuracy of information in your CVs and cover letters.
-              We are not responsible for any consequences resulting from inaccurate information.
+              You are responsible for the accuracy of information in your CVs and cover letters. We
+              are not responsible for any consequences resulting from inaccurate information.
             </p>
           </div>
         </div>
@@ -166,12 +182,12 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       <section id="section-5" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">5. AI-Generated Content</h2>
+        <h2 className="mb-4 text-2xl font-semibold">5. AI-Generated Content</h2>
 
-        <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900 mb-4">
-          <CardContent className="p-4 space-y-3">
+        <Card className="mb-4 border-purple-200 bg-purple-50 dark:border-purple-900 dark:bg-purple-950/20">
+          <CardContent className="space-y-3 p-4">
             <p className="text-sm font-medium">When using AI features:</p>
-            <ul className="list-disc list-inside space-y-1 ml-4 text-sm">
+            <ul className="ml-4 list-inside list-disc space-y-1 text-sm">
               <li>AI-generated content is provided "as is" without guarantees</li>
               <li>You must review and verify all AI-generated content before use</li>
               <li>We are not responsible for the accuracy or quality of AI output</li>
@@ -189,10 +205,10 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       <section id="section-6" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">6. Prohibited Uses</h2>
+        <h2 className="mb-4 text-2xl font-semibold">6. Prohibited Uses</h2>
 
         <p className="mb-2">You may not:</p>
-        <ul className="list-disc list-inside space-y-1 ml-4">
+        <ul className="ml-4 list-inside list-disc space-y-1">
           <li>Use the service for any illegal purpose</li>
           <li>Attempt to gain unauthorized access to our systems</li>
           <li>Interfere with or disrupt the service</li>
@@ -208,18 +224,18 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       <section id="section-7" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">7. Termination</h2>
+        <h2 className="mb-4 text-2xl font-semibold">7. Termination</h2>
 
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-medium mb-2">7.1 By You</h3>
+            <h3 className="mb-2 text-lg font-medium">7.1 By You</h3>
             <p>You may terminate your account at any time by deleting it from Settings.</p>
           </div>
 
           <div>
-            <h3 className="text-lg font-medium mb-2">7.2 By Us</h3>
+            <h3 className="mb-2 text-lg font-medium">7.2 By Us</h3>
             <p>We may suspend or terminate your account if:</p>
-            <ul className="list-disc list-inside space-y-1 ml-4">
+            <ul className="ml-4 list-inside list-disc space-y-1">
               <li>You violate these Terms of Service</li>
               <li>You engage in prohibited activities</li>
               <li>We are required to do so by law</li>
@@ -228,10 +244,11 @@ function EnglishTerms() {
           </div>
 
           <div>
-            <h3 className="text-lg font-medium mb-2">7.3 Effect of Termination</h3>
+            <h3 className="mb-2 text-lg font-medium">7.3 Effect of Termination</h3>
             <p>
-              Upon termination, your right to use the service ends immediately.
-              Your data will be deleted according to our data retention policy ({LEGAL_CONFIG.dataRetention.backupDeletionDays} days).
+              Upon termination, your right to use the service ends immediately. Your data will be
+              deleted according to our data retention policy (
+              {LEGAL_CONFIG.dataRetention.backupDeletionDays} days).
             </p>
           </div>
         </div>
@@ -240,14 +257,17 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       <section id="section-8" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">8. Disclaimer of Warranties</h2>
+        <h2 className="mb-4 text-2xl font-semibold">8. Disclaimer of Warranties</h2>
 
-        <Card className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20">
           <CardContent className="p-4">
-            <p className="text-sm font-semibold mb-2">THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.</p>
-            <p className="text-sm mb-0">
-              We do not guarantee that the service will be uninterrupted, error-free, or secure.
-              We make no warranties regarding the accuracy, reliability, or quality of AI-generated content.
+            <p className="mb-2 text-sm font-semibold">
+              THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.
+            </p>
+            <p className="mb-0 text-sm">
+              We do not guarantee that the service will be uninterrupted, error-free, or secure. We
+              make no warranties regarding the accuracy, reliability, or quality of AI-generated
+              content.
             </p>
           </CardContent>
         </Card>
@@ -256,15 +276,17 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       <section id="section-9" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">9. Limitation of Liability</h2>
+        <h2 className="mb-4 text-2xl font-semibold">9. Limitation of Liability</h2>
 
-        <Card className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900">
+        <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20">
           <CardContent className="p-4">
-            <p className="text-sm font-semibold mb-2">TO THE MAXIMUM EXTENT PERMITTED BY LAW:</p>
-            <ul className="list-disc list-inside space-y-1 ml-4 text-sm mb-0">
+            <p className="mb-2 text-sm font-semibold">TO THE MAXIMUM EXTENT PERMITTED BY LAW:</p>
+            <ul className="mb-0 ml-4 list-inside list-disc space-y-1 text-sm">
               <li>We are not liable for any indirect, incidental, or consequential damages</li>
               <li>We are not liable for lost profits, data loss, or business interruption</li>
-              <li>Our total liability is limited to the amount you paid us in the past 12 months</li>
+              <li>
+                Our total liability is limited to the amount you paid us in the past 12 months
+              </li>
               <li>We are not responsible for third-party services (Google AI, Supabase)</li>
             </ul>
           </CardContent>
@@ -274,31 +296,45 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       <section id="section-10" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">10. Changes to Terms</h2>
-        <ul className="list-disc list-inside space-y-1 ml-4">
-          <li><strong>Notification:</strong> We will notify you by email of material changes</li>
-          <li><strong>Effective date:</strong> Changes take effect 30 days after notification</li>
-          <li><strong>Continued use:</strong> Using the service after changes constitutes acceptance</li>
-          <li><strong>Disagreement:</strong> If you disagree, delete your account before the effective date</li>
+        <h2 className="mb-4 text-2xl font-semibold">10. Changes to Terms</h2>
+        <ul className="ml-4 list-inside list-disc space-y-1">
+          <li>
+            <strong>Notification:</strong> We will notify you by email of material changes
+          </li>
+          <li>
+            <strong>Effective date:</strong> Changes take effect 30 days after notification
+          </li>
+          <li>
+            <strong>Continued use:</strong> Using the service after changes constitutes acceptance
+          </li>
+          <li>
+            <strong>Disagreement:</strong> If you disagree, delete your account before the effective
+            date
+          </li>
         </ul>
       </section>
 
       <hr className="my-8 border-border" />
 
       <section id="section-11" className="scroll-mt-4">
-        <h2 className="text-2xl font-semibold mb-4">11. Contact</h2>
+        <h2 className="mb-4 text-2xl font-semibold">11. Contact</h2>
 
         <Card>
           <CardContent className="p-4">
-            <h3 className="font-semibold mb-2">Questions about Terms of Service?</h3>
-            <div className="text-sm space-y-1">
+            <h3 className="mb-2 font-semibold">Questions about Terms of Service?</h3>
+            <div className="space-y-1 text-sm">
               <p>
                 <strong>Email:</strong>{' '}
-                <a href={`mailto:${LEGAL_CONFIG.supportEmail}`} className="text-primary hover:underline">
+                <a
+                  href={`mailto:${LEGAL_CONFIG.supportEmail}`}
+                  className="text-primary hover:underline"
+                >
                   {LEGAL_CONFIG.supportEmail}
                 </a>
               </p>
-              <p><strong>Subject:</strong> "Terms of Service Inquiry"</p>
+              <p>
+                <strong>Subject:</strong> "Terms of Service Inquiry"
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -307,19 +343,28 @@ function EnglishTerms() {
       <hr className="my-8 border-border" />
 
       {/* Summary */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-900">
+      <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 dark:border-blue-900 dark:from-blue-950/20 dark:to-purple-950/20">
         <CardContent className="p-6">
-          <h3 className="font-semibold mb-4 text-lg">Key Points</h3>
+          <h3 className="mb-4 text-lg font-semibold">Key Points</h3>
           <div className="space-y-2 text-sm">
-            <p>✅ <strong>Your Content:</strong> You own your content and can delete it anytime</p>
-            <p>✅ <strong>AI Optional:</strong> All AI features are optional to use</p>
-            <p>✅ <strong>Your Responsibility:</strong> Review all content before use</p>
-            <p>✅ <strong>No Warranties:</strong> Service provided "as is"</p>
-            <p>✅ <strong>Limited Liability:</strong> We're not responsible for job outcomes</p>
+            <p>
+              ✅ <strong>Your Content:</strong> You own your content and can delete it anytime
+            </p>
+            <p>
+              ✅ <strong>AI Optional:</strong> All AI features are optional to use
+            </p>
+            <p>
+              ✅ <strong>Your Responsibility:</strong> Review all content before use
+            </p>
+            <p>
+              ✅ <strong>No Warranties:</strong> Service provided "as is"
+            </p>
+            <p>
+              ✅ <strong>Limited Liability:</strong> We're not responsible for job outcomes
+            </p>
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
-

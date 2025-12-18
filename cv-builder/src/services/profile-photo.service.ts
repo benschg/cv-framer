@@ -1,4 +1,4 @@
-import type { ProfilePhoto, GetProfilePhotosResponse } from '@/types/api.schemas';
+import type { GetProfilePhotosResponse,ProfilePhoto } from '@/types/api.schemas';
 
 export async function fetchProfilePhotos(): Promise<{
   data?: GetProfilePhotosResponse;

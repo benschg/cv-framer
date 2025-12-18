@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import { ArrowUp,ChevronDown } from 'lucide-react';
+import { ReactNode,useEffect, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ArrowUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface TocItem {
   id: string;
@@ -51,12 +52,12 @@ export function DocumentLayoutWithToc({
   };
 
   return (
-    <div className={compact ? 'max-w-2xl' : 'max-w-6xl mx-auto'}>
+    <div className={compact ? 'max-w-2xl' : 'mx-auto max-w-6xl'}>
       {/* Metadata Card */}
       {metadata && (
-        <Card className="bg-muted/50 mb-6">
+        <Card className="mb-6 bg-muted/50">
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-muted-foreground">
+            <div className="flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
               {metadata.lastUpdated && <span>Last Updated: {metadata.lastUpdated}</span>}
               {metadata.version && <span>Version: {metadata.version}</span>}
             </div>
@@ -65,18 +66,18 @@ export function DocumentLayoutWithToc({
       )}
 
       {/* Main Layout: TOC + Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         {/* Table of Contents (Desktop Sidebar) */}
         {!compact && tocItems.length > 0 && (
-          <aside className="hidden lg:block lg:col-span-1">
+          <aside className="hidden lg:col-span-1 lg:block">
             <div className="sticky top-4">
-              <h3 className="font-semibold mb-4 text-sm">Table of Contents</h3>
+              <h3 className="mb-4 text-sm font-semibold">Table of Contents</h3>
               <nav className="space-y-1">
                 {tocItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
-                    className="block w-full text-left py-1 px-2 text-sm hover:text-primary hover:bg-muted rounded-md transition-colors text-muted-foreground"
+                    className="block w-full rounded-md px-2 py-1 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
                   >
                     {item.label}
                   </button>
@@ -90,9 +91,9 @@ export function DocumentLayoutWithToc({
         <main className={compact ? 'col-span-1' : 'lg:col-span-3'}>
           {/* Mobile TOC (Collapsible) */}
           {!compact && tocItems.length > 0 && (
-            <div className="lg:hidden mb-6">
+            <div className="mb-6 lg:hidden">
               <Collapsible>
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted rounded-lg hover:bg-muted/80">
+                <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg bg-muted p-4 hover:bg-muted/80">
                   <span className="font-semibold">Table of Contents</span>
                   <ChevronDown className="h-5 w-5" />
                 </CollapsibleTrigger>
@@ -102,7 +103,7 @@ export function DocumentLayoutWithToc({
                       <button
                         key={item.id}
                         onClick={() => scrollToSection(item.id)}
-                        className="block w-full text-left py-1 px-2 text-sm hover:text-primary hover:bg-muted rounded-md"
+                        className="block w-full rounded-md px-2 py-1 text-left text-sm hover:bg-muted hover:text-primary"
                       >
                         {item.label}
                       </button>
@@ -123,7 +124,7 @@ export function DocumentLayoutWithToc({
         <Button
           onClick={scrollToTop}
           size="icon"
-          className="fixed bottom-8 right-8 rounded-full shadow-lg z-50"
+          className="fixed bottom-8 right-8 z-50 rounded-full shadow-lg"
           aria-label="Scroll to top"
         >
           <ArrowUp className="h-5 w-5" />

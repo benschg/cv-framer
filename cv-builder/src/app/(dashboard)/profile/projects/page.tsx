@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { ProjectsManager } from '@/components/profile/projects-manager';
+import { useRef,useState } from 'react';
+
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { ProjectsManager } from '@/components/profile/projects-manager';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function ProjectsPage() {

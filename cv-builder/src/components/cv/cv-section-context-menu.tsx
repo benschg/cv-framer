@@ -1,13 +1,12 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import {
-  ContextMenuSeparator,
-  ContextMenuItem,
-} from '@/components/ui/context-menu';
 import { Settings } from 'lucide-react';
-import { CVBaseSectionContextMenu } from './cv-base-section-context-menu';
+import type { ReactNode } from 'react';
+
+import { ContextMenuItem,ContextMenuSeparator } from '@/components/ui/context-menu';
 import type { CVMainSection } from '@/types/cv-layout.types';
+
+import { CVBaseSectionContextMenu } from './cv-base-section-context-menu';
 
 interface CVSectionContextMenuProps {
   children: ReactNode;
@@ -45,10 +44,7 @@ export function CVSectionContextMenu({
     <>
       {/* Configure section (for future expansion) */}
       {onConfigureSection && (
-        <ContextMenuItem
-          onClick={() => onConfigureSection(sectionType)}
-          className="gap-2"
-        >
+        <ContextMenuItem onClick={() => onConfigureSection(sectionType)} className="gap-2">
           <Settings className="h-4 w-4" />
           Configure...
         </ContextMenuItem>
@@ -58,10 +54,7 @@ export function CVSectionContextMenu({
       {onPageProperties && (
         <>
           <ContextMenuSeparator />
-          <ContextMenuItem
-            onClick={() => onPageProperties(pageIndex)}
-            className="gap-2"
-          >
+          <ContextMenuItem onClick={() => onPageProperties(pageIndex)} className="gap-2">
             <Settings className="h-4 w-4" />
             Page Properties...
           </ContextMenuItem>

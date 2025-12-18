@@ -1,23 +1,25 @@
 'use client';
 
+import { Loader2, Plus, Trash2, X } from 'lucide-react';
 import { forwardRef, useImperativeHandle, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Trash2, Loader2, Plus, X } from 'lucide-react';
+import { useAppTranslation } from '@/hooks/use-app-translation';
+import { useProfileManager } from '@/hooks/use-profile-manager';
 import {
-  fetchSkillCategories,
   createSkillCategory,
   deleteSkillCategory,
-  updateSkillCategory,
+  fetchSkillCategories,
   type ProfileSkillCategory,
+  updateSkillCategory,
 } from '@/services/profile-career.service';
-import { useProfileManager } from '@/hooks/use-profile-manager';
+
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
-import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface SkillsManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -30,91 +32,86 @@ export interface SkillsManagerRef {
 
 export const SkillsManager = forwardRef<SkillsManagerRef, SkillsManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
-  const { t } = useAppTranslation();
-  const {
-    items: skillCategories,
-    isExpanded,
-    getFormData,
-    loading,
-    saving,
-    handleAdd,
-    handleEdit,
-    handleDelete,
-    handleDone,
-    handleFieldChange,
-    handleDragEnd,
-  } = useProfileManager<ProfileSkillCategory>({
-    fetchItems: fetchSkillCategories,
-    createItem: createSkillCategory,
-    updateItem: updateSkillCategory,
-    deleteItem: deleteSkillCategory,
-    defaultItem: {
-      category: '',
-      skills: [],
-    },
-    onSavingChange,
-    onSaveSuccessChange,
-  });
+    const { t } = useAppTranslation();
+    const {
+      items: skillCategories,
+      isExpanded,
+      getFormData,
+      loading,
+      saving,
+      handleAdd,
+      handleEdit,
+      handleDelete,
+      handleDone,
+      handleFieldChange,
+      handleDragEnd,
+    } = useProfileManager<ProfileSkillCategory>({
+      fetchItems: fetchSkillCategories,
+      createItem: createSkillCategory,
+      updateItem: updateSkillCategory,
+      deleteItem: deleteSkillCategory,
+      defaultItem: {
+        category: '',
+        skills: [],
+      },
+      onSavingChange,
+      onSaveSuccessChange,
+    });
 
-  // Expose methods to parent via ref
-  useImperativeHandle(ref, () => ({
-    handleAdd,
-  }));
+    // Expose methods to parent via ref
+    useImperativeHandle(ref, () => ({
+      handleAdd,
+    }));
 
-  if (loading) {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <ProfileCardManager
+        items={skillCategories}
+        onDragEnd={handleDragEnd}
+        renderCard={(category) => {
+          const expanded = isExpanded(category.id);
+          const formData = getFormData(category.id);
+          return (
+            <SortableCard id={category.id} disabled={false} showDragHandle={!expanded}>
+              {expanded ? (
+                <SkillCategoryEditForm
+                  formData={formData}
+                  onFieldChange={(field, value) => handleFieldChange(category.id, field, value)}
+                  onDone={() => handleDone(category.id)}
+                  t={t}
+                />
+              ) : (
+                <SkillCategoryViewCard
+                  category={category}
+                  onEdit={() => handleEdit(category)}
+                  onDelete={() => handleDelete(category.id)}
+                  disabled={saving}
+                  t={t}
+                />
+              )}
+            </SortableCard>
+          );
+        }}
+        renderDragOverlay={(category) => <SkillCategoryCardOverlay category={category} />}
+        emptyState={
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <p>{t('profile.skills.empty')}</p>
+              <p className="mt-1 text-sm">{t('profile.skills.emptyAction')}</p>
+            </CardContent>
+          </Card>
+        }
+      />
     );
   }
-
-  return (
-    <ProfileCardManager
-      items={skillCategories}
-      onDragEnd={handleDragEnd}
-      renderCard={(category) => {
-        const expanded = isExpanded(category.id);
-        const formData = getFormData(category.id);
-        return (
-          <SortableCard
-            id={category.id}
-            disabled={false}
-            showDragHandle={!expanded}
-          >
-            {expanded ? (
-              <SkillCategoryEditForm
-                formData={formData}
-                onFieldChange={(field, value) => handleFieldChange(category.id, field, value)}
-                onDone={() => handleDone(category.id)}
-                t={t}
-              />
-            ) : (
-              <SkillCategoryViewCard
-                category={category}
-                onEdit={() => handleEdit(category)}
-                onDelete={() => handleDelete(category.id)}
-                disabled={saving}
-                t={t}
-              />
-            )}
-          </SortableCard>
-        );
-      }}
-      renderDragOverlay={(category) => (
-        <SkillCategoryCardOverlay category={category} />
-      )}
-      emptyState={
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <p>{t('profile.skills.empty')}</p>
-            <p className="text-sm mt-1">{t('profile.skills.emptyAction')}</p>
-          </CardContent>
-        </Card>
-      }
-    />
-  );
-});
+);
 
 SkillsManager.displayName = 'SkillsManager';
 
@@ -126,12 +123,7 @@ interface SkillCategoryEditFormProps {
   t: (key: string) => string;
 }
 
-function SkillCategoryEditForm({
-  formData,
-  onFieldChange,
-  onDone,
-  t,
-}: SkillCategoryEditFormProps) {
+function SkillCategoryEditForm({ formData, onFieldChange, onDone, t }: SkillCategoryEditFormProps) {
   const [skillInput, setSkillInput] = useState('');
 
   const handleAddSkill = () => {
@@ -188,7 +180,7 @@ function SkillCategoryEditForm({
             </Button>
           </div>
           {(formData.skills || []).length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="mt-3 flex flex-wrap gap-2">
               {(formData.skills || []).map((skill, index) => (
                 <Badge key={index} variant="secondary" className="gap-1">
                   {skill}
@@ -231,23 +223,15 @@ function SkillCategoryViewCard({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle>{category.category}</CardTitle>
-            <CardDescription>{category.skills.length} {t('profile.skills.skillsCount')}</CardDescription>
+            <CardDescription>
+              {category.skills.length} {t('profile.skills.skillsCount')}
+            </CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEdit}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onEdit} disabled={disabled}>
               {t('profile.skills.editButton')}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onDelete}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onDelete} disabled={disabled}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -269,7 +253,7 @@ function SkillCategoryViewCard({
 // Overlay component shown while dragging
 function SkillCategoryCardOverlay({ category }: { category: ProfileSkillCategory }) {
   return (
-    <Card className="shadow-xl rotate-3 cursor-grabbing opacity-80">
+    <Card className="rotate-3 cursor-grabbing opacity-80 shadow-xl">
       <CardHeader>
         <div>
           <CardTitle>{category.category}</CardTitle>

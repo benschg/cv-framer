@@ -1,15 +1,21 @@
-import type { CVContent, CVDocument, UserProfile, DisplaySettings, LanguageSkill } from '@/types/cv.types';
-import type {
-  CVWorkExperienceWithSelection,
-  CVEducationWithSelection,
-  CVSkillCategoryWithSelection,
-  CVKeyCompetenceWithSelection,
-} from '@/types/profile-career.types';
-import type { CVLayoutConfig, CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
-import { getDefaultLayout } from '@/lib/cv-layouts';
 import { getDisplayModeContent } from '@/lib/cv-display-mode';
+import { getDefaultLayout } from '@/lib/cv-layouts';
 import { filterSelectedSkills } from '@/lib/cv-skill-filter';
 import { formatDateRange } from '@/lib/utils';
+import type {
+  CVContent,
+  CVDocument,
+  DisplaySettings,
+  LanguageSkill,
+  UserProfile,
+} from '@/types/cv.types';
+import type { CVLayoutConfig, CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
+import type {
+  CVEducationWithSelection,
+  CVKeyCompetenceWithSelection,
+  CVSkillCategoryWithSelection,
+  CVWorkExperienceWithSelection,
+} from '@/types/profile-career.types';
 
 export interface CVTemplateData {
   cv: CVDocument;
@@ -27,7 +33,16 @@ export interface CVTemplateData {
  * Produces HTML that matches the CVDocument React component structure
  */
 export function generateCVHTML(data: CVTemplateData): string {
-  const { cv, userProfile, photoUrl, workExperiences, educations, skillCategories, keyCompetences, layoutConfig } = data;
+  const {
+    cv,
+    userProfile,
+    photoUrl,
+    workExperiences,
+    educations,
+    skillCategories,
+    keyCompetences,
+    layoutConfig,
+  } = data;
   const content = cv.content;
   const language = cv.language || 'en';
 
@@ -82,21 +97,24 @@ export function generateCVHTML(data: CVTemplateData): string {
     contact: language === 'de' ? 'Kontakt' : 'Contact',
     languages: language === 'de' ? 'Sprachen' : 'Languages',
     certifications: language === 'de' ? 'Zertifikate' : 'Certifications',
-    availableOnRequest: language === 'de' ? 'Vollständige Kontaktdaten auf Anfrage' : 'Full contact details available on request',
+    availableOnRequest:
+      language === 'de'
+        ? 'Vollständige Kontaktdaten auf Anfrage'
+        : 'Full contact details available on request',
   };
 
   // Filter to selected items
   const selectedWorkExperiences = showWorkExperience
-    ? (workExperiences?.filter(exp => exp.selection.is_selected) || [])
+    ? workExperiences?.filter((exp) => exp.selection.is_selected) || []
     : [];
   const selectedEducations = showEducation
-    ? (educations?.filter(edu => edu.selection.is_selected) || [])
+    ? educations?.filter((edu) => edu.selection.is_selected) || []
     : [];
   const selectedSkillCategories = showSkills
-    ? (skillCategories?.filter(cat => cat.selection.is_selected) || [])
+    ? skillCategories?.filter((cat) => cat.selection.is_selected) || []
     : [];
   const selectedKeyCompetences = showKeyCompetences
-    ? (keyCompetences?.filter(comp => comp.selection.is_selected) || [])
+    ? keyCompetences?.filter((comp) => comp.selection.is_selected) || []
     : [];
 
   // Get CSS styles
@@ -643,23 +661,25 @@ function generatePages(
       const isFirstPage = index === 0;
 
       // Determine sidebar position (default to 'left' if sidebar has content and mode is two-column)
-      const sidebarPosition = pageLayout.sidebarPosition ??
+      const sidebarPosition =
+        pageLayout.sidebarPosition ??
         (pageLayout.sidebar.length > 0 && layout.mode === 'two-column' ? 'left' : 'none');
       const hasSidebar = sidebarPosition !== 'none' && pageLayout.sidebar.length > 0;
-      const sidebarClass = sidebarPosition === 'right' ? 'cv-two-column cv-sidebar-right' : 'cv-two-column';
+      const sidebarClass =
+        sidebarPosition === 'right' ? 'cv-two-column cv-sidebar-right' : 'cv-two-column';
 
       const pageContent = hasSidebar
         ? `
           <div class="${sidebarClass}">
             ${generateSidebar(pageLayout.sidebar, userProfile, content, photoUrl, skillCategories, educations, isFirstPage && showPhoto, privacyLevel !== 'none', labels, language)}
             <div class="cv-main-content">
-              ${pageLayout.main.map(section => generateMainSection(section, content, userProfile, workExperiences, educations, skillCategories, keyCompetences, labels, language)).join('')}
+              ${pageLayout.main.map((section) => generateMainSection(section, content, userProfile, workExperiences, educations, skillCategories, keyCompetences, labels, language)).join('')}
             </div>
           </div>
         `
         : `
           <div class="cv-main-content cv-full-width">
-            ${pageLayout.main.map(section => generateMainSection(section, content, userProfile, workExperiences, educations, skillCategories, keyCompetences, labels, language)).join('')}
+            ${pageLayout.main.map((section) => generateMainSection(section, content, userProfile, workExperiences, educations, skillCategories, keyCompetences, labels, language)).join('')}
           </div>
         `;
 
@@ -694,7 +714,7 @@ function pageHasContent(
   skillCategories: CVSkillCategoryWithSelection[],
   keyCompetences: CVKeyCompetenceWithSelection[]
 ): boolean {
-  const mainSections = page.main.filter(section => {
+  const mainSections = page.main.filter((section) => {
     switch (section) {
       case 'header':
         return true;
@@ -730,103 +750,121 @@ function generateSidebar(
 ): string {
   return `
     <div class="cv-sidebar">
-      ${sections.map(section => {
-        switch (section) {
-          case 'photo':
-            if (!showPhoto || !photoUrl) return '';
-            return `
+      ${sections
+        .map((section) => {
+          switch (section) {
+            case 'photo':
+              if (!showPhoto || !photoUrl) return '';
+              return `
               <div class="cv-sidebar-photo">
                 <img src="${photoUrl}" alt="${userProfile?.first_name || 'Profile'}" />
               </div>
             `;
 
-          case 'contact':
-            return `
+            case 'contact':
+              return `
               <div class="cv-sidebar-section">
                 <h3 class="cv-sidebar-title">${labels.contact}</h3>
                 <div class="cv-sidebar-contact">
-                  ${showPrivateInfo ? `
+                  ${
+                    showPrivateInfo
+                      ? `
                     ${userProfile?.email ? `<div class="cv-sidebar-contact-item">${userProfile.email}</div>` : ''}
                     ${userProfile?.phone ? `<div class="cv-sidebar-contact-item">${userProfile.phone}</div>` : ''}
                     ${userProfile?.location ? `<div class="cv-sidebar-contact-item">${userProfile.location}</div>` : ''}
                     ${userProfile?.linkedin_url ? `<div class="cv-sidebar-contact-item">LinkedIn</div>` : ''}
                     ${userProfile?.website_url ? `<div class="cv-sidebar-contact-item">${userProfile.website_url}</div>` : ''}
-                  ` : `
+                  `
+                      : `
                     ${userProfile?.website_url ? `<div class="cv-sidebar-contact-item">${userProfile.website_url}</div>` : ''}
                     <p style="font-size: 0.6rem; color: var(--cv-text-muted); font-style: italic;">${labels.availableOnRequest}</p>
-                  `}
+                  `
+                  }
                 </div>
               </div>
             `;
 
-          case 'skills':
-            if (skillCategories.length === 0) return '';
-            const allSkills = skillCategories.flatMap(cat =>
-              filterSelectedSkills(cat.skills, cat.selection.selected_skill_indices)
-            );
-            return `
+            case 'skills':
+              if (skillCategories.length === 0) return '';
+              const allSkills = skillCategories.flatMap((cat) =>
+                filterSelectedSkills(cat.skills, cat.selection.selected_skill_indices)
+              );
+              return `
               <div class="cv-sidebar-section">
                 <h3 class="cv-sidebar-title">${labels.skills}</h3>
                 <div class="cv-sidebar-skills">
-                  ${allSkills.map(skill => `<span class="cv-sidebar-skill">${skill}</span>`).join('')}
+                  ${allSkills.map((skill) => `<span class="cv-sidebar-skill">${skill}</span>`).join('')}
                 </div>
               </div>
             `;
 
-          case 'languages':
-            if (!content.languages || content.languages.length === 0) return '';
-            return `
+            case 'languages':
+              if (!content.languages || content.languages.length === 0) return '';
+              return `
               <div class="cv-sidebar-section">
                 <h3 class="cv-sidebar-title">${labels.languages}</h3>
                 <div class="cv-sidebar-languages">
-                  ${content.languages.map(lang => `
+                  ${content.languages
+                    .map(
+                      (lang) => `
                     <div class="cv-sidebar-language">
                       <span class="cv-sidebar-language-name">${lang.name}</span>
                       <span class="cv-sidebar-language-level">${formatLanguageLevel(lang.level, language)}</span>
                     </div>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </div>
               </div>
             `;
 
-          case 'education':
-            if (educations.length === 0) return '';
-            return `
+            case 'education':
+              if (educations.length === 0) return '';
+              return `
               <div class="cv-sidebar-section">
                 <h3 class="cv-sidebar-title">${labels.education}</h3>
                 <div class="cv-sidebar-list">
-                  ${educations.map(edu => `
+                  ${educations
+                    .map(
+                      (edu) => `
                     <div class="cv-sidebar-list-item">
                       <span class="cv-sidebar-list-title">${edu.degree}</span>
                       <span class="cv-sidebar-list-subtitle">${edu.institution}</span>
                       <span class="cv-sidebar-list-year">${formatDateRange(edu.start_date, edu.end_date)}</span>
                     </div>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </div>
               </div>
             `;
 
-          case 'certifications':
-            if (!content.certifications || content.certifications.length === 0) return '';
-            return `
+            case 'certifications':
+              if (!content.certifications || content.certifications.length === 0) return '';
+              return `
               <div class="cv-sidebar-section">
                 <h3 class="cv-sidebar-title">${labels.certifications}</h3>
                 <div class="cv-sidebar-list">
-                  ${content.certifications.map(cert => `
+                  ${content.certifications
+                    .map(
+                      (cert) => `
                     <div class="cv-sidebar-list-item">
                       <span class="cv-sidebar-list-title">${cert.name}</span>
                       <span class="cv-sidebar-list-subtitle">${cert.issuer}</span>
                       ${cert.date ? `<span class="cv-sidebar-list-year">${cert.date}</span>` : ''}
                     </div>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </div>
               </div>
             `;
 
-          default:
-            return '';
-        }
-      }).join('')}
+            default:
+              return '';
+          }
+        })
+        .join('')}
     </div>
   `;
 }
@@ -844,7 +882,9 @@ function generateMainSection(
 ): string {
   const name = userProfile
     ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim()
-    : language === 'de' ? 'Ihr Name' : 'Your Name';
+    : language === 'de'
+      ? 'Ihr Name'
+      : 'Your Name';
 
   switch (sectionType) {
     case 'header':
@@ -876,10 +916,11 @@ function generateMainSection(
       return `
         <section class="cv-section cv-experience">
           <h2>${labels.workExperience}</h2>
-          ${workExperiences.map(exp => {
-            const displayMode = exp.selection.display_mode || 'custom';
-            const { description, bullets } = getDisplayModeContent(exp, displayMode);
-            return `
+          ${workExperiences
+            .map((exp) => {
+              const displayMode = exp.selection.display_mode || 'custom';
+              const { description, bullets } = getDisplayModeContent(exp, displayMode);
+              return `
               <div class="cv-experience-entry">
                 <div class="cv-experience-header">
                   <h3>${exp.title}</h3>
@@ -887,14 +928,19 @@ function generateMainSection(
                 </div>
                 <p class="cv-experience-company">${exp.company}${exp.location ? `, ${exp.location}` : ''}</p>
                 ${description ? `<p class="cv-experience-description">${description}</p>` : ''}
-                ${bullets && bullets.length > 0 ? `
+                ${
+                  bullets && bullets.length > 0
+                    ? `
                   <ul class="cv-experience-achievements">
-                    ${bullets.map(bullet => `<li>${bullet}</li>`).join('')}
+                    ${bullets.map((bullet) => `<li>${bullet}</li>`).join('')}
                   </ul>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
             `;
-          }).join('')}
+            })
+            .join('')}
         </section>
       `;
 
@@ -903,9 +949,10 @@ function generateMainSection(
       return `
         <section class="cv-section cv-education">
           <h2>${labels.education}</h2>
-          ${educations.map(edu => {
-            const description = edu.selection.description_override ?? edu.description;
-            return `
+          ${educations
+            .map((edu) => {
+              const description = edu.selection.description_override ?? edu.description;
+              return `
               <div class="cv-education-entry">
                 <div class="cv-education-header">
                   <h3>${edu.degree}</h3>
@@ -916,7 +963,8 @@ function generateMainSection(
                 ${description ? `<p class="cv-experience-description">${description}</p>` : ''}
               </div>
             `;
-          }).join('')}
+            })
+            .join('')}
         </section>
       `;
 
@@ -926,17 +974,22 @@ function generateMainSection(
         <section class="cv-section cv-skills">
           <h2>${labels.skills}</h2>
           <div class="cv-skills-categories">
-            ${skillCategories.map(cat => {
-              const skills = filterSelectedSkills(cat.skills, cat.selection.selected_skill_indices);
-              return `
+            ${skillCategories
+              .map((cat) => {
+                const skills = filterSelectedSkills(
+                  cat.skills,
+                  cat.selection.selected_skill_indices
+                );
+                return `
                 <div class="cv-skills-category">
                   <span class="cv-skills-category-name">${cat.category}:</span>
                   <div class="cv-skills-list">
-                    ${skills.map(skill => `<span class="cv-skill-chip">${skill}</span>`).join('')}
+                    ${skills.map((skill) => `<span class="cv-skill-chip">${skill}</span>`).join('')}
                   </div>
                 </div>
               `;
-            }).join('')}
+              })
+              .join('')}
           </div>
         </section>
       `;
@@ -947,15 +1000,17 @@ function generateMainSection(
         <section class="cv-section cv-key-competences">
           <h2>${labels.keyCompetences}</h2>
           <div class="cv-competences-list">
-            ${keyCompetences.map(comp => {
-              const description = comp.selection.description_override ?? comp.description;
-              return `
+            ${keyCompetences
+              .map((comp) => {
+                const description = comp.selection.description_override ?? comp.description;
+                return `
                 <div class="cv-competence-item">
                   <span class="cv-competence-title">${comp.title}</span>
                   ${description ? `<p class="cv-competence-description">${description}</p>` : ''}
                 </div>
               `;
-            }).join('')}
+              })
+              .join('')}
           </div>
         </section>
       `;

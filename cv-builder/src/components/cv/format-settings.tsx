@@ -1,15 +1,23 @@
 'use client';
 
+import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { ChevronDown } from 'lucide-react';
-import { PageLayoutConfigurator } from './page-layout-configurator';
 import type { DisplaySettings, PageLayoutOverride } from '@/types/cv.types';
+
+import { PageLayoutConfigurator } from './page-layout-configurator';
 
 interface FormatSettingsProps {
   displaySettings?: Partial<DisplaySettings> | null;
@@ -23,192 +31,302 @@ export function FormatSettings({ displaySettings, onUpdateSettings }: FormatSett
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+          <CardHeader className="cursor-pointer transition-colors hover:bg-muted/50">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Format Settings</CardTitle>
-                <CardDescription>
-                  Customize the appearance and layout of your CV
-                </CardDescription>
+                <CardDescription>Customize the appearance and layout of your CV</CardDescription>
               </div>
-              <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`h-5 w-5 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
+              />
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="space-y-4 pt-0">
-        <div className="flex flex-wrap gap-3">
-          {/* Font Family */}
-          <div className="space-y-2 flex-1 min-w-[180px]">
-            <Label htmlFor="fontFamily" className="text-xs">Font</Label>
-            <Select
-              value={displaySettings?.fontFamily || 'sans-serif'}
-              onValueChange={(value) => onUpdateSettings('fontFamily', value)}
-            >
-              <SelectTrigger id="fontFamily" className="h-9">
-                <SelectValue placeholder="Select font" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {/* Default System Fonts */}
-                <SelectItem value="sans-serif" style={{ fontFamily: 'sans-serif' }}>Sans Serif (Default)</SelectItem>
-                <SelectItem value="serif" style={{ fontFamily: 'serif' }}>Serif (Default)</SelectItem>
+            <div className="flex flex-wrap gap-3">
+              {/* Font Family */}
+              <div className="min-w-[180px] flex-1 space-y-2">
+                <Label htmlFor="fontFamily" className="text-xs">
+                  Font
+                </Label>
+                <Select
+                  value={displaySettings?.fontFamily || 'sans-serif'}
+                  onValueChange={(value) => onUpdateSettings('fontFamily', value)}
+                >
+                  <SelectTrigger id="fontFamily" className="h-9">
+                    <SelectValue placeholder="Select font" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {/* Default System Fonts */}
+                    <SelectItem value="sans-serif" style={{ fontFamily: 'sans-serif' }}>
+                      Sans Serif (Default)
+                    </SelectItem>
+                    <SelectItem value="serif" style={{ fontFamily: 'serif' }}>
+                      Serif (Default)
+                    </SelectItem>
 
-                {/* Classic Professional Fonts */}
-                <SelectItem value="'Arial', sans-serif" style={{ fontFamily: 'Arial, sans-serif' }}>Arial</SelectItem>
-                <SelectItem value="'Helvetica', sans-serif" style={{ fontFamily: 'Helvetica, sans-serif' }}>Helvetica</SelectItem>
-                <SelectItem value="'Calibri', sans-serif" style={{ fontFamily: 'Calibri, sans-serif' }}>Calibri</SelectItem>
-                <SelectItem value="'Verdana', sans-serif" style={{ fontFamily: 'Verdana, sans-serif' }}>Verdana</SelectItem>
-                <SelectItem value="'Tahoma', sans-serif" style={{ fontFamily: 'Tahoma, sans-serif' }}>Tahoma</SelectItem>
+                    {/* Classic Professional Fonts */}
+                    <SelectItem
+                      value="'Arial', sans-serif"
+                      style={{ fontFamily: 'Arial, sans-serif' }}
+                    >
+                      Arial
+                    </SelectItem>
+                    <SelectItem
+                      value="'Helvetica', sans-serif"
+                      style={{ fontFamily: 'Helvetica, sans-serif' }}
+                    >
+                      Helvetica
+                    </SelectItem>
+                    <SelectItem
+                      value="'Calibri', sans-serif"
+                      style={{ fontFamily: 'Calibri, sans-serif' }}
+                    >
+                      Calibri
+                    </SelectItem>
+                    <SelectItem
+                      value="'Verdana', sans-serif"
+                      style={{ fontFamily: 'Verdana, sans-serif' }}
+                    >
+                      Verdana
+                    </SelectItem>
+                    <SelectItem
+                      value="'Tahoma', sans-serif"
+                      style={{ fontFamily: 'Tahoma, sans-serif' }}
+                    >
+                      Tahoma
+                    </SelectItem>
 
-                {/* Serif Fonts */}
-                <SelectItem value="'Times New Roman', serif" style={{ fontFamily: 'Times New Roman, serif' }}>Times New Roman</SelectItem>
-                <SelectItem value="'Georgia', serif" style={{ fontFamily: 'Georgia, serif' }}>Georgia</SelectItem>
-                <SelectItem value="'Garamond', serif" style={{ fontFamily: 'Garamond, serif' }}>Garamond</SelectItem>
-                <SelectItem value="'Palatino', serif" style={{ fontFamily: 'Palatino, serif' }}>Palatino</SelectItem>
-                <SelectItem value="'Cambria', serif" style={{ fontFamily: 'Cambria, serif' }}>Cambria</SelectItem>
+                    {/* Serif Fonts */}
+                    <SelectItem
+                      value="'Times New Roman', serif"
+                      style={{ fontFamily: 'Times New Roman, serif' }}
+                    >
+                      Times New Roman
+                    </SelectItem>
+                    <SelectItem value="'Georgia', serif" style={{ fontFamily: 'Georgia, serif' }}>
+                      Georgia
+                    </SelectItem>
+                    <SelectItem value="'Garamond', serif" style={{ fontFamily: 'Garamond, serif' }}>
+                      Garamond
+                    </SelectItem>
+                    <SelectItem value="'Palatino', serif" style={{ fontFamily: 'Palatino, serif' }}>
+                      Palatino
+                    </SelectItem>
+                    <SelectItem value="'Cambria', serif" style={{ fontFamily: 'Cambria, serif' }}>
+                      Cambria
+                    </SelectItem>
 
-                {/* Modern Sans-Serif */}
-                <SelectItem value="'Roboto', sans-serif" style={{ fontFamily: 'Roboto, sans-serif' }}>Roboto</SelectItem>
-                <SelectItem value="'Open Sans', sans-serif" style={{ fontFamily: 'Open Sans, sans-serif' }}>Open Sans</SelectItem>
-                <SelectItem value="'Lato', sans-serif" style={{ fontFamily: 'Lato, sans-serif' }}>Lato</SelectItem>
-                <SelectItem value="'Montserrat', sans-serif" style={{ fontFamily: 'Montserrat, sans-serif' }}>Montserrat</SelectItem>
-                <SelectItem value="'Source Sans Pro', sans-serif" style={{ fontFamily: 'Source Sans Pro, sans-serif' }}>Source Sans Pro</SelectItem>
-                <SelectItem value="'Inter', sans-serif" style={{ fontFamily: 'Inter, sans-serif' }}>Inter</SelectItem>
-                <SelectItem value="'Work Sans', sans-serif" style={{ fontFamily: 'Work Sans, sans-serif' }}>Work Sans</SelectItem>
+                    {/* Modern Sans-Serif */}
+                    <SelectItem
+                      value="'Roboto', sans-serif"
+                      style={{ fontFamily: 'Roboto, sans-serif' }}
+                    >
+                      Roboto
+                    </SelectItem>
+                    <SelectItem
+                      value="'Open Sans', sans-serif"
+                      style={{ fontFamily: 'Open Sans, sans-serif' }}
+                    >
+                      Open Sans
+                    </SelectItem>
+                    <SelectItem
+                      value="'Lato', sans-serif"
+                      style={{ fontFamily: 'Lato, sans-serif' }}
+                    >
+                      Lato
+                    </SelectItem>
+                    <SelectItem
+                      value="'Montserrat', sans-serif"
+                      style={{ fontFamily: 'Montserrat, sans-serif' }}
+                    >
+                      Montserrat
+                    </SelectItem>
+                    <SelectItem
+                      value="'Source Sans Pro', sans-serif"
+                      style={{ fontFamily: 'Source Sans Pro, sans-serif' }}
+                    >
+                      Source Sans Pro
+                    </SelectItem>
+                    <SelectItem
+                      value="'Inter', sans-serif"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                    >
+                      Inter
+                    </SelectItem>
+                    <SelectItem
+                      value="'Work Sans', sans-serif"
+                      style={{ fontFamily: 'Work Sans, sans-serif' }}
+                    >
+                      Work Sans
+                    </SelectItem>
 
-                {/* Professional Serif */}
-                <SelectItem value="'Merriweather', serif" style={{ fontFamily: 'Merriweather, serif' }}>Merriweather</SelectItem>
-                <SelectItem value="'Playfair Display', serif" style={{ fontFamily: 'Playfair Display, serif' }}>Playfair Display</SelectItem>
-                <SelectItem value="'PT Serif', serif" style={{ fontFamily: 'PT Serif, serif' }}>PT Serif</SelectItem>
+                    {/* Professional Serif */}
+                    <SelectItem
+                      value="'Merriweather', serif"
+                      style={{ fontFamily: 'Merriweather, serif' }}
+                    >
+                      Merriweather
+                    </SelectItem>
+                    <SelectItem
+                      value="'Playfair Display', serif"
+                      style={{ fontFamily: 'Playfair Display, serif' }}
+                    >
+                      Playfair Display
+                    </SelectItem>
+                    <SelectItem value="'PT Serif', serif" style={{ fontFamily: 'PT Serif, serif' }}>
+                      PT Serif
+                    </SelectItem>
 
-                {/* Monospace (for technical CVs) */}
-                <SelectItem value="'Courier New', monospace" style={{ fontFamily: 'Courier New, monospace' }}>Courier New</SelectItem>
-                <SelectItem value="'Consolas', monospace" style={{ fontFamily: 'Consolas, monospace' }}>Consolas</SelectItem>
-                <SelectItem value="'Monaco', monospace" style={{ fontFamily: 'Monaco, monospace' }}>Monaco</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                    {/* Monospace (for technical CVs) */}
+                    <SelectItem
+                      value="'Courier New', monospace"
+                      style={{ fontFamily: 'Courier New, monospace' }}
+                    >
+                      Courier New
+                    </SelectItem>
+                    <SelectItem
+                      value="'Consolas', monospace"
+                      style={{ fontFamily: 'Consolas, monospace' }}
+                    >
+                      Consolas
+                    </SelectItem>
+                    <SelectItem
+                      value="'Monaco', monospace"
+                      style={{ fontFamily: 'Monaco, monospace' }}
+                    >
+                      Monaco
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Accent Color */}
-          <div className="space-y-2 min-w-[140px]">
-            <Label htmlFor="accentColor" className="text-xs">Accent</Label>
-            <div className="flex gap-2">
-              <Input
-                id="accentColor"
-                type="color"
-                value={displaySettings?.accentColor || '#2563eb'}
-                onChange={(e) => onUpdateSettings('accentColor', e.target.value)}
-                className="w-12 h-9 p-1 cursor-pointer"
-              />
-              <Input
-                type="text"
-                value={displaySettings?.accentColor || '#2563eb'}
-                onChange={(e) => onUpdateSettings('accentColor', e.target.value)}
-                placeholder="#2563eb"
-                className="w-20 h-9 font-mono text-xs"
-              />
+              {/* Accent Color */}
+              <div className="min-w-[140px] space-y-2">
+                <Label htmlFor="accentColor" className="text-xs">
+                  Accent
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="accentColor"
+                    type="color"
+                    value={displaySettings?.accentColor || '#2563eb'}
+                    onChange={(e) => onUpdateSettings('accentColor', e.target.value)}
+                    className="h-9 w-12 cursor-pointer p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={displaySettings?.accentColor || '#2563eb'}
+                    onChange={(e) => onUpdateSettings('accentColor', e.target.value)}
+                    placeholder="#2563eb"
+                    className="h-9 w-20 font-mono text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Text Color */}
+              <div className="min-w-[140px] space-y-2">
+                <Label htmlFor="textColor" className="text-xs">
+                  Text
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="textColor"
+                    type="color"
+                    value={displaySettings?.textColor || '#111827'}
+                    onChange={(e) => onUpdateSettings('textColor', e.target.value)}
+                    className="h-9 w-12 cursor-pointer p-1"
+                  />
+                  <Input
+                    type="text"
+                    value={displaySettings?.textColor || '#111827'}
+                    onChange={(e) => onUpdateSettings('textColor', e.target.value)}
+                    placeholder="#111827"
+                    className="h-9 w-20 font-mono text-xs"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Text Color */}
-          <div className="space-y-2 min-w-[140px]">
-            <Label htmlFor="textColor" className="text-xs">Text</Label>
-            <div className="flex gap-2">
-              <Input
-                id="textColor"
-                type="color"
-                value={displaySettings?.textColor || '#111827'}
-                onChange={(e) => onUpdateSettings('textColor', e.target.value)}
-                className="w-12 h-9 p-1 cursor-pointer"
-              />
-              <Input
-                type="text"
-                value={displaySettings?.textColor || '#111827'}
-                onChange={(e) => onUpdateSettings('textColor', e.target.value)}
-                placeholder="#111827"
-                className="w-20 h-9 font-mono text-xs"
-              />
+            {/* Preview Example */}
+            <div className="rounded-lg border bg-white p-4">
+              <div className="space-y-2">
+                <h3
+                  className="text-sm font-bold uppercase tracking-wide"
+                  style={{
+                    color: displaySettings?.accentColor || '#2563eb',
+                    fontFamily: displaySettings?.fontFamily || 'sans-serif',
+                  }}
+                >
+                  Preview Example
+                </h3>
+                <p
+                  className="text-xs"
+                  style={{
+                    color: displaySettings?.textColor || '#111827',
+                    fontFamily: displaySettings?.fontFamily || 'sans-serif',
+                  }}
+                >
+                  This is how your CV text will appear with the selected font and colors. The
+                  heading above uses the accent color, while this paragraph uses the text color.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Preview Example */}
-        <div className="p-4 rounded-lg border bg-white">
-          <div className="space-y-2">
-            <h3
-              className="text-sm font-bold uppercase tracking-wide"
-              style={{
-                color: displaySettings?.accentColor || '#2563eb',
-                fontFamily: displaySettings?.fontFamily || 'sans-serif'
-              }}
-            >
-              Preview Example
-            </h3>
-            <p
-              className="text-xs"
-              style={{
-                color: displaySettings?.textColor || '#111827',
-                fontFamily: displaySettings?.fontFamily || 'sans-serif'
-              }}
-            >
-              This is how your CV text will appear with the selected font and colors.
-              The heading above uses the accent color, while this paragraph uses the text color.
+            {/* Page Format & Layout */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="format">Page Format</Label>
+                <Select
+                  value={displaySettings?.format || 'A4'}
+                  onValueChange={(value) => onUpdateSettings('format', value as 'A4' | 'Letter')}
+                >
+                  <SelectTrigger id="format">
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
+                    <SelectItem value="Letter">Letter (216 × 279 mm)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="layoutMode">Layout</Label>
+                <Select
+                  value={displaySettings?.layoutMode || 'two-column'}
+                  onValueChange={(value) => onUpdateSettings('layoutMode', value)}
+                >
+                  <SelectTrigger id="layoutMode">
+                    <SelectValue placeholder="Select layout" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="two-column">Two Column (Sidebar)</SelectItem>
+                    <SelectItem value="single-column">Single Column</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {displaySettings?.layoutMode === 'single-column'
+                ? 'Traditional single-column layout with all sections in main content'
+                : 'Modern two-column layout with sidebar for skills, contact, and languages'}
             </p>
-          </div>
-        </div>
 
-        {/* Page Format & Layout */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="format">Page Format</Label>
-            <Select
-              value={displaySettings?.format || 'A4'}
-              onValueChange={(value) => onUpdateSettings('format', value as 'A4' | 'Letter')}
-            >
-              <SelectTrigger id="format">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
-                <SelectItem value="Letter">Letter (216 × 279 mm)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="layoutMode">Layout</Label>
-            <Select
-              value={displaySettings?.layoutMode || 'two-column'}
-              onValueChange={(value) => onUpdateSettings('layoutMode', value)}
-            >
-              <SelectTrigger id="layoutMode">
-                <SelectValue placeholder="Select layout" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="two-column">Two Column (Sidebar)</SelectItem>
-                <SelectItem value="single-column">Single Column</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {displaySettings?.layoutMode === 'single-column'
-            ? 'Traditional single-column layout with all sections in main content'
-            : 'Modern two-column layout with sidebar for skills, contact, and languages'}
-        </p>
-
-        {/* Per-Page Sidebar Position */}
-        {(displaySettings?.layoutMode || 'two-column') === 'two-column' && (
-          <>
-            <Separator className="my-4" />
-            <PageLayoutConfigurator
-              pageLayouts={displaySettings?.pageLayouts || []}
-              pageCount={2}
-              isTwoColumn={(displaySettings?.layoutMode || 'two-column') === 'two-column'}
-              onChange={(pageLayouts) => onUpdateSettings('pageLayouts', pageLayouts)}
-            />
-          </>
-        )}
+            {/* Per-Page Sidebar Position */}
+            {(displaySettings?.layoutMode || 'two-column') === 'two-column' && (
+              <>
+                <Separator className="my-4" />
+                <PageLayoutConfigurator
+                  pageLayouts={displaySettings?.pageLayouts || []}
+                  pageCount={2}
+                  isTwoColumn={(displaySettings?.layoutMode || 'two-column') === 'two-column'}
+                  onChange={(pageLayouts) => onUpdateSettings('pageLayouts', pageLayouts)}
+                />
+              </>
+            )}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

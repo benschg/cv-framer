@@ -25,9 +25,7 @@ export function ProfessionalLinksForm({ formData, onChange }: ProfessionalLinksF
     <Card>
       <CardHeader>
         <CardTitle>{t('profile.professionalLinks.title')}</CardTitle>
-        <CardDescription>
-          {t('profile.professionalLinks.subtitle')}
-        </CardDescription>
+        <CardDescription>{t('profile.professionalLinks.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

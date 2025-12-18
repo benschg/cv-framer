@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { errorResponse } from '@/lib/api-utils';
-import { parseJobPostingUrl } from '@/lib/ai/gemini';
 import { z } from 'zod';
+
+import { parseJobPostingUrl } from '@/lib/ai/gemini';
+import { errorResponse } from '@/lib/api-utils';
+import { createClient } from '@/lib/supabase/server';
 
 const ParseJobUrlSchema = z.object({
   url: z.string().url('Invalid URL format'),
@@ -14,7 +15,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -24,10 +28,7 @@ export async function POST(request: NextRequest) {
     const parseResult = ParseJobUrlSchema.safeParse(body);
 
     if (!parseResult.success) {
-      return NextResponse.json(
-        { error: parseResult.error.issues[0].message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: parseResult.error.issues[0].message }, { status: 400 });
     }
 
     const { url } = parseResult.data;
@@ -37,8 +38,9 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.5',
         },
       });
@@ -54,7 +56,9 @@ export async function POST(request: NextRequest) {
     } catch (fetchError) {
       console.error('Error fetching URL:', fetchError);
       return NextResponse.json(
-        { error: 'Failed to fetch the job posting URL. Please paste the job description manually.' },
+        {
+          error: 'Failed to fetch the job posting URL. Please paste the job description manually.',
+        },
         { status: 400 }
       );
     }

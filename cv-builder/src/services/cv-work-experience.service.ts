@@ -42,33 +42,34 @@ export async function fetchCVWorkExperiences(
 
   // Create a map of selections by work_experience_id
   const selectionMap = new Map<string, CVWorkExperienceSelection>();
-  selections?.forEach(sel => selectionMap.set(sel.work_experience_id, sel));
+  selections?.forEach((sel) => selectionMap.set(sel.work_experience_id, sel));
 
   // Merge experiences with selections
-  const merged: CVWorkExperienceWithSelection[] = (experiences as ProfileWorkExperience[])?.map((exp, index) => {
-    const sel = selectionMap.get(exp.id);
-    return {
-      id: exp.id,
-      company: exp.company,
-      title: exp.title,
-      location: exp.location,
-      start_date: exp.start_date,
-      end_date: exp.end_date,
-      current: exp.current,
-      description: exp.description,
-      bullets: exp.bullets,
-      display_order: exp.display_order,
-      selection: {
-        id: sel?.id,
-        is_selected: sel?.is_selected ?? true, // Default: selected
-        is_favorite: sel?.is_favorite ?? false,
-        display_order: sel?.display_order ?? index,
-        display_mode: (sel as any)?.display_mode ?? 'custom', // Default: custom mode for backwards compatibility
-        description_override: sel?.description_override ?? null,
-        selected_bullet_indices: sel?.selected_bullet_indices ?? null,
-      },
-    };
-  }) || [];
+  const merged: CVWorkExperienceWithSelection[] =
+    (experiences as ProfileWorkExperience[])?.map((exp, index) => {
+      const sel = selectionMap.get(exp.id);
+      return {
+        id: exp.id,
+        company: exp.company,
+        title: exp.title,
+        location: exp.location,
+        start_date: exp.start_date,
+        end_date: exp.end_date,
+        current: exp.current,
+        description: exp.description,
+        bullets: exp.bullets,
+        display_order: exp.display_order,
+        selection: {
+          id: sel?.id,
+          is_selected: sel?.is_selected ?? true, // Default: selected
+          is_favorite: sel?.is_favorite ?? false,
+          display_order: sel?.display_order ?? index,
+          display_mode: (sel as any)?.display_mode ?? 'custom', // Default: custom mode for backwards compatibility
+          description_override: sel?.description_override ?? null,
+          selected_bullet_indices: sel?.selected_bullet_indices ?? null,
+        },
+      };
+    }) || [];
 
   // Sort by selection display_order
   merged.sort((a, b) => a.selection.display_order - b.selection.display_order);
@@ -131,7 +132,7 @@ export async function bulkUpsertCVWorkExperienceSelections(
     return { data: [], error: null };
   }
 
-  const upsertData = selections.map(sel => ({
+  const upsertData = selections.map((sel) => ({
     cv_id: cvId,
     work_experience_id: sel.work_experience_id,
     is_selected: sel.is_selected,
@@ -160,10 +161,7 @@ export async function bulkUpsertCVWorkExperienceSelections(
 export async function deleteCVWorkExperienceSelections(
   cvId: string
 ): Promise<{ error: string | null }> {
-  const { error } = await supabase
-    .from('cv_work_experience_selections')
-    .delete()
-    .eq('cv_id', cvId);
+  const { error } = await supabase.from('cv_work_experience_selections').delete().eq('cv_id', cvId);
 
   if (error) {
     return { error: error.message };

@@ -1,10 +1,17 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import Cropper, { Area } from 'react-easy-crop';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Loader2 } from 'lucide-react';
+import { useCallback, useEffect,useState } from 'react';
+import Cropper, { Area } from 'react-easy-crop';
+
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface ImageCropperProps {
   image: string; // Data URL or blob URL
@@ -66,9 +73,10 @@ export function ImageCropper({ image, filename, onComplete, onCancel, open }: Im
           className="relative h-96 rounded-lg"
           style={{
             backgroundColor: hasTransparency && backgroundColor ? backgroundColor : '#f3f4f6',
-            backgroundImage: hasTransparency && !backgroundColor
-              ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50% / 20px 20px'
-              : undefined,
+            backgroundImage:
+              hasTransparency && !backgroundColor
+                ? 'repeating-conic-gradient(#e5e7eb 0% 25%, transparent 0% 50%) 50% / 20px 20px'
+                : undefined,
           }}
         >
           <Cropper
@@ -89,7 +97,7 @@ export function ImageCropper({ image, filename, onComplete, onCancel, open }: Im
           />
           {hasTransparency && backgroundColor && (
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="pointer-events-none absolute inset-0"
               style={{
                 background: `radial-gradient(circle at center, ${backgroundColor} 0%, ${backgroundColor} 50%, transparent 50%)`,
                 mixBlendMode: 'multiply',
@@ -117,17 +125,17 @@ export function ImageCropper({ image, filename, onComplete, onCancel, open }: Im
             <div className="space-y-2">
               <label className="text-sm font-medium">
                 Background
-                <span className="text-xs text-muted-foreground ml-2">
+                <span className="ml-2 text-xs text-muted-foreground">
                   (Transparent image detected)
                 </span>
               </label>
-              <div className="flex gap-2 items-center flex-wrap">
+              <div className="flex flex-wrap items-center gap-2">
                 {/* Color picker */}
                 <input
                   type="color"
                   value={backgroundColor || '#4F46E5'}
                   onChange={(e) => setBackgroundColor(e.target.value)}
-                  className="h-8 w-12 border-2 border-gray-300 cursor-pointer"
+                  className="h-8 w-12 cursor-pointer border-2 border-gray-300"
                   title="Custom color"
                 />
 
@@ -135,11 +143,14 @@ export function ImageCropper({ image, filename, onComplete, onCancel, open }: Im
                 <button
                   type="button"
                   onClick={() => setBackgroundColor(null)}
-                  className={`h-8 w-8 rounded-full border-2 hover:scale-110 transition-transform ${
-                    backgroundColor === null ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-gray-300'
+                  className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
+                    backgroundColor === null
+                      ? 'border-primary ring-2 ring-primary ring-offset-2'
+                      : 'border-gray-300'
                   }`}
                   style={{
-                    backgroundImage: 'repeating-conic-gradient(#999999 0% 25%, white 0% 50%) 50% / 8px 8px',
+                    backgroundImage:
+                      'repeating-conic-gradient(#999999 0% 25%, white 0% 50%) 50% / 8px 8px',
                   }}
                   title="Keep transparent"
                 >
@@ -152,8 +163,10 @@ export function ImageCropper({ image, filename, onComplete, onCancel, open }: Im
                     key={color}
                     type="button"
                     onClick={() => setBackgroundColor(color)}
-                    className={`h-8 w-8 rounded-full border-2 hover:scale-110 transition-transform ${
-                      backgroundColor === color ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-gray-300'
+                    className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
+                      backgroundColor === color
+                        ? 'border-primary ring-2 ring-primary ring-offset-2'
+                        : 'border-gray-300'
                     }`}
                     style={{ backgroundColor: color }}
                     title={color}

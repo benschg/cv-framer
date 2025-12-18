@@ -1,27 +1,36 @@
 'use client';
 
+import {
+  AlertTriangle,
+  ExternalLink,
+  FileText,
+  Image as ImageIcon,
+  Loader2,
+  Trash2,
+} from 'lucide-react';
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, Trash2, Loader2, ExternalLink, FileText, Image as ImageIcon } from 'lucide-react';
-import { CertificationDocumentsManager } from './certification-documents-manager';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
-import { formatMonthYear } from '@/lib/utils';
-import { toast } from 'sonner';
-import {
-  fetchCertifications,
-  createCertification,
-  deleteCertification,
-  updateCertification,
-  createCertificationDocument,
-  type ProfileCertification,
-} from '@/services/profile-career.service';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 import { useProfileManager } from '@/hooks/use-profile-manager';
+import { formatMonthYear } from '@/lib/utils';
+import {
+  createCertification,
+  createCertificationDocument,
+  deleteCertification,
+  fetchCertifications,
+  type ProfileCertification,
+  updateCertification,
+} from '@/services/profile-career.service';
+
+import { CertificationDocumentsManager } from './certification-documents-manager';
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
-import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface CertificationsManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -33,8 +42,10 @@ export interface CertificationsManagerRef {
   handleAddWithData: (data: Partial<ProfileCertification>, file?: File) => Promise<void>;
 }
 
-export const CertificationsManager = forwardRef<CertificationsManagerRef, CertificationsManagerProps>(
-  ({ onSavingChange, onSaveSuccessChange }, ref) => {
+export const CertificationsManager = forwardRef<
+  CertificationsManagerRef,
+  CertificationsManagerProps
+>(({ onSavingChange, onSaveSuccessChange }, ref) => {
   const { t } = useAppTranslation();
   const {
     items: certifications,
@@ -102,7 +113,7 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
       const { data: refreshedData } = await fetchCertifications();
       if (refreshedData) {
         // Small delay to show the success toast before reload
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         window.location.reload();
       }
     } catch (error) {
@@ -133,11 +144,7 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
         const expanded = isExpanded(certification.id);
         const formData = getFormData(certification.id);
         return (
-          <SortableCard
-            id={certification.id}
-            disabled={false}
-            showDragHandle={!expanded}
-          >
+          <SortableCard id={certification.id} disabled={false} showDragHandle={!expanded}>
             {expanded ? (
               <CertificationEditForm
                 formData={formData}
@@ -166,7 +173,7 @@ export const CertificationsManager = forwardRef<CertificationsManagerRef, Certif
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             <p>{t('profile.certifications.empty')}</p>
-            <p className="text-sm mt-1">{t('profile.certifications.emptyAction')}</p>
+            <p className="mt-1 text-sm">{t('profile.certifications.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -287,10 +294,7 @@ function CertificationEditForm({
         {formData.id && (
           <div className="space-y-2">
             <Label>{t('profile.certifications.documents')}</Label>
-            <CertificationDocumentsManager
-              certificationId={formData.id}
-              disabled={isSaving}
-            />
+            <CertificationDocumentsManager certificationId={formData.id} disabled={isSaving} />
           </div>
         )}
       </CardContent>
@@ -323,12 +327,25 @@ function CertificationViewCard({
           <div className="flex-1">
             <CardTitle>{certification.name}</CardTitle>
             <CardDescription>{certification.issuer}</CardDescription>
-            <div className="flex flex-wrap gap-2 mt-2 text-sm text-muted-foreground">
-              {certification.date && <span>{t('profile.certifications.issued')} {formatMonthYear(certification.date)}</span>}
-              {certification.expiry_date && <span>• {t('profile.certifications.expires')} {formatMonthYear(certification.expiry_date)}</span>}
-              {certification.credential_id && <span>• {t('profile.certifications.id')}: {certification.credential_id}</span>}
+            <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
+              {certification.date && (
+                <span>
+                  {t('profile.certifications.issued')} {formatMonthYear(certification.date)}
+                </span>
+              )}
+              {certification.expiry_date && (
+                <span>
+                  • {t('profile.certifications.expires')}{' '}
+                  {formatMonthYear(certification.expiry_date)}
+                </span>
+              )}
+              {certification.credential_id && (
+                <span>
+                  • {t('profile.certifications.id')}: {certification.credential_id}
+                </span>
+              )}
             </div>
-            <div className="flex flex-wrap gap-3 mt-2">
+            <div className="mt-2 flex flex-wrap gap-3">
               {certification.url && (
                 <a
                   href={certification.url}
@@ -347,26 +364,18 @@ function CertificationViewCard({
                 onClick={() => setShowDocuments(!showDocuments)}
                 className="h-auto p-0 text-sm"
               >
-                <FileText className="h-3 w-3 mr-1" />
-                {showDocuments ? t('profile.certifications.hideDocuments') : t('profile.certifications.viewDocuments')}
+                <FileText className="mr-1 h-3 w-3" />
+                {showDocuments
+                  ? t('profile.certifications.hideDocuments')
+                  : t('profile.certifications.viewDocuments')}
               </Button>
             </div>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEdit}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onEdit} disabled={disabled}>
               {t('profile.certifications.editButton')}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onDelete}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onDelete} disabled={disabled}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -374,10 +383,7 @@ function CertificationViewCard({
       </CardHeader>
       {showDocuments && (
         <CardContent>
-          <CertificationDocumentsManager
-            certificationId={certification.id}
-            disabled={disabled}
-          />
+          <CertificationDocumentsManager certificationId={certification.id} disabled={disabled} />
         </CardContent>
       )}
     </>
@@ -387,14 +393,16 @@ function CertificationViewCard({
 // Overlay component shown while dragging
 function CertificationCardOverlay({ certification }: { certification: ProfileCertification }) {
   return (
-    <Card className="shadow-xl rotate-3 cursor-grabbing opacity-80">
+    <Card className="rotate-3 cursor-grabbing opacity-80 shadow-xl">
       <CardHeader>
         <div>
           <CardTitle>{certification.name}</CardTitle>
           <CardDescription>{certification.issuer}</CardDescription>
-          <div className="flex flex-wrap gap-2 mt-2 text-sm text-muted-foreground">
+          <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
             {certification.date && <span>Issued {formatMonthYear(certification.date)}</span>}
-            {certification.expiry_date && <span>• Expires {formatMonthYear(certification.expiry_date)}</span>}
+            {certification.expiry_date && (
+              <span>• Expires {formatMonthYear(certification.expiry_date)}</span>
+            )}
           </div>
         </div>
       </CardHeader>

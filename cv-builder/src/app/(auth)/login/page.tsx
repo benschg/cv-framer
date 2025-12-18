@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense } from 'react';
 import Link from 'next/link';
+import { Suspense } from 'react';
+
+import { GoogleOAuthButton,LoginForm } from '@/components/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { LoginForm, GoogleOAuthButton } from '@/components/auth';
 import { useTranslations } from '@/hooks/use-translations';
 
 function LoginContent() {
@@ -14,9 +15,7 @@ function LoginContent() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">{t('auth.loginPage.title')}</CardTitle>
-        <CardDescription>
-          {t('auth.loginPage.subtitle')}
-        </CardDescription>
+        <CardDescription>{t('auth.loginPage.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <GoogleOAuthButton />

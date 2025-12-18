@@ -1,9 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
+import type { ReactNode } from 'react';
+
 import { cn } from '@/lib/utils';
 
 interface CVSortableSidebarSectionProps {
@@ -19,14 +20,7 @@ export function CVSortableSidebarSection({
   disabled = false,
   className,
 }: CVSortableSidebarSectionProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     disabled,
   });
@@ -46,18 +40,18 @@ export function CVSortableSidebarSection({
       style={style}
       className={cn(
         'cv-sortable-sidebar-section group relative',
-        isDragging && 'opacity-50 z-50',
+        isDragging && 'z-50 opacity-50',
         className
       )}
     >
       {/* Hover indicator */}
-      <div className="absolute -left-1 top-0 bottom-0 w-1 bg-transparent group-hover:bg-blue-400/50 transition-colors pointer-events-none print:hidden" />
+      <div className="pointer-events-none absolute -left-1 bottom-0 top-0 w-1 bg-transparent transition-colors group-hover:bg-blue-400/50 print:hidden" />
 
       {/* Drag handle */}
       <div
         {...attributes}
         {...listeners}
-        className="absolute -left-5 top-0.5 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing touch-none transition-opacity pointer-events-auto print:hidden"
+        className="pointer-events-auto absolute -left-5 top-0.5 cursor-grab touch-none opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100 print:hidden"
       >
         <GripVertical className="h-3 w-3 text-muted-foreground hover:text-foreground" />
       </div>

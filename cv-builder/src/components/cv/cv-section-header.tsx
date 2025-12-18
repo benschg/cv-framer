@@ -9,7 +9,7 @@ export function CVSectionHeader({ title, accentColor }: CVSectionHeaderProps) {
   return (
     <div className="mb-2">
       <h2
-        className="text-xs font-bold uppercase tracking-wide pb-1 border-b border-gray-200"
+        className="border-b border-gray-200 pb-1 text-xs font-bold uppercase tracking-wide"
         style={{ color: accentColor }}
       >
         {title}

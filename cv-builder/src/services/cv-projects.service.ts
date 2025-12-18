@@ -11,7 +11,10 @@ export async function fetchCVProjects(cvId: string): Promise<{
   const supabase = createClient();
 
   // Get current user
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
   if (authError || !user) {
     return { data: null, error: authError || new Error('Not authenticated') };
   }
@@ -42,11 +45,9 @@ export async function fetchCVProjects(cvId: string): Promise<{
   }
 
   // Map selections to projects
-  const selectionsMap = new Map(
-    (selections || []).map(sel => [sel.profile_project_id, sel])
-  );
+  const selectionsMap = new Map((selections || []).map((sel) => [sel.profile_project_id, sel]));
 
-  const projectsWithSelections: CVProjectWithSelection[] = projects.map(project => ({
+  const projectsWithSelections: CVProjectWithSelection[] = projects.map((project) => ({
     ...project,
     selection: selectionsMap.get(project.id) || {
       id: undefined,
@@ -73,7 +74,7 @@ export async function bulkUpsertCVProjectSelections(
 ): Promise<{ error: any }> {
   const supabase = createClient();
 
-  const selections = projects.map(project => ({
+  const selections = projects.map((project) => ({
     cv_id: cvId,
     profile_project_id: project.id,
     is_selected: project.selection.is_selected,
@@ -82,11 +83,9 @@ export async function bulkUpsertCVProjectSelections(
     description_override: project.selection.description_override,
   }));
 
-  const { error } = await supabase
-    .from('cv_project_selections')
-    .upsert(selections, {
-      onConflict: 'cv_id,profile_project_id',
-    });
+  const { error } = await supabase.from('cv_project_selections').upsert(selections, {
+    onConflict: 'cv_id,profile_project_id',
+  });
 
   return { error };
 }

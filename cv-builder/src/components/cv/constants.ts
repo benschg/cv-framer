@@ -23,10 +23,7 @@ export const CV_SIDEBAR_LABELS: Record<CVSidebarSection, { en: string; de: strin
 };
 
 /** Get section label by type and language */
-export function getSectionLabel(
-  sectionType: CVMainSection,
-  language: 'en' | 'de' = 'en'
-): string {
+export function getSectionLabel(sectionType: CVMainSection, language: 'en' | 'de' = 'en'): string {
   return CV_SECTION_LABELS[sectionType]?.[language] || sectionType;
 }
 

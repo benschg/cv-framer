@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+
 import { CVImportWorkflow } from '@/components/profile/cv-import-workflow';
+import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
 
 export default function ImportCVPage() {
   const router = useRouter();

@@ -1,25 +1,27 @@
 'use client';
 
+import { AlertTriangle, Loader2,Trash2 } from 'lucide-react';
 import { forwardRef, useImperativeHandle } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { AlertTriangle, Trash2, Loader2 } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
+import { Textarea } from '@/components/ui/textarea';
+import { useAppTranslation } from '@/hooks/use-app-translation';
+import { useProfileManager } from '@/hooks/use-profile-manager';
 import { formatDateRange } from '@/lib/utils';
 import {
-  fetchEducations,
   createEducation,
   deleteEducation,
-  updateEducation,
+  fetchEducations,
   type ProfileEducation,
+  updateEducation,
 } from '@/services/profile-career.service';
-import { useProfileManager } from '@/hooks/use-profile-manager';
+
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
-import { useAppTranslation } from '@/hooks/use-app-translation';
 
 interface EducationManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -32,96 +34,91 @@ export interface EducationManagerRef {
 
 export const EducationManager = forwardRef<EducationManagerRef, EducationManagerProps>(
   ({ onSavingChange, onSaveSuccessChange }, ref) => {
-  const { t } = useAppTranslation();
-  const {
-    items: educationList,
-    isExpanded,
-    getFormData,
-    loading,
-    saving,
-    handleAdd,
-    handleEdit,
-    handleDelete,
-    handleDone,
-    handleFieldChange,
-    handleDragEnd,
-  } = useProfileManager<ProfileEducation>({
-    fetchItems: fetchEducations,
-    createItem: createEducation,
-    updateItem: updateEducation,
-    deleteItem: deleteEducation,
-    defaultItem: {
-      institution: '',
-      degree: '',
-      field: '',
-      start_date: '',
-      end_date: '',
-      description: '',
-      grade: '',
-    },
-    onSavingChange,
-    onSaveSuccessChange,
-  });
+    const { t } = useAppTranslation();
+    const {
+      items: educationList,
+      isExpanded,
+      getFormData,
+      loading,
+      saving,
+      handleAdd,
+      handleEdit,
+      handleDelete,
+      handleDone,
+      handleFieldChange,
+      handleDragEnd,
+    } = useProfileManager<ProfileEducation>({
+      fetchItems: fetchEducations,
+      createItem: createEducation,
+      updateItem: updateEducation,
+      deleteItem: deleteEducation,
+      defaultItem: {
+        institution: '',
+        degree: '',
+        field: '',
+        start_date: '',
+        end_date: '',
+        description: '',
+        grade: '',
+      },
+      onSavingChange,
+      onSaveSuccessChange,
+    });
 
-  // Expose methods to parent via ref
-  useImperativeHandle(ref, () => ({
-    handleAdd,
-  }));
+    // Expose methods to parent via ref
+    useImperativeHandle(ref, () => ({
+      handleAdd,
+    }));
 
-  if (loading) {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <ProfileCardManager
+        items={educationList}
+        onDragEnd={handleDragEnd}
+        renderCard={(education) => {
+          const expanded = isExpanded(education.id);
+          const formData = getFormData(education.id);
+          return (
+            <SortableCard id={education.id} disabled={false} showDragHandle={!expanded}>
+              {expanded ? (
+                <EducationEditForm
+                  formData={formData}
+                  onFieldChange={(field, value) => handleFieldChange(education.id, field, value)}
+                  onDone={() => handleDone(education.id)}
+                  t={t}
+                />
+              ) : (
+                <EducationViewCard
+                  education={education}
+                  onEdit={() => handleEdit(education)}
+                  onDelete={() => handleDelete(education.id)}
+                  disabled={saving}
+                  t={t}
+                />
+              )}
+            </SortableCard>
+          );
+        }}
+        renderDragOverlay={(education) => <EducationCardOverlay education={education} />}
+        emptyState={
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <p>{t('profile.education.empty')}</p>
+              <p className="mt-1 text-sm">{t('profile.education.emptyAction')}</p>
+            </CardContent>
+          </Card>
+        }
+      />
     );
   }
-
-  return (
-    <ProfileCardManager
-      items={educationList}
-      onDragEnd={handleDragEnd}
-      renderCard={(education) => {
-        const expanded = isExpanded(education.id);
-        const formData = getFormData(education.id);
-        return (
-          <SortableCard
-            id={education.id}
-            disabled={false}
-            showDragHandle={!expanded}
-          >
-            {expanded ? (
-              <EducationEditForm
-                formData={formData}
-                onFieldChange={(field, value) => handleFieldChange(education.id, field, value)}
-                onDone={() => handleDone(education.id)}
-                t={t}
-              />
-            ) : (
-              <EducationViewCard
-                education={education}
-                onEdit={() => handleEdit(education)}
-                onDelete={() => handleDelete(education.id)}
-                disabled={saving}
-                t={t}
-              />
-            )}
-          </SortableCard>
-        );
-      }}
-      renderDragOverlay={(education) => (
-        <EducationCardOverlay education={education} />
-      )}
-      emptyState={
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <p>{t('profile.education.empty')}</p>
-            <p className="text-sm mt-1">{t('profile.education.emptyAction')}</p>
-          </CardContent>
-        </Card>
-      }
-    />
-  );
-});
+);
 
 EducationManager.displayName = 'EducationManager';
 
@@ -133,12 +130,7 @@ interface EducationEditFormProps {
   t: (key: string) => string;
 }
 
-function EducationEditForm({
-  formData,
-  onFieldChange,
-  onDone,
-  t,
-}: EducationEditFormProps) {
+function EducationEditForm({ formData, onFieldChange, onDone, t }: EducationEditFormProps) {
   // Check if end date is before start date
   const isEndDateBeforeStart = (() => {
     if (!formData.start_date || !formData.end_date) return false;
@@ -248,13 +240,7 @@ interface EducationViewCardProps {
   t: (key: string) => string;
 }
 
-function EducationViewCard({
-  education,
-  onEdit,
-  onDelete,
-  disabled,
-  t,
-}: EducationViewCardProps) {
+function EducationViewCard({ education, onEdit, onDelete, disabled, t }: EducationViewCardProps) {
   return (
     <>
       <CardHeader>
@@ -265,26 +251,16 @@ function EducationViewCard({
               {education.field && ` ${t('profile.education.in')} ${education.field}`}
             </CardTitle>
             <CardDescription>{education.institution}</CardDescription>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="mt-1 text-sm text-muted-foreground">
               {formatDateRange(education.start_date, education.end_date)}
               {education.grade && ` • ${education.grade}`}
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEdit}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onEdit} disabled={disabled}>
               {t('profile.education.editButton')}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onDelete}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onDelete} disabled={disabled}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -292,9 +268,7 @@ function EducationViewCard({
       </CardHeader>
       {education.description && (
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            {education.description}
-          </p>
+          <p className="text-sm text-muted-foreground">{education.description}</p>
         </CardContent>
       )}
     </>
@@ -304,7 +278,7 @@ function EducationViewCard({
 // Overlay component shown while dragging
 function EducationCardOverlay({ education }: { education: ProfileEducation }) {
   return (
-    <Card className="shadow-xl rotate-3 cursor-grabbing opacity-80">
+    <Card className="rotate-3 cursor-grabbing opacity-80 shadow-xl">
       <CardHeader>
         <div>
           <CardTitle>
@@ -312,7 +286,7 @@ function EducationCardOverlay({ education }: { education: ProfileEducation }) {
             {education.field && ` in ${education.field}`}
           </CardTitle>
           <CardDescription>{education.institution}</CardDescription>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             {formatDateRange(education.start_date, education.end_date)}
             {education.grade && ` • ${education.grade}`}
           </p>

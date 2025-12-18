@@ -1,23 +1,25 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
 import { forwardRef, useImperativeHandle, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/use-app-translation';
+import { useProfileManager } from '@/hooks/use-profile-manager';
 import {
-  fetchHighlights,
   createHighlight,
   deleteHighlight,
-  updateHighlight,
-  type ProfileHighlight,
+  fetchHighlights,
   type HighlightType,
+  type ProfileHighlight,
+  updateHighlight,
 } from '@/services/profile-career.service';
-import { useProfileManager } from '@/hooks/use-profile-manager';
-import { ProfileCardManager } from './ProfileCardManager';
-import { SortableCard } from './SortableCard';
+
 import { HighlightEditForm } from './highlight-edit-form';
 import { HighlightViewCard } from './highlight-view-card';
+import { ProfileCardManager } from './ProfileCardManager';
+import { SortableCard } from './SortableCard';
 
 interface HighlightsManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -66,9 +68,8 @@ export const HighlightsManager = forwardRef<HighlightsManagerRef, HighlightsMana
     }));
 
     // Filter highlights by type
-    const filteredHighlights = filterType === 'all'
-      ? highlights
-      : highlights.filter(h => h.type === filterType);
+    const filteredHighlights =
+      filterType === 'all' ? highlights : highlights.filter((h) => h.type === filterType);
 
     if (loading) {
       return (
@@ -127,11 +128,7 @@ export const HighlightsManager = forwardRef<HighlightsManagerRef, HighlightsMana
             const expanded = isExpanded(highlight.id);
             const formData = getFormData(highlight.id);
             return (
-              <SortableCard
-                id={highlight.id}
-                disabled={false}
-                showDragHandle={!expanded}
-              >
+              <SortableCard id={highlight.id} disabled={false} showDragHandle={!expanded}>
                 {expanded ? (
                   <HighlightEditForm
                     formData={formData}
@@ -162,7 +159,7 @@ export const HighlightsManager = forwardRef<HighlightsManagerRef, HighlightsMana
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 <p>{t('profile.highlights.empty')}</p>
-                <p className="text-sm mt-1">{t('profile.highlights.emptyAction')}</p>
+                <p className="mt-1 text-sm">{t('profile.highlights.emptyAction')}</p>
               </CardContent>
             </Card>
           }

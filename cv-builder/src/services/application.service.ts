@@ -1,10 +1,10 @@
 import type {
-  JobApplication,
-  JobFitAnalysis,
+  ApplicationStatsResponse,
   ApplicationStatus,
   CreateApplicationInput,
+  JobApplication,
+  JobFitAnalysis,
   UpdateApplicationInput,
-  ApplicationStatsResponse,
 } from '@/types/api.schemas';
 
 const API_BASE = '/api';
@@ -47,7 +47,9 @@ export async function fetchApplications(options?: {
 /**
  * Fetch a single application by ID
  */
-export async function fetchApplication(id: string): Promise<ApplicationServiceResponse<JobApplication>> {
+export async function fetchApplication(
+  id: string
+): Promise<ApplicationServiceResponse<JobApplication>> {
   try {
     const response = await fetch(`${API_BASE}/applications/${id}`);
     const json = await response.json();
@@ -216,7 +218,9 @@ export async function getFitAnalysis(
 /**
  * Get application statistics
  */
-export async function getApplicationStats(): Promise<ApplicationServiceResponse<ApplicationStatsResponse['stats']>> {
+export async function getApplicationStats(): Promise<
+  ApplicationServiceResponse<ApplicationStatsResponse['stats']>
+> {
   try {
     const response = await fetch(`${API_BASE}/applications/stats`);
     const json = await response.json();

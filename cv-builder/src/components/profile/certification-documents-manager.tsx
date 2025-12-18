@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { FileText, Image as ImageIcon, Upload, ExternalLink, Trash2, Loader2 } from 'lucide-react';
+import { ExternalLink, FileText, Image as ImageIcon, Loader2,Trash2, Upload } from 'lucide-react';
+import { useEffect, useRef,useState } from 'react';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
 import {
-  fetchCertificationDocuments,
   createCertificationDocument,
   deleteCertificationDocumentRecord,
+  fetchCertificationDocuments,
 } from '@/services/profile-career.service';
 import type { CertificationDocument } from '@/types/profile-career.types';
 
@@ -161,25 +162,23 @@ export function CertificationDocumentsManager({
           className="w-full"
           size="sm"
         >
-          <Upload className="h-4 w-4 mr-2" />
+          <Upload className="mr-2 h-4 w-4" />
           {uploading ? 'Uploading...' : 'Upload Document'}
         </Button>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="mt-1 text-xs text-muted-foreground">
           Accepted formats: JPG, PNG, WebP, PDF (Max 10MB)
         </p>
       </div>
 
       {/* Documents List */}
       {documents.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-4">
-          No documents uploaded yet
-        </p>
+        <p className="py-4 text-center text-sm text-muted-foreground">No documents uploaded yet</p>
       ) : (
         <div className="space-y-2">
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+              className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3 transition-colors hover:bg-muted/50"
             >
               <div className="flex-shrink-0">
                 {doc.document_name.toLowerCase().endsWith('.pdf') ? (
@@ -188,8 +187,8 @@ export function CertificationDocumentsManager({
                   <ImageIcon className="h-6 w-6 text-blue-500" />
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{doc.document_name}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{doc.document_name}</p>
                 <p className="text-xs text-muted-foreground">
                   {doc.file_type?.split('/')[1]?.toUpperCase() || 'File'}
                   {doc.file_size && ` • ${formatFileSize(doc.file_size)}`}

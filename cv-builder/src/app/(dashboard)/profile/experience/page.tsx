@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { WorkExperienceManager } from '@/components/profile/work-experience-manager';
+import { useRef,useState } from 'react';
+
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
+import { WorkExperienceManager } from '@/components/profile/work-experience-manager';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export default function WorkExperiencePage() {

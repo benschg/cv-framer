@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
 import { generatePDFFromHTML } from '@/lib/pdf/generator';
+import { createClient } from '@/lib/supabase/server';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -21,7 +22,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -49,21 +53,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const theme = body.theme || 'light';
 
     // Theme-specific colors
-    const themeColors = theme === 'dark'
-      ? {
-          bgPage: '#343a40',
-          bgSidebar: '#2a2e32',
-          textPrimary: '#ffffff',
-          textSecondary: '#e0e0e0',
-          textMuted: '#b0b0b0',
-        }
-      : {
-          bgPage: '#ffffff',
-          bgSidebar: '#f5f5f5',
-          textPrimary: '#1a1a1a',
-          textSecondary: '#333333',
-          textMuted: '#666666',
-        };
+    const themeColors =
+      theme === 'dark'
+        ? {
+            bgPage: '#343a40',
+            bgSidebar: '#2a2e32',
+            textPrimary: '#ffffff',
+            textSecondary: '#e0e0e0',
+            textMuted: '#b0b0b0',
+          }
+        : {
+            bgPage: '#ffffff',
+            bgSidebar: '#f5f5f5',
+            textPrimary: '#1a1a1a',
+            textSecondary: '#333333',
+            textMuted: '#666666',
+          };
 
     // Build full HTML document with CSS
     const fullHtml = `

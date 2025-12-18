@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { validateBody, errorResponse } from '@/lib/api-utils';
-import { CreateShareLinkSchema } from '@/types/api.schemas';
 import crypto from 'crypto';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { errorResponse,validateBody } from '@/lib/api-utils';
+import { createClient } from '@/lib/supabase/server';
+import { CreateShareLinkSchema } from '@/types/api.schemas';
 
 // Generate a unique share token
 function generateShareToken(): string {
@@ -20,7 +21,10 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -70,19 +74,17 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Validate request body
     const data = await validateBody(request, CreateShareLinkSchema);
-    const {
-      cv_id,
-      privacy_level = 'personal',
-      expires_at,
-      password,
-    } = data;
+    const { cv_id, privacy_level = 'personal', expires_at, password } = data;
 
     // Verify CV belongs to user
     const { data: cv } = await supabase

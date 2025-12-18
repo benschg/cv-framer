@@ -1,23 +1,13 @@
 'use client';
 
+import { ChevronDown, ChevronUp, GripVertical, Plus, Settings2,X } from 'lucide-react';
 import { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  GripVertical,
-  Plus,
-  X,
-  ChevronUp,
-  ChevronDown,
-  Settings2,
-} from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { PageLayoutOverride } from '@/types/cv.types';
 
 // Section definitions with labels
@@ -140,7 +130,7 @@ export function SectionConfigurator({
               return (
                 <div
                   key={sectionId}
-                  className="flex items-center gap-1 p-1.5 bg-muted/50 rounded text-xs"
+                  className="flex items-center gap-1 rounded bg-muted/50 p-1.5 text-xs"
                 >
                   <GripVertical className="h-3 w-3 text-muted-foreground" />
                   <span className="flex-1">{getLabel(section)}</span>
@@ -175,7 +165,7 @@ export function SectionConfigurator({
             })}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground italic">
+          <p className="text-xs italic text-muted-foreground">
             {type === 'sidebar' ? 'No sidebar sections' : 'No main sections'}
           </p>
         )}
@@ -184,8 +174,8 @@ export function SectionConfigurator({
         {availableSections.length > 0 && (
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="w-full h-7 text-xs">
-                <Plus className="h-3 w-3 mr-1" />
+              <Button variant="outline" size="sm" className="h-7 w-full text-xs">
+                <Plus className="mr-1 h-3 w-3" />
                 Add section
               </Button>
             </PopoverTrigger>
@@ -196,7 +186,7 @@ export function SectionConfigurator({
                     key={section.id}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start h-7 text-xs"
+                    className="h-7 w-full justify-start text-xs"
                     onClick={() => onToggle(section.id, true)}
                   >
                     {getLabel(section)}
@@ -213,7 +203,7 @@ export function SectionConfigurator({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="secondary" size="sm" className="h-8 text-xs gap-1.5">
+        <Button variant="secondary" size="sm" className="h-8 gap-1.5 text-xs">
           <Settings2 className="h-3.5 w-3.5" />
           Configure Sections
         </Button>
@@ -221,9 +211,7 @@ export function SectionConfigurator({
       <PopoverContent className="w-80" align="start">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="font-medium text-sm">
-              Page {pageIndex + 1} Sections
-            </h4>
+            <h4 className="text-sm font-medium">Page {pageIndex + 1} Sections</h4>
             <Button
               variant="ghost"
               size="sm"

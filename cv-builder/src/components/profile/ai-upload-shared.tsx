@@ -1,7 +1,8 @@
 'use client';
 
+import { AlertTriangle,FileText, Image as ImageIcon, Loader2, Upload } from 'lucide-react';
 import { DragEvent } from 'react';
-import { Upload, Loader2, FileText, Image as ImageIcon, AlertTriangle } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 
 interface UploadAreaProps {
@@ -27,7 +28,7 @@ export function UploadArea({
 }: UploadAreaProps) {
   return (
     <div
-      className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+      className={`rounded-lg border-2 border-dashed p-12 text-center transition-colors ${
         isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
       }`}
       onDragOver={onDragOver}
@@ -41,15 +42,13 @@ export function UploadArea({
         onChange={onFileChange}
         className="hidden"
       />
-      <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-      <h3 className="text-lg font-medium mb-2">Drop your {documentType} here</h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        or click to browse your files
-      </p>
+      <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+      <h3 className="mb-2 text-lg font-medium">Drop your {documentType} here</h3>
+      <p className="mb-4 text-sm text-muted-foreground">or click to browse your files</p>
       <Button onClick={onChooseFile} variant="secondary">
         Choose File
       </Button>
-      <p className="text-xs text-muted-foreground mt-4">
+      <p className="mt-4 text-xs text-muted-foreground">
         Accepted formats: JPG, PNG, WebP, PDF (Max 10MB)
       </p>
     </div>
@@ -63,8 +62,8 @@ interface AnalyzingStateProps {
 export function AnalyzingState({ documentType }: AnalyzingStateProps) {
   return (
     <div className="py-12 text-center">
-      <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-primary" />
-      <h3 className="text-lg font-medium mb-2">Analyzing {documentType}...</h3>
+      <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
+      <h3 className="mb-2 text-lg font-medium">Analyzing {documentType}...</h3>
       <p className="text-sm text-muted-foreground">
         AI is extracting information from your document
       </p>
@@ -80,7 +79,7 @@ interface DocumentPreviewProps {
 
 export function DocumentPreview({ file, extractedFieldCount, documentType }: DocumentPreviewProps) {
   return (
-    <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
+    <div className="flex items-center gap-3 rounded-lg border bg-muted/50 p-3">
       <div className="flex-shrink-0">
         {file.name.toLowerCase().endsWith('.pdf') ? (
           <FileText className="h-8 w-8 text-red-500" />
@@ -88,8 +87,8 @@ export function DocumentPreview({ file, extractedFieldCount, documentType }: Doc
           <ImageIcon className="h-8 w-8 text-blue-500" />
         )}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{file.name}</p>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{file.name}</p>
         <p className="text-xs text-muted-foreground">
           {extractedFieldCount} field(s) extracted • Will be uploaded with {documentType}
         </p>
@@ -116,7 +115,11 @@ export function ConfidenceWarning({ confidence, hasValue }: ConfidenceWarningPro
   );
 }
 
-export function validateFile(file: File): { valid: boolean; error?: string; errorDescription?: string } {
+export function validateFile(file: File): {
+  valid: boolean;
+  error?: string;
+  errorDescription?: string;
+} {
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
 
   if (!validTypes.includes(file.type)) {

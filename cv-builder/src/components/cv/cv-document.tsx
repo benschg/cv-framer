@@ -1,42 +1,46 @@
 'use client';
 
-import { forwardRef } from 'react';
-import type { ReactNode } from 'react';
-import type { CVContent, UserProfile, DisplaySettings } from '@/types/cv.types';
-import type {
-  CVWorkExperienceWithSelection,
-  CVEducationWithSelection,
-  CVSkillCategoryWithSelection,
-  CVKeyCompetenceWithSelection,
-} from '@/types/profile-career.types';
-import type { CVLayoutConfig, CVMainSection, CVSidebarSection, CVPageLayout } from '@/types/cv-layout.types';
 import {
+  closestCenter,
   DndContext,
   DragEndEvent,
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import type { ReactNode } from 'react';
+import { forwardRef } from 'react';
+
+import { getDefaultLayout } from '@/lib/cv-layouts';
+import type { CVContent, DisplaySettings,UserProfile } from '@/types/cv.types';
+import type {
+  CVLayoutConfig,
+  CVMainSection,
+  CVPageLayout,
+  CVSidebarSection,
+} from '@/types/cv-layout.types';
+import type {
+  CVEducationWithSelection,
+  CVKeyCompetenceWithSelection,
+  CVSkillCategoryWithSelection,
+  CVWorkExperienceWithSelection,
+} from '@/types/profile-career.types';
+
 import { CVPage } from './cv-page';
-import { CVSidebar } from './cv-sidebar';
-import { CVSectionWrapper } from './cv-section-wrapper';
 import { CVPageContextMenu } from './cv-page-context-menu';
+import { CVSectionWrapper } from './cv-section-wrapper';
+import { CVSidebar } from './cv-sidebar';
+import type { PhotoOption, PhotoSize } from './cv-sidebar-section-wrapper';
 import { CVSortableSection } from './cv-sortable-section';
 import {
-  CVHeaderSection,
-  CVProfileSection,
-  CVExperienceSection,
   CVEducationSection,
-  CVSkillsSection,
+  CVExperienceSection,
+  CVHeaderSection,
   CVKeyCompetencesSection,
+  CVProfileSection,
+  CVSkillsSection,
 } from './sections';
-import { getDefaultLayout } from '@/lib/cv-layouts';
-import type { PhotoOption, PhotoSize } from './cv-sidebar-section-wrapper';
 
 interface CVDocumentProps {
   content: CVContent;
@@ -138,17 +142,18 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
     );
 
     // Handle main section drag end
-    const handleMainDragEnd = (pageIndex: number, visibleSections: CVMainSection[]) => (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over || active.id === over.id || !onSectionMove) return;
+    const handleMainDragEnd =
+      (pageIndex: number, visibleSections: CVMainSection[]) => (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id || !onSectionMove) return;
 
-      const oldIndex = visibleSections.indexOf(active.id as CVMainSection);
-      const newIndex = visibleSections.indexOf(over.id as CVMainSection);
+        const oldIndex = visibleSections.indexOf(active.id as CVMainSection);
+        const newIndex = visibleSections.indexOf(over.id as CVMainSection);
 
-      if (oldIndex !== -1 && newIndex !== -1) {
-        onSectionMove(pageIndex, oldIndex, newIndex);
-      }
-    };
+        if (oldIndex !== -1 && newIndex !== -1) {
+          onSectionMove(pageIndex, oldIndex, newIndex);
+        }
+      };
 
     // Use provided layout or default, then apply page layout overrides
     const baseLayout = layoutConfig || getDefaultLayout(layoutMode);
@@ -174,16 +179,16 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
 
     // Filter to selected items only
     const selectedWorkExperiences = showWorkExperience
-      ? (workExperiences?.filter(exp => exp.selection.is_selected) || [])
+      ? workExperiences?.filter((exp) => exp.selection.is_selected) || []
       : [];
     const selectedEducations = showEducation
-      ? (educations?.filter(edu => edu.selection.is_selected) || [])
+      ? educations?.filter((edu) => edu.selection.is_selected) || []
       : [];
     const selectedSkillCategories = showSkills
-      ? (skillCategories?.filter(cat => cat.selection.is_selected) || [])
+      ? skillCategories?.filter((cat) => cat.selection.is_selected) || []
       : [];
     const selectedKeyCompetences = showKeyCompetences
-      ? (keyCompetences?.filter(comp => comp.selection.is_selected) || [])
+      ? keyCompetences?.filter((comp) => comp.selection.is_selected) || []
       : [];
 
     // Handle section move up
@@ -230,11 +235,7 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
         case 'profile':
           if (!content.profile) return null;
           return (
-            <CVProfileSection
-              key="profile"
-              profile={content.profile}
-              title={labels.profile}
-            />
+            <CVProfileSection key="profile" profile={content.profile} title={labels.profile} />
           );
 
         case 'experience':
@@ -296,7 +297,7 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
       if (!page) return false;
 
       // Check if any main sections have content
-      const mainSections = page.main.filter(section => {
+      const mainSections = page.main.filter((section) => {
         switch (section) {
           case 'header':
             return true; // Header always has content
@@ -339,20 +340,10 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
     // Empty state
     if (totalPages === 0) {
       return (
-        <div
-          className="cv-document-wrapper"
-          data-theme={theme}
-          ref={ref}
-          style={cssVars}
-        >
-          <CVPage
-            pageNumber={1}
-            totalPages={1}
-            format={format}
-            zoom={zoom}
-          >
+        <div className="cv-document-wrapper" data-theme={theme} ref={ref} style={cssVars}>
+          <CVPage pageNumber={1} totalPages={1} format={format} zoom={zoom}>
             <div className="cv-main-content cv-full-width">
-              <div className="text-center py-8 text-[var(--cv-text-muted)]">
+              <div className="py-8 text-center text-[var(--cv-text-muted)]">
                 <p className="text-sm">
                   {language === 'de'
                     ? 'Beginnen Sie mit der Bearbeitung Ihres Lebenslaufs, um eine Vorschau zu sehen'
@@ -368,12 +359,7 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
     let visiblePageNumber = 0;
 
     return (
-      <div
-        className="cv-document-wrapper"
-        data-theme={theme}
-        ref={ref}
-        style={cssVars}
-      >
+      <div className="cv-document-wrapper" data-theme={theme} ref={ref} style={cssVars}>
         {layout.pages.map((pageLayout, pageIndex) => {
           // Skip pages without content
           if (!pageHasContent(pageIndex)) return null;
@@ -382,13 +368,15 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
           const isFirstPage = pageIndex === 0;
 
           // Determine sidebar position (default to 'left' if sidebar has content and mode is two-column)
-          const sidebarPosition = pageLayout.sidebarPosition ??
+          const sidebarPosition =
+            pageLayout.sidebarPosition ??
             (pageLayout.sidebar.length > 0 && layout.mode === 'two-column' ? 'left' : 'none');
           const hasSidebar = sidebarPosition !== 'none' && pageLayout.sidebar.length > 0;
-          const sidebarClass = sidebarPosition === 'right' ? 'cv-two-column cv-sidebar-right' : 'cv-two-column';
+          const sidebarClass =
+            sidebarPosition === 'right' ? 'cv-two-column cv-sidebar-right' : 'cv-two-column';
 
           // Filter out sections with no content for proper indexing
-          const visibleSections = pageLayout.main.filter(section => {
+          const visibleSections = pageLayout.main.filter((section) => {
             const rendered = renderMainSection(section);
             return rendered !== null;
           });
@@ -400,11 +388,7 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
             const visibleIndex = visibleSections.indexOf(sectionType);
 
             return (
-              <CVSortableSection
-                key={sectionType}
-                id={sectionType}
-                disabled={!isInteractive}
-              >
+              <CVSortableSection key={sectionType} id={sectionType} disabled={!isInteractive}>
                 <CVSectionWrapper
                   sectionType={sectionType}
                   sectionIndex={visibleIndex}
@@ -488,10 +472,7 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
                     collisionDetection={closestCenter}
                     onDragEnd={handleMainDragEnd(pageIndex, visibleSections)}
                   >
-                    <SortableContext
-                      items={visibleSections}
-                      strategy={verticalListSortingStrategy}
-                    >
+                    <SortableContext items={visibleSections} strategy={verticalListSortingStrategy}>
                       <div className="cv-main-content cv-full-width">
                         {pageLayout.main.map((sectionType) => renderWrappedSection(sectionType))}
                       </div>

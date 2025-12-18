@@ -1,8 +1,8 @@
 'use client';
 
-import { forwardRef, useRef, useEffect, useCallback } from 'react';
+import { Globe,Linkedin, Mail, Phone } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { Mail, Phone, Linkedin, Globe } from 'lucide-react';
+import { forwardRef, useCallback,useEffect, useRef } from 'react';
 
 interface CVPageProps {
   children: ReactNode;
@@ -17,7 +17,10 @@ interface CVPageProps {
 }
 
 export const CVPage = forwardRef<HTMLDivElement, CVPageProps>(
-  ({ children, pageNumber, totalPages, format = 'A4', email, phone, linkedin, website, zoom = 0 }, ref) => {
+  (
+    { children, pageNumber, totalPages, format = 'A4', email, phone, linkedin, website, zoom = 0 },
+    ref
+  ) => {
     const hasContact = email || phone || linkedin || website;
     const contentRef = useRef<HTMLDivElement>(null);
 

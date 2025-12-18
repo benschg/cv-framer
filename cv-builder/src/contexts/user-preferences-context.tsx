@@ -1,9 +1,11 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { useAuth } from './auth-context';
+import { createContext, useCallback,useContext, useEffect, useState } from 'react';
+
 import type { Language } from '@/i18n';
+import { createClient } from '@/lib/supabase/client';
+
+import { useAuth } from './auth-context';
 
 interface UserPreferences {
   language: Language;
@@ -47,7 +49,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
         const dbLanguage = data.preferred_language || 'en';
         const validLanguage = (dbLanguage === 'de' ? 'de' : 'en') as Language;
 
-        setPreferences(prev => ({
+        setPreferences((prev) => ({
           ...prev,
           language: validLanguage,
         }));
@@ -56,7 +58,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
       // Load theme from localStorage
       const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
       if (savedTheme) {
-        setPreferences(prev => ({
+        setPreferences((prev) => ({
           ...prev,
           theme: savedTheme,
         }));
@@ -69,39 +71,42 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   }, [user, supabase]);
 
   // Save language preference to database
-  const setLanguage = useCallback(async (language: Language) => {
-    if (!user) {
-      return { error: 'User not authenticated' };
-    }
-
-    // Update local state immediately for all languages
-    setPreferences(prev => ({ ...prev, language }));
-
-    // Skip database save for 'dev' language (session-only)
-    if (language === 'dev') {
-      if (process.env.NODE_ENV !== 'development') {
-        console.warn('Pseudo-locale "dev" should only be used in development mode.');
+  const setLanguage = useCallback(
+    async (language: Language) => {
+      if (!user) {
+        return { error: 'User not authenticated' };
       }
-      // Don't save to database, just keep in state
+
+      // Update local state immediately for all languages
+      setPreferences((prev) => ({ ...prev, language }));
+
+      // Skip database save for 'dev' language (session-only)
+      if (language === 'dev') {
+        if (process.env.NODE_ENV !== 'development') {
+          console.warn('Pseudo-locale "dev" should only be used in development mode.');
+        }
+        // Don't save to database, just keep in state
+        return { error: null };
+      }
+
+      // Save to database for 'en' and 'de'
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ preferred_language: language })
+        .eq('user_id', user.id);
+
+      if (error) {
+        return { error: error.message };
+      }
+
       return { error: null };
-    }
-
-    // Save to database for 'en' and 'de'
-    const { error } = await supabase
-      .from('user_profiles')
-      .update({ preferred_language: language })
-      .eq('user_id', user.id);
-
-    if (error) {
-      return { error: error.message };
-    }
-
-    return { error: null };
-  }, [user, supabase]);
+    },
+    [user, supabase]
+  );
 
   // Save theme preference to localStorage (theme is client-side only)
   const setTheme = useCallback((theme: 'light' | 'dark' | 'system') => {
-    setPreferences(prev => ({ ...prev, theme }));
+    setPreferences((prev) => ({ ...prev, theme }));
     localStorage.setItem('theme', theme);
 
     // Apply theme to document
@@ -109,7 +114,9 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     root.classList.remove('light', 'dark');
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
       root.classList.add(systemTheme);
     } else {
       root.classList.add(theme);
@@ -117,12 +124,14 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <UserPreferencesContext.Provider value={{
-      ...preferences,
-      setLanguage,
-      setTheme,
-      loading,
-    }}>
+    <UserPreferencesContext.Provider
+      value={{
+        ...preferences,
+        setLanguage,
+        setTheme,
+        loading,
+      }}
+    >
       {children}
     </UserPreferencesContext.Provider>
   );

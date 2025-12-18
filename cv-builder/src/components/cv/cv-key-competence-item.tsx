@@ -13,7 +13,7 @@ export function CVKeyCompetenceItem({ title, description, isFavorite }: CVKeyCom
     <div className="text-sm">
       <div className="flex items-center gap-1">
         <span className="font-semibold">{title}</span>
-        {isFavorite && <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />}
+        {isFavorite && <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />}
       </div>
       {description && <p className="text-gray-700">{description}</p>}
     </div>

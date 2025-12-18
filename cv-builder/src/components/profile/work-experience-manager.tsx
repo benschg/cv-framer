@@ -1,25 +1,27 @@
 'use client';
 
+import { AlertTriangle, Loader2,Trash2 } from 'lucide-react';
 import { forwardRef, useImperativeHandle } from 'react';
+
+import { BulletListEditor } from '@/components/ui/bullet-list-editor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { AlertTriangle, Trash2, Loader2 } from 'lucide-react';
 import { MonthYearPicker } from '@/components/ui/month-year-picker';
-import { BulletListEditor } from '@/components/ui/bullet-list-editor';
-import { formatDateRange } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
 import { useAppTranslation } from '@/hooks/use-app-translation';
+import { useProfileManager } from '@/hooks/use-profile-manager';
+import { formatDateRange } from '@/lib/utils';
 import {
-  fetchWorkExperiences,
   createWorkExperience,
   deleteWorkExperience,
-  updateWorkExperience,
+  fetchWorkExperiences,
   type ProfileWorkExperience,
+  updateWorkExperience,
 } from '@/services/profile-career.service';
-import { useProfileManager } from '@/hooks/use-profile-manager';
+
 import { ProfileCardManager } from './ProfileCardManager';
 import { SortableCard } from './SortableCard';
 
@@ -32,8 +34,10 @@ export interface WorkExperienceManagerRef {
   handleAdd: () => void;
 }
 
-export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkExperienceManagerProps>(
-  ({ onSavingChange, onSaveSuccessChange }, ref) => {
+export const WorkExperienceManager = forwardRef<
+  WorkExperienceManagerRef,
+  WorkExperienceManagerProps
+>(({ onSavingChange, onSaveSuccessChange }, ref) => {
   const { t } = useAppTranslation();
   const {
     items: experiences,
@@ -88,11 +92,7 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
         const expanded = isExpanded(experience.id);
         const formData = getFormData(experience.id);
         return (
-          <SortableCard
-            id={experience.id}
-            disabled={false}
-            showDragHandle={!expanded}
-          >
+          <SortableCard id={experience.id} disabled={false} showDragHandle={!expanded}>
             {expanded ? (
               <ExperienceEditForm
                 formData={formData}
@@ -113,14 +113,12 @@ export const WorkExperienceManager = forwardRef<WorkExperienceManagerRef, WorkEx
           </SortableCard>
         );
       }}
-      renderDragOverlay={(experience) => (
-        <ExperienceCardOverlay experience={experience} />
-      )}
+      renderDragOverlay={(experience) => <ExperienceCardOverlay experience={experience} />}
       emptyState={
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             <p>{t('profile.workExperience.empty')}</p>
-            <p className="text-sm mt-1">{t('profile.workExperience.emptyAction')}</p>
+            <p className="mt-1 text-sm">{t('profile.workExperience.emptyAction')}</p>
           </CardContent>
         </Card>
       }
@@ -226,7 +224,7 @@ function ExperienceEditForm({
               });
             }}
           />
-          <Label htmlFor="current" className="text-sm font-normal cursor-pointer">
+          <Label htmlFor="current" className="cursor-pointer text-sm font-normal">
             {t('profile.workExperience.currentlyWorkHere')}
           </Label>
         </div>
@@ -290,25 +288,15 @@ function ExperienceViewCard({
               {experience.company}
               {experience.location && ` • ${experience.location}`}
             </CardDescription>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="mt-1 text-sm text-muted-foreground">
               {formatDateRange(experience.start_date, experience.end_date, experience.current)}
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEdit}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onEdit} disabled={disabled}>
               {t('profile.workExperience.editButton')}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onDelete}
-              disabled={disabled}
-            >
+            <Button variant="ghost" size="sm" onClick={onDelete} disabled={disabled}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -317,12 +305,10 @@ function ExperienceViewCard({
       {(experience.description || (experience.bullets && experience.bullets.length > 0)) && (
         <CardContent>
           {experience.description && (
-            <p className="text-sm text-muted-foreground mb-3">
-              {experience.description}
-            </p>
+            <p className="mb-3 text-sm text-muted-foreground">{experience.description}</p>
           )}
           {experience.bullets && experience.bullets.length > 0 && (
-            <ul className="list-disc list-inside space-y-1 text-sm">
+            <ul className="list-inside list-disc space-y-1 text-sm">
               {experience.bullets.map((bullet, index) => (
                 <li key={index}>{bullet}</li>
               ))}
@@ -337,7 +323,7 @@ function ExperienceViewCard({
 // Overlay component shown while dragging
 function ExperienceCardOverlay({ experience }: { experience: ProfileWorkExperience }) {
   return (
-    <Card className="shadow-xl rotate-3 cursor-grabbing opacity-80">
+    <Card className="rotate-3 cursor-grabbing opacity-80 shadow-xl">
       <CardHeader>
         <div>
           <CardTitle>{experience.title}</CardTitle>
@@ -345,7 +331,7 @@ function ExperienceCardOverlay({ experience }: { experience: ProfileWorkExperien
             {experience.company}
             {experience.location && ` • ${experience.location}`}
           </CardDescription>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             {formatDateRange(experience.start_date, experience.end_date, experience.current)}
           </p>
         </div>

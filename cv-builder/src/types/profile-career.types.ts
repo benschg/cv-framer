@@ -199,18 +199,48 @@ export type ProfileHighlightUpdate = Tables['profile_highlights']['Update'];
 export type ProfileProjectUpdate = Tables['profile_projects']['Update'];
 
 // Helper type for creating new entries (omits auto-generated fields)
-export type NewProfileWorkExperience = Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
-export type NewProfileEducation = Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
-export type NewProfileSkillCategory = Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
-export type NewProfileCertification = Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
-export type NewProfileReference = Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
-export type NewProfileKeyCompetence = Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
-export type NewCertificationDocument = Omit<CertificationDocument, 'id' | 'user_id' | 'uploaded_at'>;
+export type NewProfileWorkExperience = Omit<
+  ProfileWorkExperience,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
+export type NewProfileEducation = Omit<
+  ProfileEducation,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
+export type NewProfileSkillCategory = Omit<
+  ProfileSkillCategory,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
+export type NewProfileCertification = Omit<
+  ProfileCertification,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
+export type NewProfileReference = Omit<
+  ProfileReference,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
+export type NewProfileKeyCompetence = Omit<
+  ProfileKeyCompetence,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
+export type NewCertificationDocument = Omit<
+  CertificationDocument,
+  'id' | 'user_id' | 'uploaded_at'
+>;
 
 // NEW: Helper types for new profile tables
-export type NewProfileMotivationVision = Omit<ProfileMotivationVision, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
-export type NewProfileHighlight = Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
-export type NewProfileProject = Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+export type NewProfileMotivationVision = Omit<
+  ProfileMotivationVision,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
+export type NewProfileHighlight = Omit<
+  ProfileHighlight,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
+export type NewProfileProject = Omit<
+  ProfileProject,
+  'id' | 'user_id' | 'created_at' | 'updated_at'
+>;
 
 // Type alias for highlight types
 export type HighlightType = 'highlight' | 'achievement' | 'mehrwert' | 'usp';

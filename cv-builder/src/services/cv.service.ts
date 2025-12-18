@@ -1,9 +1,9 @@
 import type {
-  CVDocument,
   CreateCVInput,
-  UpdateCVInput,
+  CVDocument,
   GenerateCVInput,
   RegenerateItemInput,
+  UpdateCVInput,
 } from '@/types/api.schemas';
 
 const API_BASE = '/api/cv';
@@ -127,7 +127,10 @@ export async function deleteCV(id: string): Promise<CVServiceResponse<boolean>> 
 /**
  * Duplicate a CV
  */
-export async function duplicateCV(id: string, newName?: string): Promise<CVServiceResponse<CVDocument>> {
+export async function duplicateCV(
+  id: string,
+  newName?: string
+): Promise<CVServiceResponse<CVDocument>> {
   try {
     const response = await fetch(`${API_BASE}/${id}/duplicate`, {
       method: 'POST',
@@ -151,7 +154,9 @@ export async function duplicateCV(id: string, newName?: string): Promise<CVServi
 /**
  * Generate CV content using AI
  */
-export async function generateCVContent(data: GenerateCVInput): Promise<CVServiceResponse<Record<string, unknown>>> {
+export async function generateCVContent(
+  data: GenerateCVInput
+): Promise<CVServiceResponse<Record<string, unknown>>> {
   try {
     const response = await fetch('/api/generate-cv', {
       method: 'POST',
@@ -175,10 +180,12 @@ export async function generateCVContent(data: GenerateCVInput): Promise<CVServic
 /**
  * Regenerate a specific CV item/section using AI
  */
-export async function regenerateItem(data: RegenerateItemInput): Promise<CVServiceResponse<{
-  section: string;
-  content: string | string[];
-}>> {
+export async function regenerateItem(data: RegenerateItemInput): Promise<
+  CVServiceResponse<{
+    section: string;
+    content: string | string[];
+  }>
+> {
   try {
     const response = await fetch('/api/regenerate-item', {
       method: 'POST',

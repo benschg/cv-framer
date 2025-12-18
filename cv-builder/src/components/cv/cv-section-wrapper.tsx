@@ -1,9 +1,11 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { CVSectionContextMenu } from './cv-section-context-menu';
-import { getSectionLabel } from './constants';
+
 import type { CVMainSection } from '@/types/cv-layout.types';
+
+import { getSectionLabel } from './constants';
+import { CVSectionContextMenu } from './cv-section-context-menu';
 
 interface CVSectionWrapperProps {
   children: ReactNode;

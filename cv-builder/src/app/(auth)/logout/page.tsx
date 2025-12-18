@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { ArrowLeft,LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
-import { LogOut, ArrowLeft } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
 import { useTranslations } from '@/hooks/use-translations';
-import { toast } from 'sonner';
 
 export default function LogoutPage() {
   const router = useRouter();
@@ -54,17 +55,15 @@ export default function LogoutPage() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader className="text-center space-y-3">
+      <CardHeader className="space-y-3 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
           <LogOut className="h-6 w-6 text-muted-foreground" />
         </div>
         <CardTitle className="text-2xl">{t('auth.logoutPage.title')}</CardTitle>
-        <CardDescription className="text-base">
-          {t('auth.logoutPage.subtitle')}
-        </CardDescription>
+        <CardDescription className="text-base">{t('auth.logoutPage.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-center text-muted-foreground">
+        <p className="text-center text-sm text-muted-foreground">
           {t('auth.logoutPage.description')}
         </p>
 
@@ -75,7 +74,7 @@ export default function LogoutPage() {
             disabled={isSigningOut}
             className="w-full"
           >
-            <LogOut className="h-4 w-4 mr-2" />
+            <LogOut className="mr-2 h-4 w-4" />
             {isSigningOut ? t('auth.logoutPage.signingOut') : t('auth.logoutPage.confirm')}
           </Button>
 
@@ -85,7 +84,7 @@ export default function LogoutPage() {
             disabled={isSigningOut}
             className="w-full"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             {t('auth.logoutPage.cancel')}
           </Button>
         </div>

@@ -1,18 +1,25 @@
 'use client';
 
+import { AlertCircle, Download, ExternalLink, FileText, Globe, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/auth-context';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
 import { useTranslations } from '@/hooks/use-translations';
-import { AlertCircle, Download, ExternalLink, FileText, Globe, Moon, Sun } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const { language, theme, setLanguage, setTheme, loading: preferencesLoading } = useUserPreferences();
+  const {
+    language,
+    theme,
+    setLanguage,
+    setTheme,
+    loading: preferencesLoading,
+  } = useUserPreferences();
 
   const { t } = useTranslations(language);
 
@@ -31,21 +38,17 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{t('settings.title')}</h1>
-        <p className="text-muted-foreground">
-          {t('settings.subtitle')}
-        </p>
+        <p className="text-muted-foreground">{t('settings.subtitle')}</p>
       </div>
 
       {/* Appearance */}
       <Card>
         <CardHeader>
           <CardTitle>{t('settings.appearance')}</CardTitle>
-          <CardDescription>
-            {t('settings.appearanceDescription')}
-          </CardDescription>
+          <CardDescription>{t('settings.appearanceDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -88,9 +91,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t('settings.language')}</CardTitle>
-          <CardDescription>
-            {t('settings.languageDescription')}
-          </CardDescription>
+          <CardDescription>{t('settings.languageDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -133,7 +134,7 @@ export default function SettingsPage() {
             <p className="text-xs text-muted-foreground">
               {t('settings.languageHint')}
               {process.env.NODE_ENV === 'development' && language === 'dev' && (
-                <span className="block mt-1 text-amber-600">
+                <span className="mt-1 block text-amber-600">
                   Warning: DEV pseudo-locale is session-only and will reset on page refresh.
                 </span>
               )}
@@ -146,9 +147,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t('settings.account')}</CardTitle>
-          <CardDescription>
-            {t('settings.accountDescription')}
-          </CardDescription>
+          <CardDescription>{t('settings.accountDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -159,15 +158,15 @@ export default function SettingsPage() {
             <Label>{t('settings.accountCreated')}</Label>
             <p className="text-sm text-muted-foreground">
               {user?.created_at
-                ? new Date(user.created_at).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')
+                ? new Date(user.created_at).toLocaleDateString(
+                    language === 'de' ? 'de-DE' : 'en-US'
+                  )
                 : t('settings.unknown')}
             </p>
           </div>
           <div className="pt-4">
             <Button variant="outline" asChild>
-              <Link href="/logout">
-                {t('settings.signOut')}
-              </Link>
+              <Link href="/logout">{t('settings.signOut')}</Link>
             </Button>
           </div>
         </CardContent>
@@ -180,13 +179,11 @@ export default function SettingsPage() {
             <FileText className="h-5 w-5" />
             Legal & Privacy
           </CardTitle>
-          <CardDescription>
-            Review our legal documents and manage your data
-          </CardDescription>
+          <CardDescription>Review our legal documents and manage your data</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b">
+            <div className="flex items-center justify-between border-b py-2">
               <div>
                 <Label className="text-base">Privacy Policy</Label>
                 <p className="text-sm text-muted-foreground">
@@ -201,7 +198,7 @@ export default function SettingsPage() {
               </Link>
             </div>
 
-            <div className="flex items-center justify-between py-2 border-b">
+            <div className="flex items-center justify-between border-b py-2">
               <div>
                 <Label className="text-base">Terms of Service</Label>
                 <p className="text-sm text-muted-foreground">
@@ -228,9 +225,7 @@ export default function SettingsPage() {
                 Export Data
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Data export functionality coming soon
-            </p>
+            <p className="text-xs text-muted-foreground">Data export functionality coming soon</p>
           </div>
         </CardContent>
       </Card>
@@ -242,9 +237,7 @@ export default function SettingsPage() {
             <AlertCircle className="h-5 w-5" />
             {t('settings.dangerZone')}
           </CardTitle>
-          <CardDescription>
-            {t('settings.dangerZoneDescription')}
-          </CardDescription>
+          <CardDescription>{t('settings.dangerZoneDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -256,9 +249,7 @@ export default function SettingsPage() {
           <Button variant="destructive" disabled>
             {t('settings.deleteAccount')}
           </Button>
-          <p className="text-xs text-muted-foreground">
-            {t('settings.deleteAccountDisabled')}
-          </p>
+          <p className="text-xs text-muted-foreground">{t('settings.deleteAccountDisabled')}</p>
         </CardContent>
       </Card>
     </div>

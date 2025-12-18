@@ -1,24 +1,23 @@
-import commonEn from './en/common.json';
-import authEn from './en/auth.json';
-import navEn from './en/nav.json';
-import profileEn from './en/profile.json';
-import applicationsEn from './en/applications.json';
-import cvEn from './en/cv.json';
-import coverLetterEn from './en/coverLetter.json';
-import settingsEn from './en/settings.json';
-import errorsEn from './en/errors.json';
-import guidesEn from './en/guides.json';
-
-import commonDe from './de/common.json';
-import authDe from './de/auth.json';
-import navDe from './de/nav.json';
-import profileDe from './de/profile.json';
 import applicationsDe from './de/applications.json';
-import cvDe from './de/cv.json';
+import authDe from './de/auth.json';
+import commonDe from './de/common.json';
 import coverLetterDe from './de/coverLetter.json';
-import settingsDe from './de/settings.json';
+import cvDe from './de/cv.json';
 import errorsDe from './de/errors.json';
 import guidesDe from './de/guides.json';
+import navDe from './de/nav.json';
+import profileDe from './de/profile.json';
+import settingsDe from './de/settings.json';
+import applicationsEn from './en/applications.json';
+import authEn from './en/auth.json';
+import commonEn from './en/common.json';
+import coverLetterEn from './en/coverLetter.json';
+import cvEn from './en/cv.json';
+import errorsEn from './en/errors.json';
+import guidesEn from './en/guides.json';
+import navEn from './en/nav.json';
+import profileEn from './en/profile.json';
+import settingsEn from './en/settings.json';
 
 const en = {
   common: commonEn,
@@ -56,7 +55,7 @@ const translations: Record<'en' | 'de', TranslationKeys> = {
 };
 
 // Import pseudo-localization utility
-import { pseudoLocalizeToKannada, isPseudoLocaleAvailable } from './utils/pseudo-localize';
+import { isPseudoLocaleAvailable,pseudoLocalizeToKannada } from './utils/pseudo-localize';
 
 // Cache for generated Kannada translations (lazy-initialized)
 let kannadaCache: TranslationKeys | null = null;
@@ -65,7 +64,9 @@ export function getTranslations(language: Language): TranslationKeys {
   // Handle 'dev' pseudo-locale
   if (language === 'dev') {
     if (!isPseudoLocaleAvailable()) {
-      console.warn('Pseudo-locale "dev" is only available in development mode. Falling back to English.');
+      console.warn(
+        'Pseudo-locale "dev" is only available in development mode. Falling back to English.'
+      );
       return translations.en;
     }
 
@@ -111,4 +112,4 @@ export function t(language: Language, path: string): string {
   return typeof value === 'string' ? value : path;
 }
 
-export { en, de };
+export { de,en };

@@ -1,16 +1,21 @@
 'use client';
 
+import { Check, ImageIcon, Maximize2,UserX } from 'lucide-react';
 import type { ReactNode } from 'react';
+
+import { Avatar, AvatarFallback,AvatarImage } from '@/components/ui/avatar';
 import {
-  ContextMenuSeparator,
   ContextMenuItem,
+  ContextMenuSeparator,
   ContextMenuSub,
-  ContextMenuSubTrigger,
   ContextMenuSubContent,
+  ContextMenuSubTrigger,
 } from '@/components/ui/context-menu';
-import { ImageIcon, Check, UserX, Maximize2 } from 'lucide-react';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { CVBaseSectionContextMenu, type BaseSectionContextMenuProps } from './cv-base-section-context-menu';
+
+import {
+  type BaseSectionContextMenuProps,
+  CVBaseSectionContextMenu,
+} from './cv-base-section-context-menu';
 
 /** Photo option for the context menu */
 export interface PhotoOption {
@@ -30,7 +35,10 @@ const PHOTO_SIZE_OPTIONS: { value: PhotoSize; label: string }[] = [
   { value: 'large', label: 'Large' },
 ];
 
-interface CVPhotoContextMenuProps extends Omit<BaseSectionContextMenuProps, 'additionalItems' | 'sectionLabel' | 'locationLabel'> {
+interface CVPhotoContextMenuProps extends Omit<
+  BaseSectionContextMenuProps,
+  'additionalItems' | 'sectionLabel' | 'locationLabel'
+> {
   /** Photo options for the submenu */
   photoOptions?: PhotoOption[];
   /** Currently selected photo ID (null = primary, 'none' = no photo) */
@@ -90,20 +98,17 @@ export function CVPhotoContextMenu({
             </ContextMenuSubTrigger>
             <ContextMenuSubContent className="w-56">
               {/* No Photo option */}
-              <ContextMenuItem
-                onClick={() => onPhotoSelect('none')}
-                className="gap-2"
-              >
+              <ContextMenuItem onClick={() => onPhotoSelect('none')} className="gap-2">
                 <Avatar className="h-6 w-6">
                   <AvatarFallback className="text-xs">
                     <UserX className="h-3 w-3" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <span className="text-sm">No Photo</span>
                 </div>
                 {isPhotoSelected('none') && (
-                  <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                  <Check className="h-4 w-4 flex-shrink-0 text-primary" />
                 )}
               </ContextMenuItem>
 
@@ -120,16 +125,16 @@ export function CVPhotoContextMenu({
                     <AvatarImage src={option.imageUrl} />
                     <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm truncate block">{option.label}</span>
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-sm">{option.label}</span>
                     {option.sublabel && (
-                      <span className="text-xs text-muted-foreground truncate block">
+                      <span className="block truncate text-xs text-muted-foreground">
                         {option.sublabel}
                       </span>
                     )}
                   </div>
                   {isPhotoSelected(option.isPrimary ? 'primary' : option.id) && (
-                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <Check className="h-4 w-4 flex-shrink-0 text-primary" />
                   )}
                 </ContextMenuItem>
               ))}
@@ -151,9 +156,7 @@ export function CVPhotoContextMenu({
                     className="gap-2"
                   >
                     <span className="flex-1">{option.label}</span>
-                    {photoSize === option.value && (
-                      <Check className="h-4 w-4 text-primary" />
-                    )}
+                    {photoSize === option.value && <Check className="h-4 w-4 text-primary" />}
                   </ContextMenuItem>
                 ))}
               </ContextMenuSubContent>

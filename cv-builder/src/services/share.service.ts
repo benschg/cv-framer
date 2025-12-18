@@ -1,8 +1,4 @@
-import type {
-  ShareLink,
-  CreateShareLinkInput,
-  UpdateShareLinkInput,
-} from '@/types/api.schemas';
+import type { CreateShareLinkInput, ShareLink, UpdateShareLinkInput } from '@/types/api.schemas';
 
 const API_BASE = '/api';
 
@@ -52,9 +48,7 @@ export async function createShareLink(
 /**
  * Get share links for a CV
  */
-export async function getShareLinks(
-  cvId: string
-): Promise<ShareServiceResponse<ShareLink[]>> {
+export async function getShareLinks(cvId: string): Promise<ShareServiceResponse<ShareLink[]>> {
   try {
     const response = await fetch(`${API_BASE}/share?cv_id=${cvId}`);
     const json = await response.json();
@@ -73,9 +67,7 @@ export async function getShareLinks(
 /**
  * Delete a share link
  */
-export async function deleteShareLink(
-  linkId: string
-): Promise<ShareServiceResponse<boolean>> {
+export async function deleteShareLink(linkId: string): Promise<ShareServiceResponse<boolean>> {
   try {
     const response = await fetch(`${API_BASE}/share/${linkId}`, {
       method: 'DELETE',

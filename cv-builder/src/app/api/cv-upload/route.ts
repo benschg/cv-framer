@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { errorResponse } from '@/lib/api-utils';
 import mammoth from 'mammoth';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { errorResponse } from '@/lib/api-utils';
+import { createClient } from '@/lib/supabase/server';
 
 // POST /api/cv-upload - Upload and extract text from a CV file
 export async function POST(request: NextRequest) {
@@ -9,7 +10,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -38,10 +42,7 @@ export async function POST(request: NextRequest) {
     // Check file size (max 5MB)
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File too large. Maximum size is 5MB.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File too large. Maximum size is 5MB.' }, { status: 400 });
     }
 
     // Determine file type
@@ -70,7 +71,10 @@ export async function POST(request: NextRequest) {
 
     if (!extractedText || extractedText.trim().length < 50) {
       return NextResponse.json(
-        { error: 'Could not extract sufficient text from the file. Please try pasting the text directly.' },
+        {
+          error:
+            'Could not extract sufficient text from the file. Please try pasting the text directly.',
+        },
         { status: 400 }
       );
     }
@@ -139,8 +143,8 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
 
       // Convert to our format with fontSize estimation from height
       const textItems = items
-        .filter(item => item.str.trim())
-        .map(item => ({
+        .filter((item) => item.str.trim())
+        .map((item) => ({
           x: item.transform[4],
           y: item.transform[5],
           text: item.str,
@@ -163,15 +167,20 @@ async function extractTextFromPDF(buffer: Buffer): Promise<string> {
 }
 
 // Extract text from a page with column detection
-function extractPageText(items: Array<{ x: number; y: number; text: string; fontSize: number }>, pageWidth: number): string {
+function extractPageText(
+  items: Array<{ x: number; y: number; text: string; fontSize: number }>,
+  pageWidth: number
+): string {
   if (items.length === 0) return '';
 
   // Detect if this is a multi-column layout
-  const xPositions = items.map(item => item.x);
+  const xPositions = items.map((item) => item.x);
   const midPoint = pageWidth / 2;
-  const leftItems = xPositions.filter(x => x < midPoint * 0.7).length;
-  const rightItems = xPositions.filter(x => x > midPoint * 0.5).length;
-  const isMultiColumn = leftItems > 5 && rightItems > 5 &&
+  const leftItems = xPositions.filter((x) => x < midPoint * 0.7).length;
+  const rightItems = xPositions.filter((x) => x > midPoint * 0.5).length;
+  const isMultiColumn =
+    leftItems > 5 &&
+    rightItems > 5 &&
     Math.min(leftItems, rightItems) / Math.max(leftItems, rightItems) > 0.15;
 
   if (isMultiColumn) {
@@ -188,8 +197,8 @@ function extractPageText(items: Array<{ x: number; y: number; text: string; font
       }
     }
 
-    const leftColumn = items.filter(item => item.x < columnDivider);
-    const rightColumn = items.filter(item => item.x >= columnDivider);
+    const leftColumn = items.filter((item) => item.x < columnDivider);
+    const rightColumn = items.filter((item) => item.x >= columnDivider);
 
     const leftText = extractColumnText(leftColumn);
     const rightText = extractColumnText(rightColumn);
@@ -209,7 +218,9 @@ function extractPageText(items: Array<{ x: number; y: number; text: string; font
 }
 
 // Extract text from a set of items (single column)
-function extractColumnText(items: Array<{ x: number; y: number; text: string; fontSize: number }>): string {
+function extractColumnText(
+  items: Array<{ x: number; y: number; text: string; fontSize: number }>
+): string {
   if (items.length === 0) return '';
 
   // Group text by Y position (lines) with tolerance
@@ -237,7 +248,10 @@ function extractColumnText(items: Array<{ x: number; y: number; text: string; fo
     lineItems.sort((a, b) => a.x - b.x);
 
     // Join items with appropriate spacing
-    const lineText = lineItems.map(item => item.text).join(' ').trim();
+    const lineText = lineItems
+      .map((item) => item.text)
+      .join(' ')
+      .trim();
 
     if (!lineText) continue;
 
@@ -266,7 +280,7 @@ function extractColumnText(items: Array<{ x: number; y: number; text: string; fo
 
 // Format extracted text to preserve structure (sections, bullets, numbers)
 function formatExtractedText(text: string): string {
-  let formatted = text
+  const formatted = text
     // Normalize line endings
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
@@ -290,7 +304,7 @@ function formatExtractedText(text: string): string {
 
     // Trim each line
     .split('\n')
-    .map(line => line.trim())
+    .map((line) => line.trim())
     .join('\n')
 
     // Remove empty lines at start/end
@@ -320,7 +334,10 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

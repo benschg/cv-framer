@@ -28,7 +28,9 @@
       "Bash(git branch:*)",
       "Bash(xargs -I {} git push origin --delete {})",
       "Bash(rm:*)",
-      "Bash(bun run lint)"
+      "Bash(bun run lint)",
+      "Bash(bun run format:*)",
+      "Bash(bun run lint:fix:*)"
     ]
   }
 }

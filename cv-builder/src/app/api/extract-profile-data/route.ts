@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+
 import { extractProfileData } from '@/lib/ai/gemini';
+import { createClient } from '@/lib/supabase/server';
 
 // POST /api/extract-profile-data - Extract profile data from CV document
 export async function POST(request: NextRequest) {
@@ -8,7 +9,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -71,19 +75,19 @@ export async function POST(request: NextRequest) {
           extractedData: {
             motivationVision: {},
             highlights: [],
-            projects: []
+            projects: [],
           },
           confidence: {
             motivationVision: 0,
             highlights: 0,
-            projects: 0
+            projects: 0,
           },
           sectionCounts: {
             motivationVision: 0,
             highlights: 0,
-            projects: 0
+            projects: 0,
           },
-          reasoning: 'Extraction failed'
+          reasoning: 'Extraction failed',
         },
         { status: 200 } // Not an error - return empty data for manual entry
       );
@@ -92,14 +96,10 @@ export async function POST(request: NextRequest) {
     // Return extracted data with success flag
     return NextResponse.json({
       success: true,
-      ...extractionResult
+      ...extractionResult,
     });
-
   } catch (error) {
     console.error('Profile data extraction endpoint error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

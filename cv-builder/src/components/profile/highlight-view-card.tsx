@@ -1,9 +1,10 @@
 'use client';
 
+import { Trash2 } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Trash2 } from 'lucide-react';
 import type { ProfileHighlight } from '@/types/profile-career.types';
 
 interface HighlightViewCardProps {
@@ -22,22 +23,18 @@ export function HighlightViewCard({
   t,
 }: HighlightViewCardProps) {
   return (
-    <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={onEdit}>
+    <Card className="cursor-pointer transition-colors hover:bg-accent/50" onClick={onEdit}>
       <CardContent className="pt-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">
-                {t(`profile.highlights.types.${highlight.type}`)}
-              </Badge>
-              {highlight.metric && (
-                <Badge variant="outline">{highlight.metric}</Badge>
-              )}
+              <Badge variant="secondary">{t(`profile.highlights.types.${highlight.type}`)}</Badge>
+              {highlight.metric && <Badge variant="outline">{highlight.metric}</Badge>}
             </div>
             <div>
               <h3 className="font-medium">{highlight.title}</h3>
               {highlight.description && (
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                   {highlight.description}
                 </p>
               )}

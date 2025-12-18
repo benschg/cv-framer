@@ -1,4 +1,4 @@
-import type { CVContent, JobContext, CompanyResearch } from '@/types/cv.types';
+import type { CompanyResearch,CVContent, JobContext } from '@/types/cv.types';
 
 const API_BASE = '/api';
 

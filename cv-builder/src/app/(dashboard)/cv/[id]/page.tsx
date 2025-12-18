@@ -1,55 +1,62 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { Check, Download, Eye, Loader2, Save, Sparkles, UserX } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { useEffect, useMemo,useRef, useState } from 'react';
+
+import { CVEducationSection } from '@/components/cv/cv-education-section';
+import { CVKeyCompetencesSection } from '@/components/cv/cv-key-competences-section';
+import { CVPreviewSection, CVPreviewSectionHandle } from '@/components/cv/cv-preview-section';
+import { CVProjectsSection } from '@/components/cv/cv-projects-section';
+import type { PhotoOption } from '@/components/cv/cv-sidebar-section-wrapper';
+import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
+import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-section';
+import { FormatSettings } from '@/components/cv/format-settings';
+import { PhotoSelector } from '@/components/cv/photo-selector';
+import { Breadcrumb } from '@/components/shared/breadcrumb';
+import { EditableBreadcrumb } from '@/components/shared/editable-breadcrumb';
+import { Avatar, AvatarFallback,AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  Save,
-  Download,
-  Sparkles,
-  Loader2,
-  Eye,
-  Check,
-  UserX,
-} from 'lucide-react';
-import { Breadcrumb } from '@/components/shared/breadcrumb';
-import { EditableBreadcrumb } from '@/components/shared/editable-breadcrumb';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Separator } from '@/components/ui/separator';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
-import { fetchCV, updateCV } from '@/services/cv.service';
-import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
-import { PhotoSelector } from '@/components/cv/photo-selector';
-import { FormatSettings } from '@/components/cv/format-settings';
-import { CVPreviewSection, CVPreviewSectionHandle } from '@/components/cv/cv-preview-section';
-import type { PhotoOption } from '@/components/cv/cv-sidebar-section-wrapper';
-import { CVWorkExperienceSection } from '@/components/cv/cv-work-experience-section';
-import { CVEducationSection } from '@/components/cv/cv-education-section';
-import { CVSkillCategoriesSection } from '@/components/cv/cv-skill-categories-section';
-import { CVKeyCompetencesSection } from '@/components/cv/cv-key-competences-section';
-import { CVProjectsSection } from '@/components/cv/cv-projects-section';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
-import { getUserInitials, getUserName, getUserPhone, getUserLocation } from '@/lib/user-utils';
+import { getUserInitials, getUserLocation,getUserName, getUserPhone } from '@/lib/user-utils';
+import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
+import { fetchCV, updateCV } from '@/services/cv.service';
+import {
+  bulkUpsertCVEducationSelections,
+  fetchCVEducations,
+} from '@/services/cv-education.service';
+import {
+  bulkUpsertCVKeyCompetenceSelections,
+  fetchCVKeyCompetences,
+} from '@/services/cv-key-competences.service';
+import { bulkUpsertCVProjectSelections,fetchCVProjects } from '@/services/cv-projects.service';
+import {
+  bulkUpsertCVSkillCategorySelections,
+  fetchCVSkillCategories,
+} from '@/services/cv-skill-categories.service';
+import {
+  bulkUpsertCVWorkExperienceSelections,
+  fetchCVWorkExperiences,
+} from '@/services/cv-work-experience.service';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import { fetchCVWorkExperiences, bulkUpsertCVWorkExperienceSelections } from '@/services/cv-work-experience.service';
-import { fetchCVEducations, bulkUpsertCVEducationSelections } from '@/services/cv-education.service';
-import { fetchCVSkillCategories, bulkUpsertCVSkillCategorySelections } from '@/services/cv-skill-categories.service';
-import { fetchCVKeyCompetences, bulkUpsertCVKeyCompetenceSelections } from '@/services/cv-key-competences.service';
-import { fetchCVProjects, bulkUpsertCVProjectSelections } from '@/services/cv-projects.service';
-import type { CVDocument, CVContent, DisplaySettings } from '@/types/cv.types';
 import type { ProfilePhoto } from '@/types/api.schemas';
-import type { CVWorkExperienceWithSelection, CVEducationWithSelection, CVSkillCategoryWithSelection, CVKeyCompetenceWithSelection, CVProjectWithSelection } from '@/types/profile-career.types';
+import type { CVContent, CVDocument, DisplaySettings } from '@/types/cv.types';
+import type {
+  CVEducationWithSelection,
+  CVKeyCompetenceWithSelection,
+  CVProjectWithSelection,
+  CVSkillCategoryWithSelection,
+  CVWorkExperienceWithSelection,
+} from '@/types/profile-career.types';
 
 export default function CVEditorPage() {
   const params = useParams();
@@ -203,7 +210,7 @@ export default function CVEditorPage() {
         setPhotoUrl(null);
       } else if (selectedPhotoId && selectedPhotoId !== 'none') {
         // User selected a specific photo
-        const selectedPhoto = photos.find(p => p.id === selectedPhotoId);
+        const selectedPhoto = photos.find((p) => p.id === selectedPhotoId);
         if (selectedPhoto) {
           setPhotoUrl(getPhotoPublicUrl(selectedPhoto.storage_path));
         } else {
@@ -242,14 +249,16 @@ export default function CVEditorPage() {
     }
 
     // Add other photos
-    photos.filter(p => !p.is_primary).forEach((photo) => {
-      options.push({
-        id: photo.id,
-        label: photo.filename,
-        sublabel: `${(photo.file_size / 1024).toFixed(0)} KB`,
-        imageUrl: getPhotoPublicUrl(photo.storage_path),
+    photos
+      .filter((p) => !p.is_primary)
+      .forEach((photo) => {
+        options.push({
+          id: photo.id,
+          label: photo.filename,
+          sublabel: `${(photo.file_size / 1024).toFixed(0)} KB`,
+          imageUrl: getPhotoPublicUrl(photo.storage_path),
+        });
       });
-    });
 
     return options;
   }, [photos, primaryPhoto]);
@@ -327,9 +336,8 @@ export default function CVEditorPage() {
     setSaving(false);
   };
 
-
   const updateField = (field: keyof CVContent, value: unknown) => {
-    setContent(prev => ({ ...prev, [field]: value }));
+    setContent((prev) => ({ ...prev, [field]: value }));
   };
 
   const updateDisplaySettings = (field: keyof DisplaySettings, value: unknown) => {
@@ -338,12 +346,13 @@ export default function CVEditorPage() {
       ...cv.display_settings,
       [field]: value,
     };
-    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+    setCv((prev) => (prev ? { ...prev, display_settings: updatedSettings } : null));
   };
 
   const handlePageBreakToggle = (sectionId: string) => {
     if (!cv) return;
-    const currentBreaks = (cv.display_settings as DisplaySettings & { pageBreaks?: string[] })?.pageBreaks || [];
+    const currentBreaks =
+      (cv.display_settings as DisplaySettings & { pageBreaks?: string[] })?.pageBreaks || [];
     const updatedBreaks = currentBreaks.includes(sectionId)
       ? currentBreaks.filter((id: string) => id !== sectionId)
       : [...currentBreaks, sectionId];
@@ -352,7 +361,7 @@ export default function CVEditorPage() {
       ...cv.display_settings,
       pageBreaks: updatedBreaks,
     } as DisplaySettings;
-    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+    setCv((prev) => (prev ? { ...prev, display_settings: updatedSettings } : null));
   };
 
   // Handle section order change from the preview
@@ -370,14 +379,23 @@ export default function CVEditorPage() {
     // Update the main sections for this page
     updatedPageLayouts[pageIndex] = {
       ...updatedPageLayouts[pageIndex],
-      main: newOrder as ('header' | 'profile' | 'experience' | 'education' | 'skills' | 'keyCompetences' | 'projects' | 'references')[],
+      main: newOrder as (
+        | 'header'
+        | 'profile'
+        | 'experience'
+        | 'education'
+        | 'skills'
+        | 'keyCompetences'
+        | 'projects'
+        | 'references'
+      )[],
     };
 
     const updatedSettings = {
       ...cv.display_settings,
       pageLayouts: updatedPageLayouts,
     } as DisplaySettings;
-    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+    setCv((prev) => (prev ? { ...prev, display_settings: updatedSettings } : null));
   };
 
   // Handle sidebar section order change from the preview
@@ -395,14 +413,21 @@ export default function CVEditorPage() {
     // Update the sidebar sections for this page
     updatedPageLayouts[pageIndex] = {
       ...updatedPageLayouts[pageIndex],
-      sidebar: newOrder as ('photo' | 'contact' | 'skills' | 'languages' | 'education' | 'certifications')[],
+      sidebar: newOrder as (
+        | 'photo'
+        | 'contact'
+        | 'skills'
+        | 'languages'
+        | 'education'
+        | 'certifications'
+      )[],
     };
 
     const updatedSettings = {
       ...cv.display_settings,
       pageLayouts: updatedPageLayouts,
     } as DisplaySettings;
-    setCv(prev => prev ? { ...prev, display_settings: updatedSettings } : null);
+    setCv((prev) => (prev ? { ...prev, display_settings: updatedSettings } : null));
   };
 
   // Export PDF using client-rendered HTML
@@ -479,7 +504,7 @@ export default function CVEditorPage() {
       setError(result.error);
     } else if (result.data?.content) {
       const newContent = result.data.content;
-      setContent(prev => ({
+      setContent((prev) => ({
         ...prev,
         ...newContent,
       }));
@@ -492,7 +517,7 @@ export default function CVEditorPage() {
     if (!cv) return;
     setRegeneratingSection(section);
 
-    const currentValue = content[section as keyof CVContent] as string || '';
+    const currentValue = (content[section as keyof CVContent] as string) || '';
 
     const result = await regenerateItem({
       cvId,
@@ -517,7 +542,7 @@ export default function CVEditorPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center gap-4">
           <Skeleton className="h-10 w-24" />
           <Skeleton className="h-8 w-64" />
@@ -529,7 +554,7 @@ export default function CVEditorPage() {
 
   if (error || !cv) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <Breadcrumb currentLabel="CV" />
         <Card className="border-destructive/50">
           <CardContent className="pt-6">
@@ -541,8 +566,8 @@ export default function CVEditorPage() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 bg-background">
+    <div className="flex h-full flex-col overflow-hidden">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
 
@@ -559,7 +584,7 @@ export default function CVEditorPage() {
         <Popover open={photoPopoverOpen} onOpenChange={setPhotoPopoverOpen}>
           <PopoverTrigger asChild>
             <button
-              className="flex-shrink-0 hidden sm:block ml-2 cursor-pointer hover:opacity-80 transition-opacity"
+              className="ml-2 hidden flex-shrink-0 cursor-pointer transition-opacity hover:opacity-80 sm:block"
               title="Change photo"
             >
               <Avatar className="h-8 w-8">
@@ -576,7 +601,7 @@ export default function CVEditorPage() {
                   updateField('selected_photo_id', 'none');
                   setPhotoPopoverOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
+                className={`flex w-full items-center gap-3 p-3 transition-colors hover:bg-accent ${
                   content.selected_photo_id === 'none' ? 'bg-accent' : ''
                 }`}
               >
@@ -586,18 +611,14 @@ export default function CVEditorPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">
-                  <p className="font-medium text-sm">No Photo</p>
-                  <p className="text-xs text-muted-foreground">
-                    Generate CV without a photo
-                  </p>
+                  <p className="text-sm font-medium">No Photo</p>
+                  <p className="text-xs text-muted-foreground">Generate CV without a photo</p>
                 </div>
-                {content.selected_photo_id === 'none' && (
-                  <Check className="h-4 w-4 text-primary" />
-                )}
+                {content.selected_photo_id === 'none' && <Check className="h-4 w-4 text-primary" />}
               </button>
 
               {/* Separator */}
-              <div className="border-t my-1" />
+              <div className="my-1 border-t" />
 
               {/* Primary Photo Option */}
               <button
@@ -605,8 +626,10 @@ export default function CVEditorPage() {
                   updateField('selected_photo_id', null);
                   setPhotoPopoverOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
-                  !content.selected_photo_id || content.selected_photo_id === primaryPhoto?.id ? 'bg-accent' : ''
+                className={`flex w-full items-center gap-3 p-3 transition-colors hover:bg-accent ${
+                  !content.selected_photo_id || content.selected_photo_id === primaryPhoto?.id
+                    ? 'bg-accent'
+                    : ''
                 }`}
               >
                 <Avatar className="h-12 w-12">
@@ -616,7 +639,7 @@ export default function CVEditorPage() {
                   <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">
-                  <p className="font-medium text-sm">Primary Photo (Default)</p>
+                  <p className="text-sm font-medium">Primary Photo (Default)</p>
                   <p className="text-xs text-muted-foreground">
                     {primaryPhoto ? primaryPhoto.filename : 'No primary photo set'}
                   </p>
@@ -627,51 +650,49 @@ export default function CVEditorPage() {
               </button>
 
               {/* Separator */}
-              {photos.filter(p => !p.is_primary).length > 0 && (
-                <div className="border-t my-1" />
-              )}
+              {photos.filter((p) => !p.is_primary).length > 0 && <div className="my-1 border-t" />}
 
               {/* Other Photos */}
-              {photos.filter(p => !p.is_primary).map((photo) => {
-                const isSelected = content.selected_photo_id === photo.id;
-                return (
-                  <button
-                    key={photo.id}
-                    onClick={() => {
-                      updateField('selected_photo_id', photo.id);
-                      setPhotoPopoverOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors ${
-                      isSelected ? 'bg-accent' : ''
-                    }`}
-                  >
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
-                      <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-sm">{photo.filename}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(photo.file_size / 1024).toFixed(0)} KB
-                      </p>
-                    </div>
-                    {isSelected && (
-                      <Check className="h-4 w-4 text-primary" />
-                    )}
-                  </button>
-                );
-              })}
+              {photos
+                .filter((p) => !p.is_primary)
+                .map((photo) => {
+                  const isSelected = content.selected_photo_id === photo.id;
+                  return (
+                    <button
+                      key={photo.id}
+                      onClick={() => {
+                        updateField('selected_photo_id', photo.id);
+                        setPhotoPopoverOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-3 p-3 transition-colors hover:bg-accent ${
+                        isSelected ? 'bg-accent' : ''
+                      }`}
+                    >
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
+                        <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium">{photo.filename}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(photo.file_size / 1024).toFixed(0)} KB
+                        </p>
+                      </div>
+                      {isSelected && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                  );
+                })}
             </div>
           </PopoverContent>
         </Popover>
         {cv.job_context?.company && (
-          <div className="min-w-0 flex-1 hidden lg:block ml-2">
-            <p className="text-sm text-muted-foreground truncate">
+          <div className="ml-2 hidden min-w-0 flex-1 lg:block">
+            <p className="truncate text-sm text-muted-foreground">
               {cv.job_context.position} at {cv.job_context.company}
             </p>
           </div>
         )}
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="ml-auto flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-2" onClick={handlePreview}>
             <Eye className="h-4 w-4" />
             <span className="hidden sm:inline">Preview</span>
@@ -691,193 +712,186 @@ export default function CVEditorPage() {
             <span className="hidden sm:inline">Export</span>
           </Button>
           <Button onClick={handleSave} disabled={saving} size="sm" className="gap-2">
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span className="hidden sm:inline">Save</span>
           </Button>
         </div>
       </header>
 
       {/* Content - Resizable Split Layout */}
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="flex-1 min-h-0"
-      >
+      <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
         {/* Left Side - Configuration (scrollable) */}
         <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
           <div className="h-full overflow-y-auto p-4">
-            <div className="max-w-3xl mx-auto space-y-6 pb-6">
-            {/* Photo Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Photo Settings</CardTitle>
-                <CardDescription>
-                  Choose which photo to use for this CV (defaults to your primary photo)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PhotoSelector
-                  selectedPhotoId={content.selected_photo_id || null}
-                  onChange={(photoId) => updateField('selected_photo_id', photoId)}
-                  userInitials={getUserInitials(user)}
-                />
-              </CardContent>
-            </Card>
+            <div className="mx-auto max-w-3xl space-y-6 pb-6">
+              {/* Photo Selection */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Photo Settings</CardTitle>
+                  <CardDescription>
+                    Choose which photo to use for this CV (defaults to your primary photo)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <PhotoSelector
+                    selectedPhotoId={content.selected_photo_id || null}
+                    onChange={(photoId) => updateField('selected_photo_id', photoId)}
+                    userInitials={getUserInitials(user)}
+                  />
+                </CardContent>
+              </Card>
 
-            {/* AI Generate Button */}
-            <Card className="border-dashed border-primary/50 bg-primary/5">
-              <CardContent className="py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium">AI-Powered Generation</p>
-                      <p className="text-sm text-muted-foreground">
-                        Generate content from your profile data
-                        {cv.job_context?.company && ` tailored for ${cv.job_context.company}`}
-                      </p>
+              {/* AI Generate Button */}
+              <Card className="border-dashed border-primary/50 bg-primary/5">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium">AI-Powered Generation</p>
+                        <p className="text-sm text-muted-foreground">
+                          Generate content from your profile data
+                          {cv.job_context?.company && ` tailored for ${cv.job_context.company}`}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <Button
-                    onClick={handleGenerateAll}
-                    disabled={generating}
-                    className="gap-2"
-                  >
-                    {generating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4" />
-                        Generate Content
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Profile Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile</CardTitle>
-                <CardDescription>Your professional summary and tagline</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="tagline">Tagline</Label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs gap-1"
-                      onClick={() => handleRegenerateSection('tagline')}
-                      disabled={regeneratingSection === 'tagline'}
-                    >
-                      {regeneratingSection === 'tagline' ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
+                    <Button onClick={handleGenerateAll} disabled={generating} className="gap-2">
+                      {generating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Generating...
+                        </>
                       ) : (
-                        <Sparkles className="h-3 w-3" />
+                        <>
+                          <Sparkles className="h-4 w-4" />
+                          Generate Content
+                        </>
                       )}
-                      Regenerate
                     </Button>
                   </div>
-                  <Input
-                    id="tagline"
-                    placeholder="e.g., Senior Software Engineer | React & Node.js"
-                    value={content.tagline || ''}
-                    onChange={(e) => updateField('tagline', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="profile">Professional Summary</Label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs gap-1"
-                      onClick={() => handleRegenerateSection('profile')}
-                      disabled={regeneratingSection === 'profile'}
-                    >
-                      {regeneratingSection === 'profile' ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Sparkles className="h-3 w-3" />
-                      )}
-                      Regenerate
-                    </Button>
+                </CardContent>
+              </Card>
+
+              {/* Profile Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile</CardTitle>
+                  <CardDescription>Your professional summary and tagline</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="tagline">Tagline</Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1 text-xs"
+                        onClick={() => handleRegenerateSection('tagline')}
+                        disabled={regeneratingSection === 'tagline'}
+                      >
+                        {regeneratingSection === 'tagline' ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3 w-3" />
+                        )}
+                        Regenerate
+                      </Button>
+                    </div>
+                    <Input
+                      id="tagline"
+                      placeholder="e.g., Senior Software Engineer | React & Node.js"
+                      value={content.tagline || ''}
+                      onChange={(e) => updateField('tagline', e.target.value)}
+                    />
                   </div>
-                  <Textarea
-                    id="profile"
-                    placeholder="Write a brief summary of your professional background..."
-                    rows={4}
-                    value={content.profile || ''}
-                    onChange={(e) => updateField('profile', e.target.value)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="profile">Professional Summary</Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1 text-xs"
+                        onClick={() => handleRegenerateSection('profile')}
+                        disabled={regeneratingSection === 'profile'}
+                      >
+                        {regeneratingSection === 'profile' ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3 w-3" />
+                        )}
+                        Regenerate
+                      </Button>
+                    </div>
+                    <Textarea
+                      id="profile"
+                      placeholder="Write a brief summary of your professional background..."
+                      rows={4}
+                      value={content.profile || ''}
+                      onChange={(e) => updateField('profile', e.target.value)}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Work Experience Section */}
-            <CVWorkExperienceSection
-              cvId={cvId}
-              workExperiences={workExperiences}
-              onChange={setWorkExperiences}
-              language={cv.language}
-              showWorkExperience={cv.display_settings?.showWorkExperience !== false}
-              onShowWorkExperienceChange={(show) => updateDisplaySettings('showWorkExperience', show)}
-            />
+              {/* Work Experience Section */}
+              <CVWorkExperienceSection
+                cvId={cvId}
+                workExperiences={workExperiences}
+                onChange={setWorkExperiences}
+                language={cv.language}
+                showWorkExperience={cv.display_settings?.showWorkExperience !== false}
+                onShowWorkExperienceChange={(show) =>
+                  updateDisplaySettings('showWorkExperience', show)
+                }
+              />
 
-            {/* Education Section */}
-            <CVEducationSection
-              cvId={cvId}
-              educations={educations}
-              onChange={setEducations}
-              language={cv.language}
-              showEducation={cv.display_settings?.showEducation !== false}
-              onShowEducationChange={(show) => updateDisplaySettings('showEducation', show)}
-            />
+              {/* Education Section */}
+              <CVEducationSection
+                cvId={cvId}
+                educations={educations}
+                onChange={setEducations}
+                language={cv.language}
+                showEducation={cv.display_settings?.showEducation !== false}
+                onShowEducationChange={(show) => updateDisplaySettings('showEducation', show)}
+              />
 
-            {/* Skills Section */}
-            <CVSkillCategoriesSection
-              cvId={cvId}
-              skillCategories={skillCategories}
-              onChange={setSkillCategories}
-              language={cv.language}
-              showSkills={cv.display_settings?.showSkills !== false}
-              onShowSkillsChange={(show) => updateDisplaySettings('showSkills', show)}
-            />
+              {/* Skills Section */}
+              <CVSkillCategoriesSection
+                cvId={cvId}
+                skillCategories={skillCategories}
+                onChange={setSkillCategories}
+                language={cv.language}
+                showSkills={cv.display_settings?.showSkills !== false}
+                onShowSkillsChange={(show) => updateDisplaySettings('showSkills', show)}
+              />
 
-            {/* Key Competences Section */}
-            <CVKeyCompetencesSection
-              cvId={cvId}
-              keyCompetences={keyCompetences}
-              onChange={setKeyCompetences}
-              language={cv.language}
-              showKeyCompetences={cv.display_settings?.showKeyCompetences !== false}
-              onShowKeyCompetencesChange={(show) => updateDisplaySettings('showKeyCompetences', show)}
-            />
+              {/* Key Competences Section */}
+              <CVKeyCompetencesSection
+                cvId={cvId}
+                keyCompetences={keyCompetences}
+                onChange={setKeyCompetences}
+                language={cv.language}
+                showKeyCompetences={cv.display_settings?.showKeyCompetences !== false}
+                onShowKeyCompetencesChange={(show) =>
+                  updateDisplaySettings('showKeyCompetences', show)
+                }
+              />
 
-            {/* Projects Section */}
-            <CVProjectsSection
-              cvId={cvId}
-              projects={projects}
-              onChange={setProjects}
-              language={cv.language}
-              showProjects={cv.display_settings?.showProjects !== false}
-              onShowProjectsChange={(show) => updateDisplaySettings('showProjects', show)}
-            />
+              {/* Projects Section */}
+              <CVProjectsSection
+                cvId={cvId}
+                projects={projects}
+                onChange={setProjects}
+                language={cv.language}
+                showProjects={cv.display_settings?.showProjects !== false}
+                onShowProjectsChange={(show) => updateDisplaySettings('showProjects', show)}
+              />
 
-            {/* Format Settings */}
-            <FormatSettings
-              displaySettings={cv.display_settings}
-              onUpdateSettings={updateDisplaySettings}
-            />
+              {/* Format Settings */}
+              <FormatSettings
+                displaySettings={cv.display_settings}
+                onUpdateSettings={updateDisplaySettings}
+              />
             </div>
           </div>
         </ResizablePanel>
@@ -908,18 +922,22 @@ export default function CVEditorPage() {
               educations={educations}
               skillCategories={skillCategories}
               keyCompetences={keyCompetences}
-              userProfile={user ? {
-                id: user.id,
-                user_id: user.id,
-                first_name: getUserName(user).firstName,
-                last_name: getUserName(user).lastName,
-                email: user.email,
-                phone: getUserPhone(user),
-                location: getUserLocation(user),
-                preferred_language: cv.language,
-                created_at: user.created_at,
-                updated_at: user.updated_at || user.created_at,
-              } : undefined}
+              userProfile={
+                user
+                  ? {
+                      id: user.id,
+                      user_id: user.id,
+                      first_name: getUserName(user).firstName,
+                      last_name: getUserName(user).lastName,
+                      email: user.email,
+                      phone: getUserPhone(user),
+                      location: getUserLocation(user),
+                      preferred_language: cv.language,
+                      created_at: user.created_at,
+                      updated_at: user.updated_at || user.created_at,
+                    }
+                  : undefined
+              }
             />
           </div>
         </ResizablePanel>

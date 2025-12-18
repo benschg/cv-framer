@@ -27,9 +27,7 @@ export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
     <Card>
       <CardHeader>
         <CardTitle>{t('profile.basicInfo.title')}</CardTitle>
-        <CardDescription>
-          {t('profile.basicInfo.subtitle')}
-        </CardDescription>
+        <CardDescription>{t('profile.basicInfo.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -65,9 +63,7 @@ export function BasicInfoForm({ formData, onChange }: BasicInfoFormProps) {
             placeholder={t('profile.basicInfo.emailPlaceholder')}
             disabled
           />
-          <p className="text-xs text-muted-foreground">
-            {t('profile.basicInfo.emailNote')}
-          </p>
+          <p className="text-xs text-muted-foreground">{t('profile.basicInfo.emailNote')}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">

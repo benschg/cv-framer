@@ -2,9 +2,10 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card } from '@/components/ui/card';
 import { GripVertical } from 'lucide-react';
 import { ReactNode } from 'react';
+
+import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 export interface SortableCardProps {
@@ -22,14 +23,7 @@ export function SortableCard({
   className,
   showDragHandle = true,
 }: SortableCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     disabled,
   });
@@ -43,25 +37,19 @@ export function SortableCard({
     <Card
       ref={setNodeRef}
       style={style}
-      className={cn(
-        'transition-shadow',
-        isDragging && 'opacity-50 ring-2 ring-primary',
-        className
-      )}
+      className={cn('transition-shadow', isDragging && 'opacity-50 ring-2 ring-primary', className)}
     >
       <div className="relative">
         {showDragHandle && !disabled && (
           <div
             {...attributes}
             {...listeners}
-            className="absolute left-2 top-4 cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute left-2 top-4 cursor-grab touch-none text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing"
           >
             <GripVertical className="h-5 w-5" />
           </div>
         )}
-        <div className={cn(showDragHandle && !disabled && 'pl-10')}>
-          {children}
-        </div>
+        <div className={cn(showDragHandle && !disabled && 'pl-10')}>{children}</div>
       </div>
     </Card>
   );

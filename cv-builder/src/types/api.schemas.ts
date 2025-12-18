@@ -125,28 +125,45 @@ export const AutofillWerbeflaechenResponseSchema = z.object({
 
 const PageLayoutOverrideSchema = z.object({
   sidebarPosition: z.enum(['left', 'right', 'none']).optional(),
-  sidebar: z.array(z.enum(['photo', 'contact', 'skills', 'languages', 'education', 'certifications'])).optional(),
-  main: z.array(z.enum(['header', 'profile', 'experience', 'education', 'skills', 'keyCompetences', 'projects', 'references'])).optional(),
+  sidebar: z
+    .array(z.enum(['photo', 'contact', 'skills', 'languages', 'education', 'certifications']))
+    .optional(),
+  main: z
+    .array(
+      z.enum([
+        'header',
+        'profile',
+        'experience',
+        'education',
+        'skills',
+        'keyCompetences',
+        'projects',
+        'references',
+      ])
+    )
+    .optional(),
 });
 
-export const DisplaySettingsSchema = z.object({
-  theme: z.enum(['light', 'dark']).default('light'),
-  format: z.enum(['A4', 'Letter']).default('A4'),
-  layoutMode: z.enum(['single-column', 'two-column']).optional(),
-  showPhoto: z.boolean().default(true),
-  showAttachments: z.boolean().default(false),
-  showWorkExperience: z.boolean().default(true),
-  showEducation: z.boolean().default(true),
-  showSkills: z.boolean().default(true),
-  showKeyCompetences: z.boolean().default(true),
-  showProjects: z.boolean().default(true),
-  privacyLevel: PrivacyLevelSchema,
-  accentColor: z.string().optional(),
-  fontFamily: z.string().optional(),
-  textColor: z.string().optional(),
-  pageBreaks: z.array(z.string()).optional(),
-  pageLayouts: z.array(PageLayoutOverrideSchema).optional(),
-}).partial();
+export const DisplaySettingsSchema = z
+  .object({
+    theme: z.enum(['light', 'dark']).default('light'),
+    format: z.enum(['A4', 'Letter']).default('A4'),
+    layoutMode: z.enum(['single-column', 'two-column']).optional(),
+    showPhoto: z.boolean().default(true),
+    showAttachments: z.boolean().default(false),
+    showWorkExperience: z.boolean().default(true),
+    showEducation: z.boolean().default(true),
+    showSkills: z.boolean().default(true),
+    showKeyCompetences: z.boolean().default(true),
+    showProjects: z.boolean().default(true),
+    privacyLevel: PrivacyLevelSchema,
+    accentColor: z.string().optional(),
+    fontFamily: z.string().optional(),
+    textColor: z.string().optional(),
+    pageBreaks: z.array(z.string()).optional(),
+    pageLayouts: z.array(PageLayoutOverrideSchema).optional(),
+  })
+  .partial();
 
 export const CVDocumentSchema = z.object({
   id: z.string().uuid(),

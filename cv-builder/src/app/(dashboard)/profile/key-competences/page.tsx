@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { KeyCompetencesManager, KeyCompetencesManagerRef } from '@/components/profile/key-competences-manager';
+import { useRef,useState } from 'react';
+
+import {
+  KeyCompetencesManager,
+  KeyCompetencesManagerRef,
+} from '@/components/profile/key-competences-manager';
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 

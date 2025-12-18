@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { errorResponse,validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
-import { validateBody, errorResponse } from '@/lib/api-utils';
 import {
+  type CreateApplicationInput,
   CreateApplicationSchema,
   GetApplicationsQuerySchema,
-  type CreateApplicationInput,
 } from '@/types/api.schemas';
 
 // GET /api/applications - Get all applications for the current user
@@ -13,7 +14,10 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -25,13 +29,12 @@ export async function GET(request: NextRequest) {
     });
 
     const status = queryResult.success ? queryResult.data.status : undefined;
-    const includeArchived = queryResult.success ? queryResult.data.includeArchived === 'true' : false;
+    const includeArchived = queryResult.success
+      ? queryResult.data.includeArchived === 'true'
+      : false;
 
     // Build query
-    let query = supabase
-      .from('job_applications')
-      .select('*')
-      .eq('user_id', user.id);
+    let query = supabase.from('job_applications').select('*').eq('user_id', user.id);
 
     if (!includeArchived) {
       query = query.eq('is_archived', false);
@@ -63,7 +66,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

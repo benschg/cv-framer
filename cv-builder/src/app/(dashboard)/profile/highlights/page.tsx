@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef,useState } from 'react';
+
 import { HighlightsManager } from '@/components/profile/highlights-manager';
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
 import { useAppTranslation } from '@/hooks/use-app-translation';

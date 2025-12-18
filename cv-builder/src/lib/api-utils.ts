@@ -55,10 +55,7 @@ export class ValidationError extends Error {
  */
 export function errorResponse(error: unknown, status = 500): NextResponse {
   if (error instanceof ValidationError) {
-    return NextResponse.json(
-      { error: error.message, issues: error.issues },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: error.message, issues: error.issues }, { status: 400 });
   }
 
   if (error instanceof Error) {
@@ -71,10 +68,7 @@ export function errorResponse(error: unknown, status = 500): NextResponse {
 /**
  * Safe parse that returns null on error (for optional validation)
  */
-export function safeParse<T extends ZodSchema>(
-  schema: T,
-  data: unknown
-): z.infer<T> | null {
+export function safeParse<T extends ZodSchema>(schema: T, data: unknown): z.infer<T> | null {
   const result = schema.safeParse(data);
   return result.success ? result.data : null;
 }

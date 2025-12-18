@@ -1,10 +1,6 @@
-export function CVBuilderLogo({ className = "h-6 w-6" }: { className?: string }) {
+export function CVBuilderLogo({ className = 'h-6 w-6' }: { className?: string }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-      className={className}
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
       <defs>
         <linearGradient id="paper" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style={{ stopColor: '#ffffff' }} />
@@ -22,7 +18,10 @@ export function CVBuilderLogo({ className = "h-6 w-6" }: { className?: string })
 
         {/* Folded corner */}
         <path d="M320 0 L320 70 Q320 80 310 80 L250 80 L320 0" fill="#e2e8f0" />
-        <path d="M250 0 L320 0 L320 70 Q320 80 310 80 L250 80 L250 10 Q250 0 260 0" fill="#cbd5e1" />
+        <path
+          d="M250 0 L320 0 L320 70 Q320 80 310 80 L250 80 L250 10 Q250 0 260 0"
+          fill="#cbd5e1"
+        />
 
         {/* Profile circle */}
         <circle cx="160" cy="100" r="50" fill="#3b82f6" />

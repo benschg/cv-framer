@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { Loader2, Mail } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/auth-context';
 import { useTranslations } from '@/hooks/use-translations';
-import { Loader2, Mail } from 'lucide-react';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -91,9 +92,7 @@ export function LoginForm() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
 
           <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
@@ -137,9 +136,7 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
 
       <Button type="submit" className="w-full" disabled={isLoading}>
@@ -153,9 +150,7 @@ export function LoginForm() {
         )}
       </Button>
 
-      <p className="text-xs text-center text-muted-foreground">
-        {t('auth.form.loginMessage')}
-      </p>
+      <p className="text-center text-xs text-muted-foreground">{t('auth.form.loginMessage')}</p>
     </form>
   );
 }

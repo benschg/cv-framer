@@ -1,8 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ReactNode } from 'react';
+
+import { Button } from '@/components/ui/button';
 
 export interface ProfilePageHeaderProps {
   title: string;
@@ -29,7 +30,7 @@ export function ProfilePageHeader({
         {children}
         {addButtonLabel && onAdd && (
           <Button onClick={onAdd}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             {addButtonLabel}
           </Button>
         )}

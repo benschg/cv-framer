@@ -9,12 +9,10 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { Card, CardContent } from '@/components/ui/card';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { ReactNode, useState } from 'react';
+
+import { Card, CardContent } from '@/components/ui/card';
 
 export interface ProfileCardManagerProps<T extends { id: string }> {
   items: T[];
@@ -74,15 +72,10 @@ export function ProfileCardManager<T extends { id: string }>({
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <SortableContext
-        items={items.map((item) => item.id)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-4">
           {items.map((item, index) => (
-            <div key={item.id}>
-              {renderCard(item, index)}
-            </div>
+            <div key={item.id}>{renderCard(item, index)}</div>
           ))}
         </div>
       </SortableContext>
@@ -92,11 +85,9 @@ export function ProfileCardManager<T extends { id: string }>({
           renderDragOverlay ? (
             renderDragOverlay(activeItem)
           ) : (
-            <Card className="rotate-2 shadow-xl cursor-grabbing opacity-80">
+            <Card className="rotate-2 cursor-grabbing opacity-80 shadow-xl">
               <CardContent className="py-4">
-                <div className="text-sm text-muted-foreground">
-                  Dragging...
-                </div>
+                <div className="text-sm text-muted-foreground">Dragging...</div>
               </CardContent>
             </Card>
           )

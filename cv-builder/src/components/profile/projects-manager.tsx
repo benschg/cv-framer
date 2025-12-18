@@ -1,21 +1,23 @@
 'use client';
 
-import { forwardRef, useImperativeHandle } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { forwardRef, useImperativeHandle } from 'react';
+
+import { Card, CardContent } from '@/components/ui/card';
 import { useAppTranslation } from '@/hooks/use-app-translation';
+import { useProfileManager } from '@/hooks/use-profile-manager';
 import {
-  fetchProjects,
   createProject,
   deleteProject,
-  updateProject,
+  fetchProjects,
   type ProfileProject,
+  updateProject,
 } from '@/services/profile-career.service';
-import { useProfileManager } from '@/hooks/use-profile-manager';
+
 import { ProfileCardManager } from './ProfileCardManager';
-import { SortableCard } from './SortableCard';
 import { ProjectEditForm } from './project-edit-form';
 import { ProjectViewCard } from './project-view-card';
+import { SortableCard } from './SortableCard';
 
 interface ProjectsManagerProps {
   onSavingChange?: (saving: boolean) => void;
@@ -82,11 +84,7 @@ export const ProjectsManager = forwardRef<ProjectsManagerRef, ProjectsManagerPro
           const expanded = isExpanded(project.id);
           const formData = getFormData(project.id);
           return (
-            <SortableCard
-              id={project.id}
-              disabled={false}
-              showDragHandle={!expanded}
-            >
+            <SortableCard id={project.id} disabled={false} showDragHandle={!expanded}>
               {expanded ? (
                 <ProjectEditForm
                   formData={formData}
@@ -117,7 +115,7 @@ export const ProjectsManager = forwardRef<ProjectsManagerRef, ProjectsManagerPro
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
               <p>{t('profile.projects.empty')}</p>
-              <p className="text-sm mt-1">{t('profile.projects.emptyAction')}</p>
+              <p className="mt-1 text-sm">{t('profile.projects.emptyAction')}</p>
             </CardContent>
           </Card>
         }

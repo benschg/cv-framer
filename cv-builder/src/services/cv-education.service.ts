@@ -42,30 +42,31 @@ export async function fetchCVEducations(
 
   // Create a map of selections by education_id
   const selectionMap = new Map<string, CVEducationSelection>();
-  selections?.forEach(sel => selectionMap.set(sel.education_id, sel));
+  selections?.forEach((sel) => selectionMap.set(sel.education_id, sel));
 
   // Merge educations with selections
-  const merged: CVEducationWithSelection[] = (educations as ProfileEducation[])?.map((edu, index) => {
-    const sel = selectionMap.get(edu.id);
-    return {
-      id: edu.id,
-      institution: edu.institution,
-      degree: edu.degree,
-      field: edu.field,
-      start_date: edu.start_date,
-      end_date: edu.end_date,
-      description: edu.description,
-      grade: edu.grade,
-      display_order: edu.display_order,
-      selection: {
-        id: sel?.id,
-        is_selected: sel?.is_selected ?? true, // Default: selected
-        is_favorite: sel?.is_favorite ?? false,
-        display_order: sel?.display_order ?? index,
-        description_override: sel?.description_override ?? null,
-      },
-    };
-  }) || [];
+  const merged: CVEducationWithSelection[] =
+    (educations as ProfileEducation[])?.map((edu, index) => {
+      const sel = selectionMap.get(edu.id);
+      return {
+        id: edu.id,
+        institution: edu.institution,
+        degree: edu.degree,
+        field: edu.field,
+        start_date: edu.start_date,
+        end_date: edu.end_date,
+        description: edu.description,
+        grade: edu.grade,
+        display_order: edu.display_order,
+        selection: {
+          id: sel?.id,
+          is_selected: sel?.is_selected ?? true, // Default: selected
+          is_favorite: sel?.is_favorite ?? false,
+          display_order: sel?.display_order ?? index,
+          description_override: sel?.description_override ?? null,
+        },
+      };
+    }) || [];
 
   // Sort by selection display_order
   merged.sort((a, b) => a.selection.display_order - b.selection.display_order);
@@ -91,7 +92,7 @@ export async function bulkUpsertCVEducationSelections(
     return { data: [], error: null };
   }
 
-  const upsertData = selections.map(sel => ({
+  const upsertData = selections.map((sel) => ({
     cv_id: cvId,
     education_id: sel.education_id,
     is_selected: sel.is_selected,

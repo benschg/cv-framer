@@ -1,23 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import {
+  Briefcase,
+  Copy,
+  Edit,
+  FileText,
+  Mail,
+  MoreVertical,
+  Plus,
+  Star,
+  Target,
+  Trash2,
+} from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Plus,
-  FileText,
-  Target,
-  Mail,
-  Briefcase,
-  MoreVertical,
-  Edit,
-  Copy,
-  Trash2,
-  Star,
-} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,8 +25,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { fetchAllCVs, deleteCV, duplicateCV, updateCV } from '@/services/cv.service';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from '@/hooks/use-translations';
+import { deleteCV, duplicateCV, fetchAllCVs, updateCV } from '@/services/cv.service';
 import type { CVDocument } from '@/types/cv.types';
 
 export default function CVDashboardPage() {
@@ -61,7 +62,7 @@ export default function CVDashboardPage() {
     if (!confirm(translations.cv.confirmDelete)) return;
     const result = await deleteCV(id);
     if (result.data) {
-      setCvs(cvs.filter(cv => cv.id !== id));
+      setCvs(cvs.filter((cv) => cv.id !== id));
     }
   };
 
@@ -75,10 +76,12 @@ export default function CVDashboardPage() {
   const handleSetDefault = async (id: string) => {
     const result = await updateCV(id, { is_default: true });
     if (result.data) {
-      setCvs(cvs.map(cv => ({
-        ...cv,
-        is_default: cv.id === id,
-      })));
+      setCvs(
+        cvs.map((cv) => ({
+          ...cv,
+          is_default: cv.id === id,
+        }))
+      );
     }
   };
 
@@ -96,9 +99,7 @@ export default function CVDashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{translations.cv.myCVs}</h1>
-          <p className="text-muted-foreground">
-            {translations.cv.subtitle}
-          </p>
+          <p className="text-muted-foreground">{translations.cv.subtitle}</p>
         </div>
         <Link href="/cv/new">
           <Button className="gap-2">
@@ -130,9 +131,7 @@ export default function CVDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0%</div>
-            <p className="text-xs text-muted-foreground">
-              {translations.cv.profileCompletion}
-            </p>
+            <p className="text-xs text-muted-foreground">{translations.cv.profileCompletion}</p>
           </CardContent>
         </Card>
 
@@ -143,9 +142,7 @@ export default function CVDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              {translations.cv.generatedLetters}
-            </p>
+            <p className="text-xs text-muted-foreground">{translations.cv.generatedLetters}</p>
           </CardContent>
         </Card>
 
@@ -156,9 +153,7 @@ export default function CVDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              {translations.cv.activeApplications}
-            </p>
+            <p className="text-xs text-muted-foreground">{translations.cv.activeApplications}</p>
           </CardContent>
         </Card>
       </div>
@@ -193,9 +188,7 @@ export default function CVDashboardPage() {
                 <Target className="h-5 w-5" />
                 {language === 'de' ? 'Profil vervollständigen' : 'Complete Your Profile'}
               </CardTitle>
-              <CardDescription>
-                {translations.cv.completeProfile}
-              </CardDescription>
+              <CardDescription>{translations.cv.completeProfile}</CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/profile">
@@ -212,9 +205,7 @@ export default function CVDashboardPage() {
                 <FileText className="h-5 w-5" />
                 {translations.cv.createFirstCV}
               </CardTitle>
-              <CardDescription>
-                {translations.cv.buildProfessional}
-              </CardDescription>
+              <CardDescription>{translations.cv.buildProfessional}</CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/cv/new">
@@ -231,9 +222,7 @@ export default function CVDashboardPage() {
                 <Mail className="h-5 w-5" />
                 {translations.cv.generateCoverLetter}
               </CardTitle>
-              <CardDescription>
-                {translations.cv.createTailored}
-              </CardDescription>
+              <CardDescription>{translations.cv.createTailored}</CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/cover-letter">
@@ -251,18 +240,18 @@ export default function CVDashboardPage() {
             <Card key={cv.id} className="group">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <CardTitle className="truncate">{cv.name}</CardTitle>
                       {cv.is_default && (
                         <Badge variant="secondary" className="shrink-0">
-                          <Star className="h-3 w-3 mr-1 fill-current" />
+                          <Star className="mr-1 h-3 w-3 fill-current" />
                           {translations.cv.default}
                         </Badge>
                       )}
                     </div>
                     {cv.description && (
-                      <CardDescription className="line-clamp-1 mt-1">
+                      <CardDescription className="mt-1 line-clamp-1">
                         {cv.description}
                       </CardDescription>
                     )}
@@ -272,7 +261,7 @@ export default function CVDashboardPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
                       >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
@@ -280,17 +269,17 @@ export default function CVDashboardPage() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
                         <Link href={`/cv/${cv.id}`} className="flex items-center">
-                          <Edit className="h-4 w-4 mr-2" />
+                          <Edit className="mr-2 h-4 w-4" />
                           {translations.common.edit}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleDuplicate(cv.id, cv.name)}>
-                        <Copy className="h-4 w-4 mr-2" />
+                        <Copy className="mr-2 h-4 w-4" />
                         {translations.cv.duplicate}
                       </DropdownMenuItem>
                       {!cv.is_default && (
                         <DropdownMenuItem onClick={() => handleSetDefault(cv.id)}>
-                          <Star className="h-4 w-4 mr-2" />
+                          <Star className="mr-2 h-4 w-4" />
                           {translations.cv.setAsDefault}
                         </DropdownMenuItem>
                       )}
@@ -299,7 +288,7 @@ export default function CVDashboardPage() {
                         className="text-destructive focus:text-destructive"
                         onClick={() => handleDelete(cv.id)}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="mr-2 h-4 w-4" />
                         {translations.common.delete}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -309,7 +298,9 @@ export default function CVDashboardPage() {
               <CardContent>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>
-                    {cv.job_context?.company || cv.job_context?.position || translations.cv.generalCV}
+                    {cv.job_context?.company ||
+                      cv.job_context?.position ||
+                      translations.cv.generalCV}
                   </span>
                   <span>{formatDate(cv.updated_at)}</span>
                 </div>

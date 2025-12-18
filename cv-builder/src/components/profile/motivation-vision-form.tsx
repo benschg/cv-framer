@@ -1,12 +1,13 @@
 'use client';
 
+import { X } from 'lucide-react';
 import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 import type { ProfileMotivationVision } from '@/types/profile-career.types';
 
@@ -36,7 +37,10 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
 
   const handleRemovePassion = (passionToRemove: string) => {
     const currentPassions = formData.passions || [];
-    onChange('passions', currentPassions.filter(p => p !== passionToRemove));
+    onChange(
+      'passions',
+      currentPassions.filter((p) => p !== passionToRemove)
+    );
   };
 
   return (
@@ -45,9 +49,7 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
       <Card>
         <CardHeader>
           <CardTitle>Vision, Mission & Purpose</CardTitle>
-          <CardDescription>
-            Define your professional direction and long-term goals
-          </CardDescription>
+          <CardDescription>Define your professional direction and long-term goals</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -89,13 +91,13 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
       <Card>
         <CardHeader>
           <CardTitle>Motivation & Drive</CardTitle>
-          <CardDescription>
-            What motivates you in your work and career
-          </CardDescription>
+          <CardDescription>What motivates you in your work and career</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="what_drives_you">{t('profile.motivationVision.whatDrivesYouTitle')}</Label>
+            <Label htmlFor="what_drives_you">
+              {t('profile.motivationVision.whatDrivesYouTitle')}
+            </Label>
             <Textarea
               id="what_drives_you"
               value={formData.what_drives_you || ''}
@@ -106,7 +108,9 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="why_this_field">{t('profile.motivationVision.whyThisFieldTitle')}</Label>
+            <Label htmlFor="why_this_field">
+              {t('profile.motivationVision.whyThisFieldTitle')}
+            </Label>
             <Textarea
               id="why_this_field"
               value={formData.why_this_field || ''}
@@ -133,9 +137,7 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
       <Card>
         <CardHeader>
           <CardTitle>Professional Passions</CardTitle>
-          <CardDescription>
-            Your passions and how they connect to your work
-          </CardDescription>
+          <CardDescription>Your passions and how they connect to your work</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -148,7 +150,7 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
               placeholder={t('profile.motivationVision.passionsPlaceholder')}
             />
             {formData.passions && formData.passions.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {formData.passions.map((passion) => (
                   <Badge key={passion} variant="secondary" className="gap-1">
                     {passion}
@@ -166,7 +168,9 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="how_passions_relate">{t('profile.motivationVision.howPassionsRelateTitle')}</Label>
+            <Label htmlFor="how_passions_relate">
+              {t('profile.motivationVision.howPassionsRelateTitle')}
+            </Label>
             <Textarea
               id="how_passions_relate"
               value={formData.how_passions_relate || ''}

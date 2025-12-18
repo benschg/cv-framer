@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Calendar, Gift, CheckCircle, XCircle, Search, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import type { ApplicationStatus } from '@/types/cv.types';
+import { AnimatePresence,motion } from 'framer-motion';
+import { Calendar, CheckCircle, Gift, Search, Send, Users,XCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 import { PaperAirplane } from '@/components/icons/paper-airplane';
+import type { ApplicationStatus } from '@/types/cv.types';
 
 interface StatusChangeAnimationProps {
   status: ApplicationStatus | null;
@@ -13,12 +14,17 @@ interface StatusChangeAnimationProps {
 }
 
 // Animation configurations for each status
-const statusAnimations: Partial<Record<ApplicationStatus, {
-  icon: React.ElementType;
-  color: string;
-  animation: 'fly' | 'burst' | 'fade' | 'sparkle' | 'confetti';
-  duration: number;
-}>> = {
+const statusAnimations: Partial<
+  Record<
+    ApplicationStatus,
+    {
+      icon: React.ElementType;
+      color: string;
+      animation: 'fly' | 'burst' | 'fade' | 'sparkle' | 'confetti';
+      duration: number;
+    }
+  >
+> = {
   applied: {
     icon: Send,
     color: '#3b82f6', // blue
@@ -57,12 +63,18 @@ const statusAnimations: Partial<Record<ApplicationStatus, {
   },
 };
 
-
 // Send animation - paper airplane flies up and to the right, out of screen
-function FlyAnimation({ color, onComplete }: { icon: React.ElementType; color: string; onComplete: () => void }) {
+function FlyAnimation({
+  color,
+  onComplete,
+}: {
+  icon: React.ElementType;
+  color: string;
+  onComplete: () => void;
+}) {
   return (
     <motion.div
-      className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
@@ -92,7 +104,7 @@ function FlyAnimation({ color, onComplete }: { icon: React.ElementType; color: s
               delay: 1.1,
             }}
           >
-            <PaperAirplane color={color} className="w-16 h-16" />
+            <PaperAirplane color={color} className="h-16 w-16" />
           </motion.div>
         </motion.div>
       </motion.div>
@@ -101,10 +113,18 @@ function FlyAnimation({ color, onComplete }: { icon: React.ElementType; color: s
 }
 
 // Burst animation (for screening)
-function BurstAnimation({ icon: Icon, color, onComplete }: { icon: React.ElementType; color: string; onComplete: () => void }) {
+function BurstAnimation({
+  icon: Icon,
+  color,
+  onComplete,
+}: {
+  icon: React.ElementType;
+  color: string;
+  onComplete: () => void;
+}) {
   return (
     <motion.div
-      className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
@@ -143,22 +163,30 @@ function BurstAnimation({ icon: Icon, color, onComplete }: { icon: React.Element
         }}
         onAnimationComplete={onComplete}
       >
-        <Icon className="w-16 h-16" style={{ color }} />
+        <Icon className="h-16 w-16" style={{ color }} />
       </motion.div>
     </motion.div>
   );
 }
 
 // Sparkle animation (for interview, offer)
-function SparkleAnimation({ icon: Icon, color, onComplete }: { icon: React.ElementType; color: string; onComplete: () => void }) {
+function SparkleAnimation({
+  icon: Icon,
+  color,
+  onComplete,
+}: {
+  icon: React.ElementType;
+  color: string;
+  onComplete: () => void;
+}) {
   const sparkles = [...Array(12)].map((_, i) => ({
     id: i,
-    angle: (i * 30) * (Math.PI / 180),
+    angle: i * 30 * (Math.PI / 180),
   }));
 
   return (
     <motion.div
-      className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
@@ -186,10 +214,7 @@ function SparkleAnimation({ icon: Icon, color, onComplete }: { icon: React.Eleme
           }}
         >
           <svg width="20" height="20" viewBox="0 0 20 20">
-            <polygon
-              points="10,0 12,8 20,10 12,12 10,20 8,12 0,10 8,8"
-              fill={color}
-            />
+            <polygon points="10,0 12,8 20,10 12,12 10,20 8,12 0,10 8,8" fill={color} />
           </svg>
         </motion.div>
       ))}
@@ -210,15 +235,12 @@ function SparkleAnimation({ icon: Icon, color, onComplete }: { icon: React.Eleme
       >
         <motion.div
           animate={{
-            boxShadow: [
-              `0 0 0 0 ${color}40`,
-              `0 0 0 30px ${color}00`,
-            ],
+            boxShadow: [`0 0 0 0 ${color}40`, `0 0 0 30px ${color}00`],
           }}
           transition={{ duration: 1.5 }}
           className="rounded-full p-4"
         >
-          <Icon className="w-16 h-16" style={{ color }} />
+          <Icon className="h-16 w-16" style={{ color }} />
         </motion.div>
       </motion.div>
     </motion.div>
@@ -226,7 +248,15 @@ function SparkleAnimation({ icon: Icon, color, onComplete }: { icon: React.Eleme
 }
 
 // Confetti animation (for accepted) - uses canvas-confetti library
-function ConfettiAnimation({ icon: Icon, color, onComplete }: { icon: React.ElementType; color: string; onComplete: () => void }) {
+function ConfettiAnimation({
+  icon: Icon,
+  color,
+  onComplete,
+}: {
+  icon: React.ElementType;
+  color: string;
+  onComplete: () => void;
+}) {
   useEffect(() => {
     // Fire confetti from both sides
     const duration = 1500;
@@ -267,7 +297,7 @@ function ConfettiAnimation({ icon: Icon, color, onComplete }: { icon: React.Elem
 
   return (
     <motion.div
-      className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
@@ -289,17 +319,25 @@ function ConfettiAnimation({ icon: Icon, color, onComplete }: { icon: React.Elem
           setTimeout(onComplete, 1000);
         }}
       >
-        <Icon className="w-20 h-20" style={{ color }} />
+        <Icon className="h-20 w-20" style={{ color }} />
       </motion.div>
     </motion.div>
   );
 }
 
 // Fade animation (for rejected)
-function FadeAnimation({ icon: Icon, color, onComplete }: { icon: React.ElementType; color: string; onComplete: () => void }) {
+function FadeAnimation({
+  icon: Icon,
+  color,
+  onComplete,
+}: {
+  icon: React.ElementType;
+  color: string;
+  onComplete: () => void;
+}) {
   return (
     <motion.div
-      className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
@@ -316,7 +354,7 @@ function FadeAnimation({ icon: Icon, color, onComplete }: { icon: React.ElementT
         }}
         onAnimationComplete={onComplete}
       >
-        <Icon className="w-16 h-16" style={{ color }} />
+        <Icon className="h-16 w-16" style={{ color }} />
       </motion.div>
     </motion.div>
   );

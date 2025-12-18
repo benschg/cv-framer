@@ -9,15 +9,15 @@
 import { createClient } from '@/lib/supabase/client';
 import type { Certification, Reference } from '@/types/cv.types';
 import type {
-  ProfileWorkExperience,
-  ProfileEducation,
-  ProfileSkillCategory,
   ProfileCertification,
-  ProfileReference,
+  ProfileEducation,
+  ProfileHighlight,
   ProfileKeyCompetence,
   ProfileMotivationVision,
-  ProfileHighlight,
   ProfileProject,
+  ProfileReference,
+  ProfileSkillCategory,
+  ProfileWorkExperience,
 } from '@/types/profile-career.types';
 
 const supabase = createClient();
@@ -30,7 +30,10 @@ const supabase = createClient();
  * Get the current authenticated user ID
  */
 async function getCurrentUserId(): Promise<{ userId: string | null; error: any }> {
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
   if (error) {
     return { userId: null, error };
@@ -91,12 +94,7 @@ async function updateProfileData<T>(
   id: string,
   updates: Partial<Omit<T, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
 ): Promise<{ data: T | null; error: any }> {
-  const { data, error } = await supabase
-    .from(table)
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
+  const { data, error } = await supabase.from(table).update(updates).eq('id', id).select().single();
 
   return { data, error };
 }
@@ -104,14 +102,8 @@ async function updateProfileData<T>(
 /**
  * Generic delete function for profile data
  */
-async function deleteProfileData(
-  table: string,
-  id: string
-): Promise<{ error: any }> {
-  const { error } = await supabase
-    .from(table)
-    .delete()
-    .eq('id', id);
+async function deleteProfileData(table: string, id: string): Promise<{ error: any }> {
+  const { error } = await supabase.from(table).delete().eq('id', id);
 
   return { error };
 }
@@ -146,16 +138,16 @@ function createAutoSave<T>(
 
 // Re-export types for convenience
 export type {
-  ProfileWorkExperience,
-  ProfileEducation,
-  ProfileSkillCategory,
+  HighlightType,
   ProfileCertification,
-  ProfileReference,
+  ProfileEducation,
+  ProfileHighlight,
   ProfileKeyCompetence,
   ProfileMotivationVision,
-  ProfileHighlight,
   ProfileProject,
-  HighlightType,
+  ProfileReference,
+  ProfileSkillCategory,
+  ProfileWorkExperience,
 } from '@/types/profile-career.types';
 
 // Debounce utility for auto-save
@@ -185,7 +177,10 @@ export function debounce<T extends (...args: any[]) => any>(
 // WORK EXPERIENCE
 // ============================================
 
-export async function fetchWorkExperiences(): Promise<{ data: ProfileWorkExperience[] | null; error: any }> {
+export async function fetchWorkExperiences(): Promise<{
+  data: ProfileWorkExperience[] | null;
+  error: any;
+}> {
   return fetchProfileData<ProfileWorkExperience>('profile_work_experiences', [
     { column: 'display_order', ascending: true },
     { column: 'start_date', ascending: false },
@@ -242,16 +237,16 @@ export async function deleteEducation(id: string): Promise<{ error: any }> {
   return deleteProfileData('profile_educations', id);
 }
 
-export const autoSaveEducation = createAutoSave<ProfileEducation>(
-  updateEducation,
-  'education'
-);
+export const autoSaveEducation = createAutoSave<ProfileEducation>(updateEducation, 'education');
 
 // ============================================
 // SKILL CATEGORIES
 // ============================================
 
-export async function fetchSkillCategories(): Promise<{ data: ProfileSkillCategory[] | null; error: any }> {
+export async function fetchSkillCategories(): Promise<{
+  data: ProfileSkillCategory[] | null;
+  error: any;
+}> {
   return fetchProfileData<ProfileSkillCategory>('profile_skill_categories', [
     { column: 'display_order', ascending: true },
   ]);
@@ -283,7 +278,10 @@ export const autoSaveSkillCategory = createAutoSave<ProfileSkillCategory>(
 // KEY COMPETENCES
 // ============================================
 
-export async function fetchKeyCompetences(): Promise<{ data: ProfileKeyCompetence[] | null; error: any }> {
+export async function fetchKeyCompetences(): Promise<{
+  data: ProfileKeyCompetence[] | null;
+  error: any;
+}> {
   return fetchProfileData<ProfileKeyCompetence>('profile_key_competences', [
     { column: 'display_order', ascending: true },
   ]);
@@ -315,7 +313,10 @@ export const autoSaveKeyCompetence = createAutoSave<ProfileKeyCompetence>(
 // CERTIFICATIONS
 // ============================================
 
-export async function fetchCertifications(): Promise<{ data: ProfileCertification[] | null; error: any }> {
+export async function fetchCertifications(): Promise<{
+  data: ProfileCertification[] | null;
+  error: any;
+}> {
   return fetchProfileData<ProfileCertification>('profile_certifications', [
     { column: 'display_order', ascending: true },
     { column: 'date', ascending: false },
@@ -344,9 +345,7 @@ export async function deleteCertification(id: string): Promise<{ error: any }> {
     .single();
 
   if (cert?.storage_path) {
-    await supabase.storage
-      .from('certification-documents')
-      .remove([cert.storage_path]);
+    await supabase.storage.from('certification-documents').remove([cert.storage_path]);
   }
 
   return deleteProfileData('profile_certifications', id);
@@ -375,9 +374,9 @@ export async function uploadCertificationDocument(
     return { data: null, error: uploadError };
   }
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('certification-documents')
-    .getPublicUrl(filePath);
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from('certification-documents').getPublicUrl(filePath);
 
   return {
     data: { url: publicUrl, path: filePath },
@@ -387,9 +386,7 @@ export async function uploadCertificationDocument(
 
 // Delete certification document
 export async function deleteCertificationDocument(storagePath: string): Promise<{ error: any }> {
-  const { error } = await supabase.storage
-    .from('certification-documents')
-    .remove([storagePath]);
+  const { error } = await supabase.storage.from('certification-documents').remove([storagePath]);
 
   return { error };
 }
@@ -490,10 +487,7 @@ export async function deleteCertificationDocumentRecord(
   }
 
   // Delete database record
-  const { error } = await supabase
-    .from('certification_documents')
-    .delete()
-    .eq('id', documentId);
+  const { error } = await supabase.from('certification_documents').delete().eq('id', documentId);
 
   return { error };
 }
@@ -553,18 +547,13 @@ export async function deleteReference(id: string): Promise<{ error: any }> {
     .single();
 
   if (ref?.storage_path) {
-    await supabase.storage
-      .from('reference-letters')
-      .remove([ref.storage_path]);
+    await supabase.storage.from('reference-letters').remove([ref.storage_path]);
   }
 
   return deleteProfileData('profile_references', id);
 }
 
-export const autoSaveReference = createAutoSave<ProfileReference>(
-  updateReference,
-  'reference'
-);
+export const autoSaveReference = createAutoSave<ProfileReference>(updateReference, 'reference');
 
 // Upload reference letter
 export async function uploadReferenceLetter(
@@ -597,9 +586,7 @@ export async function uploadReferenceLetter(
 
 // Delete reference letter
 export async function deleteReferenceLetter(storagePath: string): Promise<{ error: any }> {
-  const { error } = await supabase.storage
-    .from('reference-letters')
-    .remove([storagePath]);
+  const { error } = await supabase.storage.from('reference-letters').remove([storagePath]);
 
   return { error };
 }
@@ -655,7 +642,9 @@ export function convertToReference(profile: ProfileReference): Reference {
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateWorkExperiences(
-  experiences: Array<Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
+  experiences: Array<
+    Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>
+  >
 ): Promise<{ data: ProfileWorkExperience[] | null; error: any }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
@@ -686,7 +675,9 @@ export async function bulkCreateWorkExperiences(
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateEducations(
-  educations: Array<Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
+  educations: Array<
+    Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>
+  >
 ): Promise<{ data: ProfileEducation[] | null; error: any }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
@@ -702,10 +693,7 @@ export async function bulkCreateEducations(
     display_order: startOrder + idx,
   }));
 
-  const { data, error } = await supabase
-    .from('profile_educations')
-    .insert(itemsToInsert)
-    .select();
+  const { data, error } = await supabase.from('profile_educations').insert(itemsToInsert).select();
 
   return { data, error };
 }
@@ -715,7 +703,9 @@ export async function bulkCreateEducations(
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateSkillCategories(
-  categories: Array<Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
+  categories: Array<
+    Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>
+  >
 ): Promise<{ data: ProfileSkillCategory[] | null; error: any }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
@@ -744,7 +734,9 @@ export async function bulkCreateSkillCategories(
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateKeyCompetences(
-  competences: Array<Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>>
+  competences: Array<
+    Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'>
+  >
 ): Promise<{ data: ProfileKeyCompetence[] | null; error: any }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
@@ -773,7 +765,19 @@ export async function bulkCreateKeyCompetences(
  * Automatically assigns display_order based on existing count
  */
 export async function bulkCreateCertifications(
-  certifications: Array<Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order' | 'document_url' | 'document_name' | 'storage_path'>>
+  certifications: Array<
+    Omit<
+      ProfileCertification,
+      | 'id'
+      | 'user_id'
+      | 'created_at'
+      | 'updated_at'
+      | 'display_order'
+      | 'document_url'
+      | 'document_name'
+      | 'storage_path'
+    >
+  >
 ): Promise<{ data: ProfileCertification[] | null; error: any }> {
   const { userId, error: authError } = await getCurrentUserId();
   if (authError || !userId) {
@@ -812,10 +816,7 @@ export async function fetchMotivationVision(): Promise<{
   data: ProfileMotivationVision | null;
   error: any;
 }> {
-  const { data, error } = await supabase
-    .from('profile_motivation_vision')
-    .select('*')
-    .single();
+  const { data, error } = await supabase.from('profile_motivation_vision').select('*').single();
 
   return { data, error };
 }
@@ -835,10 +836,7 @@ export async function upsertMotivationVision(
 
   const { data, error } = await supabase
     .from('profile_motivation_vision')
-    .upsert(
-      { ...updates, user_id: userId },
-      { onConflict: 'user_id' }
-    )
+    .upsert({ ...updates, user_id: userId }, { onConflict: 'user_id' })
     .select()
     .single();
 
@@ -856,10 +854,9 @@ export async function fetchHighlights(): Promise<{
   data: ProfileHighlight[] | null;
   error: any;
 }> {
-  return fetchProfileData<ProfileHighlight>(
-    'profile_highlights',
-    [{ column: 'display_order', ascending: true }]
-  );
+  return fetchProfileData<ProfileHighlight>('profile_highlights', [
+    { column: 'display_order', ascending: true },
+  ]);
 }
 
 /**
@@ -908,10 +905,7 @@ export async function bulkCreateHighlights(
     display_order: startOrder + idx,
   }));
 
-  const { data, error } = await supabase
-    .from('profile_highlights')
-    .insert(itemsToInsert)
-    .select();
+  const { data, error } = await supabase.from('profile_highlights').insert(itemsToInsert).select();
 
   return { data, error };
 }
@@ -927,10 +921,9 @@ export async function fetchProjects(): Promise<{
   data: ProfileProject[] | null;
   error: any;
 }> {
-  return fetchProfileData<ProfileProject>(
-    'profile_projects',
-    [{ column: 'display_order', ascending: true }]
-  );
+  return fetchProfileData<ProfileProject>('profile_projects', [
+    { column: 'display_order', ascending: true },
+  ]);
 }
 
 /**
@@ -979,10 +972,7 @@ export async function bulkCreateProjects(
     display_order: startOrder + idx,
   }));
 
-  const { data, error } = await supabase
-    .from('profile_projects')
-    .insert(itemsToInsert)
-    .select();
+  const { data, error } = await supabase.from('profile_projects').insert(itemsToInsert).select();
 
   return { data, error };
 }

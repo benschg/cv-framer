@@ -1,9 +1,10 @@
 'use client';
 
-import { CheckCircle2, XCircle, FileType, Search, AlertCircle, ExternalLink } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, CheckCircle2, ExternalLink,FileType, Search, XCircle } from 'lucide-react';
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export function ATSFormattingGuideContent() {
@@ -43,18 +44,14 @@ export function ATSFormattingGuideContent() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 p-4">
+    <div className="mx-auto max-w-4xl space-y-8 p-4">
       {/* Hero Section */}
       <div className="space-y-4">
         <Badge variant="secondary" className="mb-2">
           {t('guides.atsFormatting.badge')}
         </Badge>
-        <h1 className="text-4xl font-bold tracking-tight">
-          {t('guides.atsFormatting.title')}
-        </h1>
-        <p className="text-xl text-muted-foreground">
-          {t('guides.atsFormatting.subtitle')}
-        </p>
+        <h1 className="text-4xl font-bold tracking-tight">{t('guides.atsFormatting.title')}</h1>
+        <p className="text-xl text-muted-foreground">{t('guides.atsFormatting.subtitle')}</p>
       </div>
 
       {/* What is ATS Section */}
@@ -79,9 +76,7 @@ export function ATSFormattingGuideContent() {
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>{t('guides.atsFormatting.proTip.title')}</AlertTitle>
-        <AlertDescription>
-          {t('guides.atsFormatting.proTip.description')}
-        </AlertDescription>
+        <AlertDescription>{t('guides.atsFormatting.proTip.description')}</AlertDescription>
       </Alert>
 
       {/* Elements to Avoid */}
@@ -91,15 +86,13 @@ export function ATSFormattingGuideContent() {
             <XCircle className="h-5 w-5 text-destructive" />
             {t('guides.atsFormatting.elementsToAvoid.title')}
           </CardTitle>
-          <CardDescription>
-            {t('guides.atsFormatting.elementsToAvoid.description')}
-          </CardDescription>
+          <CardDescription>{t('guides.atsFormatting.elementsToAvoid.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
             {elementsToAvoid.map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
                 <span>{item}</span>
               </li>
             ))}
@@ -122,7 +115,7 @@ export function ATSFormattingGuideContent() {
           <ul className="space-y-2">
             {acceptableElements.map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
                 <span>{item}</span>
               </li>
             ))}
@@ -131,7 +124,7 @@ export function ATSFormattingGuideContent() {
       </Card>
 
       {/* Best Practices Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* File Format */}
         <Card>
           <CardHeader>
@@ -141,11 +134,11 @@ export function ATSFormattingGuideContent() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+            <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
               <p className="font-semibold text-green-900 dark:text-green-100">
                 {t('guides.atsFormatting.fileFormat.recommended')}
               </p>
-              <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+              <p className="mt-1 text-sm text-green-700 dark:text-green-300">
                 {t('guides.atsFormatting.fileFormat.description')}
               </p>
             </div>
@@ -190,7 +183,7 @@ export function ATSFormattingGuideContent() {
           <ul className="space-y-2 text-muted-foreground">
             {scanningItems.map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
                 <span>{item}</span>
               </li>
             ))}
@@ -202,18 +195,14 @@ export function ATSFormattingGuideContent() {
       <Card>
         <CardHeader>
           <CardTitle>{t('guides.atsFormatting.keywords.title')}</CardTitle>
-          <CardDescription>
-            {t('guides.atsFormatting.keywords.description')}
-          </CardDescription>
+          <CardDescription>{t('guides.atsFormatting.keywords.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            {t('guides.atsFormatting.keywords.intro')}
-          </p>
+          <p className="text-muted-foreground">{t('guides.atsFormatting.keywords.intro')}</p>
           <ul className="space-y-2 text-muted-foreground">
             {keywordItems.map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
                 <span>{item}</span>
               </li>
             ))}
@@ -234,7 +223,7 @@ export function ATSFormattingGuideContent() {
           <CardTitle className="text-base">{t('guides.atsFormatting.source.title')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground mb-3">
+          <p className="mb-3 text-sm text-muted-foreground">
             {t('guides.atsFormatting.source.description')}
           </p>
           <a
@@ -253,14 +242,15 @@ export function ATSFormattingGuideContent() {
       <Card className="bg-primary text-primary-foreground">
         <CardContent className="pt-6">
           <div className="space-y-4 text-center">
-            <h3 className="text-2xl font-bold">
-              {t('guides.atsFormatting.cta.title')}
-            </h3>
+            <h3 className="text-2xl font-bold">{t('guides.atsFormatting.cta.title')}</h3>
             <p className="text-primary-foreground/90">
               {t('guides.atsFormatting.cta.description')}
             </p>
-            <div className="flex gap-4 justify-center pt-2">
-              <a href="/cv" className="inline-flex items-center justify-center rounded-md bg-primary-foreground text-primary px-6 py-2 text-sm font-medium hover:opacity-90 transition-opacity">
+            <div className="flex justify-center gap-4 pt-2">
+              <a
+                href="/cv"
+                className="inline-flex items-center justify-center rounded-md bg-primary-foreground px-6 py-2 text-sm font-medium text-primary transition-opacity hover:opacity-90"
+              >
                 {t('guides.atsFormatting.cta.button')}
               </a>
             </div>

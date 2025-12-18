@@ -14,13 +14,15 @@ export function PageBreakButton({ sectionId, isActive, onClick, type }: PageBrea
     section: {
       active: '↑ Remove break',
       inactive: '↓ New page',
-      title: (active: boolean) => active ? 'Remove page break' : 'Add page break before this section'
+      title: (active: boolean) =>
+        active ? 'Remove page break' : 'Add page break before this section',
     },
     item: {
       active: '↑ Remove',
       inactive: '↓ New page',
-      title: (active: boolean) => active ? 'Remove page break' : 'Add page break before this item'
-    }
+      title: (active: boolean) =>
+        active ? 'Remove page break' : 'Add page break before this item',
+    },
   };
 
   const label = labels[type];
@@ -30,7 +32,7 @@ export function PageBreakButton({ sectionId, isActive, onClick, type }: PageBrea
     <Button
       variant="ghost"
       size="sm"
-      className={`${sizeClasses} text-xs gap-1 bg-white hover:bg-emerald-100 shadow-md border ${isActive ? 'text-emerald-700 hover:text-emerald-800 bg-emerald-50' : 'hover:text-emerald-700'}`}
+      className={`${sizeClasses} gap-1 border bg-white text-xs shadow-md hover:bg-emerald-100 ${isActive ? 'bg-emerald-50 text-emerald-700 hover:text-emerald-800' : 'hover:text-emerald-700'}`}
       onClick={onClick}
       title={label.title(isActive)}
     >
