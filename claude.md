@@ -130,4 +130,79 @@ bun run lint:fix    # Auto-fix ESLint errors
 bun run format      # Format with Prettier
 bun run type-check  # TypeScript type check
 bun run knip        # Find unused code/dependencies
+bun run test        # Run tests
+bun run test:ui     # Run tests with UI
+bun run test:coverage # Run tests with coverage
+```
+
+## Document Storage
+
+### Server-Side Upload API
+Document uploads (reference letters, certifications) use server-side API routes for security:
+
+| Document Type | Upload Endpoint | Delete Endpoint |
+|--------------|-----------------|-----------------|
+| References | `/api/reference-documents/upload` | `/api/reference-documents/[id]` |
+| Certifications | `/api/certification-documents/upload` | `/api/certification-documents/[id]` |
+
+### Storage Utilities
+Shared utilities in `lib/storage-utils.ts`:
+- `validateDocumentFile(file)` - Validates file type and size
+- `generateStoragePath(userId, parentId, filename)` - Creates unique storage path
+- `uploadToStorage(supabase, bucket, path, file)` - Uploads to Supabase Storage
+- `deleteFromStorage(supabase, bucket, path)` - Deletes from storage
+- `extractStoragePath(url, bucket)` - Extracts path from public URL
+
+### File Constraints
+- **Max size**: 10MB
+- **Allowed types**: PDF, JPEG, PNG, WebP
+- **Path format**: `{userId}/{parentId}/{timestamp}_{random}_{filename}`
+
+## Testing
+
+### Setup
+Tests use Vitest with jsdom environment. Configuration in `vitest.config.ts`.
+
+### Running Tests
+```bash
+bun run test           # Run all tests
+bun run test:ui        # Run with interactive UI
+bun run test:coverage  # Run with coverage report
+```
+
+### Test Structure
+```
+src/
+  test/
+    setup.ts           # Test setup and global mocks
+    mocks/
+      supabase.ts      # Supabase client mock helper
+  lib/
+    storage-utils.test.ts
+  app/api/
+    reference-documents/upload/route.test.ts
+    certification-documents/upload/route.test.ts
+```
+
+### Writing Tests
+```typescript
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createMockSupabaseClient } from '@/test/mocks/supabase';
+
+let mockSupabase: MockSupabaseClient;
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn(() => Promise.resolve(mockSupabase)),
+}));
+
+describe('API Route', () => {
+  beforeEach(() => {
+    mockSupabase = createMockSupabaseClient();
+    vi.clearAllMocks();
+  });
+
+  it('should handle request', async () => {
+    // Test implementation
+  });
+});
 ```

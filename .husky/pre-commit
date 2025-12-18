@@ -36,7 +36,7 @@ done
 # Run ESLint if there are ts/tsx files
 if [ -n "$CV_BUILDER_TS_FILES" ]; then
   echo "Running ESLint on staged TypeScript files..."
-  (cd cv-builder && bun eslint --cache --cache-location .next/cache/eslint $CV_BUILDER_TS_FILES --max-warnings 0)
+  (cd cv-builder && bun eslint --cache --cache-location .next/cache/eslint --no-warn-ignored $CV_BUILDER_TS_FILES --max-warnings 0)
   if [ $? -ne 0 ]; then
     echo "ESLint found errors. Please fix them before committing."
     exit 1
