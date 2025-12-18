@@ -14,9 +14,9 @@ export function HeroCVAnimation() {
         style={{ clipPath: 'inset(-50% -0% 0 -0% round 999px)' }}
       >
         {/* Animated CV pages with hover animation */}
-        <div className="relative h-40 w-40 sm:h-48 sm:w-48" key={animKey}>
+        <div className="relative h-48 w-48" key={animKey}>
           {/* Back CV page */}
-          <div className="-ml-18 sm:-mt-42 cv-page-back absolute left-1/2 top-1/2 -mt-36 h-52 w-36 origin-bottom-left drop-shadow-xl sm:-ml-20 sm:h-60 sm:w-40">
+          <div className="cv-page-back absolute left-1/2 top-1/2 -ml-[72px] -mt-36 h-52 w-36 origin-bottom-left drop-shadow-xl sm:-ml-20 sm:-mt-[168px] sm:h-60 sm:w-40">
             <Image
               src="/cv-page-back.svg"
               alt=""
@@ -28,7 +28,7 @@ export function HeroCVAnimation() {
           </div>
 
           {/* Front CV page */}
-          <div className="-ml-18 sm:-mt-42 cv-page-front absolute left-1/2 top-1/2 -mt-36 h-52 w-36 origin-bottom-right drop-shadow-2xl sm:-ml-20 sm:h-60 sm:w-40">
+          <div className="cv-page-front absolute left-1/2 top-1/2 -ml-[72px] -mt-36 h-52 w-36 origin-bottom-right drop-shadow-2xl sm:-ml-20 sm:-mt-[168px] sm:h-60 sm:w-40">
             <Image
               src="/cv-page-front.svg"
               alt=""
