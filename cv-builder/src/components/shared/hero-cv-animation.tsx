@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export function HeroCVAnimation() {
   // Generate unique key on each component mount to force animation replay
@@ -8,7 +8,10 @@ export function HeroCVAnimation() {
 
   return (
     <div className="mb-8 flex justify-center">
-      <div className="rounded-full bg-primary p-6 sm:p-8 animate-in fade-in zoom-in duration-700 relative group" style={{ clipPath: 'inset(-100% 0 0 0 round 9999px)' }}>
+      <div
+        className="rounded-full bg-primary p-6 sm:p-8 animate-in fade-in zoom-in duration-700 relative group"
+        style={{ clipPath: "inset(-50% -0% 0 -0% round 999px)" }}
+      >
         {/* Animated CV pages with hover animation */}
         <div className="relative w-40 h-40 sm:w-48 sm:h-48" key={animKey}>
           {/* Back CV page */}

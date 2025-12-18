@@ -97,7 +97,7 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-24 text-center">
+      <section className="container mx-auto px-4 py-24 text-center overflow-visible">
         <HeroCVAnimation />
         <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
           Customize Your CV
