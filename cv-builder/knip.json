@@ -23,12 +23,7 @@
     "src/lib/pdf/generator.ts",
     "src/lib/ai/gemini.ts",
     "src/i18n/index.ts",
-    "src/config/legal.ts",
-    "src/components/cv/cv-*-item.tsx",
-    "src/components/cv/cv-page-break.tsx",
-    "src/components/cv/cv-section-header.tsx",
-    "src/components/cv/page-break-button.tsx",
-    "src/components/shared/error-boundary.tsx"
+    "src/config/legal.ts"
   ],
   "ignoreDependencies": [
     "eslint-*",
