@@ -93,6 +93,91 @@ interface ChildProps {
 4. Include both labels and placeholders where applicable
 5. Test language switching works correctly
 
+## Component Architecture & Refactoring
+
+### Page Component Structure
+Page components should be clean and focused on orchestration. Extract complex logic into reusable components and utilities.
+
+**Good Page Structure:**
+```typescript
+'use client';
+
+import { PageLoading, PageError, PageHeader } from '@/components/feature/...';
+import { useFeatureData } from '@/hooks/use-feature-data';
+
+export default function FeaturePage() {
+  const { data, loading, error } = useFeatureData();
+
+  if (loading) return <PageLoading />;
+  if (error) return <PageError message={error} />;
+  if (!data) return null;
+
+  return (
+    <div>
+      <PageHeader {...data} />
+      <PageContent {...data} />
+    </div>
+  );
+}
+```
+
+### Extraction Guidelines
+
+**1. Extract State Components**
+- Loading skeletons → `feature-loading.tsx`
+- Error states → `feature-error.tsx`
+- Empty states → `feature-empty.tsx`
+
+**2. Extract Complex Sections**
+- Headers with conditional logic → `feature-header.tsx`
+- Forms with validation → `feature-form.tsx`
+- Lists with filtering → `feature-list.tsx`
+
+**3. Extract Business Logic**
+- Privacy/permission logic → `lib/feature-privacy-utils.ts`
+- Data transformations → `lib/feature-data-utils.ts`
+- Validation rules → `lib/feature-validation.ts`
+
+**4. Extract Data Fetching**
+- API calls → `hooks/use-feature-data.ts`
+- Mutations → `hooks/use-feature-mutation.ts`
+- Real-time subscriptions → `hooks/use-feature-subscription.ts`
+
+### Directory Structure
+```
+components/
+  feature/              # Feature-specific components
+    feature-loading.tsx
+    feature-error.tsx
+    feature-header.tsx
+    feature-content.tsx
+    index.ts            # Barrel export
+  shared/              # Reusable across features
+    public-page-layout.tsx
+    data-table.tsx
+lib/
+  feature-utils.ts     # Pure utility functions
+hooks/
+  use-feature-data.ts  # Data fetching hooks
+```
+
+### Benefits
+- **Maintainability** - Single responsibility per file
+- **Reusability** - Components can be used across the app
+- **Testability** - Isolated logic is easier to test
+- **Readability** - Page files stay under ~100 lines
+- **Collaboration** - Clear boundaries between concerns
+
+### Example: Public CV Page Refactoring
+Before (174 lines):
+- Mixed data fetching, state management, and UI rendering
+- Inline privacy logic scattered throughout
+
+After (71 lines):
+- Extracted `PublicCVLoading`, `PublicCVError`, `PublicCVHeader`, `PublicCVProfile`
+- Created `cv-privacy-utils.ts` with reusable functions
+- Page focused solely on orchestration
+
 ## TypeScript & Code Quality
 
 ### No `any` Types

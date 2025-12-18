@@ -7,6 +7,12 @@
   "saveButton": "Änderungen speichern",
   "savedMessage": "Änderungen erfolgreich gespeichert!",
 
+  "careerInfo": {
+    "title": "Karriere-Informationen",
+    "subtitle": "Verwalten Sie Ihren beruflichen Werdegang, der in allen Ihren CVs verwendet wird",
+    "importButton": "Mit KI importieren"
+  },
+
   "basicInfo": {
     "title": "Grundlegende Informationen",
     "subtitle": "Ihr Name und Kontaktdaten",

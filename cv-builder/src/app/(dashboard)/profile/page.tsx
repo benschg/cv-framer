@@ -70,11 +70,14 @@ export default function ProfilePage() {
     setLoadingPhotos(false);
   };
 
+  // Load photos when user is available (wait for auth to be ready)
   useEffect(() => {
-    // Valid pattern: data fetching on mount
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadPhotos();
-  }, []);
+    if (user) {
+      // Valid pattern: data fetching on user change
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadPhotos();
+    }
+  }, [user]);
 
   // Auto-save handler with debouncing
   const handleFieldChange = useCallback(
