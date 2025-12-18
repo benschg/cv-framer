@@ -34,12 +34,32 @@ export const routeConfig: Record<string, RouteConfig> = {
     label: 'Skills',
     parent: '/profile',
   },
+  '/profile/highlights': {
+    label: 'Highlights',
+    parent: '/profile',
+  },
+  '/profile/projects': {
+    label: 'Projects',
+    parent: '/profile',
+  },
+  '/profile/key-competences': {
+    label: 'Key Competences',
+    parent: '/profile',
+  },
   '/profile/certifications': {
     label: 'Certifications',
     parent: '/profile',
   },
   '/profile/references': {
     label: 'References',
+    parent: '/profile',
+  },
+  '/profile/motivation-vision': {
+    label: 'Motivation & Vision',
+    parent: '/profile',
+  },
+  '/profile/import-cv': {
+    label: 'Import CV',
     parent: '/profile',
   },
   '/settings': {

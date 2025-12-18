@@ -58,8 +58,8 @@ interface ProfileManagerModalProps {
     refreshKey: number;
   }) => ReactNode;
 
-  // Optional features
-  headerActions?: ReactNode;
+  // Optional features - receives managerRef so buttons can call handleAdd
+  headerActions?: (managerRef: RefObject<ManagerRef | null>) => ReactNode;
 
   // Lifecycle callbacks
   onClose?: () => void;
@@ -112,8 +112,8 @@ export function ProfileManagerModal({
             {/* Save indicator container */}
             <div id={modalHeaderId} className="flex-shrink-0" />
           </div>
-          {/* Optional header actions (e.g., AI upload buttons) */}
-          {headerActions && <div className="mt-4">{headerActions}</div>}
+          {/* Optional header actions (e.g., Add button, AI upload buttons) */}
+          {headerActions && <div className="mt-4 flex gap-2">{headerActions(managerRef)}</div>}
         </DialogHeader>
 
         {/* Manager component renders here */}

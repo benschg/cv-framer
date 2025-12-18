@@ -1,7 +1,9 @@
 'use client';
 
+import { Plus } from 'lucide-react';
 import React, { createContext, type ReactNode, useRef, useState } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 
 import { getProfileModalEntry } from './profile-modal-registry';
@@ -96,6 +98,16 @@ export function ProfileModalProvider({ children }: ProfileModalProviderProps) {
           title={registryEntry.title(t)}
           description={registryEntry.description(t)}
           onClose={closeModal}
+          headerActions={(managerRef) => (
+            <>
+              {registryEntry.addButtonLabel && (
+                <Button onClick={() => managerRef.current?.handleAdd()}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {registryEntry.addButtonLabel(t)}
+                </Button>
+              )}
+            </>
+          )}
         >
           {({ managerRef, onSavingChange, onSaveSuccessChange, onRefreshNeeded, refreshKey }) => {
             const ManagerComponent =
