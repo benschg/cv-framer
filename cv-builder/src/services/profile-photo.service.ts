@@ -1,4 +1,4 @@
-import type { GetProfilePhotosResponse, ProfilePhoto } from '@/types/api.schemas';
+import type { GetProfilePhotosResponse, ProfilePhotoWithUrl } from '@/types/api.schemas';
 
 export async function fetchProfilePhotos(): Promise<{
   data?: GetProfilePhotosResponse;
@@ -26,7 +26,7 @@ export async function uploadProfilePhoto(
     height?: number;
   } = {}
 ): Promise<{
-  data?: { photo: ProfilePhoto; publicUrl: string };
+  data?: { photo: ProfilePhotoWithUrl };
   error?: string;
 }> {
   try {
@@ -93,12 +93,4 @@ export async function deleteProfilePhoto(photoId: string): Promise<{
   } catch {
     return { error: 'Network error' };
   }
-}
-
-/**
- * Get public URL for a photo from its storage path
- */
-export function getPhotoPublicUrl(storagePath: string): string {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  return `${supabaseUrl}/storage/v1/object/public/profile-photos/${storagePath}`;
 }

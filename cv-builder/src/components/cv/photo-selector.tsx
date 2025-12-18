@@ -1,15 +1,15 @@
 'use client';
 
-import { Check, ChevronDown, Upload,UserX } from 'lucide-react';
+import { Check, ChevronDown, Upload, UserX } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Avatar, AvatarFallback,AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import type { ProfilePhoto } from '@/types/api.schemas';
+import { fetchProfilePhotos } from '@/services/profile-photo.service';
+import type { ProfilePhotoWithUrl } from '@/types/api.schemas';
 
 interface PhotoSelectorProps {
   selectedPhotoId: string | null;
@@ -28,8 +28,8 @@ export function PhotoSelector({
   open: externalOpen,
   onOpenChange: externalOnOpenChange,
 }: PhotoSelectorProps) {
-  const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
-  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
+  const [photos, setPhotos] = useState<ProfilePhotoWithUrl[]>([]);
+  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhotoWithUrl | null>(null);
   const [loading, setLoading] = useState(true);
   const [internalOpen, setInternalOpen] = useState(false);
 
@@ -87,9 +87,7 @@ export function PhotoSelector({
       ? photos.find((p) => p.id === selectedPhotoId) || primaryPhoto
       : primaryPhoto;
 
-  const selectedPhotoUrl = selectedPhoto
-    ? getPhotoPublicUrl(selectedPhoto.storage_path)
-    : undefined;
+  const selectedPhotoUrl = selectedPhoto?.signedUrl;
 
   const isUsingPrimary = !selectedPhotoId || selectedPhotoId === primaryPhoto?.id;
 
@@ -164,9 +162,7 @@ export function PhotoSelector({
               }`}
             >
               <Avatar className="h-12 w-12">
-                <AvatarImage
-                  src={primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : undefined}
-                />
+                <AvatarImage src={primaryPhoto?.signedUrl} />
                 <AvatarFallback>{userInitials}</AvatarFallback>
               </Avatar>
               <div className="flex-1 text-left">
@@ -198,7 +194,7 @@ export function PhotoSelector({
                     }`}
                   >
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
+                      <AvatarImage src={photo.signedUrl} />
                       <AvatarFallback>{userInitials}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 text-left">
