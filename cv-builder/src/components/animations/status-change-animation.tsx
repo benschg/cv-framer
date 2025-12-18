@@ -368,6 +368,8 @@ export function StatusChangeAnimation({ status, onComplete }: StatusChangeAnimat
   useEffect(() => {
     if (status && statusAnimations[status]) {
       // Immediately start new animation, interrupting any current one
+      // Valid pattern: syncing animation state with status prop
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentStatus(status);
       setIsVisible(true);
       setAnimationKey((prev) => prev + 1); // Force remount to restart animation

@@ -5,11 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import {
-  createCertificationDocument,
-  deleteCertificationDocumentRecord,
-  fetchCertificationDocuments,
-} from '@/services/profile-career.service';
+import { fetchCertificationDocuments } from '@/services/profile-career.service';
 import type { CertificationDocument } from '@/types/profile-career.types';
 
 interface CertificationDocumentsManagerProps {
@@ -75,10 +71,19 @@ export function CertificationDocumentsManager({
 
     setUploading(true);
     try {
-      const { error } = await createCertificationDocument(certificationId, file);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('certification_id', certificationId);
 
-      if (error) {
-        throw new Error(typeof error === 'string' ? error : 'Upload failed');
+      const response = await fetch('/api/certification-documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed');
       }
 
       toast.success('Document uploaded successfully');
@@ -99,17 +104,20 @@ export function CertificationDocumentsManager({
     }
   };
 
-  const handleDelete = async (documentId: string, storagePath: string) => {
+  const handleDelete = async (documentId: string) => {
     if (!confirm('Are you sure you want to delete this document?')) {
       return;
     }
 
     setDeletingId(documentId);
     try {
-      const { error } = await deleteCertificationDocumentRecord(documentId, storagePath);
+      const response = await fetch(`/api/certification-documents/${documentId}`, {
+        method: 'DELETE',
+      });
 
-      if (error) {
-        throw new Error(typeof error === 'string' ? error : 'Delete failed');
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || 'Delete failed');
       }
 
       toast.success('Document deleted');
@@ -209,7 +217,7 @@ export function CertificationDocumentsManager({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDelete(doc.id, doc.storage_path)}
+                  onClick={() => handleDelete(doc.id)}
                   disabled={disabled || deletingId === doc.id}
                 >
                   {deletingId === doc.id ? (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback,useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { BasicInfoForm } from '@/components/profile/basic-info-form';
 import { CareerInfoNavigation } from '@/components/profile/career-info-navigation';
@@ -10,7 +10,7 @@ import { ProfilePhotosCard } from '@/components/profile/profile-photos-card';
 import { ProfilePageLayout } from '@/components/profile/ProfilePageLayout';
 import { useAuth } from '@/contexts/auth-context';
 import { useAppTranslation } from '@/hooks/use-app-translation';
-import { getUserInitials, getUserLocation,getUserName, getUserPhone } from '@/lib/user-utils';
+import { getUserInitials, getUserLocation, getUserName, getUserPhone } from '@/lib/user-utils';
 import { debounce } from '@/services/profile-career.service';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import type { ProfilePhoto } from '@/types/api.schemas';
@@ -47,6 +47,8 @@ export default function ProfilePage() {
   // Update form when user data changes (e.g., after login)
   useEffect(() => {
     const { firstName, lastName } = getUserName(user);
+    // Valid pattern: syncing form state with user prop
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData((prev) => ({
       ...prev,
       firstName: firstName || prev.firstName,
@@ -69,6 +71,8 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
+    // Valid pattern: data fetching on mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadPhotos();
   }, []);
 

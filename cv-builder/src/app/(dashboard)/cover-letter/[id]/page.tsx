@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Copy,Download, Eye, Loader2, Save, Sparkles } from 'lucide-react';
+import { ArrowLeft, Copy, Download, Eye, Loader2, Save, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { useAppLanguage } from '@/hooks/use-app-language';
 import { useTranslations } from '@/hooks/use-translations';
 import {
   fetchCoverLetter,
@@ -31,7 +32,7 @@ export default function CoverLetterEditorPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'de'>('en');
+  const { language } = useAppLanguage();
   const { translations } = useTranslations(language);
 
   // Scroll to preview
@@ -41,14 +42,6 @@ export default function CoverLetterEditorPage() {
 
   // Editable content
   const [content, setContent] = useState<CoverLetterContent>({});
-
-  // Load language preference from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('app-language');
-    if (saved === 'en' || saved === 'de') {
-      setLanguage(saved);
-    }
-  }, []);
 
   useEffect(() => {
     const loadCoverLetter = async () => {

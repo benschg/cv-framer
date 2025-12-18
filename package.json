@@ -1,6 +1,7 @@
 {
   "name": "benjamin-grauer-monorepo",
   "private": true,
+  "packageManager": "bun@1.3.4",
   "workspaces": [
     "cv-builder"
   ],
@@ -12,6 +13,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^16.0.10",
     "husky": "^9.1.7",
     "turbo": "^2.3.3"
   }

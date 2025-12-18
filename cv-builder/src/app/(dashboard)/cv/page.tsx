@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAppLanguage } from '@/hooks/use-app-language';
 import { useTranslations } from '@/hooks/use-translations';
 import { deleteCV, duplicateCV, fetchAllCVs, updateCV } from '@/services/cv.service';
 import type { CVDocument } from '@/types/cv.types';
@@ -34,16 +35,8 @@ export default function CVDashboardPage() {
   const [cvs, setCvs] = useState<CVDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<'en' | 'de'>('en');
+  const { language } = useAppLanguage();
   const { translations } = useTranslations(language);
-
-  // Load language preference from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('app-language');
-    if (saved === 'en' || saved === 'de') {
-      setLanguage(saved);
-    }
-  }, []);
 
   useEffect(() => {
     const loadCVs = async () => {

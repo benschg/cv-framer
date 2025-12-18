@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/auth-context';
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -18,7 +18,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { signInWithOTP, verifyOTP } = useAuth();
-  const { t } = useTranslations('en'); // TODO: Get language from context when auth pages support language switching
+  const { t } = useAppTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/cv';

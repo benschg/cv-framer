@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AutoFillDialog } from '@/components/auto-fill-dialog';
 import { Button } from '@/components/ui/button';
@@ -26,10 +26,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useAppLanguage } from '@/hooks/use-app-language';
 import { useTranslations } from '@/hooks/use-translations';
 import { createCoverLetter, getDefaultCoverLetterContent } from '@/services/cover-letter.service';
 import { fetchAllCVs } from '@/services/cv.service';
-import { type ParsedJobPosting,parseJobPostingUrl } from '@/services/job-parser.service';
+import { type ParsedJobPosting, parseJobPostingUrl } from '@/services/job-parser.service';
 import type { CVDocument } from '@/types/cv.types';
 
 type Step = 'basic' | 'job';
@@ -43,7 +44,7 @@ export default function NewCoverLetterPage() {
   const [parsedData, setParsedData] = useState<ParsedJobPosting | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cvList, setCvList] = useState<CVDocument[]>([]);
-  const [appLanguage, setAppLanguage] = useState<'en' | 'de'>('en');
+  const { language: appLanguage } = useAppLanguage();
   const { translations } = useTranslations(appLanguage);
 
   // Form state
@@ -54,14 +55,6 @@ export default function NewCoverLetterPage() {
   const [jobPostingUrl, setJobPostingUrl] = useState('');
   const [company, setCompany] = useState('');
   const [position, setPosition] = useState('');
-
-  // Load language preference from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('app-language');
-    if (saved === 'en' || saved === 'de') {
-      setAppLanguage(saved);
-    }
-  }, []);
 
   useEffect(() => {
     const loadCVs = async () => {

@@ -1,8 +1,8 @@
 'use client';
 
-import { LogOut,Settings } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo,useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -15,7 +15,7 @@ import {
 import { useAuth } from '@/contexts/auth-context';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
 import { useTranslations } from '@/hooks/use-translations';
-import { getDisplayName,getUserInitials } from '@/lib/user-utils';
+import { getDisplayName, getUserInitials } from '@/lib/user-utils';
 import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
 import type { ProfilePhoto } from '@/types/api.schemas';
 
@@ -27,6 +27,8 @@ export function UserAccountButton() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Valid pattern: setting mounted state to prevent hydration mismatch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
