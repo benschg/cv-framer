@@ -130,6 +130,8 @@ export function AppSidebar() {
   ];
 
   useEffect(() => {
+    // Valid pattern: setting mounted state to prevent hydration mismatch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

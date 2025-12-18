@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar,ExternalLink, FileText, Mail, MoreVertical, Plus, Trash2 } from 'lucide-react';
+import { Calendar, ExternalLink, FileText, Mail, MoreVertical, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -15,24 +15,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAppLanguage } from '@/hooks/use-app-language';
 import { useTranslations } from '@/hooks/use-translations';
-import { deleteCoverLetter,fetchCoverLetters } from '@/services/cover-letter.service';
+import { deleteCoverLetter, fetchCoverLetters } from '@/services/cover-letter.service';
 import type { CoverLetter, CoverLetterContent } from '@/types/cv.types';
 
 export default function CoverLetterListPage() {
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<'en' | 'de'>('en');
+  const { language } = useAppLanguage();
   const { translations } = useTranslations(language);
-
-  // Load language preference from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('app-language');
-    if (saved === 'en' || saved === 'de') {
-      setLanguage(saved);
-    }
-  }, []);
 
   useEffect(() => {
     const loadCoverLetters = async () => {

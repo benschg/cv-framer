@@ -183,10 +183,6 @@ export default function ApplicationsPage() {
     })
   );
 
-  useEffect(() => {
-    loadApplications();
-  }, []);
-
   const loadApplications = async () => {
     const result = await fetchApplications();
     if (result.error) {
@@ -196,6 +192,11 @@ export default function ApplicationsPage() {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadApplications();
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this application?')) return;

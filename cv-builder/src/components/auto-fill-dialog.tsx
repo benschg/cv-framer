@@ -1,7 +1,7 @@
 'use client';
 
-import { AlertCircle,Check, Loader2 } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { AlertCircle, Check, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -80,6 +80,8 @@ export function AutoFillDialog({
         multiline: key === 'jobDescription',
         notFound: !data[key], // Mark fields that couldn't be extracted
       }));
+      // Valid pattern: computing derived state from props
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFields(newFields);
     }
   }, [data, fieldLabels, visibleFields]);
