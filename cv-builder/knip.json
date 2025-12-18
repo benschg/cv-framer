@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/app/**/page.tsx",
+    "src/app/**/layout.tsx",
+    "src/app/**/route.ts",
+    "src/app/global-error.tsx",
+    "src/middleware.ts",
+    "src/scripts/**/*.ts",
+    "scripts/**/*.{js,cjs,ts}",
+    "src/components/ui/**/*.tsx"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{js,cjs,ts}"],
+  "ignore": [
+    "src/**/*.test.{ts,tsx}",
+    "src/**/*.spec.{ts,tsx}",
+    "src/test/**",
+    "**/*.d.ts",
+    "src/types/generated/**",
+    "src/libs/supabase/types.ts"
+  ],
+  "ignoreDependencies": [
+    "eslint-*",
+    "prettier-plugin-*",
+    "@testing-library/*",
+    "@vitejs/*",
+    "@vitest/*",
+    "husky",
+    "postcss-load-config"
+  ]
+}

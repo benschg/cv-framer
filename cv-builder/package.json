@@ -11,6 +11,7 @@
     "format": "prettier --write 'src/**/*.{js,ts,tsx,css,json}'",
     "format:check": "prettier --check 'src/**/*.{js,ts,tsx,css,json}'",
     "type-check": "tsc --noEmit",
+    "knip": "knip",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage"
@@ -85,6 +86,7 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "jsdom": "^27.3.0",
+    "knip": "^5.75.1",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",

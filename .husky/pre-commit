@@ -8,64 +8,49 @@ STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
 # Filter for cv-builder files only
 CV_BUILDER_FILES=""
-CV_BUILDER_FULL_PATHS=""
+CV_BUILDER_TS_FILES=""
+
 for file in $STAGED_FILES; do
   if [[ "$file" == cv-builder/* ]]; then
-    # Strip the cv-builder/ prefix for prettier
-    CV_BUILDER_FILES="$CV_BUILDER_FILES ${file#cv-builder/}"
-    CV_BUILDER_FULL_PATHS="$CV_BUILDER_FULL_PATHS $file"
+    rel_file="${file#cv-builder/}"
+    CV_BUILDER_FILES="$CV_BUILDER_FILES $rel_file"
+
+    if [[ "$rel_file" == *.ts ]] || [[ "$rel_file" == *.tsx ]]; then
+      CV_BUILDER_TS_FILES="$CV_BUILDER_TS_FILES $rel_file"
+    fi
   fi
 done
 
-# Run prettier on cv-builder files if any
-if [ -n "$CV_BUILDER_FILES" ]; then
-  echo "Running Prettier on staged cv-builder files..."
-  cd cv-builder
+# Exit if no cv-builder files
+[ -z "$CV_BUILDER_FILES" ] && exit 0
 
-  # Format files with prettier
-  bun prettier --write $CV_BUILDER_FILES 2>/dev/null
+# Run prettier on cv-builder files
+echo "Running Prettier on staged cv-builder files..."
+(cd cv-builder && bun prettier --write $CV_BUILDER_FILES 2>/dev/null)
 
-  cd ..
-
-  # Re-add formatted files to staging (using full paths from root)
-  for file in $CV_BUILDER_FULL_PATHS; do
-    git add "$file" 2>/dev/null
-  done
-fi
-
-# Run ESLint on cv-builder if there are staged ts/tsx files
-CV_BUILDER_TS_FILES=""
-for file in $STAGED_FILES; do
-  if [[ "$file" == cv-builder/*.ts ]] || [[ "$file" == cv-builder/*.tsx ]]; then
-    CV_BUILDER_TS_FILES="$CV_BUILDER_TS_FILES $file"
-  fi
+# Re-add formatted files to staging
+for file in $CV_BUILDER_FILES; do
+  git add "cv-builder/$file" 2>/dev/null
 done
 
+# Run ESLint if there are ts/tsx files
 if [ -n "$CV_BUILDER_TS_FILES" ]; then
   echo "Running ESLint on staged TypeScript files..."
-  cd cv-builder
-  bun eslint --cache --cache-location .next/cache/eslint ${CV_BUILDER_TS_FILES//cv-builder\//} --max-warnings 0
-  ESLINT_EXIT=$?
-  cd ..
-
-  if [ $ESLINT_EXIT -ne 0 ]; then
+  (cd cv-builder && bun eslint --cache --cache-location .next/cache/eslint $CV_BUILDER_TS_FILES --max-warnings 0)
+  if [ $? -ne 0 ]; then
     echo "ESLint found errors. Please fix them before committing."
     exit 1
   fi
-fi
 
-# Run TypeScript type check on cv-builder if ts/tsx files changed
-if [ -n "$CV_BUILDER_TS_FILES" ]; then
   echo "Running TypeScript type check..."
-  cd cv-builder
-  bun tsc --noEmit
-  TSC_EXIT=$?
-  cd ..
-
-  if [ $TSC_EXIT -ne 0 ]; then
+  (cd cv-builder && bun tsc --noEmit)
+  if [ $? -ne 0 ]; then
     echo "TypeScript found type errors. Please fix them before committing."
     exit 1
   fi
+
+  echo "Running Knip (dead code detection)..."
+  (cd cv-builder && bun knip) || echo "Knip found issues (not blocking commit yet)"
 fi
 
 exit 0
