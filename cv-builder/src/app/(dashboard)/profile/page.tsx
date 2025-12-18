@@ -12,8 +12,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { useAppTranslation } from '@/hooks/use-app-translation';
 import { getUserInitials, getUserLocation, getUserName, getUserPhone } from '@/lib/user-utils';
 import { debounce } from '@/services/profile-career.service';
-import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import type { ProfilePhoto } from '@/types/api.schemas';
+import { fetchProfilePhotos } from '@/services/profile-photo.service';
+import type { ProfilePhotoWithUrl } from '@/types/api.schemas';
 
 export default function ProfilePage() {
   const { user, updateUserProfile } = useAuth();
@@ -22,8 +22,8 @@ export default function ProfilePage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Photo state
-  const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
-  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
+  const [photos, setPhotos] = useState<ProfilePhotoWithUrl[]>([]);
+  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhotoWithUrl | null>(null);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
 
   // Form state - pre-filled with user data from auth.user_metadata
@@ -122,9 +122,7 @@ export default function ProfilePage() {
   );
 
   const userInitials = getUserInitials(user);
-  const primaryPhotoUrl = primaryPhoto
-    ? getPhotoPublicUrl(primaryPhoto.storage_path)
-    : user?.user_metadata?.avatar_url;
+  const primaryPhotoUrl = primaryPhoto?.signedUrl ?? user?.user_metadata?.avatar_url;
 
   return (
     <ProfilePageLayout

@@ -14,16 +14,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/auth-context';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
+import { usePrimaryPhoto } from '@/hooks/use-primary-photo';
 import { useTranslations } from '@/hooks/use-translations';
 import { getDisplayName, getUserInitials } from '@/lib/user-utils';
-import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import type { ProfilePhoto } from '@/types/api.schemas';
 
 export function UserAccountButton() {
   const { user } = useAuth();
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
-  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
+  const { avatarUrl } = usePrimaryPhoto();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -31,25 +30,6 @@ export function UserAccountButton() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    const loadPrimaryPhoto = async () => {
-      const result = await fetchProfilePhotos();
-      if (result.data?.primaryPhoto) {
-        setPrimaryPhoto(result.data.primaryPhoto);
-      }
-    };
-
-    if (user) {
-      loadPrimaryPhoto();
-    }
-  }, [user]);
-
-  const avatarUrl = useMemo(
-    () =>
-      primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : user?.user_metadata?.avatar_url,
-    [primaryPhoto, user?.user_metadata?.avatar_url]
-  );
 
   const userInitials = useMemo(() => getUserInitials(user), [user]);
 

@@ -1,25 +1,21 @@
 'use client';
 
-import { Check, Loader2,Trash2 } from 'lucide-react';
+import { Check, Loader2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { Avatar, AvatarFallback,AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
 import { useTranslations } from '@/hooks/use-translations';
-import {
-  deleteProfilePhoto,
-  getPhotoPublicUrl,
-  setPrimaryPhoto,
-} from '@/services/profile-photo.service';
-import type { ProfilePhoto } from '@/types/api.schemas';
+import { deleteProfilePhoto, setPrimaryPhoto } from '@/services/profile-photo.service';
+import type { ProfilePhotoWithUrl } from '@/types/api.schemas';
 
 interface PhotoGalleryProps {
-  photos: ProfilePhoto[];
-  primaryPhoto: ProfilePhoto | null;
+  photos: ProfilePhotoWithUrl[];
+  primaryPhoto: ProfilePhotoWithUrl | null;
   onUpdate: () => void;
   userInitials: string;
 }
@@ -43,7 +39,7 @@ export function PhotoGallery({ photos, primaryPhoto, onUpdate, userInitials }: P
     setActioningId(null);
   };
 
-  const handleDelete = async (photo: ProfilePhoto) => {
+  const handleDelete = async (photo: ProfilePhotoWithUrl) => {
     if (photos.length === 1) {
       toast.error(t('profile.photoGallery.cannotDeleteOnly'));
       return;
@@ -75,14 +71,13 @@ export function PhotoGallery({ photos, primaryPhoto, onUpdate, userInitials }: P
       {photos.map((photo) => {
         const isPrimary = photo.id === primaryPhoto?.id;
         const isActioning = actioningId === photo.id;
-        const publicUrl = getPhotoPublicUrl(photo.storage_path);
 
         return (
           <Card key={photo.id} className="group relative">
             <CardContent className="p-3">
               <div className="relative">
                 <Avatar className="mx-auto h-24 w-24">
-                  <AvatarImage src={publicUrl} alt={photo.filename} />
+                  <AvatarImage src={photo.signedUrl} alt={photo.filename} />
                   <AvatarFallback>{userInitials}</AvatarFallback>
                 </Avatar>
 

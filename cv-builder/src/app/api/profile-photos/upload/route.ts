@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const SIGNED_URL_EXPIRY_SECONDS = 3600;
 
 export async function POST(request: NextRequest) {
   try {
@@ -58,10 +59,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
     }
 
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('profile-photos').getPublicUrl(storagePath);
+    // Generate signed URL for the uploaded file
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from('profile-photos')
+      .createSignedUrl(storagePath, SIGNED_URL_EXPIRY_SECONDS);
+
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      console.error('Signed URL error:', signedUrlError);
+      return NextResponse.json({ error: 'Failed to generate signed URL' }, { status: 500 });
+    }
 
     // Get image dimensions (from client-provided metadata or default)
     const width = formData.get('width') ? parseInt(formData.get('width') as string) : null;
@@ -106,7 +112,12 @@ export async function POST(request: NextRequest) {
         .eq('user_id', user.id);
     }
 
-    return NextResponse.json({ photo, publicUrl });
+    return NextResponse.json({
+      photo: {
+        ...photo,
+        signedUrl: signedUrlData.signedUrl,
+      },
+    });
   } catch (error) {
     console.error('Photo upload error:', error);
     return errorResponse(error);

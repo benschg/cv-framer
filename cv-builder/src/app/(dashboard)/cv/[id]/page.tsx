@@ -47,8 +47,8 @@ import {
   bulkUpsertCVWorkExperienceSelections,
   fetchCVWorkExperiences,
 } from '@/services/cv-work-experience.service';
-import { fetchProfilePhotos, getPhotoPublicUrl } from '@/services/profile-photo.service';
-import type { ProfilePhoto } from '@/types/api.schemas';
+import { fetchProfilePhotos } from '@/services/profile-photo.service';
+import type { ProfilePhotoWithUrl } from '@/types/api.schemas';
 import type { CVContent, CVDocument, DisplaySettings } from '@/types/cv.types';
 import type {
   CVEducationWithSelection,
@@ -82,8 +82,8 @@ export default function CVEditorPage() {
   const [content, setContent] = useState<CVContent>({});
 
   // Photo state
-  const [photos, setPhotos] = useState<ProfilePhoto[]>([]);
-  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhoto | null>(null);
+  const [photos, setPhotos] = useState<ProfilePhotoWithUrl[]>([]);
+  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhotoWithUrl | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   // Work experience state
@@ -202,35 +202,31 @@ export default function CVEditorPage() {
 
   // Update photo URL when selected photo or primary photo changes
   useEffect(() => {
-    const updatePhotoUrl = async () => {
-      const selectedPhotoId = content.selected_photo_id;
+    const selectedPhotoId = content.selected_photo_id;
 
-      if (selectedPhotoId === 'none') {
-        // No photo
-        setPhotoUrl(null);
-      } else if (selectedPhotoId && selectedPhotoId !== 'none') {
-        // User selected a specific photo
-        const selectedPhoto = photos.find((p) => p.id === selectedPhotoId);
-        if (selectedPhoto) {
-          setPhotoUrl(getPhotoPublicUrl(selectedPhoto.storage_path));
-        } else {
-          // Photo not found in list, fallback to primary
-          setPhotoUrl(primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : null);
-        }
-      } else if (!selectedPhotoId || selectedPhotoId === null) {
-        // Use primary photo
-        if (primaryPhoto) {
-          setPhotoUrl(getPhotoPublicUrl(primaryPhoto.storage_path));
-        } else if (user?.user_metadata?.avatar_url) {
-          // Fallback to OAuth avatar
-          setPhotoUrl(user.user_metadata.avatar_url);
-        } else {
-          setPhotoUrl(null);
-        }
+    if (selectedPhotoId === 'none') {
+      // No photo
+      setPhotoUrl(null);
+    } else if (selectedPhotoId && selectedPhotoId !== 'none') {
+      // User selected a specific photo
+      const selectedPhoto = photos.find((p) => p.id === selectedPhotoId);
+      if (selectedPhoto) {
+        setPhotoUrl(selectedPhoto.signedUrl);
+      } else {
+        // Photo not found in list, fallback to primary
+        setPhotoUrl(primaryPhoto?.signedUrl ?? null);
       }
-    };
-
-    updatePhotoUrl();
+    } else if (!selectedPhotoId || selectedPhotoId === null) {
+      // Use primary photo
+      if (primaryPhoto) {
+        setPhotoUrl(primaryPhoto.signedUrl);
+      } else if (user?.user_metadata?.avatar_url) {
+        // Fallback to OAuth avatar
+        setPhotoUrl(user.user_metadata.avatar_url);
+      } else {
+        setPhotoUrl(null);
+      }
+    }
   }, [content.selected_photo_id, photos, primaryPhoto, user]);
 
   // Build photo options for context menu
@@ -243,7 +239,7 @@ export default function CVEditorPage() {
         id: primaryPhoto.id,
         label: 'Primary Photo (Default)',
         sublabel: primaryPhoto.filename,
-        imageUrl: getPhotoPublicUrl(primaryPhoto.storage_path),
+        imageUrl: primaryPhoto.signedUrl,
         isPrimary: true,
       });
     }
@@ -256,7 +252,7 @@ export default function CVEditorPage() {
           id: photo.id,
           label: photo.filename,
           sublabel: `${(photo.file_size / 1024).toFixed(0)} KB`,
-          imageUrl: getPhotoPublicUrl(photo.storage_path),
+          imageUrl: photo.signedUrl,
         });
       });
 
@@ -634,9 +630,7 @@ export default function CVEditorPage() {
                 }`}
               >
                 <Avatar className="h-12 w-12">
-                  <AvatarImage
-                    src={primaryPhoto ? getPhotoPublicUrl(primaryPhoto.storage_path) : undefined}
-                  />
+                  <AvatarImage src={primaryPhoto?.signedUrl} />
                   <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">
@@ -670,7 +664,7 @@ export default function CVEditorPage() {
                       }`}
                     >
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={getPhotoPublicUrl(photo.storage_path)} />
+                        <AvatarImage src={photo.signedUrl} />
                         <AvatarFallback>{getUserInitials(user)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 text-left">

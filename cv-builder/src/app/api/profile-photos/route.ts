@@ -2,6 +2,30 @@ import { NextResponse } from 'next/server';
 
 import { errorResponse } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
+import type { ProfilePhoto, ProfilePhotoWithUrl } from '@/types/api.schemas';
+
+// Signed URLs expire after 1 hour
+const SIGNED_URL_EXPIRY_SECONDS = 3600;
+
+async function addSignedUrls(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  photos: ProfilePhoto[]
+): Promise<ProfilePhotoWithUrl[]> {
+  const photosWithUrls = await Promise.all(
+    photos.map(async (photo) => {
+      const { data } = await supabase.storage
+        .from('profile-photos')
+        .createSignedUrl(photo.storage_path, SIGNED_URL_EXPIRY_SECONDS);
+
+      return {
+        ...photo,
+        signedUrl: data?.signedUrl || '',
+      };
+    })
+  );
+
+  return photosWithUrls;
+}
 
 export async function GET() {
   try {
@@ -27,9 +51,11 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch photos' }, { status: 500 });
     }
 
-    const primaryPhoto = photos?.find((p) => p.is_primary) || null;
+    // Add signed URLs to all photos
+    const photosWithUrls = await addSignedUrls(supabase, photos || []);
+    const primaryPhoto = photosWithUrls.find((p) => p.is_primary) || null;
 
-    return NextResponse.json({ photos: photos || [], primaryPhoto });
+    return NextResponse.json({ photos: photosWithUrls, primaryPhoto });
   } catch (error) {
     console.error('Photos GET error:', error);
     return errorResponse(error);

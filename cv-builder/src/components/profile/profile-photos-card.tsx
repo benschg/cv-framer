@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown,Loader2 } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { PhotoGallery } from '@/components/profile/photo-gallery';
@@ -8,11 +8,11 @@ import { PhotoUpload } from '@/components/profile/photo-upload';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import type { ProfilePhoto } from '@/types/api.schemas';
+import type { ProfilePhotoWithUrl } from '@/types/api.schemas';
 
 interface ProfilePhotosCardProps {
-  photos: ProfilePhoto[];
-  primaryPhoto: ProfilePhoto | null;
+  photos: ProfilePhotoWithUrl[];
+  primaryPhoto: ProfilePhotoWithUrl | null;
   loadingPhotos: boolean;
   primaryPhotoUrl: string | undefined;
   userInitials: string;

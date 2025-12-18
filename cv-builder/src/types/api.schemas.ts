@@ -337,18 +337,24 @@ export const ProfilePhotoSchema = z.object({
 
 export type ProfilePhoto = z.infer<typeof ProfilePhotoSchema>;
 
+// Extended photo with signed URL for client use
+export const ProfilePhotoWithUrlSchema = ProfilePhotoSchema.extend({
+  signedUrl: z.string(),
+});
+
+export type ProfilePhotoWithUrl = z.infer<typeof ProfilePhotoWithUrlSchema>;
+
 // POST /api/profile-photos/upload
 export const UploadProfilePhotoResponseSchema = z.object({
-  photo: ProfilePhotoSchema,
-  publicUrl: z.string(),
+  photo: ProfilePhotoWithUrlSchema,
 });
 
 export type UploadProfilePhotoResponse = z.infer<typeof UploadProfilePhotoResponseSchema>;
 
 // GET /api/profile-photos
 export const GetProfilePhotosResponseSchema = z.object({
-  photos: z.array(ProfilePhotoSchema),
-  primaryPhoto: ProfilePhotoSchema.nullable(),
+  photos: z.array(ProfilePhotoWithUrlSchema),
+  primaryPhoto: ProfilePhotoWithUrlSchema.nullable(),
 });
 
 export type GetProfilePhotosResponse = z.infer<typeof GetProfilePhotosResponseSchema>;
