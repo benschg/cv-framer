@@ -8,7 +8,6 @@ import {
   FolderKanban,
   GraduationCap,
   LucideIcon,
-  Sparkles,
   Star,
   Target,
   Upload,

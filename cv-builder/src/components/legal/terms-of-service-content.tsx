@@ -188,10 +188,10 @@ function EnglishTerms() {
           <CardContent className="space-y-3 p-4">
             <p className="text-sm font-medium">When using AI features:</p>
             <ul className="ml-4 list-inside list-disc space-y-1 text-sm">
-              <li>AI-generated content is provided "as is" without guarantees</li>
+              <li>AI-generated content is provided &quot;as is&quot; without guarantees</li>
               <li>You must review and verify all AI-generated content before use</li>
               <li>We are not responsible for the accuracy or quality of AI output</li>
-              <li>AI features are subject to Google's AI Terms of Service</li>
+              <li>AI features are subject to Google&apos;s AI Terms of Service</li>
             </ul>
           </CardContent>
         </Card>
@@ -262,7 +262,7 @@ function EnglishTerms() {
         <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20">
           <CardContent className="p-4">
             <p className="mb-2 text-sm font-semibold">
-              THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.
+              THE SERVICE IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF ANY KIND.
             </p>
             <p className="mb-0 text-sm">
               We do not guarantee that the service will be uninterrupted, error-free, or secure. We
@@ -333,7 +333,7 @@ function EnglishTerms() {
                 </a>
               </p>
               <p>
-                <strong>Subject:</strong> "Terms of Service Inquiry"
+                <strong>Subject:</strong> &quot;Terms of Service Inquiry&quot;
               </p>
             </div>
           </CardContent>
@@ -357,10 +357,10 @@ function EnglishTerms() {
               ✅ <strong>Your Responsibility:</strong> Review all content before use
             </p>
             <p>
-              ✅ <strong>No Warranties:</strong> Service provided "as is"
+              ✅ <strong>No Warranties:</strong> Service provided &quot;as is&quot;
             </p>
             <p>
-              ✅ <strong>Limited Liability:</strong> We're not responsible for job outcomes
+              ✅ <strong>Limited Liability:</strong> We&apos;re not responsible for job outcomes
             </p>
           </div>
         </CardContent>

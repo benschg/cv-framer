@@ -56,14 +56,11 @@ export function generateCVHTML(data: CVTemplateData): string {
   const settings: DisplaySettings = { ...defaultSettings, ...cv.display_settings };
 
   const theme = settings.theme;
-  const format = settings.format;
   const layoutMode = settings.layoutMode || 'two-column';
-  const showPhoto = settings.showPhoto !== false && !!photoUrl;
   const showWorkExperience = settings.showWorkExperience !== false;
   const showEducation = settings.showEducation !== false;
   const showSkills = settings.showSkills !== false;
   const showKeyCompetences = settings.showKeyCompetences !== false;
-  const privacyLevel = settings.privacyLevel || 'personal';
   const accentColor = settings.accentColor || '#2563eb';
   const fontFamily = settings.fontFamily || 'Inter';
   const pageLayouts = settings.pageLayouts || [];
@@ -784,7 +781,7 @@ function generateSidebar(
               </div>
             `;
 
-            case 'skills':
+            case 'skills': {
               if (skillCategories.length === 0) return '';
               const allSkills = skillCategories.flatMap((cat) =>
                 filterSelectedSkills(cat.skills, cat.selection.selected_skill_indices)
@@ -797,6 +794,7 @@ function generateSidebar(
                 </div>
               </div>
             `;
+            }
 
             case 'languages':
               if (!content.languages || content.languages.length === 0) return '';

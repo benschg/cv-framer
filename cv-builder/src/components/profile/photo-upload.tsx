@@ -1,7 +1,7 @@
 'use client';
 
-import { Image as ImageIcon,Upload } from 'lucide-react';
-import { useRef,useState } from 'react';
+import { Image as ImageIcon, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -101,7 +101,7 @@ export function PhotoUpload({
         toast.success(t('profile.photoUpload.uploadSuccess'));
         onUploadComplete();
       }
-    } catch (error) {
+    } catch {
       toast.error(t('profile.photoUpload.uploadFailed'));
     } finally {
       setUploading(false);

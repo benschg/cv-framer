@@ -2,7 +2,7 @@
 
 import { Check, Download, Eye, Loader2, Save, Sparkles, UserX } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useEffect, useMemo,useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { CVEducationSection } from '@/components/cv/cv-education-section';
 import { CVKeyCompetencesSection } from '@/components/cv/cv-key-competences-section';
@@ -15,7 +15,7 @@ import { FormatSettings } from '@/components/cv/format-settings';
 import { PhotoSelector } from '@/components/cv/photo-selector';
 import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { EditableBreadcrumb } from '@/components/shared/editable-breadcrumb';
-import { Avatar, AvatarFallback,AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/auth-context';
-import { getUserInitials, getUserLocation,getUserName, getUserPhone } from '@/lib/user-utils';
+import { getUserInitials, getUserLocation, getUserName, getUserPhone } from '@/lib/user-utils';
 import { generateCVWithAI, regenerateItem } from '@/services/ai.service';
 import { fetchCV, updateCV } from '@/services/cv.service';
 import {
@@ -38,7 +38,7 @@ import {
   bulkUpsertCVKeyCompetenceSelections,
   fetchCVKeyCompetences,
 } from '@/services/cv-key-competences.service';
-import { bulkUpsertCVProjectSelections,fetchCVProjects } from '@/services/cv-projects.service';
+import { bulkUpsertCVProjectSelections, fetchCVProjects } from '@/services/cv-projects.service';
 import {
   bulkUpsertCVSkillCategorySelections,
   fetchCVSkillCategories,
@@ -193,8 +193,8 @@ export default function CVEditorPage() {
           const css = await response.text();
           setCvStyles(css);
         }
-      } catch (err) {
-        console.error('Failed to load CV styles:', err);
+      } catch (error: unknown) {
+        console.error('Failed to load CV styles:', error);
       }
     };
     loadCvStyles();
@@ -479,8 +479,9 @@ export default function CVEditorPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err) {
+    } catch (error: unknown) {
       setError('Failed to export PDF');
+      console.error('Export error:', error);
     } finally {
       setExporting(false);
     }

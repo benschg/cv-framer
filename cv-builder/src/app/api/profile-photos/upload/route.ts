@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { errorResponse } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
-import { UploadProfilePhotoResponseSchema } from '@/types/api.schemas';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -44,7 +43,6 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 8);
-    const ext = file.name.split('.').pop() || 'jpg';
     const storagePath = `${user.id}/${timestamp}_${randomStr}_${file.name}`;
 
     // Upload to Supabase Storage

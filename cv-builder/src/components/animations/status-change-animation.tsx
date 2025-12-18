@@ -1,8 +1,8 @@
 'use client';
 
 import confetti from 'canvas-confetti';
-import { AnimatePresence,motion } from 'framer-motion';
-import { Calendar, CheckCircle, Gift, Search, Send, Users,XCircle } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Calendar, CheckCircle, Gift, Search, Send, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { PaperAirplane } from '@/components/icons/paper-airplane';

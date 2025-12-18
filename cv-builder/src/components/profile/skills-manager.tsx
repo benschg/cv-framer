@@ -47,7 +47,10 @@ export const SkillsManager = forwardRef<SkillsManagerRef, SkillsManagerProps>(
       handleDragEnd,
     } = useProfileManager<ProfileSkillCategory>({
       fetchItems: fetchSkillCategories,
-      createItem: createSkillCategory,
+      createItem: (item) =>
+        createSkillCategory(
+          item as Omit<ProfileSkillCategory, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+        ),
       updateItem: updateSkillCategory,
       deleteItem: deleteSkillCategory,
       defaultItem: {
@@ -118,7 +121,7 @@ SkillsManager.displayName = 'SkillsManager';
 // Edit Form Component
 interface SkillCategoryEditFormProps {
   formData: Partial<ProfileSkillCategory>;
-  onFieldChange: (field: keyof ProfileSkillCategory, value: any) => void;
+  onFieldChange: (field: keyof ProfileSkillCategory, value: string | string[]) => void;
   onDone: () => void;
   t: (key: string) => string;
 }

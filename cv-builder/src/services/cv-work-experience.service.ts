@@ -64,7 +64,7 @@ export async function fetchCVWorkExperiences(
           is_selected: sel?.is_selected ?? true, // Default: selected
           is_favorite: sel?.is_favorite ?? false,
           display_order: sel?.display_order ?? index,
-          display_mode: (sel as any)?.display_mode ?? 'custom', // Default: custom mode for backwards compatibility
+          display_mode: 'custom', // Default: custom mode (display_mode not stored in DB yet)
           description_override: sel?.description_override ?? null,
           selected_bullet_indices: sel?.selected_bullet_indices ?? null,
         },

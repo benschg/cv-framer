@@ -1,9 +1,8 @@
 'use client';
 
-import { Check, ImageIcon, Maximize2,UserX } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { Check, ImageIcon, Maximize2, UserX } from 'lucide-react';
 
-import { Avatar, AvatarFallback,AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   ContextMenuItem,
   ContextMenuSeparator,

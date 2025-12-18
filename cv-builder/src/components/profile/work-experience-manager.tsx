@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Loader2,Trash2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Trash2 } from 'lucide-react';
 import { forwardRef, useImperativeHandle } from 'react';
 
 import { BulletListEditor } from '@/components/ui/bullet-list-editor';
@@ -54,7 +54,10 @@ export const WorkExperienceManager = forwardRef<
     handleDragEnd,
   } = useProfileManager<ProfileWorkExperience>({
     fetchItems: fetchWorkExperiences,
-    createItem: createWorkExperience,
+    createItem: (item) =>
+      createWorkExperience(
+        item as Omit<ProfileWorkExperience, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+      ),
     updateItem: updateWorkExperience,
     deleteItem: deleteWorkExperience,
     defaultItem: {
@@ -131,7 +134,7 @@ WorkExperienceManager.displayName = 'WorkExperienceManager';
 // Edit Form Component
 interface ExperienceEditFormProps {
   formData: Partial<ProfileWorkExperience>;
-  onFieldChange: (field: keyof ProfileWorkExperience, value: any) => void;
+  onFieldChange: (field: keyof ProfileWorkExperience, value: string | string[] | boolean) => void;
   onMultiFieldChange: (updates: Partial<ProfileWorkExperience>) => void;
   onDone: () => void;
   t: (key: string) => string;

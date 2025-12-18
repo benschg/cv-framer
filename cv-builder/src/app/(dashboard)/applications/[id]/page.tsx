@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback,useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ import {
 import { fetchCoverLetters } from '@/services/cover-letter.service';
 import { fetchAllCVs } from '@/services/cv.service';
 import type { JobFitAnalysis } from '@/types/api.schemas';
-import type { ApplicationStatus,CoverLetter, CVDocument, JobApplication } from '@/types/cv.types';
+import type { ApplicationStatus, CoverLetter, CVDocument, JobApplication } from '@/types/cv.types';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
 
 export default function ApplicationDetailPage() {
@@ -59,7 +59,6 @@ export default function ApplicationDetailPage() {
 
   const [application, setApplication] = useState<JobApplication | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [cvList, setCvList] = useState<CVDocument[]>([]);
@@ -153,7 +152,6 @@ export default function ApplicationDetailPage() {
       return;
     }
 
-    setSaving(true);
     setSaveStatus('saving');
     setError(null);
 
@@ -185,8 +183,6 @@ export default function ApplicationDetailPage() {
       if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
       savedTimeoutRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
     }
-
-    setSaving(false);
   }, [
     applicationId,
     companyName,

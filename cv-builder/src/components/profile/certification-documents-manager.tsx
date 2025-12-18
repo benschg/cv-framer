@@ -1,7 +1,7 @@
 'use client';
 
-import { ExternalLink, FileText, Image as ImageIcon, Loader2,Trash2, Upload } from 'lucide-react';
-import { useEffect, useRef,useState } from 'react';
+import { ExternalLink, FileText, Image as ImageIcon, Loader2, Trash2, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ export function CertificationDocumentsManager({
   // Fetch documents on mount
   useEffect(() => {
     loadDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [certificationId]);
 
   const loadDocuments = async () => {
@@ -74,10 +75,10 @@ export function CertificationDocumentsManager({
 
     setUploading(true);
     try {
-      const { data, error } = await createCertificationDocument(certificationId, file);
+      const { error } = await createCertificationDocument(certificationId, file);
 
       if (error) {
-        throw new Error(error.message || 'Upload failed');
+        throw new Error(typeof error === 'string' ? error : 'Upload failed');
       }
 
       toast.success('Document uploaded successfully');
@@ -108,7 +109,7 @@ export function CertificationDocumentsManager({
       const { error } = await deleteCertificationDocumentRecord(documentId, storagePath);
 
       if (error) {
-        throw new Error(error.message || 'Delete failed');
+        throw new Error(typeof error === 'string' ? error : 'Delete failed');
       }
 
       toast.success('Document deleted');

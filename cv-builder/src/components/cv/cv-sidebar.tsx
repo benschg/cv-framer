@@ -9,12 +9,12 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Globe, Linkedin,Mail, MapPin, Phone } from 'lucide-react';
+import { Globe, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { filterSelectedSkills } from '@/lib/cv-skill-filter';
 import { formatDateRange } from '@/lib/utils';
-import type { CVContent, LanguageSkill,UserProfile } from '@/types/cv.types';
+import type { CVContent, LanguageSkill, UserProfile } from '@/types/cv.types';
 import type { CVSidebarSection } from '@/types/cv-layout.types';
 import type {
   CVEducationWithSelection,
@@ -195,7 +195,7 @@ export function CVSidebar({
           </div>
         );
 
-      case 'skills':
+      case 'skills': {
         if (!skillCategories || skillCategories.length === 0) return null;
         const selectedCategories = skillCategories.filter((cat) => cat.selection.is_selected);
         if (selectedCategories.length === 0) return null;
@@ -217,6 +217,7 @@ export function CVSidebar({
             </div>
           </div>
         );
+      }
 
       case 'languages':
         if (!content?.languages || content.languages.length === 0) return null;
@@ -236,7 +237,7 @@ export function CVSidebar({
           </div>
         );
 
-      case 'education':
+      case 'education': {
         if (!educations || educations.length === 0) return null;
         const selectedEducations = educations.filter((edu) => edu.selection.is_selected);
         if (selectedEducations.length === 0) return null;
@@ -257,6 +258,7 @@ export function CVSidebar({
             </div>
           </div>
         );
+      }
 
       case 'certifications':
         if (!content?.certifications || content.certifications.length === 0) return null;

@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Github,Linkedin, Lock, Mail, MapPin, Phone } from 'lucide-react';
+import { AlertCircle, Github, Linkedin, Lock, Mail, MapPin, Phone } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -8,7 +8,7 @@ import { Footer } from '@/components/shared/footer';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { CVContent, CVDocument, ShareLink,UserProfile } from '@/types/cv.types';
+import type { CVContent, CVDocument, ShareLink, UserProfile } from '@/types/cv.types';
 
 interface SharedCVData {
   cv: CVDocument;
@@ -36,8 +36,9 @@ export default function PublicCVPage() {
         }
 
         setData(json);
-      } catch (err) {
+      } catch (error: unknown) {
         setError('Failed to load CV');
+        console.error('Error loading CV:', error);
       } finally {
         setLoading(false);
       }

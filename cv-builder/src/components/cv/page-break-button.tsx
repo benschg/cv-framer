@@ -9,7 +9,7 @@ interface PageBreakButtonProps {
   type: 'section' | 'item';
 }
 
-export function PageBreakButton({ sectionId, isActive, onClick, type }: PageBreakButtonProps) {
+export function PageBreakButton({ isActive, onClick, type }: PageBreakButtonProps) {
   const labels = {
     section: {
       active: '↑ Remove break',

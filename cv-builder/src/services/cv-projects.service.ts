@@ -6,7 +6,7 @@ import type { CVProjectWithSelection } from '@/types/profile-career.types';
  */
 export async function fetchCVProjects(cvId: string): Promise<{
   data: CVProjectWithSelection[] | null;
-  error: any;
+  error: unknown;
 }> {
   const supabase = createClient();
 
@@ -71,7 +71,7 @@ export async function fetchCVProjects(cvId: string): Promise<{
 export async function bulkUpsertCVProjectSelections(
   cvId: string,
   projects: CVProjectWithSelection[]
-): Promise<{ error: any }> {
+): Promise<{ error: unknown }> {
   const supabase = createClient();
 
   const selections = projects.map((project) => ({

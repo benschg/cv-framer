@@ -1,7 +1,7 @@
 'use client';
 
 import { Loader2, Sparkles } from 'lucide-react';
-import { DragEvent,useRef, useState } from 'react';
+import { DragEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ export function AIReferenceUploadDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [extractedData, setExtractedData] = useState<Record<string, string | null> | null>(null);
   const [confidence, setConfidence] = useState<Record<string, number>>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
@@ -207,7 +207,7 @@ export function AIReferenceUploadDialog({
     }
   };
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 

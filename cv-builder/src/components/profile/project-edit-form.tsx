@@ -15,7 +15,7 @@ import type { ProfileProject } from '@/types/profile-career.types';
 
 interface ProjectEditFormProps {
   formData: Partial<ProfileProject>;
-  onFieldChange: (field: keyof ProfileProject, value: any) => void;
+  onFieldChange: (field: keyof ProfileProject, value: string | string[] | boolean) => void;
   onDone: () => void;
   t: (key: string) => string;
 }

@@ -13,13 +13,8 @@ import type { ReactNode } from 'react';
 import { forwardRef } from 'react';
 
 import { getDefaultLayout } from '@/lib/cv-layouts';
-import type { CVContent, DisplaySettings,UserProfile } from '@/types/cv.types';
-import type {
-  CVLayoutConfig,
-  CVMainSection,
-  CVPageLayout,
-  CVSidebarSection,
-} from '@/types/cv-layout.types';
+import type { CVContent, DisplaySettings, UserProfile } from '@/types/cv.types';
+import type { CVLayoutConfig, CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
 import type {
   CVEducationWithSelection,
   CVKeyCompetenceWithSelection,
@@ -102,7 +97,6 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
       skillCategories,
       keyCompetences,
       zoom = 0,
-      onPageBreakToggle,
       isInteractive = false,
       onSectionMove,
       onSectionToggleVisibility,
@@ -129,7 +123,6 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
     const privacyLevel = settings?.privacyLevel || 'personal';
     const accentColor = settings?.accentColor || '#2563eb';
     const fontFamily = settings?.fontFamily || 'Inter';
-    const pageBreaks = settings?.pageBreaks || [];
     const pageLayouts = settings?.pageLayouts || [];
 
     // Setup drag sensors

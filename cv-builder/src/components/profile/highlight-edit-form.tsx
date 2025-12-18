@@ -12,11 +12,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { HighlightType,ProfileHighlight } from '@/types/profile-career.types';
+import type { HighlightType, ProfileHighlight } from '@/types/profile-career.types';
 
 interface HighlightEditFormProps {
   formData: Partial<ProfileHighlight>;
-  onFieldChange: (field: keyof ProfileHighlight, value: any) => void;
+  onFieldChange: (field: keyof ProfileHighlight, value: string | HighlightType) => void;
   onDone: () => void;
   t: (key: string) => string;
 }

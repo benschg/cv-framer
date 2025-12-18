@@ -1,13 +1,12 @@
 'use client';
 
-import { ChevronDown, ChevronRight, FolderKanban, RotateCcw,Star } from 'lucide-react';
+import { ChevronDown, ChevronRight, FolderKanban, RotateCcw, Star } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';

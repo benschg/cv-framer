@@ -1,14 +1,7 @@
 'use client';
 
-import {
-  AlertTriangle,
-  ExternalLink,
-  FileText,
-  Image as ImageIcon,
-  Loader2,
-  Trash2,
-} from 'lucide-react';
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { AlertTriangle, ExternalLink, FileText, Loader2, Trash2 } from 'lucide-react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -62,7 +55,10 @@ export const CertificationsManager = forwardRef<
     handleDragEnd,
   } = useProfileManager<ProfileCertification>({
     fetchItems: fetchCertifications,
-    createItem: createCertification,
+    createItem: (item) =>
+      createCertification(
+        item as Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+      ),
     updateItem: updateCertification,
     deleteItem: deleteCertification,
     defaultItem: {
@@ -82,9 +78,11 @@ export const CertificationsManager = forwardRef<
 
   const handleAddWithData = async (data: Partial<ProfileCertification>, file?: File) => {
     try {
-      const result = await createCertification(data as any);
+      const result = await createCertification(
+        data as Omit<ProfileCertification, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+      );
       if (result.error) {
-        throw new Error(result.error);
+        throw new Error(typeof result.error === 'string' ? result.error : 'Creation failed');
       }
 
       const certificationId = result.data?.id;
@@ -186,7 +184,7 @@ CertificationsManager.displayName = 'CertificationsManager';
 // Edit Form Component
 interface CertificationEditFormProps {
   formData: Partial<ProfileCertification>;
-  onFieldChange: (field: keyof ProfileCertification, value: any) => void;
+  onFieldChange: (field: keyof ProfileCertification, value: string | boolean) => void;
   onMultiFieldChange: (updates: Partial<ProfileCertification>) => void;
   onDone: () => void;
   isSaving?: boolean;
@@ -196,7 +194,7 @@ interface CertificationEditFormProps {
 function CertificationEditForm({
   formData,
   onFieldChange,
-  onMultiFieldChange,
+  onMultiFieldChange: _onMultiFieldChange,
   onDone,
   isSaving = false,
   t,

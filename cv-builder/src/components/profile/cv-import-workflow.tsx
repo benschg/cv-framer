@@ -11,12 +11,12 @@ import {
   Upload as UploadIcon,
   Zap,
 } from 'lucide-react';
-import { DragEvent,useRef, useState } from 'react';
+import { DragEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription,CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import type { CVExtractionResult } from '@/lib/ai/gemini';
@@ -26,6 +26,11 @@ import {
   bulkCreateKeyCompetences,
   bulkCreateSkillCategories,
   bulkCreateWorkExperiences,
+  type ProfileCertification,
+  type ProfileEducation,
+  type ProfileKeyCompetence,
+  type ProfileSkillCategory,
+  type ProfileWorkExperience,
 } from '@/services/profile-career.service';
 
 import { AnalyzingState, UploadArea, validateFile } from './ai-upload-shared';
@@ -152,11 +157,15 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
 
       // Pre-select all items by default
       setItemSelection({
-        workExperiences: data.extractedData.workExperiences.map((_: any, idx: number) => idx),
-        educations: data.extractedData.educations.map((_: any, idx: number) => idx),
-        skillCategories: data.extractedData.skillCategories.map((_: any, idx: number) => idx),
-        keyCompetences: data.extractedData.keyCompetences.map((_: any, idx: number) => idx),
-        certifications: data.extractedData.certifications.map((_: any, idx: number) => idx),
+        workExperiences: data.extractedData.workExperiences.map(
+          (_item: unknown, idx: number) => idx
+        ),
+        educations: data.extractedData.educations.map((_item: unknown, idx: number) => idx),
+        skillCategories: data.extractedData.skillCategories.map(
+          (_item: unknown, idx: number) => idx
+        ),
+        keyCompetences: data.extractedData.keyCompetences.map((_item: unknown, idx: number) => idx),
+        certifications: data.extractedData.certifications.map((_item: unknown, idx: number) => idx),
       });
 
       // Show success feedback
@@ -216,11 +225,18 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
           .filter((exp) => exp.company && exp.title && exp.start_date);
 
         if (selectedItems.length > 0) {
-          const { data, error } = await bulkCreateWorkExperiences(selectedItems as any);
+          const { data, error } = await bulkCreateWorkExperiences(
+            selectedItems as Array<
+              Omit<
+                ProfileWorkExperience,
+                'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'
+              >
+            >
+          );
           results.workExperiences = {
             success: !error,
             count: data?.length || 0,
-            error: error?.message,
+            error: error ? String(error) : undefined,
           };
         }
       }
@@ -231,11 +247,18 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
           .filter((edu) => edu.institution && edu.degree && edu.start_date);
 
         if (selectedItems.length > 0) {
-          const { data, error } = await bulkCreateEducations(selectedItems as any);
+          const { data, error } = await bulkCreateEducations(
+            selectedItems as Array<
+              Omit<
+                ProfileEducation,
+                'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'
+              >
+            >
+          );
           results.educations = {
             success: !error,
             count: data?.length || 0,
-            error: error?.message,
+            error: error ? String(error) : undefined,
           };
         }
       }
@@ -246,11 +269,18 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
           .filter((cat) => cat.category && cat.skills.length > 0);
 
         if (selectedItems.length > 0) {
-          const { data, error } = await bulkCreateSkillCategories(selectedItems as any);
+          const { data, error } = await bulkCreateSkillCategories(
+            selectedItems as Array<
+              Omit<
+                ProfileSkillCategory,
+                'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'
+              >
+            >
+          );
           results.skillCategories = {
             success: !error,
             count: data?.length || 0,
-            error: error?.message,
+            error: error ? String(error) : undefined,
           };
         }
       }
@@ -261,11 +291,18 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
           .filter((comp) => comp.title);
 
         if (selectedItems.length > 0) {
-          const { data, error } = await bulkCreateKeyCompetences(selectedItems as any);
+          const { data, error } = await bulkCreateKeyCompetences(
+            selectedItems as Array<
+              Omit<
+                ProfileKeyCompetence,
+                'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'
+              >
+            >
+          );
           results.keyCompetences = {
             success: !error,
             count: data?.length || 0,
-            error: error?.message,
+            error: error ? String(error) : undefined,
           };
         }
       }
@@ -276,11 +313,18 @@ export function CVImportWorkflow({ onImportComplete }: CVImportWorkflowProps) {
           .filter((cert) => cert.name && cert.issuer);
 
         if (selectedItems.length > 0) {
-          const { data, error } = await bulkCreateCertifications(selectedItems as any);
+          const { data, error } = await bulkCreateCertifications(
+            selectedItems as Array<
+              Omit<
+                ProfileCertification,
+                'id' | 'user_id' | 'created_at' | 'updated_at' | 'display_order'
+              >
+            >
+          );
           results.certifications = {
             success: !error,
             count: data?.length || 0,
-            error: error?.message,
+            error: error ? String(error) : undefined,
           };
         }
       }

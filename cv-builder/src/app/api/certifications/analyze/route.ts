@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Upload to storage first (prevents data loss if AI fails)
-    let documentData: any = null;
+    let documentData: Awaited<ReturnType<typeof createCertificationDocument>>['data'] = null;
 
     if (certificationId) {
       const uploadResult = await createCertificationDocument(certificationId, file);

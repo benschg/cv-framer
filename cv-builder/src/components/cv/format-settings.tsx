@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import type { DisplaySettings, PageLayoutOverride } from '@/types/cv.types';
+import type { DisplaySettings } from '@/types/cv.types';
 
 import { PageLayoutConfigurator } from './page-layout-configurator';
 

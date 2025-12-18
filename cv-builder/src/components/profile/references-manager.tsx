@@ -68,7 +68,10 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
       handleDragEnd,
     } = useProfileManager<ProfileReference>({
       fetchItems: fetchReferences,
-      createItem: createReference,
+      createItem: (item) =>
+        createReference(
+          item as Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+        ),
       updateItem: updateReference,
       deleteItem: deleteReference,
       defaultItem: {
@@ -100,9 +103,13 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
 
           // We need to create the reference first to get an ID, then upload the document
           // For now, create without the document, then update with document info
-          const tempResult = await createReference(data as any);
+          const tempResult = await createReference(
+            data as Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+          );
           if (tempResult.error) {
-            throw new Error(tempResult.error);
+            throw new Error(
+              typeof tempResult.error === 'string' ? tempResult.error : 'Creation failed'
+            );
           }
 
           const referenceId = tempResult.data?.id;
@@ -153,9 +160,11 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
           }
         } else {
           // No file, just create the reference
-          const result = await createReference(data as any);
+          const result = await createReference(
+            data as Omit<ProfileReference, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+          );
           if (result.error) {
-            throw new Error(result.error);
+            throw new Error(typeof result.error === 'string' ? result.error : 'Creation failed');
           }
 
           toast.success(t('profile.references.addedSuccessOnly'));
@@ -235,7 +244,7 @@ ReferencesManager.displayName = 'ReferencesManager';
 // Edit Form Component
 interface ReferenceEditFormProps {
   formData: Partial<ProfileReference>;
-  onFieldChange: (field: keyof ProfileReference, value: any) => void;
+  onFieldChange: (field: keyof ProfileReference, value: string) => void;
   onMultiFieldChange: (updates: Partial<ProfileReference>) => void;
   onDone: () => void;
   t: (key: string) => string;
@@ -535,7 +544,7 @@ function ReferenceViewCard({ reference, onEdit, onDelete, disabled, t }: Referen
             )}
             {reference.quote && (
               <blockquote className="mt-3 border-l-2 border-muted pl-4 text-sm italic text-muted-foreground">
-                "{reference.quote}"
+                &quot;{reference.quote}&quot;
               </blockquote>
             )}
             {reference.document_url && (

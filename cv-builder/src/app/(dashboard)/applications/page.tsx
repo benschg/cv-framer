@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef,useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { StatusChangeAnimation } from '@/components/animations/status-change-animation';
 import { Badge } from '@/components/ui/badge';
@@ -65,7 +65,7 @@ import {
   toggleApplicationFavorite,
   updateApplicationStatus,
 } from '@/services/application.service';
-import type { ApplicationStatus,JobApplication } from '@/types/cv.types';
+import type { ApplicationStatus, JobApplication } from '@/types/cv.types';
 import { APPLICATION_STATUS_CONFIG } from '@/types/cv.types';
 
 type ViewMode = 'kanban' | 'table';
@@ -576,8 +576,8 @@ export default function ApplicationsPage() {
   );
 }
 
-// Application Card Component for Kanban View
-function ApplicationCard({
+// Application Card Component for Kanban View (unused - using DraggableApplicationCard instead)
+function _ApplicationCard({
   application,
   onDelete,
   onStatusChange,

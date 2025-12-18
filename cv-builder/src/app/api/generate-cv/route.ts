@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { analyzeJobPosting, type CompanyResearchResult,generateCVContent } from '@/lib/ai/gemini';
-import { errorResponse,validateBody } from '@/lib/api-utils';
+import { analyzeJobPosting, type CompanyResearchResult, generateCVContent } from '@/lib/ai/gemini';
+import { errorResponse, validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
-import { type GenerateCVInput,GenerateCVSchema } from '@/types/api.schemas';
+import { GenerateCVSchema } from '@/types/api.schemas';
 
 // POST /api/generate-cv - Generate CV content using AI
 export async function POST(request: NextRequest) {

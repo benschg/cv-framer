@@ -49,7 +49,10 @@ export const HighlightsManager = forwardRef<HighlightsManagerRef, HighlightsMana
       handleDragEnd,
     } = useProfileManager<ProfileHighlight>({
       fetchItems: fetchHighlights,
-      createItem: createHighlight,
+      createItem: (item) =>
+        createHighlight(
+          item as Omit<ProfileHighlight, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+        ),
       updateItem: updateHighlight,
       deleteItem: deleteHighlight,
       defaultItem: {

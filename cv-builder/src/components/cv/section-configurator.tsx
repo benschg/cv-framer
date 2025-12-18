@@ -1,11 +1,9 @@
 'use client';
 
-import { ChevronDown, ChevronUp, GripVertical, Plus, Settings2,X } from 'lucide-react';
+import { ChevronDown, ChevronUp, GripVertical, Plus, Settings2, X } from 'lucide-react';
 import { useState } from 'react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { PageLayoutOverride } from '@/types/cv.types';
@@ -38,8 +36,8 @@ interface SectionConfiguratorProps {
   pageIndex: number;
   pageLayout: PageLayoutOverride;
   isTwoColumn: boolean;
-  defaultSidebar: SidebarSectionId[];
-  defaultMain: MainSectionId[];
+  defaultSidebar: readonly SidebarSectionId[];
+  defaultMain: readonly MainSectionId[];
   onChange: (layout: PageLayoutOverride) => void;
   language?: 'en' | 'de';
 }
@@ -56,8 +54,8 @@ export function SectionConfigurator({
   const [isOpen, setIsOpen] = useState(false);
 
   // Get current sections or fall back to defaults
-  const currentSidebar = (pageLayout.sidebar || defaultSidebar) as SidebarSectionId[];
-  const currentMain = (pageLayout.main || defaultMain) as MainSectionId[];
+  const currentSidebar = (pageLayout.sidebar || [...defaultSidebar]) as SidebarSectionId[];
+  const currentMain = (pageLayout.main || [...defaultMain]) as MainSectionId[];
 
   const getLabel = (section: { label: string; labelDe: string }) => {
     return language === 'de' ? section.labelDe : section.label;

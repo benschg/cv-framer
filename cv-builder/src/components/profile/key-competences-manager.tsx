@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2,Trash2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { forwardRef, useImperativeHandle } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,10 @@ export const KeyCompetencesManager = forwardRef<
     handleDragEnd,
   } = useProfileManager<ProfileKeyCompetence>({
     fetchItems: fetchKeyCompetences,
-    createItem: createKeyCompetence,
+    createItem: (item) =>
+      createKeyCompetence(
+        item as Omit<ProfileKeyCompetence, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+      ),
     updateItem: updateKeyCompetence,
     deleteItem: deleteKeyCompetence,
     defaultItem: {
@@ -119,7 +122,7 @@ KeyCompetencesManager.displayName = 'KeyCompetencesManager';
 // Edit Form Component
 interface KeyCompetenceEditFormProps {
   formData: Partial<ProfileKeyCompetence>;
-  onFieldChange: (field: keyof ProfileKeyCompetence, value: any) => void;
+  onFieldChange: (field: keyof ProfileKeyCompetence, value: string | null) => void;
   onDone: () => void;
   t: (key: string) => string;
 }

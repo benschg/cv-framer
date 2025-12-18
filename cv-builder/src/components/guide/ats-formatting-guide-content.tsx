@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertCircle, CheckCircle2, ExternalLink,FileType, Search, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ExternalLink, FileType, Search, XCircle } from 'lucide-react';
+import Link from 'next/link';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -247,12 +248,12 @@ export function ATSFormattingGuideContent() {
               {t('guides.atsFormatting.cta.description')}
             </p>
             <div className="flex justify-center gap-4 pt-2">
-              <a
+              <Link
                 href="/cv"
                 className="inline-flex items-center justify-center rounded-md bg-primary-foreground px-6 py-2 text-sm font-medium text-primary transition-opacity hover:opacity-90"
               >
                 {t('guides.atsFormatting.cta.button')}
-              </a>
+              </Link>
             </div>
           </div>
         </CardContent>

@@ -246,7 +246,7 @@ function EnglishPrivacyPolicy() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-primary hover:underline"
                   >
-                    Google's Privacy Policy
+                    Google&apos;s Privacy Policy
                     <ExternalLink className="h-3 w-3" />
                   </a>{' '}
                   and{' '}
@@ -491,7 +491,7 @@ function EnglishPrivacyPolicy() {
       <hr className="my-8 border-border" />
 
       <section id="section-7" className="scroll-mt-4">
-        <h2 className="mb-4 text-2xl font-semibold">7. Children's Privacy</h2>
+        <h2 className="mb-4 text-2xl font-semibold">7. Children&apos;s Privacy</h2>
         <p>
           Our service is{' '}
           <strong>not intended for users under {LEGAL_CONFIG.minimumAge} years of age</strong>. We
@@ -607,7 +607,7 @@ function EnglishPrivacyPolicy() {
                 </a>
               </p>
               <p>
-                <strong>Subject:</strong> "Privacy Inquiry - CV Builder"
+                <strong>Subject:</strong> &quot;Privacy Inquiry - CV Builder&quot;
               </p>
               <p>
                 <strong>Response Time:</strong> Within 7 business days

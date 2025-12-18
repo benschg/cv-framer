@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { analyzeJobPosting,generateCoverLetter } from '@/lib/ai/gemini';
-import { errorResponse,validateBody } from '@/lib/api-utils';
+import { analyzeJobPosting, generateCoverLetter } from '@/lib/ai/gemini';
+import { errorResponse, validateBody } from '@/lib/api-utils';
 import { createClient } from '@/lib/supabase/server';
-import { type GenerateCoverLetterInput,GenerateCoverLetterSchema } from '@/types/api.schemas';
+import { GenerateCoverLetterSchema } from '@/types/api.schemas';
 
 // POST /api/generate-cover-letter - Generate cover letter content using AI
 export async function POST(request: NextRequest) {

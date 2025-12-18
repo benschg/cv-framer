@@ -1,13 +1,13 @@
-import { useCallback, useEffect,useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { debounce } from '@/services/profile-career.service';
 
 export interface ProfileManagerConfig<T extends { id: string }> {
-  fetchItems: () => Promise<{ data: T[] | null; error: any }>;
-  createItem: (item: any) => Promise<{ data: T | null; error: any }>;
-  updateItem: (id: string, item: any) => Promise<{ data: T | null; error: any }>;
-  deleteItem: (id: string) => Promise<{ error: any }>;
-  defaultItem: any;
+  fetchItems: () => Promise<{ data: T[] | null; error: unknown }>;
+  createItem: (item: Partial<T>) => Promise<{ data: T | null; error: unknown }>;
+  updateItem: (id: string, item: Partial<T>) => Promise<{ data: T | null; error: unknown }>;
+  deleteItem: (id: string) => Promise<{ error: unknown }>;
+  defaultItem: Partial<T>;
   onSavingChange?: (saving: boolean) => void;
   onSaveSuccessChange?: (success: boolean) => void;
 }
@@ -35,6 +35,7 @@ export function useProfileManager<T extends { id: string; display_order?: number
   // Load items on mount
   useEffect(() => {
     loadItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadItems = async () => {
@@ -144,7 +145,7 @@ export function useProfileManager<T extends { id: string; display_order?: number
 
   // Auto-save handler with debouncing
   const handleFieldChange = useCallback(
-    (id: string, field: keyof T, value: any) => {
+    (id: string, field: keyof T, value: unknown) => {
       const currentFormData = formDataMap.get(id) || {};
       const updatedData = { ...currentFormData, [field]: value } as Partial<T>;
       setFormDataMap((prev) => new Map(prev).set(id, updatedData));

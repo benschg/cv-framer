@@ -5,16 +5,17 @@ import { PanelLeft, PanelRight, Square } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { PageLayoutOverride } from '@/types/cv.types';
+import type { CVMainSection, CVSidebarSection } from '@/types/cv-layout.types';
 
 import { SectionConfigurator } from './section-configurator';
 
 // Default sections for each page in two-column mode
-const DEFAULT_SIDEBAR_SECTIONS = {
+const DEFAULT_SIDEBAR_SECTIONS: Record<number, readonly CVSidebarSection[]> = {
   0: ['photo', 'contact', 'skills', 'languages'] as const,
   1: ['education', 'certifications'] as const,
 };
 
-const DEFAULT_MAIN_SECTIONS = {
+const DEFAULT_MAIN_SECTIONS: Record<number, readonly CVMainSection[]> = {
   0: ['header', 'profile', 'experience'] as const,
   1: ['keyCompetences'] as const,
 };
@@ -78,12 +79,12 @@ export function PageLayoutConfigurator({
     return pageLayouts[pageIndex] || {};
   };
 
-  const getDefaultSidebar = (pageIndex: number) => {
-    return DEFAULT_SIDEBAR_SECTIONS[pageIndex as keyof typeof DEFAULT_SIDEBAR_SECTIONS] || [];
+  const getDefaultSidebar = (pageIndex: number): readonly CVSidebarSection[] => {
+    return DEFAULT_SIDEBAR_SECTIONS[pageIndex] || [];
   };
 
-  const getDefaultMain = (pageIndex: number) => {
-    return DEFAULT_MAIN_SECTIONS[pageIndex as keyof typeof DEFAULT_MAIN_SECTIONS] || [];
+  const getDefaultMain = (pageIndex: number): readonly CVMainSection[] => {
+    return DEFAULT_MAIN_SECTIONS[pageIndex] || [];
   };
 
   // Generate page entries (minimum 2 pages for configuration)
@@ -136,8 +137,8 @@ export function PageLayoutConfigurator({
               pageIndex={pageIndex}
               pageLayout={getPageLayout(pageIndex)}
               isTwoColumn={isTwoColumn}
-              defaultSidebar={getDefaultSidebar(pageIndex) as any}
-              defaultMain={getDefaultMain(pageIndex) as any}
+              defaultSidebar={getDefaultSidebar(pageIndex)}
+              defaultMain={getDefaultMain(pageIndex)}
               onChange={(layout) => handlePageLayoutChange(pageIndex, layout)}
               language={language}
             />

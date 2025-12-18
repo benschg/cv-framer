@@ -46,7 +46,8 @@ export const ProjectsManager = forwardRef<ProjectsManagerRef, ProjectsManagerPro
       handleDragEnd,
     } = useProfileManager<ProfileProject>({
       fetchItems: fetchProjects,
-      createItem: createProject,
+      createItem: (item) =>
+        createProject(item as Omit<ProfileProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>),
       updateItem: updateProject,
       deleteItem: deleteProject,
       defaultItem: {

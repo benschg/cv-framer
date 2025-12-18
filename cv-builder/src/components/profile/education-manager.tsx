@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Loader2,Trash2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Trash2 } from 'lucide-react';
 import { forwardRef, useImperativeHandle } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,10 @@ export const EducationManager = forwardRef<EducationManagerRef, EducationManager
       handleDragEnd,
     } = useProfileManager<ProfileEducation>({
       fetchItems: fetchEducations,
-      createItem: createEducation,
+      createItem: (item) =>
+        createEducation(
+          item as Omit<ProfileEducation, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+        ),
       updateItem: updateEducation,
       deleteItem: deleteEducation,
       defaultItem: {
@@ -125,7 +128,7 @@ EducationManager.displayName = 'EducationManager';
 // Edit Form Component
 interface EducationEditFormProps {
   formData: Partial<ProfileEducation>;
-  onFieldChange: (field: keyof ProfileEducation, value: any) => void;
+  onFieldChange: (field: keyof ProfileEducation, value: string | boolean) => void;
   onDone: () => void;
   t: (key: string) => string;
 }
