@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, type RefObject, useRef, useState } from 'react';
+import { type ReactNode, type RefObject, useCallback, useRef, useState } from 'react';
 
 import {
   Dialog,
@@ -53,7 +53,9 @@ interface ProfileManagerModalProps {
     managerRef: RefObject<ManagerRef | null>;
     onSavingChange: (saving: boolean) => void;
     onSaveSuccessChange: (success: boolean) => void;
-    onRefreshNeeded?: () => void;
+    onRefreshNeeded: () => void;
+    /** Key to force manager re-mount when refresh is needed */
+    refreshKey: number;
   }) => ReactNode;
 
   // Optional features
@@ -75,6 +77,7 @@ export function ProfileManagerModal({
 }: ProfileManagerModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const managerRef = useRef<ManagerRef>(null);
 
   // Generate unique container ID for this modal instance
@@ -92,11 +95,10 @@ export function ProfileManagerModal({
   };
 
   // Refresh callback for document uploads (prevents page reload in modal)
-  const handleRefreshNeeded = () => {
-    // TODO: In Phase 2, implement actual refresh logic
-    // For now, just log to console
-    console.log('Refresh needed for section:', section);
-  };
+  // Incrementing refreshKey causes manager to re-mount and refetch data
+  const handleRefreshNeeded = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -121,6 +123,7 @@ export function ProfileManagerModal({
             onSavingChange: setIsSaving,
             onSaveSuccessChange: setSaveSuccess,
             onRefreshNeeded: handleRefreshNeeded,
+            refreshKey,
           })}
         </div>
       </DialogContent>

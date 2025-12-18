@@ -97,7 +97,7 @@ export function ProfileModalProvider({ children }: ProfileModalProviderProps) {
           description={registryEntry.description(t)}
           onClose={closeModal}
         >
-          {({ managerRef, onSavingChange, onSaveSuccessChange, onRefreshNeeded }) => {
+          {({ managerRef, onSavingChange, onSaveSuccessChange, onRefreshNeeded, refreshKey }) => {
             const ManagerComponent =
               registryEntry.ManagerComponent as React.ForwardRefExoticComponent<
                 React.PropsWithoutRef<{
@@ -110,6 +110,7 @@ export function ProfileModalProvider({ children }: ProfileModalProviderProps) {
 
             return (
               <ManagerComponent
+                key={refreshKey}
                 ref={managerRef as React.Ref<unknown>}
                 onSavingChange={onSavingChange}
                 onSaveSuccessChange={onSaveSuccessChange}
