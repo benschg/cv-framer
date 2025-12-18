@@ -33,12 +33,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'This share link has expired' }, { status: 403 });
     }
 
-    // TODO: Check password if required
-    // const password = request.headers.get('X-Share-Password');
-    // if (shareLink.password_hash && !verifyPassword(password, shareLink.password_hash)) {
-    //   return NextResponse.json({ error: 'Password required' }, { status: 401 });
-    // }
-
     // Fetch the CV
     const { data: cv, error: cvError } = await supabase
       .from('cv_documents')

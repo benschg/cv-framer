@@ -3,8 +3,8 @@
 ## Project Overview
 
 An independent CV builder application that combines:
+
 - **CV Generation** - WYSIWYG editor with AI-powered customization
-- **Werbeflaechen** - 18-category self-marketing framework (Kanton Zurich method)
 - **Cover Letters** - AI-generated, job-tailored cover letters
 - **Application Tracker** - Track job applications with fit scoring
 
@@ -14,19 +14,19 @@ An independent CV builder application that combines:
 
 ## Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| Framework | Next.js 15 (App Router) |
-| Language | TypeScript |
-| Runtime | Bun |
-| UI Library | ShadCN UI |
-| Styling | Tailwind CSS |
-| Database | Supabase (PostgreSQL) |
-| Auth | Supabase Auth (Google OAuth + email) |
-| AI | Google Gemini |
-| PDF | Puppeteer |
-| Animations | Framer Motion |
-| Build | Turborepo (optional for monorepo) |
+| Category   | Technology                           |
+| ---------- | ------------------------------------ |
+| Framework  | Next.js 15 (App Router)              |
+| Language   | TypeScript                           |
+| Runtime    | Bun                                  |
+| UI Library | ShadCN UI                            |
+| Styling    | Tailwind CSS                         |
+| Database   | Supabase (PostgreSQL)                |
+| Auth       | Supabase Auth (Google OAuth + email) |
+| AI         | Google Gemini                        |
+| PDF        | Puppeteer                            |
+| Animations | Framer Motion                        |
+| Build      | Turborepo (optional for monorepo)    |
 
 ---
 
@@ -58,10 +58,6 @@ cv-builder/
     │   │   ├── layout.tsx       # Dashboard layout with sidebar
     │   │   ├── page.tsx         # Dashboard home
     │   │   │
-    │   │   ├── werbeflaechen/
-    │   │   │   ├── page.tsx     # Main werbeflaechen view
-    │   │   │   └── [category]/page.tsx
-    │   │   │
     │   │   ├── cv/
     │   │   │   ├── page.tsx     # CV list
     │   │   │   ├── new/page.tsx
@@ -87,9 +83,6 @@ cv-builder/
     │       ├── generate-pdf/route.ts
     │       ├── generate-cv/route.ts
     │       ├── regenerate-item/route.ts
-    │       ├── werbeflaechen/
-    │       │   ├── route.ts
-    │       │   └── autofill/route.ts
     │       ├── cover-letter/
     │       │   ├── route.ts
     │       │   └── generate/route.ts
@@ -142,19 +135,6 @@ cv-builder/
     │   │       ├── export-dialog.tsx
     │   │       └── share-dialog.tsx
     │   │
-    │   ├── werbeflaechen/
-    │   │   ├── views/
-    │   │   │   ├── grid-view.tsx
-    │   │   │   ├── table-view.tsx
-    │   │   │   └── flower-view.tsx
-    │   │   ├── forms/
-    │   │   │   ├── category-form.tsx
-    │   │   │   └── ...
-    │   │   ├── beginner/
-    │   │   │   ├── beginner-wizard.tsx
-    │   │   │   └── simplified-view.tsx
-    │   │   └── autofill-dialog.tsx
-    │   │
     │   ├── cover-letter/
     │   │   ├── cover-letter-editor.tsx
     │   │   └── cover-letter-preview.tsx
@@ -166,12 +146,10 @@ cv-builder/
     │
     ├── contexts/
     │   ├── auth-context.tsx
-    │   ├── cv-context.tsx
-    │   └── werbeflaechen-context.tsx
+    │   └── cv-context.tsx
     │
     ├── hooks/
     │   ├── use-cv.ts
-    │   ├── use-werbeflaechen.ts
     │   └── use-pdf-export.ts
     │
     ├── lib/
@@ -185,13 +163,11 @@ cv-builder/
     │
     ├── services/
     │   ├── cv.service.ts
-    │   ├── werbeflaechen.service.ts
     │   ├── cover-letter.service.ts
     │   └── share.service.ts
     │
     ├── types/
     │   ├── cv.types.ts
-    │   ├── werbeflaechen.types.ts
     │   └── database.types.ts
     │
     └── styles/
@@ -263,40 +239,6 @@ CREATE TRIGGER update_user_profiles_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================
--- WERBEFLAECHEN ENTRIES
--- 18-category self-marketing framework
--- ============================================
-CREATE TABLE werbeflaechen_entries (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-
-  language VARCHAR(5) NOT NULL DEFAULT 'en',
-  category_key VARCHAR(50) NOT NULL,
-  row_number INTEGER NOT NULL CHECK (row_number BETWEEN 1 AND 3),
-
-  content JSONB NOT NULL DEFAULT '{}',
-  is_complete BOOLEAN DEFAULT false,
-
-  -- AI Fit Scores
-  cv_coverage INTEGER CHECK (cv_coverage BETWEEN 1 AND 10),
-  job_match INTEGER CHECK (job_match BETWEEN 1 AND 10),
-  fit_reasoning TEXT,
-
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-
-  UNIQUE(user_id, language, category_key)
-);
-
-CREATE INDEX idx_werbeflaechen_user_id ON werbeflaechen_entries(user_id);
-CREATE INDEX idx_werbeflaechen_user_lang ON werbeflaechen_entries(user_id, language);
-CREATE INDEX idx_werbeflaechen_category ON werbeflaechen_entries(category_key);
-
-CREATE TRIGGER update_werbeflaechen_entries_updated_at
-  BEFORE UPDATE ON werbeflaechen_entries
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================
 -- CV TEMPLATES
 -- Reusable CV layout/style templates
 -- ============================================
@@ -340,9 +282,6 @@ CREATE TABLE cv_documents (
   -- AI Generation metadata
   job_context JSONB,
   ai_metadata JSONB,
-
-  -- Snapshot of werbeflaechen data used
-  werbeflaechen_snapshot JSONB,
 
   -- Display settings
   display_settings JSONB DEFAULT '{"showPhoto": true, "showExperience": true, "theme": "light"}',
@@ -496,18 +435,6 @@ CREATE POLICY "Users can insert own profile" ON user_profiles
 CREATE POLICY "Users can update own profile" ON user_profiles
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Werbeflaechen Entries
-ALTER TABLE werbeflaechen_entries ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view own entries" ON werbeflaechen_entries
-  FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own entries" ON werbeflaechen_entries
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own entries" ON werbeflaechen_entries
-  FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete own entries" ON werbeflaechen_entries
-  FOR DELETE USING (auth.uid() = user_id);
-
 -- CV Templates
 ALTER TABLE cv_templates ENABLE ROW LEVEL SECURITY;
 
@@ -595,261 +522,6 @@ INSERT INTO cv_templates (name, description, is_public, is_default, layout_confi
 
 ---
 
-## Werbeflaechen Categories (18 Total)
-
-### Row 1: "Will you love the job?" (Yellow/Orange)
-| Key | Name (EN) | Name (DE) |
-|-----|-----------|-----------|
-| vision_mission | Vision & Mission | Vision & Mission |
-| motivation | Motivation | Motivation |
-| passion | Passion | Leidenschaft |
-| slogan | Slogan | Slogan |
-| zitat_motto | Quote/Motto | Zitat/Motto |
-| highlights | Highlights | Highlights |
-
-### Row 2: "Can you do the job?" (Pink/Purple)
-| Key | Name (EN) | Name (DE) |
-|-----|-----------|-----------|
-| erfolge | Achievements | Erfolge |
-| mehrwert | Added Value | Mehrwert |
-| projekte | Projects | Projekte |
-| referenzen | References | Referenzen |
-| usp | Unique Selling Point | USP |
-| corporate_design | Personal Branding | Corporate Design |
-
-### Row 3: "Can we work together?" (Green)
-| Key | Name (EN) | Name (DE) |
-|-----|-----------|-----------|
-| erfahrungswissen | Experiential Knowledge | Erfahrungswissen |
-| kernkompetenzen | Core Competencies | Kernkompetenzen |
-| schluesselkompetenzen | Key Competencies | Schlüsselkompetenzen |
-| kurzprofil | Short Profile | Kurzprofil |
-| berufliche_erfahrungen | Professional Experience | Berufliche Erfahrungen |
-| aus_weiterbildungen | Education & Training | Aus- & Weiterbildungen |
-
-### Category Metadata Config
-
-```typescript
-// src/data/category-metadata.ts
-export const CATEGORY_METADATA = {
-  // Row 1: Will you love the job?
-  vision_mission: {
-    row: 1,
-    order: 1,
-    color: '#fbbf24',
-    icon: 'Target',
-    beginner: true,
-  },
-  motivation: {
-    row: 1,
-    order: 2,
-    color: '#f59e0b',
-    icon: 'Flame',
-    beginner: true,
-  },
-  passion: {
-    row: 1,
-    order: 3,
-    color: '#f97316',
-    icon: 'Heart',
-    beginner: false,
-  },
-  slogan: {
-    row: 1,
-    order: 4,
-    color: '#ea580c',
-    icon: 'MessageSquare',
-    beginner: false,
-  },
-  zitat_motto: {
-    row: 1,
-    order: 5,
-    color: '#dc2626',
-    icon: 'Quote',
-    beginner: false,
-  },
-  highlights: {
-    row: 1,
-    order: 6,
-    color: '#b91c1c',
-    icon: 'Star',
-    beginner: true,
-  },
-
-  // Row 2: Can you do the job?
-  erfolge: {
-    row: 2,
-    order: 1,
-    color: '#ec4899',
-    icon: 'Trophy',
-    beginner: true,
-  },
-  mehrwert: {
-    row: 2,
-    order: 2,
-    color: '#d946ef',
-    icon: 'TrendingUp',
-    beginner: false,
-  },
-  projekte: {
-    row: 2,
-    order: 3,
-    color: '#a855f7',
-    icon: 'Folder',
-    beginner: true,
-  },
-  referenzen: {
-    row: 2,
-    order: 4,
-    color: '#8b5cf6',
-    icon: 'Users',
-    beginner: false,
-  },
-  usp: {
-    row: 2,
-    order: 5,
-    color: '#7c3aed',
-    icon: 'Sparkles',
-    beginner: true,
-  },
-  corporate_design: {
-    row: 2,
-    order: 6,
-    color: '#6d28d9',
-    icon: 'Palette',
-    beginner: false,
-  },
-
-  // Row 3: Can we work together?
-  erfahrungswissen: {
-    row: 3,
-    order: 1,
-    color: '#22c55e',
-    icon: 'Brain',
-    beginner: false,
-  },
-  kernkompetenzen: {
-    row: 3,
-    order: 2,
-    color: '#16a34a',
-    icon: 'Wrench',
-    beginner: true,
-  },
-  schluesselkompetenzen: {
-    row: 3,
-    order: 3,
-    color: '#15803d',
-    icon: 'Key',
-    beginner: true,
-  },
-  kurzprofil: {
-    row: 3,
-    order: 4,
-    color: '#14532d',
-    icon: 'User',
-    beginner: true,
-  },
-  berufliche_erfahrungen: {
-    row: 3,
-    order: 5,
-    color: '#0d9488',
-    icon: 'Briefcase',
-    beginner: true,
-  },
-  aus_weiterbildungen: {
-    row: 3,
-    order: 6,
-    color: '#0891b2',
-    icon: 'GraduationCap',
-    beginner: true,
-  },
-} as const;
-
-export type CategoryKey = keyof typeof CATEGORY_METADATA;
-
-// Categories shown in beginner mode
-export const BEGINNER_CATEGORIES: CategoryKey[] = [
-  'vision_mission',
-  'motivation',
-  'highlights',
-  'erfolge',
-  'projekte',
-  'usp',
-  'kernkompetenzen',
-  'schluesselkompetenzen',
-  'kurzprofil',
-  'berufliche_erfahrungen',
-  'aus_weiterbildungen',
-];
-```
-
----
-
-## Data Flow: Werbeflaechen → CV
-
-```
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│ User Profile     │     │ Werbeflaechen    │     │ Job Posting      │
-│ (Contact info)   │     │ (18 categories)  │     │ (URL/text)       │
-└────────┬─────────┘     └────────┬─────────┘     └────────┬─────────┘
-         │                        │                        │
-         └────────────────────────┼────────────────────────┘
-                                  │
-                                  ▼
-                    ┌─────────────────────────┐
-                    │ Data Aggregator         │
-                    │ - Collects all sources  │
-                    │ - Formats for AI        │
-                    └─────────────┬───────────┘
-                                  │
-                                  ▼
-                    ┌─────────────────────────┐
-                    │ AI Service (Gemini)     │
-                    │ - Company research      │
-                    │ - Content tailoring     │
-                    │ - Job fit analysis      │
-                    └─────────────┬───────────┘
-                                  │
-                                  ▼
-                    ┌─────────────────────────┐
-                    │ Generated Content       │
-                    │ - CV sections           │
-                    │ - Cover letter          │
-                    │ - Fit scores            │
-                    └─────────────┬───────────┘
-                                  │
-                                  ▼
-                    ┌─────────────────────────┐
-                    │ CV Document (stored)    │
-                    └─────────────┬───────────┘
-                                  │
-              ┌───────────────────┼───────────────────┐
-              ▼                   ▼                   ▼
-        ┌──────────┐        ┌──────────┐        ┌──────────┐
-        │ WYSIWYG  │        │ PDF      │        │ Share    │
-        │ Editor   │        │ Export   │        │ Link     │
-        └──────────┘        └──────────┘        └──────────┘
-```
-
-### Category → CV Section Mapping
-
-| Werbeflaechen | CV Section |
-|---------------|------------|
-| kurzprofil | Profile Summary |
-| slogan | Header Tagline |
-| berufliche_erfahrungen | Work Experience |
-| erfolge | Key Achievements |
-| projekte | Projects |
-| kernkompetenzen | Technical Skills |
-| schluesselkompetenzen | Soft Skills |
-| aus_weiterbildungen | Education |
-| referenzen | References |
-| usp | USP/Highlights |
-| vision_mission | Cover Letter Opening |
-| motivation | Cover Letter Body |
-
----
-
 ## TypeScript Types
 
 ```typescript
@@ -865,7 +537,6 @@ export interface CVDocument {
   content: CVContent;
   job_context?: JobContext;
   ai_metadata?: AIMetadata;
-  werbeflaechen_snapshot?: WerbeflaechenSnapshot;
   display_settings: DisplaySettings;
   is_default: boolean;
   is_archived: boolean;
@@ -979,28 +650,6 @@ export interface DisplaySettings {
   privacyLevel: 'none' | 'personal' | 'full';
 }
 
-// src/types/werbeflaechen.types.ts
-
-export interface WerbeflaechenEntry {
-  id: string;
-  user_id: string;
-  language: 'en' | 'de';
-  category_key: CategoryKey;
-  row_number: 1 | 2 | 3;
-  content: Record<string, unknown>;
-  is_complete: boolean;
-  cv_coverage?: number;
-  job_match?: number;
-  fit_reasoning?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export type CategoryKey =
-  | 'vision_mission' | 'motivation' | 'passion' | 'slogan' | 'zitat_motto' | 'highlights'
-  | 'erfolge' | 'mehrwert' | 'projekte' | 'referenzen' | 'usp' | 'corporate_design'
-  | 'erfahrungswissen' | 'kernkompetenzen' | 'schluesselkompetenzen' | 'kurzprofil' | 'berufliche_erfahrungen' | 'aus_weiterbildungen';
-
 // src/types/cover-letter.types.ts
 
 export interface CoverLetter {
@@ -1027,7 +676,14 @@ export interface CoverLetter {
 
 // src/types/application.types.ts
 
-export type ApplicationStatus = 'draft' | 'applied' | 'interview' | 'offer' | 'rejected' | 'accepted' | 'withdrawn';
+export type ApplicationStatus =
+  | 'draft'
+  | 'applied'
+  | 'interview'
+  | 'offer'
+  | 'rejected'
+  | 'accepted'
+  | 'withdrawn';
 
 export interface JobApplication {
   id: string;
@@ -1049,7 +705,7 @@ export interface JobApplication {
 
 export interface FitAnalysis {
   overall_score: number;
-  category_scores: Record<CategoryKey, number>;
+  category_scores: Record<string, number>;
   strengths: string[];
   gaps: string[];
   recommendations: string[];
@@ -1061,6 +717,7 @@ export interface FitAnalysis {
 ## Implementation Phases
 
 ### Phase 0: Project Setup ✅
+
 - [x] Next.js 15 with App Router
 - [x] ShadCN UI configuration
 - [x] Tailwind CSS setup
@@ -1069,6 +726,7 @@ export interface FitAnalysis {
 - [x] TypeScript configuration
 
 ### Phase 1: Auth & User Profile
+
 - [ ] Login page with form
 - [ ] Signup page with form
 - [ ] Google OAuth integration
@@ -1079,24 +737,8 @@ export interface FitAnalysis {
 - [ ] Onboarding wizard for new users
 - [ ] Protected route middleware
 
-### Phase 2: Werbeflaechen Core
-- [ ] Category metadata configuration
-- [ ] Werbeflaechen service (CRUD)
-- [ ] Grid view component
-- [ ] Table view component
-- [ ] Flower view component (SVG)
-- [ ] View switcher
-- [ ] Category form (generic)
-- [ ] Individual category forms
-- [ ] Beginner mode toggle
-- [ ] Beginner wizard
-- [ ] AI autofill dialog
-- [ ] Autofill API route
-- [ ] Progress indicator
-- [ ] Language toggle (DE/EN)
-- [ ] Fit score badges
+### Phase 2: CV Builder Core
 
-### Phase 3: CV Builder Core
 - [ ] CV service (CRUD)
 - [ ] CV list page
 - [ ] CV creation wizard
@@ -1109,9 +751,9 @@ export interface FitAnalysis {
 - [ ] Theme toggle (light/dark)
 - [ ] Zoom controls
 - [ ] Template selector
-- [ ] Data aggregation from Werbeflaechen
 
-### Phase 4: AI Integration
+### Phase 3: AI Integration
+
 - [ ] Gemini service setup
 - [ ] CV generation API route
 - [ ] Company research extraction
@@ -1122,7 +764,8 @@ export interface FitAnalysis {
 - [ ] Generation preview dialog
 - [ ] Custom instructions input
 
-### Phase 5: PDF & Sharing
+### Phase 4: PDF & Sharing
+
 - [ ] Puppeteer setup
 - [ ] PDF generation API route
 - [ ] Export options dialog
@@ -1134,7 +777,8 @@ export interface FitAnalysis {
 - [ ] Analytics display
 - [ ] QR code generation
 
-### Phase 6: Cover Letter
+### Phase 5: Cover Letter
+
 - [ ] Cover letter service
 - [ ] Cover letter list page
 - [ ] Cover letter editor
@@ -1143,7 +787,8 @@ export interface FitAnalysis {
 - [ ] Cover letter PDF export
 - [ ] Link to CV documents
 
-### Phase 7: Application Tracker
+### Phase 6: Application Tracker
+
 - [ ] Application service
 - [ ] Application list (Kanban view)
 - [ ] Application list (Table view)
@@ -1154,7 +799,8 @@ export interface FitAnalysis {
 - [ ] Deadline reminders
 - [ ] Notes/comments
 
-### Phase 8: Polish & Launch
+### Phase 7: Polish & Launch
+
 - [ ] Comprehensive testing
 - [ ] Accessibility audit (WCAG 2.1 AA)
 - [ ] Mobile responsiveness
@@ -1250,10 +896,10 @@ npx shadcn@latest add command separator scroll-area
 ### Additional dependencies needed later:
 
 ```bash
-# PDF Generation (Phase 5)
+# PDF Generation (Phase 4)
 bun add puppeteer-core @sparticuz/chromium pdf-lib
 
-# AI (Phase 4)
+# AI (Phase 3)
 bun add @google/generative-ai
 
 # Optional utilities
@@ -1295,7 +941,6 @@ bun dev
 ## Notes
 
 - **Puppeteer PDF**: Critical for accurate styling. Use `puppeteer-core` + `@sparticuz/chromium` for Vercel deployment
-- **Beginner Mode**: Show only 11 of 18 categories initially to reduce overwhelm
 - **AI Models**: Support Gemini 2.0 Flash (fast), 2.5 Flash (balanced), 2.5 Pro (quality)
 - **Privacy Levels**: `none` (no contact), `personal` (email/phone), `full` (all info + references)
 - **Languages**: Support DE and EN, user preference stored in profile

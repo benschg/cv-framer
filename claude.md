@@ -16,7 +16,6 @@ src/i18n/
     applications.json   # Application tracker
     cv.json            # CV builder
     coverLetter.json   # Cover letter pages
-    werbeflaechen.json # Werbeflaechen module
     settings.json      # Settings page
     errors.json        # Error messages
   de/
@@ -29,10 +28,10 @@ src/i18n/
 
 **In Components:**
 ```typescript
-import { useTranslations } from '@/hooks/use-translations';
+import { useAppTranslation } from '@/hooks/use-app-translation';
 
 export function MyComponent() {
-  const { t } = useTranslations('en'); // TODO: Get language from user settings context
+  const { t } = useAppTranslation();
 
   return (
     <div>
@@ -52,7 +51,7 @@ export function MyComponent() {
 Pass `t` function as prop to child components:
 ```typescript
 // Parent component
-const { t } = useTranslations('en');
+const { t } = useAppTranslation();
 
 <ChildComponent t={t} />
 
@@ -69,7 +68,7 @@ interface ChildProps {
 ### Important Notes
 1. **Always localize user-facing strings** - never hardcode display text
 2. **Keep language buttons as "EN/DE"** - these don't need translation
-3. **Add TODO comments** for language context: `const { t } = useTranslations('en'); // TODO: Get language from user settings context`
+3. **Use `useAppTranslation()`** for language context (reads from UserPreferencesContext)
 4. **Commit incrementally** - one module or feature at a time
 5. **Type-check after changes** - run `npm run type-check` before committing
 
@@ -84,7 +83,6 @@ interface ChildProps {
 - Applications tracker
 - CV builder
 - Cover letter pages
-- Werbeflaechen module
 - Settings page
 - Testing & validation
 
