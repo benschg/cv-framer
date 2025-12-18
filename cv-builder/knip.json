@@ -18,8 +18,6 @@
     "src/types/api.schemas.ts",
     "src/types/cv.types.ts",
     "src/types/database.types.ts",
-    "src/services/share.service.ts",
-    "src/lib/pdf/cv-template.ts",
     "src/lib/pdf/generator.ts",
     "src/lib/ai/gemini.ts",
     "src/i18n/index.ts",
