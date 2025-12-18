@@ -27,6 +27,7 @@ import { SortableCard } from './SortableCard';
 interface CertificationsManagerProps {
   onSavingChange?: (saving: boolean) => void;
   onSaveSuccessChange?: (success: boolean) => void;
+  onRefreshNeeded?: () => void;
 }
 
 export interface CertificationsManagerRef {
@@ -37,7 +38,7 @@ export interface CertificationsManagerRef {
 export const CertificationsManager = forwardRef<
   CertificationsManagerRef,
   CertificationsManagerProps
->(({ onSavingChange, onSaveSuccessChange }, ref) => {
+>(({ onSavingChange, onSaveSuccessChange, onRefreshNeeded }, ref) => {
   const { t } = useAppTranslation();
   const {
     items: certifications,
@@ -118,9 +119,14 @@ export const CertificationsManager = forwardRef<
       // Manually refresh the list
       const { data: refreshedData } = await fetchCertifications();
       if (refreshedData) {
-        // Small delay to show the success toast before reload
+        // Small delay to show the success toast before reload/refresh
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        window.location.reload();
+        // Use callback if in modal, otherwise reload page
+        if (onRefreshNeeded) {
+          onRefreshNeeded();
+        } else {
+          window.location.reload();
+        }
       }
     } catch (error) {
       console.error('Error creating certification:', error);

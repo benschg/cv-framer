@@ -43,6 +43,7 @@ import { SortableCard } from './SortableCard';
 interface ReferencesManagerProps {
   onSavingChange?: (saving: boolean) => void;
   onSaveSuccessChange?: (success: boolean) => void;
+  onRefreshNeeded?: () => void;
 }
 
 export interface ReferencesManagerRef {
@@ -51,7 +52,7 @@ export interface ReferencesManagerRef {
 }
 
 export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesManagerProps>(
-  ({ onSavingChange, onSaveSuccessChange }, ref) => {
+  ({ onSavingChange, onSaveSuccessChange, onRefreshNeeded }, ref) => {
     const { t } = useAppTranslation();
     const {
       items: references,
@@ -153,10 +154,13 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
           // Manually refresh the list
           const { data: refreshedData } = await fetchReferences();
           if (refreshedData) {
-            // The useProfileManager hook doesn't expose a way to refresh,
-            // so we need to reload the page
-            await new Promise((resolve) => setTimeout(resolve, 1000)); // Show toast before reload
-            window.location.reload();
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Show toast before reload/refresh
+            // Use callback if in modal, otherwise reload page
+            if (onRefreshNeeded) {
+              onRefreshNeeded();
+            } else {
+              window.location.reload();
+            }
           }
         } else {
           // No file, just create the reference
@@ -173,7 +177,12 @@ export const ReferencesManager = forwardRef<ReferencesManagerRef, ReferencesMana
           const { data: refreshedData } = await fetchReferences();
           if (refreshedData) {
             await new Promise((resolve) => setTimeout(resolve, 500));
-            window.location.reload();
+            // Use callback if in modal, otherwise reload page
+            if (onRefreshNeeded) {
+              onRefreshNeeded();
+            } else {
+              window.location.reload();
+            }
           }
         }
       } catch (error) {
