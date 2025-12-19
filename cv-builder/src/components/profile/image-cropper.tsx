@@ -1,7 +1,7 @@
 'use client';
 
 import { Loader2 } from 'lucide-react';
-import { useCallback, useEffect,useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
 
 import { Button } from '@/components/ui/button';
@@ -83,11 +83,11 @@ export function ImageCropper({ image, filename, onComplete, onCancel, open }: Im
             image={image}
             crop={crop}
             zoom={zoom}
-            aspect={1} // Square crop
+            aspect={90 / 112} // Portrait crop to match CV display ratio
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
-            cropShape="rect" // Rectangular/square crop area
+            cropShape="rect" // Rectangular crop area
             showGrid={true}
             style={{
               containerStyle: {
@@ -237,22 +237,16 @@ async function getCroppedImg(
     throw new Error('Failed to get canvas context');
   }
 
-  // Set canvas to target size (800x800 for optimal quality/size)
-  const targetSize = 800;
-  canvas.width = targetSize;
-  canvas.height = targetSize;
+  // Set canvas to portrait size matching CV display ratio (90:112)
+  const targetWidth = 720;
+  const targetHeight = 896; // 720 * (112/90) = 896
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
 
-  // If background color is specified, draw circular background
+  // If background color is specified, fill background
   if (backgroundColor) {
-    const centerX = targetSize / 2;
-    const centerY = targetSize / 2;
-    const radius = targetSize / 2;
-
-    // Draw circular background
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
     ctx.fillStyle = backgroundColor;
-    ctx.fill();
+    ctx.fillRect(0, 0, targetWidth, targetHeight);
   }
 
   // Draw cropped and resized image
@@ -264,8 +258,8 @@ async function getCroppedImg(
     croppedAreaPixels.height,
     0,
     0,
-    targetSize,
-    targetSize
+    targetWidth,
+    targetHeight
   );
 
   // Convert to blob (WebP if supported, JPEG fallback)

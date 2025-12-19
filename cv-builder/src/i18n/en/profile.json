@@ -326,15 +326,5 @@
     "currentlyWorking": "Currently working on this",
     "outcomeLabel": "Outcome/Results",
     "outcomePlaceholder": "What were the results or impact of this project?"
-  },
-
-  "defaultCvSettings": {
-    "title": "Default CV Settings",
-    "subtitle": "Set default values for new CVs",
-    "defaultTagline": "Default Tagline",
-    "taglinePlaceholder": "e.g., Senior Software Engineer | React & Node.js",
-    "taglineNote": "This will be used as the default tagline for new CVs",
-    "personalMottoLabel": "Personal Motto",
-    "personalMottoPlaceholder": "A quote or motto that represents your professional philosophy"
   }
 }

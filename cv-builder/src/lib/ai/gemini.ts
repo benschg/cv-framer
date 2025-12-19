@@ -1,14 +1,37 @@
-import { GenerativeModel,GoogleGenerativeAI } from '@google/generative-ai';
+import { GenerativeModel, GoogleGenerativeAI } from '@google/generative-ai';
+
+import { parseJsonResponse } from './json-parser';
+import type {
+  CertificationExtraction,
+  CompanyResearchResult,
+  CVExtractionResult,
+  GeminiModel,
+  GeneratedCoverLetterContent,
+  GeneratedCVContent,
+  ParsedJobPosting,
+  ProfileExtractionResult,
+  ReferenceExtraction,
+} from './types';
+
+// Re-export types for consumers
+export type {
+  CertificationExtraction,
+  CompanyResearchResult,
+  CVExtractionResult,
+  ExtractedCertificationData,
+  ExtractedCVData,
+  ExtractedProfileData,
+  ExtractedReferenceData,
+  GeminiModel,
+  GeneratedCoverLetterContent,
+  GeneratedCVContent,
+  ParsedJobPosting,
+  ProfileExtractionResult,
+  ReferenceExtraction,
+} from './types';
 
 // Initialize the Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
-// Available models
-export type GeminiModel =
-  | 'gemini-2.0-flash'
-  | 'gemini-2.0-flash-thinking-exp'
-  | 'gemini-1.5-flash'
-  | 'gemini-1.5-pro';
 
 // Get a model instance
 export function getModel(modelName: GeminiModel = 'gemini-2.0-flash'): GenerativeModel {
@@ -36,52 +59,7 @@ export async function generateJSON<T>(
 IMPORTANT: Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
 
   const text = await generateContent(fullPrompt, modelName);
-
-  // Clean the response - remove any markdown code blocks
-  let cleanedText = text.trim();
-  if (cleanedText.startsWith('```json')) {
-    cleanedText = cleanedText.slice(7);
-  } else if (cleanedText.startsWith('```')) {
-    cleanedText = cleanedText.slice(3);
-  }
-  if (cleanedText.endsWith('```')) {
-    cleanedText = cleanedText.slice(0, -3);
-  }
-  cleanedText = cleanedText.trim();
-
-  return JSON.parse(cleanedText) as T;
-}
-
-// Types for CV generation
-export interface CompanyResearchResult {
-  company: {
-    name: string;
-    industry?: string;
-    culture?: string[];
-    values?: string[];
-    techStack?: string[];
-    size?: string;
-  };
-  role: {
-    title: string;
-    level?: string;
-    responsibilities?: string[];
-    requiredSkills?: string[];
-    preferredSkills?: string[];
-    keywords?: string[];
-  };
-  insights?: {
-    whatTheyValue?: string;
-    toneGuidance?: string;
-    keyMatches?: string[];
-    gaps?: string[];
-  };
-}
-
-export interface GeneratedCVContent {
-  tagline?: string;
-  profile?: string;
-  slogan?: string;
+  return parseJsonResponse<T>(text);
 }
 
 // Analyze a job posting to extract company research
@@ -254,18 +232,6 @@ Return ONLY the new content for this section, no JSON wrapping, no explanations.
   return generateContent(prompt);
 }
 
-// Types for job posting URL parsing
-export interface ParsedJobPosting {
-  company: string;
-  position: string;
-  jobDescription: string;
-  location?: string;
-  employmentType?: string;
-  salary?: string;
-  contactName?: string;
-  contactEmail?: string;
-}
-
 // Parse a job posting URL's HTML content to extract key information
 export async function parseJobPostingUrl(
   htmlContent: string,
@@ -304,29 +270,6 @@ Guidelines:
 - Keep the jobDescription comprehensive but clean (no HTML tags, no excessive whitespace)`;
 
   return generateJSON<ParsedJobPosting>(prompt);
-}
-
-// Types for certification document extraction
-export interface ExtractedCertificationData {
-  name: string | null;
-  issuer: string | null;
-  date: string | null;
-  expiry_date: string | null;
-  credential_id: string | null;
-  url: string | null;
-}
-
-export interface CertificationExtraction {
-  extractedData: ExtractedCertificationData;
-  confidence: {
-    name: number;
-    issuer: number;
-    date: number;
-    expiry_date: number;
-    credential_id: number;
-    url: number;
-  };
-  reasoning: string;
 }
 
 // Extract certification data from a document image or PDF
@@ -417,43 +360,7 @@ Return your response as ONLY valid JSON (no markdown, no explanations outside th
   const result = await model.generateContent([prompt, imagePart]);
   const text = result.response.text();
 
-  // Clean and parse JSON
-  let cleanedText = text.trim();
-  if (cleanedText.startsWith('```json')) {
-    cleanedText = cleanedText.slice(7);
-  } else if (cleanedText.startsWith('```')) {
-    cleanedText = cleanedText.slice(3);
-  }
-  if (cleanedText.endsWith('```')) {
-    cleanedText = cleanedText.slice(0, -3);
-  }
-  cleanedText = cleanedText.trim();
-
-  return JSON.parse(cleanedText) as CertificationExtraction;
-}
-
-export interface ExtractedReferenceData {
-  name: string | null;
-  title: string | null;
-  company: string | null;
-  relationship: string | null;
-  email: string | null;
-  phone: string | null;
-  quote: string | null;
-}
-
-export interface ReferenceExtraction {
-  extractedData: ExtractedReferenceData;
-  confidence: {
-    name: number;
-    title: number;
-    company: number;
-    relationship: number;
-    email: number;
-    phone: number;
-    quote: number;
-  };
-  reasoning: string;
+  return parseJsonResponse<CertificationExtraction>(text);
 }
 
 export async function extractReferenceData(
@@ -520,28 +427,7 @@ Return ONLY valid JSON:
   const result = await model.generateContent([prompt, imagePart]);
   const text = result.response.text();
 
-  // Clean and parse JSON
-  let cleanedText = text.trim();
-  if (cleanedText.startsWith('```json')) {
-    cleanedText = cleanedText.slice(7);
-  } else if (cleanedText.startsWith('```')) {
-    cleanedText = cleanedText.slice(3);
-  }
-  if (cleanedText.endsWith('```')) {
-    cleanedText = cleanedText.slice(0, -3);
-  }
-  cleanedText = cleanedText.trim();
-
-  return JSON.parse(cleanedText) as ReferenceExtraction;
-}
-
-// Types for cover letter generation
-export interface GeneratedCoverLetterContent {
-  subject?: string;
-  greeting?: string;
-  opening?: string;
-  body?: string;
-  closing?: string;
+  return parseJsonResponse<ReferenceExtraction>(text);
 }
 
 // Generate cover letter content
@@ -635,64 +521,6 @@ Return as JSON:
 }`;
 
   return generateJSON<GeneratedCoverLetterContent>(prompt);
-}
-
-// Types for CV upload extraction
-export interface ExtractedCVData {
-  workExperiences: Array<{
-    company: string | null;
-    title: string | null;
-    location: string | null;
-    start_date: string | null; // YYYY-MM
-    end_date: string | null;
-    current: boolean;
-    description: string | null;
-    bullets: string[];
-  }>;
-  educations: Array<{
-    institution: string | null;
-    degree: string | null;
-    field: string | null;
-    start_date: string | null;
-    end_date: string | null;
-    grade: string | null;
-    description: string | null;
-  }>;
-  skillCategories: Array<{
-    category: string | null;
-    skills: string[];
-  }>;
-  keyCompetences: Array<{
-    title: string | null;
-    description: string | null;
-  }>;
-  certifications: Array<{
-    name: string | null;
-    issuer: string | null;
-    date: string | null;
-    expiry_date: string | null;
-    credential_id: string | null;
-    url: string | null;
-  }>;
-}
-
-export interface CVExtractionResult {
-  extractedData: ExtractedCVData;
-  confidence: {
-    workExperiences: number;
-    educations: number;
-    skillCategories: number;
-    keyCompetences: number;
-    certifications: number;
-  };
-  sectionCounts: {
-    workExperiences: number;
-    educations: number;
-    skillCategories: number;
-    keyCompetences: number;
-    certifications: number;
-  };
-  reasoning: string;
 }
 
 // Extract comprehensive career data from a CV document
@@ -844,65 +672,7 @@ Return ONLY valid JSON (no markdown, no explanations, no code blocks):
   const result = await model.generateContent([prompt, imagePart]);
   const text = result.response.text();
 
-  // Clean and parse JSON
-  let cleanedText = text.trim();
-  if (cleanedText.startsWith('```json')) {
-    cleanedText = cleanedText.slice(7);
-  } else if (cleanedText.startsWith('```')) {
-    cleanedText = cleanedText.slice(3);
-  }
-  if (cleanedText.endsWith('```')) {
-    cleanedText = cleanedText.slice(0, -3);
-  }
-  cleanedText = cleanedText.trim();
-
-  return JSON.parse(cleanedText) as CVExtractionResult;
-}
-
-// Types for Profile Data Extraction
-export interface ExtractedProfileData {
-  motivationVision?: {
-    vision?: string;
-    mission?: string;
-    purpose?: string;
-    what_drives_you?: string;
-    why_this_field?: string;
-    career_goals?: string;
-    passions?: string[];
-    how_passions_relate?: string;
-  };
-  highlights?: Array<{
-    type: 'highlight' | 'achievement' | 'mehrwert' | 'usp';
-    title: string;
-    description?: string;
-    metric?: string;
-  }>;
-  projects?: Array<{
-    name: string;
-    description?: string;
-    role?: string;
-    technologies?: string[];
-    url?: string;
-    start_date?: string;
-    end_date?: string;
-    current?: boolean;
-    outcome?: string;
-  }>;
-}
-
-export interface ProfileExtractionResult {
-  extractedData: ExtractedProfileData;
-  confidence: {
-    motivationVision: number;
-    highlights: number;
-    projects: number;
-  };
-  sectionCounts: {
-    motivationVision: number;
-    highlights: number;
-    projects: number;
-  };
-  reasoning: string;
+  return parseJsonResponse<CVExtractionResult>(text);
 }
 
 // Extract profile-specific data from a CV document
@@ -1030,17 +800,5 @@ Return ONLY valid JSON (no markdown, no explanations, no code blocks):
   const result = await model.generateContent([prompt, imagePart]);
   const text = result.response.text();
 
-  // Clean and parse JSON
-  let cleanedText = text.trim();
-  if (cleanedText.startsWith('```json')) {
-    cleanedText = cleanedText.slice(7);
-  } else if (cleanedText.startsWith('```')) {
-    cleanedText = cleanedText.slice(3);
-  }
-  if (cleanedText.endsWith('```')) {
-    cleanedText = cleanedText.slice(0, -3);
-  }
-  cleanedText = cleanedText.trim();
-
-  return JSON.parse(cleanedText) as ProfileExtractionResult;
+  return parseJsonResponse<ProfileExtractionResult>(text);
 }

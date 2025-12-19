@@ -15,17 +15,18 @@ interface CVSidebarPhotoProps {
 
 /**
  * CV Sidebar photo component with size support
+ * Dimensions match the CSS portrait aspect ratio (~0.8)
  */
 export function CVSidebarPhoto({
   photoUrl,
   alt = 'Profile',
   size = 'medium',
 }: CVSidebarPhotoProps) {
-  // Dynamic dimensions based on size
+  // Dynamic dimensions based on size - match CSS portrait aspect ratio
   const dimensions = {
-    small: { width: 80, height: 80 },
-    medium: { width: 120, height: 120 },
-    large: { width: 160, height: 160 },
+    small: { width: 70, height: 87 },
+    medium: { width: 90, height: 112 },
+    large: { width: 110, height: 137 },
   };
 
   const { width, height } = dimensions[size];
