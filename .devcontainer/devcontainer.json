@@ -35,5 +35,8 @@
     }
   },
   "remoteUser": "bun",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "containerEnv": {
+    "SHELL": "/bin/bash"
+  }
 }

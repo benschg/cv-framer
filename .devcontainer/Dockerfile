@@ -2,6 +2,7 @@ FROM oven/bun:1
 
 # Install Chromium dependencies for Puppeteer + Node.js for Claude Code CLI
 RUN apt-get update && apt-get install -y \
+    bash \
     libnss3 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
@@ -21,5 +22,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Claude Code CLI globally
-RUN bun install -g @anthropic-ai/claude-code
+# Set bash as default shell
+RUN chsh -s /bin/bash
+
+# Install global CLI tools
+RUN bun install -g @anthropic-ai/claude-code vercel supabase
