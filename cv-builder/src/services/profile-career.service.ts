@@ -7,6 +7,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { debounce } from '@/lib/utils/debounce';
 import type { Certification, Reference } from '@/types/cv.types';
 import type { Database } from '@/types/database.types';
 import type {
@@ -20,6 +21,9 @@ import type {
   ProfileSkillCategory,
   ProfileWorkExperience,
 } from '@/types/profile-career.types';
+
+// Re-export debounce for backward compatibility
+export { debounce } from '@/lib/utils/debounce';
 
 // Extract table types from generated Database type
 type Tables = Database['public']['Tables'];
@@ -153,29 +157,6 @@ export type {
   ProfileSkillCategory,
   ProfileWorkExperience,
 } from '@/types/profile-career.types';
-
-// Debounce utility for auto-save
-const debounceTimers = new Map<string, NodeJS.Timeout>();
-
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  key: string,
-  fn: T,
-  delay: number = 1000
-): (...args: Parameters<T>) => void {
-  return (...args: Parameters<T>) => {
-    const existingTimer = debounceTimers.get(key);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-    }
-
-    const timer = setTimeout(() => {
-      fn(...args);
-      debounceTimers.delete(key);
-    }, delay);
-
-    debounceTimers.set(key, timer);
-  };
-}
 
 // ============================================
 // WORK EXPERIENCE
