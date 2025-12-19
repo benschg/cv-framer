@@ -326,15 +326,5 @@
     "currentlyWorking": "Arbeite derzeit daran",
     "outcomeLabel": "Ergebnis/Resultate",
     "outcomePlaceholder": "Was waren die Ergebnisse oder Auswirkungen dieses Projekts?"
-  },
-
-  "defaultCvSettings": {
-    "title": "Standard-CV-Einstellungen",
-    "subtitle": "Standardwerte für neue CVs festlegen",
-    "defaultTagline": "Standard-Tagline",
-    "taglinePlaceholder": "z.B. Senior Softwareentwickler | React & Node.js",
-    "taglineNote": "Dies wird als Standard-Tagline für neue CVs verwendet",
-    "personalMottoLabel": "Persönliches Motto",
-    "personalMottoPlaceholder": "Ein Zitat oder Motto, das Ihre berufliche Philosophie repräsentiert"
   }
 }
