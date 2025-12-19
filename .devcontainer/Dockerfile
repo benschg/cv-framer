@@ -3,6 +3,7 @@ FROM oven/bun:1
 # Install Chromium dependencies for Puppeteer + Node.js for Claude Code CLI
 RUN apt-get update && apt-get install -y \
     bash \
+    locales \
     libnss3 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
@@ -24,6 +25,11 @@ RUN apt-get update && apt-get install -y \
 
 # Set bash as default shell
 RUN chsh -s /bin/bash
+
+# Generate locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 
 # Install Node.js for npm-based CLI tools
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
