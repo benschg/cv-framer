@@ -180,12 +180,12 @@
 }
 
 .cv-two-column.cv-sidebar-right .cv-main-content {
-  padding: 12mm 12mm 8mm 15mm;
+  padding: 10mm 8mm 8mm 15mm;
 }
 
 .cv-main-content {
   flex: 1;
-  padding: 12mm 15mm 8mm 12mm;
+  padding: 10mm 15mm 8mm 8mm;
   box-sizing: border-box;
   overflow: hidden;
 }
