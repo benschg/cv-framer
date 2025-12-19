@@ -34,7 +34,6 @@ export interface SectionCompletion {
   count: number;
   isComplete: boolean;
   percentage: number;
-  color: string;
 }
 
 export interface ProfileCompletion {
@@ -46,57 +45,17 @@ export interface ProfileCompletion {
   completionByHref: Record<string, { isComplete: boolean; count: number }>;
 }
 
-// Define the profile sections with their translation keys, hrefs, and colors
+// Define the profile sections with their translation keys and hrefs
 export const PROFILE_SECTIONS = [
-  {
-    key: 'motivationVision',
-    labelKey: 'motivationVision',
-    href: '/profile/motivation-vision',
-    color: 'hsl(var(--chart-1))',
-  },
-  {
-    key: 'highlights',
-    labelKey: 'highlights',
-    href: '/profile/highlights',
-    color: 'hsl(var(--chart-2))',
-  },
-  {
-    key: 'projects',
-    labelKey: 'projects',
-    href: '/profile/projects',
-    color: 'hsl(var(--chart-3))',
-  },
-  {
-    key: 'workExperiences',
-    labelKey: 'workExperience',
-    href: '/profile/experience',
-    color: 'hsl(var(--chart-4))',
-  },
-  {
-    key: 'educations',
-    labelKey: 'education',
-    href: '/profile/education',
-    color: 'hsl(var(--chart-5))',
-  },
-  { key: 'skills', labelKey: 'skills', href: '/profile/skills', color: 'hsl(220, 70%, 50%)' },
-  {
-    key: 'keyCompetences',
-    labelKey: 'keyCompetences',
-    href: '/profile/key-competences',
-    color: 'hsl(280, 70%, 50%)',
-  },
-  {
-    key: 'certifications',
-    labelKey: 'certifications',
-    href: '/profile/certifications',
-    color: 'hsl(30, 70%, 50%)',
-  },
-  {
-    key: 'references',
-    labelKey: 'references',
-    href: '/profile/references',
-    color: 'hsl(170, 70%, 50%)',
-  },
+  { key: 'motivationVision', labelKey: 'motivationVision', href: '/profile/motivation-vision' },
+  { key: 'highlights', labelKey: 'highlights', href: '/profile/highlights' },
+  { key: 'projects', labelKey: 'projects', href: '/profile/projects' },
+  { key: 'workExperiences', labelKey: 'workExperience', href: '/profile/experience' },
+  { key: 'educations', labelKey: 'education', href: '/profile/education' },
+  { key: 'skills', labelKey: 'skills', href: '/profile/skills' },
+  { key: 'keyCompetences', labelKey: 'keyCompetences', href: '/profile/key-competences' },
+  { key: 'certifications', labelKey: 'certifications', href: '/profile/certifications' },
+  { key: 'references', labelKey: 'references', href: '/profile/references' },
 ] as const;
 
 /**
@@ -162,7 +121,6 @@ export function calculateProfileCompletion(data: ProfileSectionData): ProfileCom
       count,
       isComplete,
       percentage: isComplete ? 100 / PROFILE_SECTIONS.length : 0,
-      color: section.color,
     };
   });
 

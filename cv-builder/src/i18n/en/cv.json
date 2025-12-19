@@ -15,22 +15,6 @@
   "profileCompletion": "Profile completion",
   "generatedLetters": "Generated letters",
   "activeApplications": "Active applications",
-  "profileCompletionChart": {
-    "title": "Profile Completion",
-    "subtitle": "Track your profile sections",
-    "completed": "Complete",
-    "sections": {
-      "motivationVision": "Motivation & Vision",
-      "highlights": "Highlights",
-      "projects": "Projects",
-      "workExperience": "Work Experience",
-      "education": "Education",
-      "skills": "Skills",
-      "keyCompetences": "Key Competences",
-      "certifications": "Certifications",
-      "references": "References"
-    }
-  },
   "default": "Default",
   "setAsDefault": "Set as Default",
   "duplicate": "Duplicate",

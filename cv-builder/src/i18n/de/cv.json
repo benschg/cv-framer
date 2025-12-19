@@ -15,22 +15,6 @@
   "profileCompletion": "Profilvollständigkeit",
   "generatedLetters": "Generierte Anschreiben",
   "activeApplications": "Aktive Bewerbungen",
-  "profileCompletionChart": {
-    "title": "Profilvollständigkeit",
-    "subtitle": "Verfolgen Sie Ihre Profilabschnitte",
-    "completed": "Vollständig",
-    "sections": {
-      "motivationVision": "Motivation & Vision",
-      "highlights": "Highlights",
-      "projects": "Projekte",
-      "workExperience": "Berufserfahrung",
-      "education": "Bildung",
-      "skills": "Fähigkeiten",
-      "keyCompetences": "Kernkompetenzen",
-      "certifications": "Zertifikate",
-      "references": "Referenzen"
-    }
-  },
   "default": "Standard",
   "setAsDefault": "Als Standard festlegen",
   "duplicate": "Duplizieren",
