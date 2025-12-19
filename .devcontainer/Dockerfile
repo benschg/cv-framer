@@ -25,5 +25,5 @@ RUN apt-get update && apt-get install -y \
 # Set bash as default shell
 RUN chsh -s /bin/bash
 
-# Install Claude Code CLI globally
-RUN bun install -g @anthropic-ai/claude-code
+# Install global CLI tools
+RUN bun install -g @anthropic-ai/claude-code vercel supabase
