@@ -35,6 +35,23 @@ vi.mock('@/hooks/use-modal-save-indicator', () => ({
   useModalSaveIndicator: vi.fn(),
 }));
 
+// Mock useProfileManager to prevent async data fetching that causes act() warnings
+vi.mock('@/hooks/use-profile-manager', () => ({
+  useProfileManager: vi.fn(() => ({
+    items: [],
+    isLoading: false,
+    isSaving: false,
+    saveSuccess: false,
+    error: null,
+    fetchItems: vi.fn(),
+    addItem: vi.fn(),
+    updateItem: vi.fn(),
+    deleteItem: vi.fn(),
+    reorderItems: vi.fn(),
+    setItems: vi.fn(),
+  })),
+}));
+
 // Import after mocking
 import { useProfileModal } from '@/hooks/use-profile-modal';
 
