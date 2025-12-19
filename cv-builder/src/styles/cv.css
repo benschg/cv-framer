@@ -160,7 +160,7 @@
 .cv-sidebar {
   width: var(--cv-sidebar-width);
   background-color: var(--cv-bg-sidebar);
-  padding: 10mm 8mm;
+  padding: 8mm;
   border-right: 3px solid var(--cv-accent);
   display: flex;
   flex-direction: column;
