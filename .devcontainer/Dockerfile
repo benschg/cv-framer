@@ -25,5 +25,13 @@ RUN apt-get update && apt-get install -y \
 # Set bash as default shell
 RUN chsh -s /bin/bash
 
-# Install global CLI tools
-RUN bun install -g @anthropic-ai/claude-code vercel supabase
+# Install Node.js for npm-based CLI tools
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Supabase CLI
+RUN curl -fsSL https://raw.githubusercontent.com/supabase/cli/main/install.sh | bash
+
+# Install global CLI tools via npm (more reliable for PATH)
+RUN npm install -g @anthropic-ai/claude-code vercel
