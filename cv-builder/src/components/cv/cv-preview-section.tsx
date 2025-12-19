@@ -1,7 +1,7 @@
 'use client';
 
 import { Minus, Plus } from 'lucide-react';
-import { forwardRef, useEffect, useImperativeHandle,useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import type {
 
 import { CVDocument } from './cv-document';
 import { CVPagePropertiesDialog } from './cv-page-properties-dialog';
-import type { PhotoOption, PhotoSize } from './cv-sidebar-section-wrapper';
+import type { PhotoOption, PhotoShape, PhotoSize } from './cv-sidebar-section-wrapper';
 
 interface CVPreviewSectionProps {
   content: CVContent;
@@ -53,6 +53,10 @@ interface CVPreviewSectionProps {
   photoSize?: PhotoSize;
   /** Callback when photo size is changed */
   onPhotoSizeChange?: (size: PhotoSize) => void;
+  /** Current photo shape */
+  photoShape?: PhotoShape;
+  /** Callback when photo shape is changed */
+  onPhotoShapeChange?: (shape: PhotoShape) => void;
 }
 
 export interface CVPreviewSectionHandle {
@@ -82,6 +86,8 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
       userInitials,
       photoSize,
       onPhotoSizeChange,
+      photoShape,
+      onPhotoShapeChange,
     },
     ref
   ) {
@@ -342,6 +348,8 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
                 userInitials={userInitials}
                 photoSize={photoSize}
                 onPhotoSizeChange={onPhotoSizeChange}
+                photoShape={photoShape}
+                onPhotoShapeChange={onPhotoShapeChange}
               />
             </div>
           </div>

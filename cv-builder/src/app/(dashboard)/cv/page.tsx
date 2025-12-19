@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAppLanguage } from '@/hooks/use-app-language';
+import { useProfileCompletion } from '@/hooks/use-profile-completion';
 import { useTranslations } from '@/hooks/use-translations';
 import { deleteCV, duplicateCV, fetchAllCVs, updateCV } from '@/services/cv.service';
 import type { CVDocument } from '@/types/cv.types';
@@ -37,6 +38,7 @@ export default function CVDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const { language } = useAppLanguage();
   const { translations } = useTranslations(language);
+  const { completion } = useProfileCompletion();
 
   useEffect(() => {
     const loadCVs = async () => {
@@ -106,6 +108,21 @@ export default function CVDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{translations.nav.profile}</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{completion?.totalPercentage ?? 0}%</div>
+            <p className="text-xs text-muted-foreground">
+              {completion
+                ? `${completion.completedSections}/${completion.totalSections} ${translations.cv.profileCompletion}`
+                : translations.cv.profileCompletion}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{translations.cv.cvsCreated}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -114,17 +131,6 @@ export default function CVDashboardPage() {
             <p className="text-xs text-muted-foreground">
               {cvs.length === 0 ? translations.cv.startBuilding : translations.cv.totalCVs}
             </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{translations.nav.profile}</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0%</div>
-            <p className="text-xs text-muted-foreground">{translations.cv.profileCompletion}</p>
           </CardContent>
         </Card>
 

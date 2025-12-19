@@ -23,6 +23,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,7 @@ import {
 import { useAuth } from '@/contexts/auth-context';
 import { useUserPreferences } from '@/contexts/user-preferences-context';
 import { usePrimaryPhoto } from '@/hooks/use-primary-photo';
+import { useProfileCompletion } from '@/hooks/use-profile-completion';
 import { useTranslations } from '@/hooks/use-translations';
 import { getDisplayName, getUserInitials } from '@/lib/user-utils';
 
@@ -57,6 +59,7 @@ export function AppSidebar() {
   const { language } = useUserPreferences();
   const { t } = useTranslations(language);
   const { avatarUrl } = usePrimaryPhoto();
+  const { completion } = useProfileCompletion();
   const [mounted, setMounted] = useState(false);
 
   const navigation = [
@@ -73,44 +76,63 @@ export function AppSidebar() {
           href: '/profile/motivation-vision',
           icon: Target,
           indent: true,
+          showCompletion: true,
         },
-        { title: t('nav.items.highlights'), href: '/profile/highlights', icon: Star, indent: true },
+        {
+          title: t('nav.items.highlights'),
+          href: '/profile/highlights',
+          icon: Star,
+          indent: true,
+          showCompletion: true,
+        },
         {
           title: t('nav.items.projects'),
           href: '/profile/projects',
           icon: FolderKanban,
           indent: true,
+          showCompletion: true,
         },
         {
           title: t('nav.items.workExperience'),
           href: '/profile/experience',
           icon: Briefcase,
           indent: true,
+          showCompletion: true,
         },
         {
           title: t('nav.items.education'),
           href: '/profile/education',
           icon: GraduationCap,
           indent: true,
+          showCompletion: true,
         },
-        { title: t('nav.items.skills'), href: '/profile/skills', icon: Code, indent: true },
+        {
+          title: t('nav.items.skills'),
+          href: '/profile/skills',
+          icon: Code,
+          indent: true,
+          showCompletion: true,
+        },
         {
           title: t('nav.items.keyCompetences'),
           href: '/profile/key-competences',
           icon: Zap,
           indent: true,
+          showCompletion: true,
         },
         {
           title: t('nav.items.certifications'),
           href: '/profile/certifications',
           icon: Award,
           indent: true,
+          showCompletion: true,
         },
         {
           title: t('nav.items.references'),
           href: '/profile/references',
           icon: UserCheck,
           indent: true,
+          showCompletion: true,
         },
         { title: t('nav.items.myCVs'), href: '/cv', icon: FileText },
         { title: t('nav.items.coverLetters'), href: '/cover-letter', icon: Mail },
@@ -153,20 +175,35 @@ export function AppSidebar() {
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
-                      className={'indent' in item && item.indent ? 'pl-8' : ''}
-                    >
-                      <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {group.items.map((item) => {
+                  const showCompletion = 'showCompletion' in item && item.showCompletion;
+                  const completionStatus = showCompletion
+                    ? completion?.completionByHref[item.href]
+                    : null;
+
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
+                        className={'indent' in item && item.indent ? 'pl-8' : ''}
+                      >
+                        <Link href={item.href}>
+                          <item.icon className="h-4 w-4" />
+                          <span className="flex-1">{item.title}</span>
+                          {showCompletion && completionStatus !== undefined && (
+                            <CircularProgress
+                              progress={completionStatus?.isComplete ?? false}
+                              count={completionStatus?.count}
+                              size={10}
+                              strokeWidth={2}
+                            />
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

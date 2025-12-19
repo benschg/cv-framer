@@ -26,7 +26,7 @@ import { CVPage } from './cv-page';
 import { CVPageContextMenu } from './cv-page-context-menu';
 import { CVSectionWrapper } from './cv-section-wrapper';
 import { CVSidebar } from './cv-sidebar';
-import type { PhotoOption, PhotoSize } from './cv-sidebar-section-wrapper';
+import type { PhotoOption, PhotoShape, PhotoSize } from './cv-sidebar-section-wrapper';
 import { CVSortableSection } from './cv-sortable-section';
 import {
   CVEducationSection,
@@ -81,6 +81,10 @@ interface CVDocumentProps {
   photoSize?: PhotoSize;
   /** Callback when photo size is changed */
   onPhotoSizeChange?: (size: PhotoSize) => void;
+  /** Current photo shape */
+  photoShape?: PhotoShape;
+  /** Callback when photo shape is changed */
+  onPhotoShapeChange?: (shape: PhotoShape) => void;
 }
 
 export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
@@ -109,6 +113,8 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
       userInitials,
       photoSize,
       onPhotoSizeChange,
+      photoShape,
+      onPhotoShapeChange,
     },
     ref
   ) => {
@@ -443,6 +449,8 @@ export const CVDocument = forwardRef<HTMLDivElement, CVDocumentProps>(
                       userInitials={userInitials}
                       photoSize={photoSize}
                       onPhotoSizeChange={onPhotoSizeChange}
+                      photoShape={photoShape}
+                      onPhotoShapeChange={onPhotoShapeChange}
                     />
                     <DndContext
                       sensors={sensors}

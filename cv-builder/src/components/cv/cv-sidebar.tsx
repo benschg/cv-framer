@@ -25,6 +25,7 @@ import { CVSidebarPhoto } from './cv-sidebar-photo';
 import {
   CVSidebarSectionWrapper,
   type PhotoOption,
+  type PhotoShape,
   type PhotoSize,
 } from './cv-sidebar-section-wrapper';
 import { CVSortableSidebarSection } from './cv-sortable-sidebar-section';
@@ -70,6 +71,10 @@ interface CVSidebarProps {
   photoSize?: PhotoSize;
   /** Callback when photo size is changed */
   onPhotoSizeChange?: (size: PhotoSize) => void;
+  /** Current photo shape */
+  photoShape?: PhotoShape;
+  /** Callback when photo shape is changed */
+  onPhotoShapeChange?: (shape: PhotoShape) => void;
 }
 
 export function CVSidebar({
@@ -93,6 +98,8 @@ export function CVSidebar({
   userInitials,
   photoSize,
   onPhotoSizeChange,
+  photoShape,
+  onPhotoShapeChange,
 }: CVSidebarProps) {
   // Setup drag sensors
   const sensors = useSensors(
@@ -137,6 +144,7 @@ export function CVSidebar({
             photoUrl={photoUrl}
             alt={userProfile?.first_name || 'Profile'}
             size={photoSize}
+            shape={photoShape}
           />
         );
 
@@ -306,6 +314,8 @@ export function CVSidebar({
             userInitials={userInitials}
             photoSize={sectionType === 'photo' ? photoSize : undefined}
             onPhotoSizeChange={sectionType === 'photo' ? onPhotoSizeChange : undefined}
+            photoShape={sectionType === 'photo' ? photoShape : undefined}
+            onPhotoShapeChange={sectionType === 'photo' ? onPhotoShapeChange : undefined}
             isInteractive={isInteractive}
             language={language}
           >

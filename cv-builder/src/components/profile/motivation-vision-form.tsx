@@ -1,6 +1,6 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { Compass, Eye, Flame, GitMerge, Heart, Lightbulb, Target, X, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -53,7 +53,10 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="vision">{t('profile.motivationVision.visionTitle')}</Label>
+            <Label htmlFor="vision" className="flex items-center gap-2">
+              <Eye className="h-4 w-4 text-muted-foreground" />
+              {t('profile.motivationVision.visionTitle')}
+            </Label>
             <Textarea
               id="vision"
               value={formData.vision || ''}
@@ -64,7 +67,10 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="mission">{t('profile.motivationVision.missionTitle')}</Label>
+            <Label htmlFor="mission" className="flex items-center gap-2">
+              <Compass className="h-4 w-4 text-muted-foreground" />
+              {t('profile.motivationVision.missionTitle')}
+            </Label>
             <Textarea
               id="mission"
               value={formData.mission || ''}
@@ -75,7 +81,10 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="purpose">{t('profile.motivationVision.purposeTitle')}</Label>
+            <Label htmlFor="purpose" className="flex items-center gap-2">
+              <Heart className="h-4 w-4 text-muted-foreground" />
+              {t('profile.motivationVision.purposeTitle')}
+            </Label>
             <Textarea
               id="purpose"
               value={formData.purpose || ''}
@@ -95,7 +104,8 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="what_drives_you">
+            <Label htmlFor="what_drives_you" className="flex items-center gap-2">
+              <Flame className="h-4 w-4 text-muted-foreground" />
               {t('profile.motivationVision.whatDrivesYouTitle')}
             </Label>
             <Textarea
@@ -108,7 +118,8 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="why_this_field">
+            <Label htmlFor="why_this_field" className="flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-muted-foreground" />
               {t('profile.motivationVision.whyThisFieldTitle')}
             </Label>
             <Textarea
@@ -121,7 +132,10 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="career_goals">{t('profile.motivationVision.careerGoalsTitle')}</Label>
+            <Label htmlFor="career_goals" className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-muted-foreground" />
+              {t('profile.motivationVision.careerGoalsTitle')}
+            </Label>
             <Textarea
               id="career_goals"
               value={formData.career_goals || ''}
@@ -141,7 +155,10 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="passions">{t('profile.motivationVision.passionsTitle')}</Label>
+            <Label htmlFor="passions" className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-muted-foreground" />
+              {t('profile.motivationVision.passionsTitle')}
+            </Label>
             <Input
               id="passions"
               value={passionInput}
@@ -168,7 +185,8 @@ export function MotivationVisionForm({ formData, onChange }: MotivationVisionFor
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="how_passions_relate">
+            <Label htmlFor="how_passions_relate" className="flex items-center gap-2">
+              <GitMerge className="h-4 w-4 text-muted-foreground" />
               {t('profile.motivationVision.howPassionsRelateTitle')}
             </Label>
             <Textarea

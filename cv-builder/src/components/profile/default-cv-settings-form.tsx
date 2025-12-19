@@ -1,5 +1,7 @@
 'use client';
 
+import { Quote, Star } from 'lucide-react';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,7 +34,10 @@ export function DefaultCvSettingsForm({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="defaultTagline">{t('profile.defaultCvSettings.defaultTagline')}</Label>
+          <Label htmlFor="defaultTagline" className="flex items-center gap-2">
+            <Quote className="h-4 w-4 text-muted-foreground" />
+            {t('profile.defaultCvSettings.defaultTagline')}
+          </Label>
           <Input
             id="defaultTagline"
             name="defaultTagline"
@@ -45,7 +50,10 @@ export function DefaultCvSettingsForm({
           </p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="personalMotto">{t('profile.defaultCvSettings.personalMottoLabel')}</Label>
+          <Label htmlFor="personalMotto" className="flex items-center gap-2">
+            <Star className="h-4 w-4 text-muted-foreground" />
+            {t('profile.defaultCvSettings.personalMottoLabel')}
+          </Label>
           <Input
             id="personalMotto"
             name="personalMotto"
