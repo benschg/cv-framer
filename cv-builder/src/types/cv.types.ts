@@ -155,6 +155,8 @@ export interface DisplaySettings {
   showPhoto: boolean;
   /** Photo size: 'small' | 'medium' | 'large' */
   photoSize?: 'small' | 'medium' | 'large';
+  /** Photo shape: 'square' | 'rounded' | 'circle' */
+  photoShape?: 'square' | 'rounded' | 'circle';
   showAttachments: boolean;
   showWorkExperience?: boolean;
   showEducation?: boolean;

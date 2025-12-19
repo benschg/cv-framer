@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ImageIcon, Maximize2, UserX } from 'lucide-react';
+import { Check, Circle, ImageIcon, Maximize2, Square, Squircle, UserX } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -28,10 +28,19 @@ export interface PhotoOption {
 /** Photo size options */
 export type PhotoSize = 'small' | 'medium' | 'large';
 
+/** Photo shape options */
+export type PhotoShape = 'square' | 'rounded' | 'circle';
+
 const PHOTO_SIZE_OPTIONS: { value: PhotoSize; label: string }[] = [
   { value: 'small', label: 'Small' },
   { value: 'medium', label: 'Medium' },
   { value: 'large', label: 'Large' },
+];
+
+const PHOTO_SHAPE_OPTIONS: { value: PhotoShape; label: string; icon: typeof Square }[] = [
+  { value: 'square', label: 'Square', icon: Square },
+  { value: 'rounded', label: 'Rounded', icon: Squircle },
+  { value: 'circle', label: 'Circle', icon: Circle },
 ];
 
 interface CVPhotoContextMenuProps extends Omit<
@@ -50,6 +59,10 @@ interface CVPhotoContextMenuProps extends Omit<
   photoSize?: PhotoSize;
   /** Callback when photo size is changed */
   onPhotoSizeChange?: (size: PhotoSize) => void;
+  /** Current photo shape */
+  photoShape?: PhotoShape;
+  /** Callback when photo shape is changed */
+  onPhotoShapeChange?: (shape: PhotoShape) => void;
   /** Override section label */
   sectionLabel?: string;
   /** Override location label */
@@ -68,6 +81,8 @@ export function CVPhotoContextMenu({
   userInitials = '?',
   photoSize = 'medium',
   onPhotoSizeChange,
+  photoShape = 'square',
+  onPhotoShapeChange,
   sectionLabel = 'Photo',
   locationLabel = 'Sidebar',
   ...baseProps
@@ -158,6 +173,32 @@ export function CVPhotoContextMenu({
                     {photoSize === option.value && <Check className="h-4 w-4 text-primary" />}
                   </ContextMenuItem>
                 ))}
+              </ContextMenuSubContent>
+            </ContextMenuSub>
+          )}
+
+          {/* Photo Shape submenu */}
+          {onPhotoShapeChange && (
+            <ContextMenuSub>
+              <ContextMenuSubTrigger className="gap-2">
+                <Squircle className="h-4 w-4" />
+                Photo Shape
+              </ContextMenuSubTrigger>
+              <ContextMenuSubContent className="w-32">
+                {PHOTO_SHAPE_OPTIONS.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <ContextMenuItem
+                      key={option.value}
+                      onClick={() => onPhotoShapeChange(option.value)}
+                      className="gap-2"
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="flex-1">{option.label}</span>
+                      {photoShape === option.value && <Check className="h-4 w-4 text-primary" />}
+                    </ContextMenuItem>
+                  );
+                })}
               </ContextMenuSubContent>
             </ContextMenuSub>
           )}

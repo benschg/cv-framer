@@ -6,10 +6,15 @@ import type { CVSidebarSection } from '@/types/cv-layout.types';
 
 import { getSidebarLabel } from './constants';
 import { CVBaseSectionContextMenu } from './cv-base-section-context-menu';
-import { CVPhotoContextMenu, type PhotoOption, type PhotoSize } from './cv-photo-context-menu';
+import {
+  CVPhotoContextMenu,
+  type PhotoOption,
+  type PhotoShape,
+  type PhotoSize,
+} from './cv-photo-context-menu';
 
 // Re-export types for convenience
-export type { PhotoOption, PhotoSize } from './cv-photo-context-menu';
+export type { PhotoOption, PhotoShape, PhotoSize } from './cv-photo-context-menu';
 
 interface CVSidebarSectionWrapperProps {
   children: ReactNode;
@@ -31,6 +36,10 @@ interface CVSidebarSectionWrapperProps {
   photoSize?: PhotoSize;
   /** Callback when photo size is changed */
   onPhotoSizeChange?: (size: PhotoSize) => void;
+  /** Current photo shape */
+  photoShape?: PhotoShape;
+  /** Callback when photo shape is changed */
+  onPhotoShapeChange?: (shape: PhotoShape) => void;
   isHidden?: boolean;
   isInteractive?: boolean;
   language?: 'en' | 'de';
@@ -50,6 +59,8 @@ export function CVSidebarSectionWrapper({
   userInitials,
   photoSize,
   onPhotoSizeChange,
+  photoShape,
+  onPhotoShapeChange,
   isHidden = false,
   isInteractive = true,
   language = 'en',
@@ -85,6 +96,8 @@ export function CVSidebarSectionWrapper({
         userInitials={userInitials}
         photoSize={photoSize}
         onPhotoSizeChange={onPhotoSizeChange}
+        photoShape={photoShape}
+        onPhotoShapeChange={onPhotoShapeChange}
       >
         {children}
       </CVPhotoContextMenu>

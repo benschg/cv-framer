@@ -913,6 +913,8 @@ export default function CVEditorPage() {
               userInitials={getUserInitials(user)}
               photoSize={(cv.display_settings as DisplaySettings)?.photoSize || 'medium'}
               onPhotoSizeChange={(size) => updateDisplaySettings('photoSize', size)}
+              photoShape={(cv.display_settings as DisplaySettings)?.photoShape || 'square'}
+              onPhotoShapeChange={(shape) => updateDisplaySettings('photoShape', shape)}
               workExperiences={workExperiences}
               educations={educations}
               skillCategories={skillCategories}

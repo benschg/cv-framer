@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-import type { PhotoSize } from './cv-photo-context-menu';
+import type { PhotoShape, PhotoSize } from './cv-photo-context-menu';
 
 interface CVSidebarPhotoProps {
   /** Photo URL to display */
@@ -11,29 +11,37 @@ interface CVSidebarPhotoProps {
   alt?: string;
   /** Photo size */
   size?: PhotoSize;
+  /** Photo shape */
+  shape?: PhotoShape;
 }
 
 /**
- * CV Sidebar photo component with size support
- * Dimensions match the CSS portrait aspect ratio (~0.8)
+ * CV Sidebar photo component with size and shape support
  */
 export function CVSidebarPhoto({
   photoUrl,
   alt = 'Profile',
   size = 'medium',
+  shape = 'square',
 }: CVSidebarPhotoProps) {
-  // Dynamic dimensions based on size - match CSS portrait aspect ratio
+  // Dynamic dimensions based on size - square photos
   const dimensions = {
-    small: { width: 70, height: 87 },
-    medium: { width: 90, height: 112 },
-    large: { width: 110, height: 137 },
+    small: 85,
+    medium: 105,
+    large: 125,
   };
 
-  const { width, height } = dimensions[size];
+  const dimension = dimensions[size];
 
   return (
-    <div className="cv-sidebar-photo" data-photo-size={size}>
-      <Image src={photoUrl} alt={alt} width={width} height={height} className="object-cover" />
+    <div className="cv-sidebar-photo" data-photo-size={size} data-photo-shape={shape}>
+      <Image
+        src={photoUrl}
+        alt={alt}
+        width={dimension}
+        height={dimension}
+        className="object-cover"
+      />
     </div>
   );
 }
