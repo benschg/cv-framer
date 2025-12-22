@@ -1,9 +1,23 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { CVDocument } from '@/components/cv/cv-document';
-import type { CVDocument as CVDocumentType } from '@/types/cv.types';
+import { CVPreview } from '@/components/cv/cv-preview';
+import { useAuth } from '@/contexts/auth-context';
+import { getUserLocation, getUserName, getUserPhone } from '@/lib/user-utils';
+import { fetchCVEducations } from '@/services/cv-education.service';
+import { fetchCVKeyCompetences } from '@/services/cv-key-competences.service';
+import { fetchCVSkillCategories } from '@/services/cv-skill-categories.service';
+import { fetchCVWorkExperiences } from '@/services/cv-work-experience.service';
+import { fetchProfilePhotos } from '@/services/profile-photo.service';
+import type { ProfilePhotoWithUrl } from '@/types/api.schemas';
+import type { CVDocument as CVDocumentType, UserProfile } from '@/types/cv.types';
+import type {
+  CVEducationWithSelection,
+  CVKeyCompetenceWithSelection,
+  CVSkillCategoryWithSelection,
+  CVWorkExperienceWithSelection,
+} from '@/types/profile-career.types';
 
 interface CVThumbnailProps {
   cv: CVDocumentType;
@@ -13,7 +27,83 @@ interface CVThumbnailProps {
 export function CVThumbnail({ cv, className }: CVThumbnailProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(0.15);
-  const [isHovered, setIsHovered] = useState(false);
+  const { user } = useAuth();
+
+  // Data state for full CV preview
+  const [workExperiences, setWorkExperiences] = useState<CVWorkExperienceWithSelection[]>([]);
+  const [educations, setEducations] = useState<CVEducationWithSelection[]>([]);
+  const [skillCategories, setSkillCategories] = useState<CVSkillCategoryWithSelection[]>([]);
+  const [keyCompetences, setKeyCompetences] = useState<CVKeyCompetenceWithSelection[]>([]);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<ProfilePhotoWithUrl[]>([]);
+  const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhotoWithUrl | null>(null);
+
+  // Build user profile from auth context
+  const userProfile: UserProfile | undefined = useMemo(() => {
+    if (!user) return undefined;
+    return {
+      id: user.id,
+      user_id: user.id,
+      first_name: getUserName(user).firstName,
+      last_name: getUserName(user).lastName,
+      email: user.email,
+      phone: getUserPhone(user),
+      location: getUserLocation(user),
+      preferred_language: cv.language,
+      created_at: user.created_at,
+      updated_at: user.updated_at || user.created_at,
+    };
+  }, [user, cv.language]);
+
+  // Load all CV data
+  useEffect(() => {
+    const loadData = async () => {
+      const [workExpResult, eduResult, skillsResult, competencesResult, photosResult] =
+        await Promise.all([
+          fetchCVWorkExperiences(cv.id),
+          fetchCVEducations(cv.id),
+          fetchCVSkillCategories(cv.id),
+          fetchCVKeyCompetences(cv.id),
+          fetchProfilePhotos(),
+        ]);
+
+      if (workExpResult.data) setWorkExperiences(workExpResult.data);
+      if (eduResult.data) setEducations(eduResult.data);
+      if (skillsResult.data) setSkillCategories(skillsResult.data);
+      if (competencesResult.data) setKeyCompetences(competencesResult.data);
+
+      if (photosResult.data) {
+        setPhotos(photosResult.data.photos);
+        setPrimaryPhoto(photosResult.data.primaryPhoto);
+      }
+    };
+
+    loadData();
+  }, [cv.id]);
+
+  // Update photo URL when selected photo or primary photo changes
+  useEffect(() => {
+    const selectedPhotoId = cv.content?.selected_photo_id;
+
+    if (selectedPhotoId === 'none') {
+      setPhotoUrl(null);
+    } else if (selectedPhotoId && selectedPhotoId !== 'none') {
+      const selectedPhoto = photos.find((p) => p.id === selectedPhotoId);
+      if (selectedPhoto) {
+        setPhotoUrl(selectedPhoto.signedUrl);
+      } else {
+        setPhotoUrl(primaryPhoto?.signedUrl ?? null);
+      }
+    } else if (!selectedPhotoId || selectedPhotoId === null) {
+      if (primaryPhoto) {
+        setPhotoUrl(primaryPhoto.signedUrl);
+      } else if (user?.user_metadata?.avatar_url) {
+        setPhotoUrl(user.user_metadata.avatar_url as string);
+      } else {
+        setPhotoUrl(null);
+      }
+    }
+  }, [cv.content?.selected_photo_id, photos, primaryPhoto, user]);
 
   // Calculate zoom to fit the thumbnail container
   useEffect(() => {
@@ -43,70 +133,67 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
   return (
     <div
       ref={containerRef}
-      className={`group relative aspect-[1/1.414] overflow-visible rounded-lg border bg-white shadow-sm ${className ?? ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={`group relative aspect-[1/1.414] overflow-hidden rounded-lg border bg-white shadow-sm ${className ?? ''}`}
     >
       <style>
         {`
-          .cv-thumbnail-preview .cv-document-wrapper {
-            padding: 0 !important;
-            margin: 0 !important;
-            gap: 0 !important;
-            background: transparent !important;
-            min-height: auto !important;
-            justify-content: flex-start !important;
-            align-items: flex-start !important;
-          }
-          .cv-thumbnail-preview .cv-page {
-            box-shadow: none !important;
-            border: none !important;
-            border-radius: 0 !important;
-          }
-          .cv-thumbnail-preview .cv-page:not(:first-child) {
+          .cv-thumbnail-page-1 .cv-page:not(:first-child) {
             display: none !important;
           }
-          .cv-thumbnail-preview .cv-page-footer {
+          .cv-thumbnail-page-2 .cv-page:first-child {
             display: none !important;
           }
-          .cv-thumbnail-preview.cv-thumbnail-hover .cv-page {
+          .cv-thumbnail-page-2 .cv-page:nth-child(2) {
             display: block !important;
+          }
+          .cv-thumbnail-page-2 .cv-page:nth-child(n+3) {
+            display: none !important;
           }
         `}
       </style>
 
-      {/* Default view - first page only */}
-      {!isHovered && (
-        <div className="pointer-events-none overflow-hidden">
-          <div className="cv-thumbnail-preview">
-            <CVDocument
-              content={cv.content}
-              settings={cv.display_settings}
-              language={cv.language}
-              isInteractive={false}
-              zoom={zoom}
-            />
-          </div>
-        </div>
-      )}
+      {/* Back page - Page 2 (rotates right on hover, behind page 1) */}
+      <div
+        className="cv-thumbnail-page-2 pointer-events-none absolute inset-0 origin-bottom overflow-hidden transition-transform duration-500 ease-out group-hover:translate-x-[3%] group-hover:rotate-[6deg] group-hover:scale-105"
+        style={{ zIndex: 1 }}
+      >
+        <CVPreview
+          content={cv.content}
+          displaySettings={cv.display_settings}
+          language={cv.language}
+          isInteractive={false}
+          zoom={zoom}
+          workExperiences={workExperiences}
+          educations={educations}
+          skillCategories={skillCategories}
+          keyCompetences={keyCompetences}
+          userProfile={userProfile}
+          photoUrl={photoUrl}
+        />
+      </div>
 
-      {/* Hover view - show both pages side by side */}
-      {isHovered && (
-        <div className="pointer-events-none absolute inset-0 z-50 flex origin-top-left scale-150 gap-2 rounded-lg bg-white p-2 shadow-2xl">
-          <div className="cv-thumbnail-preview cv-thumbnail-hover flex-1">
-            <CVDocument
-              content={cv.content}
-              settings={cv.display_settings}
-              language={cv.language}
-              isInteractive={false}
-              zoom={zoom * 0.45}
-            />
-          </div>
-        </div>
-      )}
+      {/* Front page - Page 1 (rotates left on hover, in front) */}
+      <div
+        className="cv-thumbnail-page-1 pointer-events-none absolute inset-0 origin-bottom overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-x-[3%] group-hover:-rotate-[6deg] group-hover:scale-105"
+        style={{ zIndex: 2 }}
+      >
+        <CVPreview
+          content={cv.content}
+          displaySettings={cv.display_settings}
+          language={cv.language}
+          isInteractive={false}
+          zoom={zoom}
+          workExperiences={workExperiences}
+          educations={educations}
+          skillCategories={skillCategories}
+          keyCompetences={keyCompetences}
+          userProfile={userProfile}
+          photoUrl={photoUrl}
+        />
+      </div>
 
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-black/0 opacity-0 transition-all group-hover:bg-black/5 group-hover:opacity-100" />
+      {/* Clickable overlay - allows click events to pass through to parent Link */}
+      <div className="absolute inset-0" style={{ zIndex: 3 }} />
     </div>
   );
 }
