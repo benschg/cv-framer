@@ -186,7 +186,7 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [yyyy] [name of copyright owner]
+   Copyright 2025 Benjamin Grauer
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -199,3 +199,38 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+---
+
+ADDITIONAL TERMS AND RESERVATIONS
+
+1. License Change Rights
+   The copyright holder (Benjamin Grauer) reserves the right to change the
+   license of this software at any time for future versions. Any such change
+   will only apply to versions released after the change and will not
+   retroactively affect previously released versions under this license.
+
+2. Repository Privacy Rights
+   The copyright holder reserves the right to make the source code repository
+   private at any time. This action does not affect the license terms for
+   versions already distributed under this license.
+
+3. Contributor License Agreement
+   By contributing to this project, contributors agree that:
+   a) Their contributions may be included in future versions under different
+      licenses as determined by the copyright holder.
+   b) They retain copyright to their individual contributions.
+   c) They grant the copyright holder a perpetual, worldwide, non-exclusive,
+      royalty-free license to use their contributions in any way, including
+      in proprietary versions.
+
+4. Dual Licensing
+   The copyright holder may, at their discretion, offer this software or
+   future versions under additional or alternative licenses, including
+   proprietary licenses, without affecting the terms of this license for
+   the current version.
+
+5. Commercial Use by Copyright Holder
+   The copyright holder reserves the right to use this software for commercial
+   purposes, including creating and distributing proprietary versions, without
+   the same obligations that apply to other users under this license.
