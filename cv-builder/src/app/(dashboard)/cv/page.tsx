@@ -164,10 +164,10 @@ export default function CVDashboardPage() {
         </Card>
       ) : viewMode === 'grid' ? (
         /* Grid View */
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {cvs.map((cv) => (
-            <Card key={cv.id} className="group overflow-hidden">
-              <CardHeader className="p-0">
+            <Card key={cv.id} className="group overflow-visible">
+              <CardHeader className="overflow-visible p-0">
                 <Link href={`/cv/${cv.id}`} className="block">
                   <CVThumbnail cv={cv} />
                 </Link>
@@ -240,10 +240,10 @@ export default function CVDashboardPage() {
         /* List View */
         <div className="space-y-2">
           {cvs.map((cv) => (
-            <Card key={cv.id} className="group">
+            <Card key={cv.id} className="group overflow-visible">
               <CardContent className="flex items-center gap-4 p-4">
                 <Link href={`/cv/${cv.id}`} className="shrink-0">
-                  <CVThumbnail cv={cv} className="w-24" />
+                  <CVThumbnail cv={cv} className="h-24 w-[68px]" />
                 </Link>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2">

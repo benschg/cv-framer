@@ -133,7 +133,7 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
   return (
     <div
       ref={containerRef}
-      className={`group relative aspect-[1/1.414] overflow-hidden rounded-lg border bg-white shadow-sm ${className ?? ''}`}
+      className={`group relative aspect-[1/1.414] overflow-visible ${className ?? ''}`}
     >
       <style>
         {`
@@ -154,42 +154,46 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
 
       {/* Back page - Page 2 (rotates right on hover, behind page 1) */}
       <div
-        className="cv-thumbnail-page-2 pointer-events-none absolute inset-0 origin-bottom overflow-hidden transition-transform duration-500 ease-out group-hover:translate-x-[3%] group-hover:rotate-[6deg] group-hover:scale-105"
+        className="cv-thumbnail-page-2 pointer-events-none absolute inset-0 origin-bottom rounded-lg shadow-md transition-transform duration-500 ease-out group-hover:translate-x-[3%] group-hover:rotate-[6deg] group-hover:scale-105"
         style={{ zIndex: 1 }}
       >
-        <CVPreview
-          content={cv.content}
-          displaySettings={cv.display_settings}
-          language={cv.language}
-          isInteractive={false}
-          zoom={zoom}
-          workExperiences={workExperiences}
-          educations={educations}
-          skillCategories={skillCategories}
-          keyCompetences={keyCompetences}
-          userProfile={userProfile}
-          photoUrl={photoUrl}
-        />
+        <div className="absolute inset-0 overflow-hidden rounded-lg">
+          <CVPreview
+            content={cv.content}
+            displaySettings={cv.display_settings}
+            language={cv.language}
+            isInteractive={false}
+            zoom={zoom}
+            workExperiences={workExperiences}
+            educations={educations}
+            skillCategories={skillCategories}
+            keyCompetences={keyCompetences}
+            userProfile={userProfile}
+            photoUrl={photoUrl}
+          />
+        </div>
       </div>
 
       {/* Front page - Page 1 (rotates left on hover, in front) */}
       <div
-        className="cv-thumbnail-page-1 pointer-events-none absolute inset-0 origin-bottom overflow-hidden transition-transform duration-500 ease-out group-hover:-translate-x-[3%] group-hover:-rotate-[6deg] group-hover:scale-105"
+        className="cv-thumbnail-page-1 pointer-events-none absolute inset-0 origin-bottom rounded-lg shadow-md transition-transform duration-500 ease-out group-hover:-translate-x-[3%] group-hover:-rotate-[6deg] group-hover:scale-105"
         style={{ zIndex: 2 }}
       >
-        <CVPreview
-          content={cv.content}
-          displaySettings={cv.display_settings}
-          language={cv.language}
-          isInteractive={false}
-          zoom={zoom}
-          workExperiences={workExperiences}
-          educations={educations}
-          skillCategories={skillCategories}
-          keyCompetences={keyCompetences}
-          userProfile={userProfile}
-          photoUrl={photoUrl}
-        />
+        <div className="absolute inset-0 overflow-hidden rounded-lg">
+          <CVPreview
+            content={cv.content}
+            displaySettings={cv.display_settings}
+            language={cv.language}
+            isInteractive={false}
+            zoom={zoom}
+            workExperiences={workExperiences}
+            educations={educations}
+            skillCategories={skillCategories}
+            keyCompetences={keyCompetences}
+            userProfile={userProfile}
+            photoUrl={photoUrl}
+          />
+        </div>
       </div>
 
       {/* Clickable overlay - allows click events to pass through to parent Link */}
