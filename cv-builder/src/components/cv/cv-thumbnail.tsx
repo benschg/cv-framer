@@ -13,6 +13,7 @@ interface CVThumbnailProps {
 export function CVThumbnail({ cv, className }: CVThumbnailProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(0.15);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Calculate zoom to fit the thumbnail container
   useEffect(() => {
@@ -42,7 +43,9 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
   return (
     <div
       ref={containerRef}
-      className={`relative aspect-[1/1.414] overflow-hidden rounded-lg border bg-white shadow-sm ${className ?? ''}`}
+      className={`group relative aspect-[1/1.414] overflow-visible rounded-lg border bg-white shadow-sm ${className ?? ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <style>
         {`
@@ -66,22 +69,44 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
           .cv-thumbnail-preview .cv-page-footer {
             display: none !important;
           }
+          .cv-thumbnail-preview.cv-thumbnail-hover .cv-page {
+            display: block !important;
+          }
         `}
       </style>
-      <div className="pointer-events-none">
-        <div className="cv-thumbnail-preview">
-          <CVDocument
-            content={cv.content}
-            settings={cv.display_settings}
-            language={cv.language}
-            isInteractive={false}
-            zoom={zoom}
-          />
+
+      {/* Default view - first page only */}
+      {!isHovered && (
+        <div className="pointer-events-none overflow-hidden">
+          <div className="cv-thumbnail-preview">
+            <CVDocument
+              content={cv.content}
+              settings={cv.display_settings}
+              language={cv.language}
+              isInteractive={false}
+              zoom={zoom}
+            />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Hover view - show both pages side by side */}
+      {isHovered && (
+        <div className="pointer-events-none absolute inset-0 z-50 flex origin-top-left scale-150 gap-2 rounded-lg bg-white p-2 shadow-2xl">
+          <div className="cv-thumbnail-preview cv-thumbnail-hover flex-1">
+            <CVDocument
+              content={cv.content}
+              settings={cv.display_settings}
+              language={cv.language}
+              isInteractive={false}
+              zoom={zoom * 0.45}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Hover overlay */}
-      <div className="absolute inset-0 bg-black/0 opacity-0 transition-all hover:bg-black/5 hover:opacity-100" />
+      <div className="absolute inset-0 bg-black/0 opacity-0 transition-all group-hover:bg-black/5 group-hover:opacity-100" />
     </div>
   );
 }
