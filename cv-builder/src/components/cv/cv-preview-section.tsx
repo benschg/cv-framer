@@ -22,8 +22,8 @@ import type {
   CVWorkExperienceWithSelection,
 } from '@/types/profile-career.types';
 
-import { CVDocument } from './cv-document';
 import { CVPagePropertiesDialog } from './cv-page-properties-dialog';
+import { CVPreview } from './cv-preview';
 import type { PhotoOption, PhotoShape, PhotoSize } from './cv-sidebar-section-wrapper';
 
 interface CVPreviewSectionProps {
@@ -323,35 +323,34 @@ export const CVPreviewSection = forwardRef<CVPreviewSectionHandle, CVPreviewSect
         </CardHeader>
         <CardContent>
           <div ref={containerRef} className="max-h-[calc(100vh-220px)] overflow-auto">
-            <div ref={previewRef}>
-              <CVDocument
-                content={content}
-                language={language}
-                settings={displaySettings}
-                photoUrl={photoUrl}
-                workExperiences={workExperiences}
-                educations={educations}
-                skillCategories={skillCategories}
-                keyCompetences={keyCompetences}
-                userProfile={userProfile}
-                zoom={effectiveZoom / 100}
-                onPageBreakToggle={onPageBreakToggle}
-                isInteractive={isInteractive}
-                onSectionMove={handleSectionMove}
-                onSectionToggleVisibility={handleSectionToggleVisibility}
-                onPageProperties={handlePageProperties}
-                onSidebarSectionMove={handleSidebarSectionMove}
-                onSidebarSectionToggleVisibility={handleSidebarSectionToggleVisibility}
-                photoOptions={photoOptions}
-                selectedPhotoId={selectedPhotoId}
-                onPhotoSelect={onPhotoSelect}
-                userInitials={userInitials}
-                photoSize={photoSize}
-                onPhotoSizeChange={onPhotoSizeChange}
-                photoShape={photoShape}
-                onPhotoShapeChange={onPhotoShapeChange}
-              />
-            </div>
+            <CVPreview
+              ref={previewRef}
+              content={content}
+              language={language}
+              displaySettings={displaySettings}
+              photoUrl={photoUrl}
+              workExperiences={workExperiences}
+              educations={educations}
+              skillCategories={skillCategories}
+              keyCompetences={keyCompetences}
+              userProfile={userProfile}
+              zoom={effectiveZoom / 100}
+              onPageBreakToggle={onPageBreakToggle}
+              isInteractive={isInteractive}
+              onSectionMove={handleSectionMove}
+              onSectionToggleVisibility={handleSectionToggleVisibility}
+              onPageProperties={handlePageProperties}
+              onSidebarSectionMove={handleSidebarSectionMove}
+              onSidebarSectionToggleVisibility={handleSidebarSectionToggleVisibility}
+              photoOptions={photoOptions}
+              selectedPhotoId={selectedPhotoId}
+              onPhotoSelect={onPhotoSelect}
+              userInitials={userInitials}
+              photoSize={photoSize}
+              onPhotoSizeChange={onPhotoSizeChange}
+              photoShape={photoShape}
+              onPhotoShapeChange={onPhotoShapeChange}
+            />
           </div>
         </CardContent>
 

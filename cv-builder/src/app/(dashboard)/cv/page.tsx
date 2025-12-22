@@ -1,23 +1,25 @@
 'use client';
 
 import {
-  Briefcase,
   Copy,
+  Download,
   Edit,
+  ExternalLink,
   FileText,
-  Mail,
+  Grid3x3,
+  List,
   MoreVertical,
   Plus,
   Star,
-  Target,
   Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+import { CVThumbnail } from '@/components/cv/cv-thumbnail';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,8 +28,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppLanguage } from '@/hooks/use-app-language';
-import { useProfileCompletion } from '@/hooks/use-profile-completion';
 import { useTranslations } from '@/hooks/use-translations';
 import { deleteCV, duplicateCV, fetchAllCVs, updateCV } from '@/services/cv.service';
 import type { CVDocument } from '@/types/cv.types';
@@ -36,9 +38,9 @@ export default function CVDashboardPage() {
   const [cvs, setCvs] = useState<CVDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { language } = useAppLanguage();
   const { translations } = useTranslations(language);
-  const { completion } = useProfileCompletion();
 
   useEffect(() => {
     const loadCVs = async () => {
@@ -89,72 +91,39 @@ export default function CVDashboardPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{translations.cv.myCVs}</h1>
-          <p className="text-muted-foreground">{translations.cv.subtitle}</p>
+          <p className="text-muted-foreground">
+            {cvs.length === 0
+              ? translations.cv.subtitle
+              : `${cvs.length} ${cvs.length === 1 ? 'CV' : 'CVs'}`}
+          </p>
         </div>
-        <Link href="/cv/new">
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            {translations.cv.newCV}
-          </Button>
-        </Link>
-      </div>
-
-      {/* Quick stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{translations.nav.profile}</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completion?.totalPercentage ?? 0}%</div>
-            <p className="text-xs text-muted-foreground">
-              {completion
-                ? `${completion.completedSections}/${completion.totalSections} ${translations.cv.profileCompletion}`
-                : translations.cv.profileCompletion}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{translations.cv.cvsCreated}</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{cvs.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {cvs.length === 0 ? translations.cv.startBuilding : translations.cv.totalCVs}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{translations.nav.coverLetter}</CardTitle>
-            <Mail className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">{translations.cv.generatedLetters}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{translations.nav.applications}</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">{translations.cv.activeApplications}</p>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-2">
+          {cvs.length > 0 && (
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'grid' | 'list')}>
+              <TabsList>
+                <TabsTrigger value="grid" className="gap-1">
+                  <Grid3x3 className="h-4 w-4" />
+                  <span className="sr-only sm:not-sr-only sm:inline">Grid</span>
+                </TabsTrigger>
+                <TabsTrigger value="list" className="gap-1">
+                  <List className="h-4 w-4" />
+                  <span className="sr-only sm:not-sr-only sm:inline">List</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
+          <Link href="/cv/new">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              {translations.cv.newCV}
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* CV List */}
@@ -163,12 +132,10 @@ export default function CVDashboardPage() {
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardHeader>
+                <Skeleton className="aspect-[1/1.414] w-full" />
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
               </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full" />
-              </CardContent>
             </Card>
           ))}
         </div>
@@ -180,88 +147,47 @@ export default function CVDashboardPage() {
         </Card>
       ) : cvs.length === 0 ? (
         /* Empty state */
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                {language === 'de' ? 'Profil vervollständigen' : 'Complete Your Profile'}
-              </CardTitle>
-              <CardDescription>{translations.cv.completeProfile}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/profile">
-                <Button variant="outline" className="w-full">
-                  {translations.cv.getStarted}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                {translations.cv.createFirstCV}
-              </CardTitle>
-              <CardDescription>{translations.cv.buildProfessional}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/cv/new">
-                <Button variant="outline" className="w-full">
-                  {translations.cv.createCV}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                {translations.cv.generateCoverLetter}
-              </CardTitle>
-              <CardDescription>{translations.cv.createTailored}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/cover-letter">
-                <Button variant="outline" className="w-full">
-                  {translations.cv.writeLetter}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
-        /* CV List */
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <FileText className="mb-4 h-16 w-16 text-muted-foreground" />
+            <h3 className="mb-2 text-lg font-semibold">{translations.cv.createFirstCV}</h3>
+            <p className="mb-6 max-w-sm text-sm text-muted-foreground">
+              {translations.cv.buildProfessional}
+            </p>
+            <Link href="/cv/new">
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                {translations.cv.createCV}
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : viewMode === 'grid' ? (
+        /* Grid View */
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {cvs.map((cv) => (
-            <Card key={cv.id} className="group">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
+            <Card key={cv.id} className="group overflow-visible">
+              <CardHeader className="overflow-visible p-0">
+                <Link href={`/cv/${cv.id}`} className="block">
+                  <CVThumbnail cv={cv} />
+                </Link>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="mb-2 flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <CardTitle className="truncate">{cv.name}</CardTitle>
-                      {cv.is_default && (
-                        <Badge variant="secondary" className="shrink-0">
-                          <Star className="mr-1 h-3 w-3 fill-current" />
-                          {translations.cv.default}
-                        </Badge>
-                      )}
-                    </div>
-                    {cv.description && (
-                      <CardDescription className="mt-1 line-clamp-1">
-                        {cv.description}
-                      </CardDescription>
+                    <Link href={`/cv/${cv.id}`}>
+                      <h3 className="truncate font-semibold hover:text-primary">{cv.name}</h3>
+                    </Link>
+                    {cv.is_default && (
+                      <Badge variant="secondary" className="mt-1">
+                        <Star className="mr-1 h-3 w-3 fill-current" />
+                        {translations.cv.default}
+                      </Badge>
                     )}
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -293,22 +219,103 @@ export default function CVDashboardPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>
+                {cv.description && (
+                  <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">
+                    {cv.description}
+                  </p>
+                )}
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="truncate">
                     {cv.job_context?.company ||
                       cv.job_context?.position ||
                       translations.cv.generalCV}
                   </span>
-                  <span>{formatDate(cv.updated_at)}</span>
+                  <span className="shrink-0">{formatDate(cv.updated_at)}</span>
                 </div>
-                <div className="mt-4">
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        /* List View */
+        <div className="space-y-2">
+          {cvs.map((cv) => (
+            <Card key={cv.id} className="group overflow-visible">
+              <CardContent className="flex items-center gap-4 p-4">
+                <Link href={`/cv/${cv.id}`} className="shrink-0">
+                  <CVThumbnail cv={cv} className="h-24 w-[68px]" />
+                </Link>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center gap-2">
+                    <Link href={`/cv/${cv.id}`}>
+                      <h3 className="truncate font-semibold hover:text-primary">{cv.name}</h3>
+                    </Link>
+                    {cv.is_default && (
+                      <Badge variant="secondary">
+                        <Star className="mr-1 h-3 w-3 fill-current" />
+                        {translations.cv.default}
+                      </Badge>
+                    )}
+                  </div>
+                  {cv.description && (
+                    <p className="mb-2 line-clamp-1 text-sm text-muted-foreground">
+                      {cv.description}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span className="truncate">
+                      {cv.job_context?.company ||
+                        cv.job_context?.position ||
+                        translations.cv.generalCV}
+                    </span>
+                    <span>•</span>
+                    <span>{formatDate(cv.updated_at)}</span>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
                   <Link href={`/cv/${cv.id}`}>
-                    <Button variant="outline" size="sm" className="w-full">
-                      {translations.cv.openEditor}
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <Edit className="h-4 w-4" />
+                      <span className="hidden sm:inline">{translations.common.edit}</span>
                     </Button>
                   </Link>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Export</span>
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href={`/cv/${cv.id}`} className="flex items-center">
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          {translations.cv.openEditor}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDuplicate(cv.id, cv.name)}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        {translations.cv.duplicate}
+                      </DropdownMenuItem>
+                      {!cv.is_default && (
+                        <DropdownMenuItem onClick={() => handleSetDefault(cv.id)}>
+                          <Star className="mr-2 h-4 w-4" />
+                          {translations.cv.setAsDefault}
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => handleDelete(cv.id)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {translations.common.delete}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </CardContent>
             </Card>

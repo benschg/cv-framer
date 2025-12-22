@@ -65,7 +65,7 @@ export function AppSidebar() {
   const navigation = [
     {
       label: t('nav.groups.overview'),
-      items: [{ title: t('nav.items.dashboard'), href: '/cv', icon: Home }],
+      items: [{ title: t('nav.items.dashboard'), href: '/dashboard', icon: Home }],
     },
     {
       label: t('nav.groups.build'),
@@ -163,7 +163,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
-        <Link href="/cv" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <CVBuilderLogo className="h-8 w-8" />
           <span className="text-lg font-bold">{t('nav.logo')}</span>
         </Link>
