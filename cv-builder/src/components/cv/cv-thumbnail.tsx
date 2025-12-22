@@ -34,7 +34,6 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
   const [educations, setEducations] = useState<CVEducationWithSelection[]>([]);
   const [skillCategories, setSkillCategories] = useState<CVSkillCategoryWithSelection[]>([]);
   const [keyCompetences, setKeyCompetences] = useState<CVKeyCompetenceWithSelection[]>([]);
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photos, setPhotos] = useState<ProfilePhotoWithUrl[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhotoWithUrl | null>(null);
 
@@ -81,28 +80,29 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
     loadData();
   }, [cv.id]);
 
-  // Update photo URL when selected photo or primary photo changes
-  useEffect(() => {
+  // Derive photo URL from state (no useEffect needed)
+  const photoUrl = useMemo(() => {
     const selectedPhotoId = cv.content?.selected_photo_id;
 
     if (selectedPhotoId === 'none') {
-      setPhotoUrl(null);
+      return null;
     } else if (selectedPhotoId && selectedPhotoId !== 'none') {
       const selectedPhoto = photos.find((p) => p.id === selectedPhotoId);
       if (selectedPhoto) {
-        setPhotoUrl(selectedPhoto.signedUrl);
+        return selectedPhoto.signedUrl;
       } else {
-        setPhotoUrl(primaryPhoto?.signedUrl ?? null);
+        return primaryPhoto?.signedUrl ?? null;
       }
     } else if (!selectedPhotoId || selectedPhotoId === null) {
       if (primaryPhoto) {
-        setPhotoUrl(primaryPhoto.signedUrl);
+        return primaryPhoto.signedUrl;
       } else if (user?.user_metadata?.avatar_url) {
-        setPhotoUrl(user.user_metadata.avatar_url as string);
+        return user.user_metadata.avatar_url as string;
       } else {
-        setPhotoUrl(null);
+        return null;
       }
     }
+    return null;
   }, [cv.content?.selected_photo_id, photos, primaryPhoto, user]);
 
   // Calculate zoom to fit the thumbnail container

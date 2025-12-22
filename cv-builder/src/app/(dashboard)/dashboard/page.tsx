@@ -28,7 +28,7 @@ export default function DashboardOverviewPage() {
   const [cvs, setCvs] = useState<CVDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const { language } = useAppLanguage();
-  const { translations } = useTranslations(language);
+  const { translations: _translations } = useTranslations(language);
   const { completion } = useProfileCompletion();
 
   useEffect(() => {
