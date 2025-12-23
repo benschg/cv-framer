@@ -217,17 +217,10 @@ export default function CVEditorPage() {
         setPhotoUrl(primaryPhoto?.signedUrl ?? null);
       }
     } else if (!selectedPhotoId || selectedPhotoId === null) {
-      // Use primary photo
-      if (primaryPhoto) {
-        setPhotoUrl(primaryPhoto.signedUrl);
-      } else if (user?.user_metadata?.avatar_url) {
-        // Fallback to OAuth avatar
-        setPhotoUrl(user.user_metadata.avatar_url);
-      } else {
-        setPhotoUrl(null);
-      }
+      // Use primary photo if available, otherwise no photo
+      setPhotoUrl(primaryPhoto?.signedUrl ?? null);
     }
-  }, [content.selected_photo_id, photos, primaryPhoto, user]);
+  }, [content.selected_photo_id, photos, primaryPhoto]);
 
   // Build photo options for context menu
   const photoOptions = useMemo((): PhotoOption[] => {
