@@ -532,12 +532,53 @@ export default function CVEditorPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-24" />
-          <Skeleton className="h-8 w-64" />
-        </div>
-        <Skeleton className="h-[400px] w-full" />
+      <div className="flex h-full flex-col overflow-hidden">
+        {/* Header skeleton */}
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
+          <Skeleton className="h-8 w-8" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="ml-2 h-8 w-8 rounded-full" />
+          <div className="ml-auto flex items-center gap-2">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-16" />
+          </div>
+        </header>
+
+        {/* Content skeleton */}
+        <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
+          {/* Left panel skeleton */}
+          <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+            <div className="h-full overflow-y-auto p-4">
+              <div className="mx-auto max-w-3xl space-y-6 pb-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <Skeleton className="h-6 w-1/3" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-24 w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          {/* Right panel skeleton */}
+          <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+            <div className="h-full overflow-y-auto p-4">
+              <div className="mx-auto max-w-4xl">
+                <Skeleton className="aspect-[1/1.414] w-full" />
+              </div>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     );
   }
