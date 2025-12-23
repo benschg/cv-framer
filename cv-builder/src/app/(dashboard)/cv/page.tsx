@@ -14,6 +14,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { CVThumbnail } from '@/components/cv/cv-thumbnail';
@@ -41,9 +42,12 @@ export default function CVDashboardPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { language } = useAppLanguage();
   const { translations } = useTranslations(language);
+  const router = useRouter();
 
+  // Load CVs on mount and when page becomes visible
   useEffect(() => {
     const loadCVs = async () => {
+      setLoading(true);
       const result = await fetchAllCVs();
       if (result.error) {
         setError(result.error);
@@ -52,8 +56,23 @@ export default function CVDashboardPage() {
       }
       setLoading(false);
     };
+
+    // Load on mount
     loadCVs();
-  }, []);
+
+    // Reload when page becomes visible (user navigates back)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadCVs();
+        router.refresh();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [router]);
 
   const handleDelete = async (id: string) => {
     if (!confirm(translations.cv.confirmDelete)) return;
@@ -167,11 +186,9 @@ export default function CVDashboardPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {cvs.map((cv) => (
             <Card key={cv.id} className="group overflow-visible">
-              <CardHeader className="overflow-visible p-0">
-                <Link href={`/cv/${cv.id}`} className="block">
-                  <CVThumbnail cv={cv} />
-                </Link>
-              </CardHeader>
+              <Link href={`/cv/${cv.id}`} className="block">
+                <CVThumbnail cv={cv} />
+              </Link>
               <CardContent className="p-4">
                 <div className="mb-2 flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">

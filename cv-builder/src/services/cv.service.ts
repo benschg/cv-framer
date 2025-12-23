@@ -18,7 +18,9 @@ export interface CVServiceResponse<T> {
  */
 export async function fetchAllCVs(): Promise<CVServiceResponse<CVDocument[]>> {
   try {
-    const response = await fetch(API_BASE);
+    const response = await fetch(API_BASE, {
+      cache: 'no-store',
+    });
     const json = await response.json();
 
     if (!response.ok) {
@@ -37,7 +39,9 @@ export async function fetchAllCVs(): Promise<CVServiceResponse<CVDocument[]>> {
  */
 export async function fetchCV(id: string): Promise<CVServiceResponse<CVDocument>> {
   try {
-    const response = await fetch(`${API_BASE}/${id}`);
+    const response = await fetch(`${API_BASE}/${id}`, {
+      cache: 'no-store',
+    });
     const json = await response.json();
 
     if (!response.ok) {

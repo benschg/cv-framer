@@ -205,10 +205,10 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
       {/* Loading spinner overlay */}
       {loading && (
         <div
-          className="absolute inset-0 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm"
+          className="absolute inset-0 flex items-center justify-center rounded-lg bg-muted/50 backdrop-blur-sm"
           style={{ zIndex: 4 }}
         >
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       )}
 
