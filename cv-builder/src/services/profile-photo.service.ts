@@ -5,7 +5,9 @@ export async function fetchProfilePhotos(): Promise<{
   error?: string;
 }> {
   try {
-    const response = await fetch('/api/profile-photos');
+    const response = await fetch('/api/profile-photos', {
+      cache: 'no-store',
+    });
     const data = await response.json();
 
     if (!response.ok) {

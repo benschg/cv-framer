@@ -13,6 +13,10 @@ import { useAppTranslation } from '@/hooks/use-app-translation';
 import { getUserInitials, getUserLocation, getUserName, getUserPhone } from '@/lib/user-utils';
 import { debounce } from '@/services/profile-career.service';
 import { fetchProfilePhotos } from '@/services/profile-photo.service';
+import {
+  fetchUserProfile,
+  updateUserProfile as updateUserProfileData,
+} from '@/services/user-profile.service';
 import type { ProfilePhotoWithUrl } from '@/types/api.schemas';
 
 export default function ProfilePage() {
@@ -70,12 +74,28 @@ export default function ProfilePage() {
     setLoadingPhotos(false);
   };
 
-  // Load photos when user is available (wait for auth to be ready)
+  // Load photos and profile data when user is available
   useEffect(() => {
     if (user) {
       // Valid pattern: data fetching on user change
       // eslint-disable-next-line react-hooks/set-state-in-effect
       loadPhotos();
+
+      // Load user profile data from database
+       
+      fetchUserProfile().then((result) => {
+        if (result.data) {
+          const profile = result.data;
+          setFormData((prev) => ({
+            ...prev,
+            linkedinUrl: profile.linkedin_url || '',
+            githubUrl: profile.github_url || '',
+            websiteUrl: profile.website_url || '',
+            defaultTagline: profile.default_tagline || '',
+            personalMotto: profile.personal_motto || '',
+          }));
+        }
+      });
     }
   }, [user]);
 
@@ -92,15 +112,46 @@ export default function ProfilePage() {
       setSaveSuccess(false);
 
       const debouncedSave = debounce(
-        `profile-basic-info-${name}`,
+        `profile-${name}`,
         async () => {
-          const { error } = await updateUserProfile({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: formData.phone,
-            location: formData.location,
-            [name]: value, // Include the latest value
-          });
+          let error: string | null = null;
+
+          // Determine which fields need to be saved where
+          const authFields = ['firstName', 'lastName', 'phone', 'location'];
+          const profileFields = [
+            'defaultTagline',
+            'personalMotto',
+            'linkedinUrl',
+            'githubUrl',
+            'websiteUrl',
+          ];
+
+          if (authFields.includes(name)) {
+            // Save to auth.users.user_metadata
+            const result = await updateUserProfile({
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              phone: formData.phone,
+              location: formData.location,
+              [name]: value, // Include the latest value
+            });
+            error = result.error;
+          } else if (profileFields.includes(name)) {
+            // Save to user_profiles table
+            const profileData: Record<string, string> = {};
+            // Convert camelCase to snake_case for database fields
+            const dbFieldMap: Record<string, string> = {
+              defaultTagline: 'default_tagline',
+              personalMotto: 'personal_motto',
+              linkedinUrl: 'linkedin_url',
+              githubUrl: 'github_url',
+              websiteUrl: 'website_url',
+            };
+            profileData[dbFieldMap[name] || name] = value;
+
+            const result = await updateUserProfileData(profileData);
+            error = result.error;
+          }
 
           setIsSaving(false);
 

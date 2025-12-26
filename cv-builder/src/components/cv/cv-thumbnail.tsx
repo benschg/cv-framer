@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { CVPreview } from '@/components/cv/cv-preview';
@@ -36,6 +37,7 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
   const [keyCompetences, setKeyCompetences] = useState<CVKeyCompetenceWithSelection[]>([]);
   const [photos, setPhotos] = useState<ProfilePhotoWithUrl[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<ProfilePhotoWithUrl | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Build user profile from auth context
   const userProfile: UserProfile | undefined = useMemo(() => {
@@ -75,6 +77,8 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
         setPhotos(photosResult.data.photos);
         setPrimaryPhoto(photosResult.data.primaryPhoto);
       }
+
+      setLoading(false);
     };
 
     loadData();
@@ -82,6 +86,9 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
 
   // Derive photo URL from state (no useEffect needed)
   const photoUrl = useMemo(() => {
+    // Wait for photo data to load before determining photo URL
+    if (loading) return null;
+
     const selectedPhotoId = cv.content?.selected_photo_id;
 
     if (selectedPhotoId === 'none') {
@@ -94,16 +101,11 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
         return primaryPhoto?.signedUrl ?? null;
       }
     } else if (!selectedPhotoId || selectedPhotoId === null) {
-      if (primaryPhoto) {
-        return primaryPhoto.signedUrl;
-      } else if (user?.user_metadata?.avatar_url) {
-        return user.user_metadata.avatar_url as string;
-      } else {
-        return null;
-      }
+      // Use primary photo if available, otherwise no photo
+      return primaryPhoto?.signedUrl ?? null;
     }
     return null;
-  }, [cv.content?.selected_photo_id, photos, primaryPhoto, user]);
+  }, [cv.content?.selected_photo_id, photos, primaryPhoto, loading]);
 
   // Calculate zoom to fit the thumbnail container
   useEffect(() => {
@@ -153,48 +155,62 @@ export function CVThumbnail({ cv, className }: CVThumbnailProps) {
       </style>
 
       {/* Back page - Page 2 (rotates right on hover, behind page 1) */}
-      <div
-        className="cv-thumbnail-page-2 pointer-events-none absolute inset-0 origin-bottom rounded-lg shadow-md transition-transform duration-500 ease-out group-hover:translate-x-[3%] group-hover:rotate-[6deg] group-hover:scale-105"
-        style={{ zIndex: 1 }}
-      >
-        <div className="absolute inset-0 overflow-hidden rounded-lg">
-          <CVPreview
-            content={cv.content}
-            displaySettings={cv.display_settings}
-            language={cv.language}
-            isInteractive={false}
-            zoom={zoom}
-            workExperiences={workExperiences}
-            educations={educations}
-            skillCategories={skillCategories}
-            keyCompetences={keyCompetences}
-            userProfile={userProfile}
-            photoUrl={photoUrl}
-          />
+      {!loading && (
+        <div
+          className="cv-thumbnail-page-2 pointer-events-none absolute inset-0 origin-bottom rounded-lg shadow-md transition-transform duration-500 ease-out group-hover:translate-x-[3%] group-hover:rotate-[6deg] group-hover:scale-105"
+          style={{ zIndex: 1 }}
+        >
+          <div className="absolute inset-0 overflow-hidden rounded-lg">
+            <CVPreview
+              content={cv.content}
+              displaySettings={cv.display_settings}
+              language={cv.language}
+              isInteractive={false}
+              zoom={zoom}
+              workExperiences={workExperiences}
+              educations={educations}
+              skillCategories={skillCategories}
+              keyCompetences={keyCompetences}
+              userProfile={userProfile}
+              photoUrl={photoUrl}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Front page - Page 1 (rotates left on hover, in front) */}
-      <div
-        className="cv-thumbnail-page-1 pointer-events-none absolute inset-0 origin-bottom rounded-lg shadow-md transition-transform duration-500 ease-out group-hover:-translate-x-[3%] group-hover:-rotate-[6deg] group-hover:scale-105"
-        style={{ zIndex: 2 }}
-      >
-        <div className="absolute inset-0 overflow-hidden rounded-lg">
-          <CVPreview
-            content={cv.content}
-            displaySettings={cv.display_settings}
-            language={cv.language}
-            isInteractive={false}
-            zoom={zoom}
-            workExperiences={workExperiences}
-            educations={educations}
-            skillCategories={skillCategories}
-            keyCompetences={keyCompetences}
-            userProfile={userProfile}
-            photoUrl={photoUrl}
-          />
+      {!loading && (
+        <div
+          className="cv-thumbnail-page-1 pointer-events-none absolute inset-0 origin-bottom rounded-lg shadow-md transition-transform duration-500 ease-out group-hover:-translate-x-[3%] group-hover:-rotate-[6deg] group-hover:scale-105"
+          style={{ zIndex: 2 }}
+        >
+          <div className="absolute inset-0 overflow-hidden rounded-lg">
+            <CVPreview
+              content={cv.content}
+              displaySettings={cv.display_settings}
+              language={cv.language}
+              isInteractive={false}
+              zoom={zoom}
+              workExperiences={workExperiences}
+              educations={educations}
+              skillCategories={skillCategories}
+              keyCompetences={keyCompetences}
+              userProfile={userProfile}
+              photoUrl={photoUrl}
+            />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Loading spinner overlay */}
+      {loading && (
+        <div
+          className="absolute inset-0 flex items-center justify-center rounded-lg bg-muted/50 backdrop-blur-sm"
+          style={{ zIndex: 4 }}
+        >
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      )}
 
       {/* Clickable overlay - allows click events to pass through to parent Link */}
       <div className="absolute inset-0" style={{ zIndex: 3 }} />
